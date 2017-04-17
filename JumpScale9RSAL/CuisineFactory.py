@@ -69,7 +69,7 @@ class CuisineBase:
         if key in self.config:
             return self.config[key]
         else:
-            if defval != None:
+            if defval is not None:
                 self.configSet(key, defval)
                 return defval
             else:
@@ -105,7 +105,7 @@ class CuisineBase:
         """
         if "done" in self.config:
             self.config.pop("done")
-        if self.executor.readonly == False:
+        if not self.executor.readonly:
             self.configSet("done", {})  # this will make sure it gets set remotely
 
     def doneSet(self, key):
@@ -255,7 +255,7 @@ class JSCuisineFactory:
                 item = line.split(" ", 2)[2]
                 keyname = item.split("(", 1)[0].strip()
                 keys.append(keyname)
-            except:
+            except BaseException:
                 pass
         key = j.tools.console.askChoice(keys, "please select key")
         # key = j.sal.fs.getBaseName(key)
@@ -315,7 +315,7 @@ class JSCuisineFactory:
             c = j.tools.cuisine.get("ovh4")
             e = c.executor
             assert e.cuisine == c
-        elif executor == None:
+        elif executor is None:
             e = j.tools.executorLocal
 
         c = e.cuisine.apps.alba
@@ -350,7 +350,7 @@ class JSCuisineFactory:
 
         # remove all cache
         e.cacheReset()
-        assert e._config == None
+        assert e._config is None
         assert {'CuisineAlba': {'test': 1, 'test2': {'a': 'bb'}}, 'CuisineIPFS': {'test': 1}} == e.config
 
         c2.configSet("test", 2)
@@ -361,27 +361,27 @@ class JSCuisineFactory:
         assert c.done == {}
 
         c.doneSet("test")
-        assert c.done["test"] == True
+        assert c.done["test"]
 
-        assert c.doneGet("test") == True
+        assert c.doneGet("test")
 
         e.reset()
         assert c.doneGet("test") == False
 
         c.doneSet("test")
-        assert c.doneGet("test") == True
+        assert c.doneGet("test")
         c.configReset()
         assert c.doneGet("test") == False
 
         c.doneSet("test")
-        assert c.doneGet("test") == True
+        assert c.doneGet("test")
         c.reset()
         assert c.doneGet("test") == False
 
         c.doneSet("test")
-        assert c.doneGet("test") == True
+        assert c.doneGet("test")
         c.cacheReset()
-        assert c.doneGet("test") == True
+        assert c.doneGet("test")
 
         assert {'CuisineAlba': {'done': {'test': True}}} == e.config
 

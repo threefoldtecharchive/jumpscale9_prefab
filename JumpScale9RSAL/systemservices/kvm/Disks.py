@@ -6,7 +6,7 @@ class Disks:
 
     def __init__(self, controller):
         self._controller = controller
-        self._storage_controller =  j.sal.kvm.StorageController(controller)
+        self._storage_controller = j.sal.kvm.StorageController(controller)
 
     def create(self, pool, name, size=100, image_name=""):
         """

@@ -11,7 +11,9 @@ class CuisineMercurial(base):
 
         # FIXME: python header files should be included inside /opt as well
         self.cuisine.package.install("python2.7-dev")
-        self.cuisine.core.file_download('https://www.mercurial-scm.org/release/mercurial-4.1.tar.gz', '$TMPDIR/mercurial-4.1.tar.gz')
+        self.cuisine.core.file_download(
+            'https://www.mercurial-scm.org/release/mercurial-4.1.tar.gz',
+            '$TMPDIR/mercurial-4.1.tar.gz')
 
         self.cuisine.core.run('cd $TMPDIR; tar -xf mercurial-4.1.tar.gz')
         self.cuisine.core.run('cd $TMPDIR/mercurial-4.1; python setup.py build')
@@ -28,7 +30,7 @@ class CuisineMercurial(base):
 
         name = j.sal.fs.getBaseName(url)
 
-        if dest == None:
+        if dest is None:
             dest = "$CODEDIR/mercurial/%s" % name
 
         dest = self.replace(dest)

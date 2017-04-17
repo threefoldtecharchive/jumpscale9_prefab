@@ -28,7 +28,10 @@ class CuisineRsync(base):
         self.cuisine.package.ensure("g++")
         self.cuisine.package.ensure('make')
 
-        self.cuisine.core.file_download("https://download.samba.org/pub/rsync/src/%s.tar.gz" % self.VERSION, to="%s/%s.tar.gz" % (self.BUILDDIRL, self.VERSION))
+        self.cuisine.core.file_download(
+            "https://download.samba.org/pub/rsync/src/%s.tar.gz" %
+            self.VERSION, to="%s/%s.tar.gz" %
+            (self.BUILDDIRL, self.VERSION))
 
         C = """
         set -xe
@@ -49,4 +52,8 @@ class CuisineRsync(base):
     def install(self):
         self.cuisine.bash.profileDefault.addPath(self.cuisine.core.replace("$BINDIR"))
         self.cuisine.bash.profileDefault.save()
-        self.cuisine.core.file_copy("%s/%s/rsync" % (self.BUILDDIRL, self.VERSION), self.cuisine.core.dir_paths['BINDIR'])
+        self.cuisine.core.file_copy(
+            "%s/%s/rsync" %
+            (self.BUILDDIRL,
+             self.VERSION),
+            self.cuisine.core.dir_paths['BINDIR'])

@@ -156,7 +156,8 @@ WantedBy=multi-user.target
         self.start(name)
 
     def __str__(self):
-        return "cuisine:%s:%s:processmanager_systemd" % (getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
+        return "cuisine:%s:%s:processmanager_systemd" % (
+            getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
 
     __repr__ = __str__
 
@@ -253,7 +254,8 @@ class CuisineRunit(ProcessManagerBase):
         self._cuisine.process.kill(name, signal=9, exact=False)
 
     def __str__(self):
-        return "cuisine:%s:%s:processmanager_runinit" % (getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
+        return "cuisine:%s:%s:processmanager_runinit" % (
+            getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
 
     __repr__ = __str__
 
@@ -277,7 +279,6 @@ class CuisineTmuxec(ProcessManagerBase):
                 res[i] = item.split(":")[1]
         res = [item.strip().rstrip("*-").strip() for item in res]
         return res
-
 
     def ensure(self, name, cmd, env={}, path="", descr="", autostart=False, wait=0):
         """
@@ -332,6 +333,7 @@ class CuisineTmuxec(ProcessManagerBase):
             self._cuisine.tmux.killWindow("main", name)
 
     def __str__(self):
-        return "cuisine:%s:%s:processmanager_tmux" % (getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
+        return "cuisine:%s:%s:processmanager_tmux" % (
+            getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
 
     __repr__ = __str__

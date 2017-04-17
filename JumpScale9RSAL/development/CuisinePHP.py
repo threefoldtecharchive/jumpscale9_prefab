@@ -19,7 +19,6 @@ compileconfig['with_pdo_mysql'] = True
 compileconfig['with_mysql_sock'] = "/var/run/mysqld/mysqld.sock"
 
 
-
 class CuisinePHP(app):
 
     NAME = 'php'
@@ -62,7 +61,6 @@ class CuisinePHP(app):
 
         C = """cd $TMPDIR/php && make"""
         self.cuisine.core.run(C, die=False)
-
 
         # check if we need an php accelerator: https://en.wikipedia.org/wiki/List_of_PHP_accelerators
 
@@ -113,7 +111,7 @@ class CuisinePHP(app):
 
     def start(self):
         phpfpmbinpath = '$JSAPPSDIR/php/sbin'
-        #COPY BINARIES
+        # COPY BINARIES
         self.cuisine.core.run("cp $JSAPPSDIR/php/sbin/* $BINDIR")
 
         phpfpmcmd = "$JSAPPSDIR/php/sbin/php-fpm -F -y $JSAPPSDIR/php/etc/php-fpm.conf.default"  # foreground

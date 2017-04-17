@@ -23,7 +23,7 @@ class CuisineRust(app):
         self.cuisine.core.run(
             'cd /tmp/{version} && ./install.sh --prefix=$JSAPPSDIR/rust --destdir==$JSAPPSDIR/rust'.format(version=version))
 
-        #was profileDefault
+        # was profileDefault
         self.cuisine.bash.profileJS.addPath(self.replace('$JSAPPSDIR/rust/bin'))
         self.cuisine.bash.profileJS.save()
 

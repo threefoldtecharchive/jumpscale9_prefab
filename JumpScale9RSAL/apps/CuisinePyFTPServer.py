@@ -53,7 +53,6 @@ class CuisinePyFTPServer(base):
 
         self.start()
 
-
     def configure(self, root="/storage/ftpserver", config="", port=2121):
         """
         see install docstring for config example

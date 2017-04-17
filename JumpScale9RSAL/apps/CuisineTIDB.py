@@ -39,7 +39,8 @@ class CuisineTIDB(app):
         if not self.cuisine.core.file_exists(dest):
             self.cuisine.core.file_download(tidb_url, dest, processtimeout=900)
         self.cuisine.core.run(
-            'cd $BUILDDIR && tar xvf tidb-latest-linux-amd64.tar.gz && cp -r $BUILDDIR/tidb-latest-linux-amd64/* {builddir}'.format(builddir=self.BUILDDIR))
+            'cd $BUILDDIR && tar xvf tidb-latest-linux-amd64.tar.gz && cp -r $BUILDDIR/tidb-latest-linux-amd64/* {builddir}'.format(
+                builddir=self.BUILDDIR))
         self.doneSet('build')
 
         if install:
@@ -53,7 +54,7 @@ class CuisineTIDB(app):
             return
 
         self.cuisine.core.run("cp $BUILDDIR/tidb/bin/* $BINDIR/")
-        #for path in self.cuisine.core.find(j.sal.fs.joinPaths(self.BUILDDIR, 'bin'), type='f'):
+        # for path in self.cuisine.core.find(j.sal.fs.joinPaths(self.BUILDDIR, 'bin'), type='f'):
         #    self.cuisine.core.file_copy(path, '$BINDIR')
 
         self.doneSet('install')

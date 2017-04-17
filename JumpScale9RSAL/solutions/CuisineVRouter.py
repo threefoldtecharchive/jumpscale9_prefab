@@ -77,7 +77,7 @@ class CuisineVRouter(base):
         try:
             if ipaddr in self.cuisine.net.getInfo("br0")["ip"]:
                 return
-        except:
+        except BaseException:
             pass
 
         C = """
@@ -129,7 +129,11 @@ class CuisineVRouter(base):
         interfaces = [item for item in self.cuisine.net.wirelessLanInterfaces if item != self.defgwInterface]
         if len(interfaces) != 1:
             raise j.exceptions.Input(
-                message="Can only create access point if 1 wireless interface found which is not the default gw.", level=1, source="", tags="", msgpub="")
+                message="Can only create access point if 1 wireless interface found which is not the default gw.",
+                level=1,
+                source="",
+                tags="",
+                msgpub="")
         return interfaces[0]
 
     @property

@@ -158,15 +158,14 @@ class CuisineNGINX(app):
         self.cuisine.core.file_write("$BUILDDIR/nginx/conf/nginx.conf", content=basicnginxconf)
         self.cuisine.core.file_write("$BUILDDIR/nginx/conf/sites-enabled/default", content=defaultenabledsitesconf)
 
-
         fst_cgi_conf = self.cuisine.core.file_read("$BUILDDIR/nginx/conf/fastcgi.conf")
-        fst_cgi_conf = fst_cgi_conf.replace("include fastcgi.conf;", self.replace("include $BUILDDIR/nginx/conf/fastcgi.conf;"))
+        fst_cgi_conf = fst_cgi_conf.replace("include fastcgi.conf;",
+                                            self.replace("include $BUILDDIR/nginx/conf/fastcgi.conf;"))
         self.cuisine.core.file_write("$BUILDDIR/nginx/conf/fastcgi.conf", content=fst_cgi_conf)
 
         #self.cuisine.core.file_link(source="$JSCFGDIR/nginx", destination="$JSAPPSDIR/nginx")
         if start:
             self.start()
-
 
     def build(self, install=True):
         os.environ["LC_ALL"] = "C.UTF-8"

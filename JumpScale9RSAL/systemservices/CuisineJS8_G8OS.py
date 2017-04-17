@@ -83,7 +83,8 @@ class CuisineJS8_G8OS(base):
                 self.cuisine.bash.include('/opt/jumpscale9/env.sh')
                 break
 
-        self.logger.info("* re-login into your shell to have access to js, because otherwise the env arguments are not set properly.")
+        self.logger.info(
+            "* re-login into your shell to have access to js, because otherwise the env arguments are not set properly.")
 
     def base(self):
         self.cuisine.bash.fixlocale()

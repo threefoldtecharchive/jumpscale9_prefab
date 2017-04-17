@@ -1,6 +1,7 @@
 from JumpScale import j
 from JumpScale.tools.cuisine.CuisineFactory import CuisineApp
 
+
 class CuisineBtrfsProgs(CuisineApp):
     NAME = 'btrfs'
 

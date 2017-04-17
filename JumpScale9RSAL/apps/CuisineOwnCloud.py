@@ -34,8 +34,6 @@ class CuisineOwnCloud(app):
         self.install()
         self.start(localinstall=True)
 
-
-
         # TODO: *2 create 1 method which does all and is sort of guideline for a customer to understand this
 
     def install(self, start=True, storagepath="/data", sitename="owncloudy.com", nginx=False):
@@ -235,7 +233,14 @@ class CuisineOwnCloud(app):
         conf = self.cuisine.core.replace(conf)
         return conf
 
-    def start(self, sitename='owncloudy.com', dbhost="127.0.0.1", dbuser="root", dbpass="", nginx=False, localinstall=False):
+    def start(
+            self,
+            sitename='owncloudy.com',
+            dbhost="127.0.0.1",
+            dbuser="root",
+            dbpass="",
+            nginx=False,
+            localinstall=False):
         dbpass = "" if dbpass == "" else ' -p "{dbpass}"'.format(dbpass=dbpass)
         if localinstall:
             privateIp = dbhost
@@ -264,7 +269,8 @@ class CuisineOwnCloud(app):
         if nginx:
             owncloudsiterules = self._get_default_conf_nginx_site()
             owncloudsiterules = owncloudsiterules % {"sitename": sitename}
-            self._cuisine.core.file_write("$JSCFGDIR/nginx/etc/sites-enabled/{sitename}".format(sitename=sitename), content=owncloudsiterules)
+            self._cuisine.core.file_write(
+                "$JSCFGDIR/nginx/etc/sites-enabled/{sitename}".format(sitename=sitename), content=owncloudsiterules)
             basicnginxconf = self._cuisine.apps.nginx.get_basic_nginx_conf()
             basicnginxconf = basicnginxconf.replace(
                 "include $JSAPPSDIR/nginx/etc/sites-enabled/*;", "include $JSCFGDIR/nginx/etc/sites-enabled/*;")
@@ -292,7 +298,7 @@ class CuisineOwnCloud(app):
             chown -R daemon:daemon /data
             """
             self.cuisine.core.execute_bash(C)
-            #self.cuisine.development.php.start()
+            # self.cuisine.development.php.start()
             self.cuisine.apps.apache2.start()
 
     def _get_apache_siteconf(self):
@@ -320,7 +326,7 @@ class CuisineOwnCloud(app):
 
 
         """)
-        conf = re.sub(r"//", "/", conf)  #remove // in paths
+        conf = re.sub(r"//", "/", conf)  # remove // in paths
         return conf
 
     def restart(self):

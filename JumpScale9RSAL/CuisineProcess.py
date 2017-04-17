@@ -73,7 +73,7 @@ class CuisineProcess(base):
                     d["local"] = a[1:].strip()
                     try:
                         d["localport"] = int(b)
-                    except:
+                    except BaseException:
                         d["localport"] = 0
                     result.append(d)
 

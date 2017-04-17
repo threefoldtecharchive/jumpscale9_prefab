@@ -222,6 +222,7 @@ self.logger.info(targ)
 
         """ % (root, j.data.serializer.json.dumps(keys), target)
 
+
 base = j.tools.cuisine._getBaseClass()
 
 
@@ -282,7 +283,7 @@ class CuisineStor(base):
         """
         Return a storagespace object
         """
-        if not name in self.storagespaces:
+        if name not in self.storagespaces:
             sp = StorSpace(self, name)
             self.storagespaces[name] = sp
 
@@ -848,6 +849,7 @@ class StorSpace(object):
 
         self.cuisine.core.run('tar -xvf %s -C %s' % (tarsource, tartarget))
         self.cuisine.core.file_unlink(tarsource)
+
 
 """
 some remarks

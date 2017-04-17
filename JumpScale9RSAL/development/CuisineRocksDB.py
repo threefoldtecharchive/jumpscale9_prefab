@@ -5,7 +5,8 @@ base = j.tools.cuisine._getBaseClass()
 
 class CuisineRocksDB(base):
 
-# WIP : builds but still cannot install gorocksdb yet , based on https://github.com/g8os/initramfs/blob/0.12.0/internals/gorocksdb.sh
+    # WIP : builds but still cannot install gorocksdb yet , based on
+    # https://github.com/g8os/initramfs/blob/0.12.0/internals/gorocksdb.sh
     def _init(self):
         self.BUILDDIRL = self.core.replace("$BUILDDIR/rocksdb/")
         self.ROCKSDB_VERSION = "5.1.2"

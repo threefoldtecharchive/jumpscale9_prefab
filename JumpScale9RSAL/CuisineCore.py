@@ -348,8 +348,21 @@ class CuisineCore(base):
         x = self.replace(x)
         return x
 
-    def file_download(self, url, to="", overwrite=True, retry=3, timeout=0, login="",
-                      passwd="", minspeed=0, multithread=False, expand=False, minsizekb=40, removeTopDir=False, processtimeout=300):
+    def file_download(
+            self,
+            url,
+            to="",
+            overwrite=True,
+            retry=3,
+            timeout=0,
+            login="",
+            passwd="",
+            minspeed=0,
+            multithread=False,
+            expand=False,
+            minsizekb=40,
+            removeTopDir=False,
+            processtimeout=300):
         """
         download from url
         @return path of downloaded file
@@ -884,8 +897,13 @@ class CuisineCore(base):
         # be on the safe side.
         location = self.replace(location)
         if self.file_exists(location):
-            return self.run("cat {0} | python -c 'import sys,hashlib;sys.stdout.write(hashlib.sha256(sys.stdin.read()).hexdigest())'".format(
-                self.shell_safe((location))), debug=False, checkok=False, showout=False)[1]
+            return self.run(
+                "cat {0} | python -c 'import sys,hashlib;sys.stdout.write(hashlib.sha256(sys.stdin.read()).hexdigest())'".format(
+                    self.shell_safe(
+                        (location))),
+                debug=False,
+                checkok=False,
+                showout=False)[1]
         else:
             return None
         # else:

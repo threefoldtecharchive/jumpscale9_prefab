@@ -81,7 +81,7 @@ class CuisineDocker(app):
 
         self._init_docker()
 
-        if ssh and not '22:' in ports:
+        if ssh and '22:' not in ports:
             port = "2202"
             while port in ports:
                 port = random.randint(1000, 9999)
@@ -99,18 +99,19 @@ class CuisineDocker(app):
         self.cuisine.core.run(cmd, profile=True)
         cmd = "jsdocker list --name {name} --parsable".format(name=name)
         _, out, _ = self.cuisine.core.run(cmd, profile=True)
-        #FIXME: cannot find g8core is included to the output
+        # FIXME: cannot find g8core is included to the output
         #out = out.replace("cannot find g8core\n","")
 
         info = j.data.serializer.json.loads(out)
 
         port = info[0]["port"]
         #host = info[0]["host"]
-        _, out, _ = self.cuisine.core.run("docker inspect {name} | grep \"IPAddress\"|  cut -d '\"' -f 4 ".format(name=name))
+        _, out, _ = self.cuisine.core.run(
+            "docker inspect {name} | grep \"IPAddress\"|  cut -d '\"' -f 4 ".format(name=name))
         host = out
         dockerexecutor = Cuisinedockerobj(name, host, "22", self.cuisine)
         cuisinedockerobj = j.tools.cuisine.get(dockerexecutor)
-  
+
         # NEED TO MAKE SURE WE CAN GET ACCESS TO THIS DOCKER WITHOUT OPENING PORTS; we know can using docker exec
         # ON DOCKER HOST (which is current cuisine)
 
@@ -130,11 +131,20 @@ class Cuisinedockerobj:
         self.login = "root"
         self.cuisineDockerHost = cuisineDockerHost
         self._cuisine = None
-        self.CURDIR = "/root" #required by CuisineFactory
-        self.env = {}  #required by cuisineFactory
+        self.CURDIR = "/root"  # required by CuisineFactory
+        self.env = {}  # required by cuisineFactory
+
     def execute(self, cmds, die=True, checkok=None, async=False, showout=True, timeout=0, env={}):
-        return self.cuisineDockerHost.core.run("docker exec %s bash -c '%s'" % (self.name, cmds.replace("'", "'\"'\"'")),
-                                               die=die, checkok=checkok, showout=showout, env=env)
+        return self.cuisineDockerHost.core.run(
+            "docker exec %s bash -c '%s'" %
+            (self.name,
+             cmds.replace(
+                 "'",
+                 "'\"'\"'")),
+            die=die,
+            checkok=checkok,
+            showout=showout,
+            env=env)
 
     executeRaw = execute
 

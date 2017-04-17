@@ -13,7 +13,7 @@ class CuisineMongodb(app):
         download, install, move files to appropriate places, and create relavent configs
         """
         if (not reset and self.doneGet("install")) or self.isInstalled():
-             return
+            return
         if self.cuisine.core.isMac:
             self.cuisine.core.run("brew uninstall mongodb", die=False)
 

@@ -103,8 +103,11 @@ class MongoInstance(Startable):
     @Startable.ensure_started
     def execute(self, cmd):
         for i in range(5):
-            rc, out, err = self.cuisine.core.run("LC_ALL=C $BINDIR/mongo --port %s --eval '%s'" %
-                                                 (self.private_port, cmd.replace("\\", "\\\\").replace("'", "\\'")), die=False)
+            rc, out, err = self.cuisine.core.run(
+                "LC_ALL=C $BINDIR/mongo --port %s --eval '%s'" %
+                (self.private_port, cmd.replace(
+                    "\\", "\\\\").replace(
+                    "'", "\\'")), die=False)
             if not rc and out.find('errmsg') == -1:
                 self.logger.info('command executed %s' % (cmd))
                 break
@@ -243,6 +246,7 @@ class MongoConfigSvr(Startable):
 
     __str__ = __repr__
 
+
 base = j.tools.cuisine._getBaseClass()
 
 
@@ -273,8 +277,16 @@ class CuisineMongoCluster(base):
         for i in [shards_nodes, config_nodes, mongos_nodes]:
             cuisines = []
             for k in i:
-                cuisines.append(MongoInstance(j.tools.cuisine.get(k['executor']), addr=k.get('addr', None), private_port=k['private_port'],
-                                              public_port=k.get('public_port'), dbdir=k.get('dbdir')))
+                cuisines.append(
+                    MongoInstance(
+                        j.tools.cuisine.get(
+                            k['executor']),
+                        addr=k.get(
+                            'addr',
+                            None),
+                        private_port=k['private_port'],
+                        public_port=k.get('public_port'),
+                        dbdir=k.get('dbdir')))
             args.append(cuisines)
         return self.__mongoCluster(args[0], args[1], args[2],
                                    shards_replica_set_counts=shards_replica_set_counts, unique=unique)

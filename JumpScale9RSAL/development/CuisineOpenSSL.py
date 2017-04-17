@@ -66,9 +66,9 @@ class CuisineOpenSSL(base):
             rm -rf $BUILDDIRL/private
             """
             if self.cuisine.core.isMac:
-                C=C.replace("$target","darwin64-x86_64-cc")
+                C = C.replace("$target", "darwin64-x86_64-cc")
             else:
-                C=C.replace("$target","linux-generic64")
+                C = C.replace("$target", "linux-generic64")
             self.cuisine.core.run(self.replace(C))
             self.doneSet("compile")
             self.logger.info("BUILD DONE")

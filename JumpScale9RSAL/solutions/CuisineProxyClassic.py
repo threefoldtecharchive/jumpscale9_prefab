@@ -342,7 +342,9 @@ class CuisineProxyClassic(base):
         self.logger.info("INSTALL OK")
         self.logger.info("to see status: point webbrowser to")
         self.logger.info("http://%s:%s/polipo/status?" % (self.cuisine.core.executor.addr, port))
-        self.logger.info("configure your webproxy client to use %s on tcp port %s" % (self.cuisine.core.executor.addr, port))
+        self.logger.info(
+            "configure your webproxy client to use %s on tcp port %s" %
+            (self.cuisine.core.executor.addr, port))
 
         self.removeFromSystemD(force=False)
 

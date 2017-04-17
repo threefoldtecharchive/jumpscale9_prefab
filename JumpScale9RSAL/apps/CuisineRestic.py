@@ -40,7 +40,7 @@ class CuisineRestic(app):
         if install:
             self.install()
 
-    def install(self,reset=False):
+    def install(self, reset=False):
         """
         download, install, move files to appropriate places, and create relavent configs
         """
@@ -48,7 +48,7 @@ class CuisineRestic(app):
         if self.doneGet("install") and not reset:
             return
 
-        self.cuisine.core.file_copy(self.CODEDIR+'/restic', '$BINDIR')
+        self.cuisine.core.file_copy(self.CODEDIR + '/restic', '$BINDIR')
 
         self.doneSet("install")
 
@@ -62,6 +62,7 @@ class CuisineRestic(app):
 
 class ResticRepository:
     """This class represent a restic repository used for backup"""
+
     def __init__(self, path, password, cuisine):
         self.path = path
         self.__password = password

@@ -24,7 +24,6 @@ from JumpScale.tools.cuisine.testscripts.testscripts import testscripts
 from JumpScale.tools.cuisine.tools.tools import tools
 
 
-
 class JSCuisine:
 
     def __init__(self, executor):
@@ -59,7 +58,6 @@ class JSCuisine:
         self.pnode = CuisinePNode(self.executor, self)
 
         # self.reset = self.core.reset
-
 
     @property
     def apps(self):

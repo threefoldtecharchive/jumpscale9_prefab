@@ -1,11 +1,12 @@
 from JumpScale import j
 
+
 class StoragePools:
     """This class give you access to storage pools related actions from the kvm sal over cuisine"""
 
     def __init__(self, controller):
         self._controller = controller
-        self._storage_controller =  j.sal.kvm.StorageController(controller)
+        self._storage_controller = j.sal.kvm.StorageController(controller)
 
     def create(self, name, start=True):
         """

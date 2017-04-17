@@ -20,7 +20,7 @@ class CuisineApache2(app):
 
         self._cuisine.core.dir_ensure("/optvar/build")
 
-        ## DOWNLOAD LINK
+        # DOWNLOAD LINK
         DOWNLOADLINK = 'https://www.apache.org/dist/httpd/httpd-2.4.25.tar.bz2'
         dest = j.sal.fs.joinPaths("/optvar", 'httpd-2.4.25.tar.bz2')
 
@@ -28,7 +28,8 @@ class CuisineApache2(app):
             self._cuisine.core.file_download(DOWNLOADLINK, dest)
 
         # EXTRACT SROURCE CODE
-        self._cuisine.core.run("cd /optvar/build && tar xjf {dest} && cp -r /optvar/build/httpd-2.4.25 /optvar/build/httpd".format(**locals()))
+        self._cuisine.core.run(
+            "cd /optvar/build && tar xjf {dest} && cp -r /optvar/build/httpd-2.4.25 /optvar/build/httpd".format(**locals()))
         self._cuisine.core.dir_ensure("$JSAPPSDIR/apache2/bin")
         self._cuisine.core.dir_ensure("$JSAPPSDIR/apache2/lib")
 
@@ -58,9 +59,8 @@ class CuisineApache2(app):
         installscript = """cd {httpdir} &&  make install""".format(httpdir=httpdir)
         self._cuisine.core.run(installscript)
 
-        #COPY APACHE BINARIES to /opt/jumpscale9/bin
-        self._cuisine.core.file_copy("$JSAPPSDIR/apache2/bin/*",'$BINDIR/')
-
+        # COPY APACHE BINARIES to /opt/jumpscale9/bin
+        self._cuisine.core.file_copy("$JSAPPSDIR/apache2/bin/*", '$BINDIR/')
 
     def configure(self):
         conffile = self._cuisine.core.file_read("$JSAPPSDIR/apache2/conf/httpd.conf")
@@ -93,7 +93,7 @@ class CuisineApache2(app):
         for line in disabled.splitlines():
             line = line.strip()
             if line:
-                mod = "#"+line
+                mod = "#" + line
                 conffile = conffile.replace(line, mod)
         sitesdirconf = self._cuisine.core.replace("\nInclude $JSCFGDIR/apache2/sites-enabled/*")
         conffile += sitesdirconf
@@ -104,7 +104,6 @@ class CuisineApache2(app):
         self._cuisine.core.dir_ensure("$JSAPPSDIR/apache2/sites-enabled")
         #self.logger.info("Config to be written = ", conffile)
         self._cuisine.core.file_write("$JSAPPSDIR/apache2/conf/httpd.conf", conffile)
-
 
     def start(self):
         """start Apache."""

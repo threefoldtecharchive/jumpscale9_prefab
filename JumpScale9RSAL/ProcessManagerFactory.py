@@ -16,7 +16,6 @@ class ProcessManagerFactory:
             self._logger = j.logger.get("processmanagerfactory")
         return self._logger
 
-
     def systemdOK(self):
         res = not self._cuisine.core.isDocker and self._cuisine.core.command_check("systemctl")
         self.logger.info("systemd:%s" % res)
@@ -28,7 +27,7 @@ class ProcessManagerFactory:
         return res
 
     def get_prefered(self):
-        for pm in ["tmux","systemd", "sv"]:
+        for pm in ["tmux", "systemd", "sv"]:
             if self.is_available(pm):
                 return pm
 

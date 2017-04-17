@@ -25,7 +25,7 @@ class CuisineLedis(app):
             """
             self.cuisine.development.golang.install()
             self.cuisine.development.git.pullRepo("https://github.com/siddontang/ledisdb",
-                                                   dest="$GOPATHDIR/src/github.com/siddontang/ledisdb")
+                                                  dest="$GOPATHDIR/src/github.com/siddontang/ledisdb")
 
             # set the backend in the server config
             ledisdir = self.replace("$GOPATHDIR/src/github.com/siddontang/ledisdb")

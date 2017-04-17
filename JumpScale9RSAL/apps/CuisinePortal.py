@@ -13,7 +13,15 @@ class CuisinePortal(base):
         self.main_portal_dir = j.sal.fs.joinPaths(self.portal_dir, 'main')
         self.cfg_path = j.sal.fs.joinPaths(self.main_portal_dir, 'config.hrd')
 
-    def configure(self, mongodbip="127.0.0.1", mongoport=27017, production=True, client_id='', client_secret='', organization='', redirect_address=''):
+    def configure(
+            self,
+            mongodbip="127.0.0.1",
+            mongoport=27017,
+            production=True,
+            client_id='',
+            client_secret='',
+            organization='',
+            redirect_address=''):
 
         # go from template dir which go the file above
         content = self.cuisine.core.file_read('$TEMPLATEDIR/cfg/portal/config.yaml')
@@ -31,7 +39,6 @@ class CuisinePortal(base):
             cfg['oauth.redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
         # ITS ALREADY THE DEFAULT IN THE CONFIG DIR
         # cfg['param.cfg.appdir'] = j.sal.fs.joinPaths(self.portal_dir, 'portalbase')
-
 
         cfg['mongoengine.connection'] = {'host': mongodbip, 'port': mongoport}
         self.cuisine.core.file_write(self.configPath, j.data.serializer.yaml.dumps(cfg))
@@ -74,10 +81,19 @@ class CuisinePortal(base):
 
     def installNodeJSLibs(self):
         self.cuisine.apps.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
-        self.cuisine.apps.nodejs.bowerInstall(["jquery", "flatui", "bootstrap", "famous", "codemirror", "font-awesome", "jqplot",
-                                               "underscore", "spin", "moment",
+        self.cuisine.apps.nodejs.bowerInstall(["jquery",
+                                               "flatui",
+                                               "bootstrap",
+                                               "famous",
+                                               "codemirror",
+                                               "font-awesome",
+                                               "jqplot",
+                                               "underscore",
+                                               "spin",
+                                               "moment",
                                                "http://DlhSoft.com/Packages/DlhSoft.KanbanLibrary.zip",
-                                               "jqwidgets", "d3"])  # , "angular-latest"])
+                                               "jqwidgets",
+                                               "d3"])  # , "angular-latest"])
 
     def installDeps(self, reset=False):
         """
@@ -178,7 +194,7 @@ class CuisinePortal(base):
         snakeviz
         """
 
-        if not "darwin" in self.cuisine.platformtype.osname:
+        if "darwin" not in self.cuisine.platformtype.osname:
             self.cuisine.package.ensure('build-essential')
             self.cuisine.package.ensure('libssl-dev')
             self.cuisine.package.ensure('libffi-dev')
@@ -194,7 +210,7 @@ class CuisinePortal(base):
             self.cuisine.development.pip.install('python-snappy')
 
         # snappy install
-        if not "darwin" in self.cuisine.platformtype.osname:
+        if "darwin" not in self.cuisine.platformtype.osname:
             self.cuisine.package.ensure('libsnappy-dev')
             self.cuisine.package.ensure('libsnappy1v5')
 
@@ -219,8 +235,15 @@ class CuisinePortal(base):
         #     destjslib = destjslib.split("\n")[1]
 
         if self.cuisine.core.file_exists(destjslib):
-            self.cuisine.core.file_link("%s/github/jumpscale/jumpscale_portal8/lib/portal" % self.cuisine.core.dir_paths["CODEDIR"],
-                                        "%s/portal" % destjslib, symbolic=True, mode=None, owner=None, group=None)
+            self.cuisine.core.file_link(
+                "%s/github/jumpscale/jumpscale_portal8/lib/portal" %
+                self.cuisine.core.dir_paths["CODEDIR"],
+                "%s/portal" %
+                destjslib,
+                symbolic=True,
+                mode=None,
+                owner=None,
+                group=None)
 
         self.cuisine.core.run("js --quiet 'j.application.reload()'", showout=False, die=False)
 
@@ -247,18 +270,31 @@ class CuisinePortal(base):
         self.cuisine.core.file_ensure('%s/base/home/home.md' % self.main_portal_dir)
 
         self.cuisine.core.dir_ensure('$TEMPLATEDIR/cfg/portal')
-        self.cuisine.core.file_copy(j.sal.fs.joinPaths(CODE_DIR, 'github/jumpscale/jumpscale_portal8/apps/portalbase/config.yaml'),
-                                    '$TEMPLATEDIR/cfg/portal/config.yaml')
+        self.cuisine.core.file_copy(
+            j.sal.fs.joinPaths(
+                CODE_DIR,
+                'github/jumpscale/jumpscale_portal8/apps/portalbase/config.yaml'),
+            '$TEMPLATEDIR/cfg/portal/config.yaml')
         self.cuisine.core.dir_ensure("$JSCFGDIR/portals/main/")
-        self.cuisine.core.file_copy(j.sal.fs.joinPaths(CODE_DIR, 'github/jumpscale/jumpscale_portal8/apps/portalbase/config.yaml'),
-                                    "$JSCFGDIR/portals/main/config.yaml")
+        self.cuisine.core.file_copy(
+            j.sal.fs.joinPaths(
+                CODE_DIR,
+                'github/jumpscale/jumpscale_portal8/apps/portalbase/config.yaml'),
+            "$JSCFGDIR/portals/main/config.yaml")
         # copy portal_start.py
-        self.cuisine.core.file_copy(j.sal.fs.joinPaths(CODE_DIR, 'github/jumpscale/jumpscale_portal8/apps/portalbase/portal_start.py'),
-                                    self.main_portal_dir)
+        self.cuisine.core.file_copy(
+            j.sal.fs.joinPaths(
+                CODE_DIR,
+                'github/jumpscale/jumpscale_portal8/apps/portalbase/portal_start.py'),
+            self.main_portal_dir)
         self.cuisine.core.file_copy("%s/jslib/old/images" % self.portal_dir,
                                     "%s/jslib/old/elfinder" % self.portal_dir, recursive=True)
         # link spaces
-        spaces = j.tools.cuisine.local.core.find('$CODEDIR/github/jumpscale/jumpscale_portal8/apps/portalbase/', recursive=True, pattern='*.space', type='d')
+        spaces = j.tools.cuisine.local.core.find(
+            '$CODEDIR/github/jumpscale/jumpscale_portal8/apps/portalbase/',
+            recursive=True,
+            pattern='*.space',
+            type='d')
         to_link = [j.sal.fs.getParent(x) for x in spaces]
         for space in to_link:
             space_name = j.sal.fs.getBaseName(space)
@@ -301,7 +337,7 @@ class CuisinePortal(base):
             try:
                 time.sleep(2)
                 resp = self.cuisine.core.run('jsuser list', showout=False)[1]
-            except:
+            except BaseException:
                 continue
 
         if resp.find('admin') == -1:

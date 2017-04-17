@@ -194,7 +194,11 @@ class CuisineNet(base):
 
         if not self.ping(pinghost):
             raise j.exceptions.Input(
-                message="Cannot set interface if we cannot ping to the host we have to check against.", level=1, source="", tags="", msgpub="")
+                message="Cannot set interface if we cannot ping to the host we have to check against.",
+                level=1,
+                source="",
+                tags="",
+                msgpub="")
 
         pscript = """
         C='''

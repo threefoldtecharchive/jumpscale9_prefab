@@ -17,7 +17,15 @@ class CuisineCaddy(app):
         app.reset(self)
         self._init()
 
-    def build(self, ssl=False, start=True, dns=None, reset=False, wwwrootdir=None, install=True, features=defaultfeatures):
+    def build(
+            self,
+            ssl=False,
+            start=True,
+            dns=None,
+            reset=False,
+            wwwrootdir=None,
+            install=True,
+            features=defaultfeatures):
         """
         Get/Build the binaries of caddy itself.
         :param features: is used to specify the required features in the installation. Currently the default installation
@@ -119,7 +127,9 @@ class CuisineCaddy(app):
         if cfg_path:
             cpath = cfg_path
         if agree:
-            self.cuisine.processmanager.ensure("caddy", 'ulimit -n 8192; %s -agree -conf=%s -email=%s' % (cmd, cpath, email))
+            self.cuisine.processmanager.ensure(
+                "caddy", 'ulimit -n 8192; %s -agree -conf=%s -email=%s' %
+                (cmd, cpath, email))
         else:
             self.cuisine.processmanager.ensure("caddy", 'ulimit -n 8192; %s -conf=%s -email=%s' % (cmd, cpath, email))
 

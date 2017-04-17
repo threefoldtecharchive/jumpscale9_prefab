@@ -15,7 +15,7 @@ class CuisinePython(base):
         self.core.dir_remove(self.CODEDIRL)
         self.cuisine.development.pip.reset()
 
-    def build(self,  reset=False):
+    def build(self, reset=False):
         """
         """
 
@@ -40,7 +40,8 @@ class CuisinePython(base):
                 self.doneSet("xcode_install")
 
         if not self.doneGet("compile") or reset:
-            cpath = self.cuisine.development.git.pullRepo('https://github.com/python/cpython', branch="3.6", reset=reset)
+            cpath = self.cuisine.development.git.pullRepo(
+                'https://github.com/python/cpython', branch="3.6", reset=reset)
             assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
             if self.core.isMac:  # TODO: *2 cant we do something similar for linux?
 
@@ -294,8 +295,8 @@ class CuisinePython(base):
         if not self.doneGet("build"):
             self.build()
         self.cuisine.core.dir_ensure(j.dirs.JSBASEDIR)
-        self.cuisine.core.dir_ensure(j.dirs.JSBASEDIR+"/bin")
-        self.cuisine.core.dir_ensure(j.dirs.JSBASEDIR+"/lib")
+        self.cuisine.core.dir_ensure(j.dirs.JSBASEDIR + "/bin")
+        self.cuisine.core.dir_ensure(j.dirs.JSBASEDIR + "/lib")
         command = """
         rsync -ldr --ignore-existing {python_build}/bin/* {JSBASE}/bin
         rsync -ldr --ignore-existing {python_build}/lib/* {JSBASE}/lib

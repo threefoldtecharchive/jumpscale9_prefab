@@ -13,6 +13,7 @@ def shell_safe(path):
     path = "".join([("\\" + _) if _ in SHELL_ESCAPE else _ for _ in path])
     return path
 
+
 base = j.tools.cuisine._getBaseClass()
 
 

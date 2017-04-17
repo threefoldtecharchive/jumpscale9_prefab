@@ -91,7 +91,6 @@ class CuisineARDB(app):
         # Install dependancies
         self.cuisine.package.multiInstall(packages)
 
-
         url = "https://github.com/yinqiwen/ardb.git"
         cpath = self.cuisine.development.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
         self.logger.info(cpath)
@@ -135,7 +134,7 @@ class CuisineARDB(app):
         # config = config.replace("redis-compatible-version  2.8.0", "redis-compatible-version  3.5.2")
         config = self.core.file_read("$BUILDDIR/ardb/ardb.conf")
         config = config.replace("${ARDB_HOME}", datadir)
-        config = config.replace("0.0.0.0:16379", '{host}:{port}'.format(host=host,port=port))
+        config = config.replace("0.0.0.0:16379", '{host}:{port}'.format(host=host, port=port))
 
         cfg_path = "$CFGDIR/ardb/{}/ardb.conf".format(name)
         self.core.file_write(cfg_path, config)

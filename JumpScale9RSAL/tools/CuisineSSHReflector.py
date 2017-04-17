@@ -31,12 +31,12 @@ class CuisineSSHReflector(base):
 
         passwd = j.data.idgenerator.generateGUID()
         self.cuisine.user.ensure("sshreflector", passwd=passwd, home="/home/sshreflector",
-                                  uid=None, gid=None, shell=None, fullname=None, encrypted_passwd=True, group=None)
+                                 uid=None, gid=None, shell=None, fullname=None, encrypted_passwd=True, group=None)
 
         self.cuisine.core.run('ufw allow %s' % port, die=False)
 
         self.cuisine.core.dir_ensure("/home/sshreflector/.ssh", recursive=True, mode=None,
-                                      owner="sshreflector", group="sshreflector")
+                                     owner="sshreflector", group="sshreflector")
 
         lpath = os.environ["HOME"] + "/.ssh/reflector"
         path = "/home/sshreflector/.ssh/reflector"
@@ -176,7 +176,8 @@ class CuisineSSHReflector(base):
 
             self.logger.info("check ssh connection to reflector")
             self.cuisine.core.run(
-                "ssh -i /root/.ssh/reflector -o StrictHostKeyChecking=no sshreflector@%s -p %s 'ls /'" % (rname, reflport))
+                "ssh -i /root/.ssh/reflector -o StrictHostKeyChecking=no sshreflector@%s -p %s 'ls /'" %
+                (rname, reflport))
             self.logger.info("OK")
 
             _, cpath, _ = self.cuisine.core.run("which autossh")
@@ -198,7 +199,7 @@ class CuisineSSHReflector(base):
             for item in remoteids.split(","):
                 try:
                     cuisine = j.tools.cuisine.get(item)
-                except:
+                except BaseException:
                     pass
         else:
             cuisine = j.tools.cuisine.get(remoteids)

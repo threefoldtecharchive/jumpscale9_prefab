@@ -78,7 +78,7 @@ class CuisineDockerCompose(app):
 
         self._init_docker()
 
-        if ssh and not '22:' in ports:
+        if ssh and '22:' not in ports:
             port = "2202"
             while port in ports:
                 port = random.randint(1000, 9999)
@@ -126,8 +126,16 @@ class Cuisinedockerobj:
         self.cuisine = None
 
     def execute(self, cmds, die=True, checkok=None, async=False, showout=True, timeout=0, env={}):
-        return self.cuisineDockerHost.core.run("docker exec %s bash -c '%s'" % (self.name, cmds.replace("'", "'\"'\"'")),
-                                               die=die, checkok=checkok, showout=showout, env=env)
+        return self.cuisineDockerHost.core.run(
+            "docker exec %s bash -c '%s'" %
+            (self.name,
+             cmds.replace(
+                 "'",
+                 "'\"'\"'")),
+            die=die,
+            checkok=checkok,
+            showout=showout,
+            env=env)
 
     executeRaw = execute
 
