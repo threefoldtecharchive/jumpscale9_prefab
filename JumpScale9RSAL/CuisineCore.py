@@ -34,7 +34,7 @@ import sys
 import functools
 import platform
 
-from JumpScale import j
+from js9 import j
 import pygments.lexers
 from pygments.formatters import get_formatter_by_name
 
@@ -1284,8 +1284,8 @@ class CuisineCore(base):
         script = self.replace(script)
         script = j.data.text.strip(script)
 
-        if script.find("from JumpScale import j") == -1:
-            script = "from JumpScale import j\n\n%s" % script
+        if script.find("from js9 import j") == -1:
+            script = "from js9 import j\n\n%s" % script
 
         return self.execute_script(script, die=die, profile=profile, interpreter="jspython", tmux=tmux,
                                    replace=replace, showout=showout)

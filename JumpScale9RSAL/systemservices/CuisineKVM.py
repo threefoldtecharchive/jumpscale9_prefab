@@ -1,5 +1,5 @@
 
-from JumpScale import j
+from js9 import j
 from JumpScale.tools.cuisine.systemservices.kvm.Machines import Machines
 from JumpScale.tools.cuisine.systemservices.kvm.Disks import Disks
 from JumpScale.tools.cuisine.systemservices.kvm.StoragePools import StoragePools

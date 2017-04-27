@@ -1,4 +1,4 @@
-from JumpScale import j
+from js9 import j
 
 
 base = j.tools.cuisine._getBaseClass()

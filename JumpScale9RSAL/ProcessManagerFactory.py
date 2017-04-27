@@ -1,6 +1,6 @@
 
 from JumpScale.tools.cuisine.CuisineProcessManager import CuisineRunit, CuisineTmuxec, CuisineSystemd
-from JumpScale import j
+from js9 import j
 
 
 class ProcessManagerFactory:

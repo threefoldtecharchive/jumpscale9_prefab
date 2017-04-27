@@ -1,5 +1,5 @@
 
-from JumpScale import j
+from js9 import j
 import random
 
 app = j.tools.cuisine._getBaseAppClass()

@@ -1,4 +1,4 @@
-from JumpScale import j
+from js9 import j
 import time
 import os
 

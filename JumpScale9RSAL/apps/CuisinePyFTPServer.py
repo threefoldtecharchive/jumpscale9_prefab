@@ -1,4 +1,4 @@
-from JumpScale import j
+from js9 import j
 
 
 base = j.tools.cuisine._getBaseClass()
@@ -57,7 +57,7 @@ class CuisinePyFTPServer(base):
         """
         see install docstring for config example
         """
-        if self.cuisine.platformtype.isLinux():
+        if self.cuisine.platformtype.isLinux:
             self.cuisine.package.ensure('btrfs-tools')
         elif self.cuisine.platformtype.isOSX():
             # TODO install btrfs for mac

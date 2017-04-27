@@ -1,5 +1,5 @@
 
-from JumpScale import j
+from js9 import j
 from JumpScale.sal.fs.SystemFS import FileLock
 
 base = j.tools.cuisine._getBaseClass()

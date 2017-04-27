@@ -1,4 +1,4 @@
-from JumpScale import j
+from js9 import j
 
 
 app = j.tools.cuisine._getBaseAppClass()
@@ -18,7 +18,7 @@ class CuisineIPFS(app):
         if reset is False and self.isInstalled():
             return
 
-        if self.cuisine.platformtype.isLinux():
+        if self.cuisine.platformtype.isLinux:
             url = "https://dist.ipfs.io/go-ipfs/v0.4.4/go-ipfs_v0.4.4_linux-amd64.tar.gz"
         elif "darwin" in self.cuisine.platformtype.osname:
             url = "https://dist.ipfs.io/go-ipfs/v0.4.4/go-ipfs_v0.4.4_darwin-amd64.tar.gz"

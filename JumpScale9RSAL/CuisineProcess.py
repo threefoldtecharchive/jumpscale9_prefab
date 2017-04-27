@@ -1,5 +1,5 @@
 
-from JumpScale import j
+from js9 import j
 import re
 
 base = j.tools.cuisine._getBaseClass()
