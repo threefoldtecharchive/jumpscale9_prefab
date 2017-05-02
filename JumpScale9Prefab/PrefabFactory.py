@@ -1,18 +1,18 @@
 from js9 import j
-import threading
-import inspect
+# import threading
+# import inspect
 from JumpScale9Prefab.PrefabBase import *
 
 
 class PrefabRootClassFactory:
 
-    _lock = threading.Lock()
     prefabs_instance = {}
     _local = None
 
     def __init__(self):
         self.__jslocation__ = "j.tools.prefab"
         self.logger = j.logger.get("j.tools.prefab")
+        self.local = j.tools.executorLocal
 
     def _getBaseClass(self):
         return PrefabBase
@@ -27,23 +27,14 @@ class PrefabRootClassFactory:
         """
         reset remove the prefab instance passed in argument from the cache.
         """
-        with self._lock:
-            if prefab.executor.id in self.prefabs_instance:
-                del self.prefabs_instance[prefab.executor.id]
+        if prefab.executor.id in self.prefabs_instance:
+            del self.prefabs_instance[prefab.executor.id]
 
     def resetAll(self):
         """
         reset cache of prefab isntances
         """
         self.prefabs_instance = {}
-
-    @property
-    def local(self):
-        with self._lock:
-            if self._local is None:
-                from JumpScale9Prefab.PrefabRootClass import PrefabRootClass
-                self._local = PrefabRootClass(j.tools.executorLocal)
-            return self._local
 
     # def (self):
     #     if not j.do.SSHAgentAvailable():
@@ -96,13 +87,12 @@ class PrefabRootClassFactory:
         from JumpScale9Prefab.PrefabRootClass import PrefabRootClass
         executor = j.tools.executor.get(executor)
 
-        with self._lock:
-            if usecache and executor.id in self.prefabs_instance:
-                return self.prefabs_instance[executor.id]
-
-            prefab = PrefabRootClass(executor)
-            self.prefabs_instance[executor.id] = prefab
+        if usecache and executor.id in self.prefabs_instance:
             return self.prefabs_instance[executor.id]
+
+        prefab = PrefabRootClass(executor)
+        self.prefabs_instance[executor.id] = prefab
+        return self.prefabs_instance[executor.id]
 
     def getFromId(self, id):
         executor = j.tools.executor.get(id)

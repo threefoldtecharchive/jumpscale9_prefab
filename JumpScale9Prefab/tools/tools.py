@@ -2,7 +2,7 @@ from js9 import j
 
 base = j.tools.prefab._getBaseClassLoader()
 
-from JumpScale.sal.disklayout.DiskManager import DiskManager
+from JumpScale9Lib.sal.disklayout.DiskManager import DiskManager
 
 
 class tools(base):

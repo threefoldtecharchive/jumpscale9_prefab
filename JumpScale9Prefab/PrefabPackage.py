@@ -1,6 +1,6 @@
 
 from js9 import j
-from JumpScale.sal.fs.SystemFS import FileLock
+from JumpScale9.sal.fs.SystemFS import FileLock
 
 base = j.tools.prefab._getBaseClass()
 
