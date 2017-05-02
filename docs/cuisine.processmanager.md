@@ -34,7 +34,7 @@ Starting a service is done by simply opening a window in tmux with the name of t
 
 ```
 !!!
-title = "Cuisine.processmanager"
+title = "Prefab.processmanager"
 date = "2017-04-08"
 tags = []
 ```

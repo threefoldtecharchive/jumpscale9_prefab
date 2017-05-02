@@ -29,7 +29,7 @@ tmux.killSession('s1')
 
 ```
 !!!
-title = "Cuisine.tmux"
+title = "Prefab.tmux"
 date = "2017-04-08"
 tags = []
 ```

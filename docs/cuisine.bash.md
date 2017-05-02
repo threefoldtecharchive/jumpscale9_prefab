@@ -21,7 +21,7 @@ Examples for methods in `bash`:
 
 ```
 !!!
-title = "Cuisine.bash"
+title = "Prefab.bash"
 date = "2017-04-08"
 tags = []
 ```

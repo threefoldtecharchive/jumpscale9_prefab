@@ -48,7 +48,7 @@ kvm2.prefab.core.sudomode=True
 
 ```
 !!!
-title = "Cuisine.kvm"
+title = "Prefab.kvm"
 date = "2017-04-08"
 tags = []
 ```

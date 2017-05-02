@@ -17,7 +17,7 @@ Examples of methods inside `ssh`:
 
 ```
 !!!
-title = "Cuisine.ssh"
+title = "Prefab.ssh"
 date = "2017-04-08"
 tags = []
 ```

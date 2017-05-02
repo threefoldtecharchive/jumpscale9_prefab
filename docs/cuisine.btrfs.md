@@ -24,7 +24,7 @@ prefab.btrfs.getSpaceUsageDataFree()
 
 ```
 !!!
-title = "Cuisine.btrfs"
+title = "Prefab.btrfs"
 date = "2017-04-08"
 tags = []
 ```

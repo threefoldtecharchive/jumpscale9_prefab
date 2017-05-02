@@ -24,7 +24,7 @@ prefab.group.create('admin')
 
 ```
 !!!
-title = "Cuisine.group"
+title = "Prefab.group"
 date = "2017-04-08"
 tags = []
 ```

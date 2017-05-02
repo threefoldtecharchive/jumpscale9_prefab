@@ -45,7 +45,7 @@ Examples for methods in `core`:
 
 ```
 !!!
-title = "Cuisine.core"
+title = "Prefab.core"
 date = "2017-04-08"
 tags = []
 ```

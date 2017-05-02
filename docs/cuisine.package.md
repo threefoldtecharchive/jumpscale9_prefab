@@ -16,7 +16,7 @@ Examples of methods inside `package`:
 
 ```
 !!!
-title = "Cuisine.package"
+title = "Prefab.package"
 date = "2017-04-08"
 tags = []
 ```

@@ -1,5 +1,5 @@
 
-from JumpScale.tools.prefab.CuisineProcessManager import CuisineRunit, CuisineTmuxec, CuisineSystemd
+from JumpScale.tools.prefab.PrefabProcessManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
 from js9 import j
 
 
@@ -54,11 +54,11 @@ class ProcessManagerFactory:
 
         if pm not in self.pms:
             if pm == "systemd":
-                inst = CuisineSystemd(self._prefab.core.executor, self._prefab)
+                inst = PrefabSystemd(self._prefab.core.executor, self._prefab)
             elif pm == "sv":
-                inst = CuisineRunit(self._prefab.core.executor, self._prefab)
+                inst = PrefabRunit(self._prefab.core.executor, self._prefab)
             elif pm == "tmux":
-                inst = CuisineTmuxec(self._prefab.core.executor, self._prefab)
+                inst = PrefabTmuxec(self._prefab.core.executor, self._prefab)
             self.pms[pm] = inst
 
         return self.pms[pm]
