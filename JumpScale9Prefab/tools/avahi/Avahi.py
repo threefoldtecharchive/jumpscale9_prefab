@@ -1,14 +1,5 @@
 from js9 import j
 
-from .prefab.ActionDecorator import ActionDecorator
-
-
-class actionrun(ActionDecorator):
-
-    def __init__(self, *args, **kwargs):
-        ActionDecorator.__init__(self, *args, **kwargs)
-        self.selfobjCode = "prefab=j.tools.prefab.getFromId('$id');selfobj=prefab.avahi"
-
 
 class Avahi:
 

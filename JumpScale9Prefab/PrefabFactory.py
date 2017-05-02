@@ -45,22 +45,22 @@ class PrefabRootClassFactory:
                 self._local = PrefabRootClass(j.tools.executorLocal)
             return self._local
 
-    def(self):
-        if not j.do.SSHAgentAvailable():
-            j.do._loadSSHAgent()
-        rc, out, err = j.sal.process.execute("ssh-add -l")
-        keys = []
-        for line in out.split("\n"):
-            try:
-                # TODO: ugly needs to be done better
-                item = line.split(" ", 2)[2]
-                keyname = item.split("(", 1)[0].strip()
-                keys.append(keyname)
-            except BaseException:
-                pass
-        key = j.tools.console.askChoice(keys, "please select key")
-        # key = j.sal.fs.getBaseName(key)
-        return j.sal.fs.fileGetContents(key + ".pub")
+    # def (self):
+    #     if not j.do.SSHAgentAvailable():
+    #         j.do._loadSSHAgent()
+    #     rc, out, err = j.sal.process.execute("ssh-add -l")
+    #     keys = []
+    #     for line in out.split("\n"):
+    #         try:
+    #             # TODO: ugly needs to be done better
+    #             item = line.split(" ", 2)[2]
+    #             keyname = item.split("(", 1)[0].strip()
+    #             keys.append(keyname)
+    #         except BaseException:
+    #             pass
+    #     key = j.tools.console.askChoice(keys, "please select key")
+    #     # key = j.sal.fs.getBaseName(key)
+    #     return j.sal.fs.fileGetContents(key + ".pub")
 
     def get_pubkey(self, keyname=''):
         if keyname == '':
