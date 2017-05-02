@@ -1,11 +1,11 @@
 
 from js9 import j
-from JumpScale9.sal.fs.SystemFS import FileLock
+# from JumpScale9.sal.fs.SystemFS import FileLock
 
 base = j.tools.prefab._getBaseClass()
 
-LOCK_NAME = 'APT-LOCK'
-LOCK_TIMEOUT = 500
+# LOCK_NAME = 'APT-LOCK'
+# LOCK_TIMEOUT = 500
 
 
 class PrefabPackage(base):

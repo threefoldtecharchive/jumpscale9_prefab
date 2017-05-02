@@ -12,7 +12,13 @@ class PrefabRootClassFactory:
     def __init__(self):
         self.__jslocation__ = "j.tools.prefab"
         self.logger = j.logger.get("j.tools.prefab")
-        self.local = j.tools.executorLocal
+        self._local = None
+
+    @property
+    def local(self):
+        if self._local is None:
+            self._local = self.get(j.tools.executorLocal)
+        return self._local
 
     def _getBaseClass(self):
         return PrefabBase
