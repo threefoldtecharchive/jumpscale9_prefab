@@ -2,26 +2,26 @@
 from js9 import j
 
 
-from JumpScale.tools.prefab.PrefabPackage import PrefabPackage
-from JumpScale.tools.prefab.PrefabProcess import PrefabProcess
-from JumpScale.tools.prefab.PrefabNet import PrefabNet
-from JumpScale.tools.prefab.PrefabSSH import PrefabSSH
-from JumpScale.tools.prefab.PrefabNS import PrefabNS
-from JumpScale.tools.prefab.PrefabUser import PrefabUser
-# from JumpScale.tools.prefab.PrefabBuilder import PrefabBuilder
-from JumpScale.tools.prefab.PrefabGroup import PrefabGroup
-from JumpScale.tools.prefab.ProcessManagerFactory import ProcessManagerFactory
-from JumpScale.tools.prefab.PrefabTmux import PrefabTmux
-from JumpScale.tools.prefab.PrefabCore import PrefabCore
-from JumpScale.tools.prefab.PrefabPNode import PrefabPNode
+from JumpScale9Prefab.PrefabPackage import PrefabPackage
+from JumpScale9Prefab.PrefabProcess import PrefabProcess
+from JumpScale9Prefab.PrefabNet import PrefabNet
+from JumpScale9Prefab.PrefabSSH import PrefabSSH
+from JumpScale9Prefab.PrefabNS import PrefabNS
+from JumpScale9Prefab.PrefabUser import PrefabUser
+# from JumpScale9Prefab.PrefabBuilder import PrefabBuilder
+from JumpScale9Prefab.PrefabGroup import PrefabGroup
+from JumpScale9Prefab.ProcessManagerFactory import ProcessManagerFactory
+from JumpScale9Prefab.PrefabTmux import PrefabTmux
+from JumpScale9Prefab.PrefabCore import PrefabCore
+from JumpScale9Prefab.PrefabPNode import PrefabPNode
 
-from JumpScale.tools.prefab.apps.apps import apps
-from JumpScale.tools.prefab.development.development import development
-from JumpScale.tools.prefab.examples.examples import examples
-from JumpScale.tools.prefab.solutions.solutions import solutions
-from JumpScale.tools.prefab.systemservices.systemservices import systemservices
-from JumpScale.tools.prefab.testscripts.testscripts import testscripts
-from JumpScale.tools.prefab.tools.tools import tools
+from JumpScale9Prefab.apps.apps import apps
+from JumpScale9Prefab.development.development import development
+from JumpScale9Prefab.examples.examples import examples
+from JumpScale9Prefab.solutions.solutions import solutions
+from JumpScale9Prefab.systemservices.systemservices import systemservices
+from JumpScale9Prefab.testscripts.testscripts import testscripts
+from JumpScale9Prefab.tools.tools import tools
 
 
 class PrefabRootClass:

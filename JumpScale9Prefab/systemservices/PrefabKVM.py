@@ -1,8 +1,8 @@
 
 from js9 import j
-from JumpScale.tools.prefab.systemservices.kvm.Machines import Machines
-from JumpScale.tools.prefab.systemservices.kvm.Disks import Disks
-from JumpScale.tools.prefab.systemservices.kvm.StoragePools import StoragePools
+from JumpScale9Prefab.systemservices.kvm.Machines import Machines
+from JumpScale9Prefab.systemservices.kvm.Disks import Disks
+from JumpScale9Prefab.systemservices.kvm.StoragePools import StoragePools
 
 base = j.tools.prefab._getBaseClass()
 

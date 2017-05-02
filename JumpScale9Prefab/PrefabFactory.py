@@ -41,7 +41,7 @@ class PrefabRootClassFactory:
     def local(self):
         with self._lock:
             if self._local is None:
-                from JumpScale.tools.prefab.PrefabRootClass import PrefabRootClass
+                from JumpScale9Prefab.PrefabRootClass import PrefabRootClass
                 self._local = PrefabRootClass(j.tools.executorLocal)
             return self._local
 
@@ -93,7 +93,7 @@ class PrefabRootClassFactory:
 
         or if used without executor then will be the local one
         """
-        from JumpScale.tools.prefab.PrefabRootClass import PrefabRootClass
+        from JumpScale9Prefab.PrefabRootClass import PrefabRootClass
         executor = j.tools.executor.get(executor)
 
         with self._lock:

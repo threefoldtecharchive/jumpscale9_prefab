@@ -1,5 +1,5 @@
 
-from JumpScale.tools.prefab.PrefabProcessManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
+from JumpScale9Prefab.PrefabProcessManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
 from js9 import j
 
 

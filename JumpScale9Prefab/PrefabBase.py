@@ -196,7 +196,7 @@ class PrefabBaseLoader:
         classes = [j.sal.fs.getBaseName(item)[7:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
         for className in classes:
             # import the class
-            exec("from JumpScale.tools.prefab.%s.Prefab%s import *" % (myClassName, className))
+            exec("from JumpScale9Prefab.%s.Prefab%s import *" % (myClassName, className))
             # attach the class to this class
             do = "self.%s=Prefab%s(self.executor,self.prefab)" % (className.lower(), className)
             # self.logger.info(do)
