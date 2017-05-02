@@ -28,8 +28,8 @@ class PrefabDocker(app):
                 C = """
                 wget -qO- https://get.docker.com/ | sh
                 """
-                with FileLock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-                    self.prefab.core.run(C)
+                # with FileLock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
+                self.prefab.core.run(C)
              # if not self.prefab.core.command_check('docker-compose'):
             #     C = """
             #     curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
