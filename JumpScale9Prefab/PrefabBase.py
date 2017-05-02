@@ -193,7 +193,7 @@ class PrefabBaseLoader:
         self.prefab = prefab
         myClassName = str(self.__class__).split(".")[-1].split("'")[0]
         localdir = j.sal.fs.getDirName(inspect.getsourcefile(self.__class__))
-        classes = [j.sal.fs.getBaseName(item)[7:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
+        classes = [j.sal.fs.getBaseName(item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
         for className in classes:
             # import the class
             exec("from JumpScale9Prefab.%s.Prefab%s import *" % (myClassName, className))
