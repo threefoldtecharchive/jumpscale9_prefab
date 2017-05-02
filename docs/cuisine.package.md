@@ -1,6 +1,6 @@
-# cuisine.package
+# prefab.package
 
-The `cuisine.package` module is for dealing with package managers.
+The `prefab.package` module is for dealing with package managers.
 
 Examples of methods inside `package`:
 

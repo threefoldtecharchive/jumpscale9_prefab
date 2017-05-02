@@ -1,6 +1,6 @@
 # Cuisine
 
-The JumpScale implementation of Cuisine is a fork of the original Cuisine as available on GitHub: <https://github.com/sebastien/cuisine>
+The JumpScale implementation of Cuisine is a fork of the original Cuisine as available on GitHub: <https://github.com/sebastien/prefab>
 
 Cuisine provides [Chef](https://en.wikipedia.org/wiki/Chef_(software) software-like functionality for [Fabric](http://www.fabfile.org/).
 
@@ -12,28 +12,28 @@ Cuisine takes an `executor` object as an argument, through which you connect loc
 
 ```python
 executor = j.tools.executorLocal
-cuisine = j.tools.cuisine.get(executor)
-# or simply j.tools.cuisine.local
+prefab = j.tools.prefab.get(executor)
+# or simply j.tools.prefab.local
 ```
 
 ## Remote
 
 ```python
 executor = j.tools.executor.getSSHBased(addr, port, login, passwd)
-cuisine = j.tools.cuisine.get(executor)
+prefab = j.tools.prefab.get(executor)
 ```
 
 ## Cuisine modules
-- [cuisine.apps](cuisine.apps.md)
-- [cuisine.bash](cuisine.bash.md)
-- [cuisine.btrfs](cuisine.btrfs.md)
-- [cuisine.core](cuisine.core.md)
-- [cuisine.development](cuisine.development.md)
-- [cuisine.group](cuisine.group.md)
-- [cuisine.kwm](cuisine.kvm.md)
-- [cuisine.net](cuisine.net.md)
-- [cuisine.package](cuisine.package.md)
-- [cuisine.processmanager](cuisine.processmanager.md)
-- [cuisine.ssh](cuisine.ssh.md)
-- [cuisine.systemservices](cuisine.systemservices.md)
-- [cuisine.tmux](cuisine.tmux.md)
+- [prefab.apps](prefab.apps.md)
+- [prefab.bash](prefab.bash.md)
+- [prefab.btrfs](prefab.btrfs.md)
+- [prefab.core](prefab.core.md)
+- [prefab.development](prefab.development.md)
+- [prefab.group](prefab.group.md)
+- [prefab.kwm](prefab.kvm.md)
+- [prefab.net](prefab.net.md)
+- [prefab.package](prefab.package.md)
+- [prefab.processmanager](prefab.processmanager.md)
+- [prefab.ssh](prefab.ssh.md)
+- [prefab.systemservices](prefab.systemservices.md)
+- [prefab.tmux](prefab.tmux.md)

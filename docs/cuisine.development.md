@@ -1,6 +1,6 @@
-# cuisine.development
+# prefab.development
 
-The `cuisine.development` module is responsible to install and manage utilities essential to development environment.
+The `prefab.development` module is responsible to install and manage utilities essential to development environment.
 
 ## Modules that are supported
 

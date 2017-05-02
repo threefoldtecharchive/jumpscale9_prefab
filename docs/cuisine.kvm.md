@@ -3,16 +3,16 @@
 You can Access it as follows:
 
 ```python
-cuisine.systemservices.kvm
+prefab.systemservices.kvm
 ```
 
-It's a cuisine module that wraps the sal.kvm module for remote kvm handling.
+It's a prefab module that wraps the sal.kvm module for remote kvm handling.
 
 ## Example
 
 ```python
 
-c = j.tools.cuisine.local
+c = j.tools.prefab.local
 
 # install kvm
 c.systemservices.kvm.install()
@@ -41,8 +41,8 @@ kvm1 = c.systemservices.kvm.machineCreate("kvm1")
 kvm2 = c.systemservices.kvm.machineCreate("kvm2")
 
 # enable sudo mode
-kvm1.cuisine.core.sudomode=True
-kvm2.cuisine.core.sudomode=True
+kvm1.prefab.core.sudomode=True
+kvm2.prefab.core.sudomode=True
 
 ```
 

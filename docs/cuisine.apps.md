@@ -1,6 +1,6 @@
-# cuisine.apps
+# prefab.apps
 
-The `cuisine.apps` module is for application management.
+The `prefab.apps` module is for application management.
 
 Examples of methods inside an application:
 

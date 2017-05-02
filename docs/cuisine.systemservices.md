@@ -1,6 +1,6 @@
-# cuisine.systemservices
+# prefab.systemservices
 
-The `cuisine.systemservices` module is for installing, building and managing supported system services.
+The `prefab.systemservices` module is for installing, building and managing supported system services.
 
 Examples:
 

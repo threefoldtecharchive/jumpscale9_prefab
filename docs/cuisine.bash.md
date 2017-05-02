@@ -1,6 +1,6 @@
-# cuisine.bash
+# prefab.bash
 
-The `cuisine.bash` module handles environment variables.
+The `prefab.bash` module handles environment variables.
 
 Examples for methods in `bash`:
 
@@ -10,13 +10,13 @@ Examples for methods in `bash`:
 
 
   ```python
-  cuisine.bash.env
+  prefab.bash.env
   ```
 
 - **run_script**: run a script
 
   ```python
-  cuisine.environGet('HOME')
+  prefab.environGet('HOME')
   ```
 
 ```

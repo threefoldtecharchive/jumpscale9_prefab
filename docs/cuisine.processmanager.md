@@ -1,10 +1,10 @@
-# cuisine.processmanager
+# prefab.processmanager
 
-The `cuisine.processmanager` module is for process management.
+The `prefab.processmanager` module is for process management.
 
 It's used to check for a process manager on the target machine, and if it finds one it will use it; otherwise it will fall back to spawning the process in `tmux`.
 
-You can force using a certain process manager with `cuisine.processmanager.get(name)` with `name` the name of the process manager; thi will fail in case that the process manager is not supported on the target machine.
+You can force using a certain process manager with `prefab.processmanager.get(name)` with `name` the name of the process manager; thi will fail in case that the process manager is not supported on the target machine.
 
 Examples for methods in `processmanager`:
 

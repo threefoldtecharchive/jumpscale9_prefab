@@ -1,24 +1,24 @@
-# cuisine.net
+# prefab.net
 
-The `cuisine.net` module handles network operations.
+The `prefab.net` module handles network operations.
 
 Examples for methods in `net`:
 
 - Getting network info using  **getInfo**:
 
 ```python
-cuisine.net.getInfo()
+prefab.net.getInfo()
 ```
 -  Getting ($fromip,$topip) IP range attached to device, **getNetRange**:
 
 ```python
-cuisine.net.getNetRange(device)
+prefab.net.getNetRange(device)
 ```
 
 - Getting all IP addresses using the property **ips**:
 
   ```python
-  cuisine.net.ips
+  prefab.net.ips
   ```
 
 ```

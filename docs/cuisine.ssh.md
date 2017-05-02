@@ -1,6 +1,6 @@
-# cuisine.ssh
+# prefab.ssh
 
-The `cuisine.ssh` module for remote SSH management.
+The `prefab.ssh` module for remote SSH management.
 
 Examples of methods inside `ssh`:
 

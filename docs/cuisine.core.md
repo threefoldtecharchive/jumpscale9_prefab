@@ -1,6 +1,6 @@
-# cuisine.core
+# prefab.core
 
-The `cuisine.core` module handles basic file system operations and command execution.
+The `prefab.core` module handles basic file system operations and command execution.
 
 Examples for methods in `core`:
 
@@ -21,26 +21,26 @@ Examples for methods in `core`:
 - **run**: run a command
 
   ```python
-  cuisine.run('ls')
-  cuisine.run('false', die=False) //it won't raise an error
+  prefab.run('ls')
+  prefab.run('false', die=False) //it won't raise an error
   ```
 
 - **run_script**: run a script
 
   ```python
-  cuisine.run_script('cd /\npwd')
+  prefab.run_script('cd /\npwd')
   ```
 
 - **sudo**: run a command using sudo
 
   ```python
-  cuisine.sudo('apt-get  install httpie')
+  prefab.sudo('apt-get  install httpie')
   ```
 
 - **args_replace**: replace arguments inside commands and paths such as `$BINDIR`, `$hostname`, `$CODEDIR`, `$TMPDIR`
 
   ```python
-  cuisine.arg_replace('$BINDIR/python -c "print(1)"')
+  prefab.arg_replace('$BINDIR/python -c "print(1)"')
   ```
 
 ```
