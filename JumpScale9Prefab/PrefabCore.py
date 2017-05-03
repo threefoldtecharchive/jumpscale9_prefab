@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 # Many ideas & lines of code have been taken from:
 #
-# Project   : Prefab - Functions to write Fabric recipes
+# Project   : Cuisine
 # -----------------------------------------------------------------------------
 # License   : Revised BSD License
 # -----------------------------------------------------------------------------
@@ -12,10 +12,6 @@
 #             Warren Moore (zypper package)               <warren@wamonite.com>
 #             Lorenzo Bivens (pkgin package)          <lorenzobivens@gmail.com>
 #             kristof de spiegeleer                 kristof@incubaid.com
-# -----------------------------------------------------------------------------
-# Creation  : 26-Apr-2010
-# Last mod  : Nov-2015
-# -----------------------------------------------------------------------------
 #
 # modified by Jumpscale authors & repackaged, also lots of new modules in this directory & different approach
 
@@ -25,18 +21,18 @@ import copy
 import base64
 import hashlib
 import os
-import string
-import tempfile
-import subprocess
-import types
-import threading
+# import string
+# import tempfile
+# import subprocess
+# import types
+# import threading
 import sys
-import functools
-import platform
+# import functools
+# import platform
 
 from js9 import j
 import pygments.lexers
-from pygments.formatters import get_formatter_by_name
+# from pygments.formatters import get_formatter_by_name
 
 NOTHING = base64
 
@@ -219,10 +215,91 @@ class PrefabCore(base):
     #         return self.file_exists("/JS8/opt/jumpscale9/bin/libasn1.so.8")
     #     return self.cache.get("isJS8Sandbox", get)
 
+    def initEnv(self, env):
+
+        curdir = self.executor.CURDIR
+
+        def exists(path):
+            return self.executor.exists(path)
+
+        if "DEBUG" in env and str(env["DEBUG"]).lower() in ["true", "1", "yes"]:
+            env["DEBUG"] = "1"
+        else:
+            env["DEBUG"] = "0"
+
+        if "READONLY" in env and str(env["READONLY"]).lower() in ["true", "1", "yes"]:
+            env["READONLY"] = "1"
+            self.readonly = True
+        else:
+            env["READONLY"] = "0"
+            self.readonly = False
+
+        if "AYSBRANCH" not in env and "JSBRANCH" in env:
+            env["AYSBRANCH"] = env["JSBRANCH"]
+
+        # if we start from a directory where there is a env.sh then we use that as base
+        if not "BASEDIR" in env:
+            if exists("%s/env.sh" % curdir) and exists("%s/js.sh" % (curdir)):
+                env["BASEDIR"] = os.getcwd()
+            else:
+                # ON OSX WE ALSO NEED TO SUPPORT /opt !!!
+                if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
+                    env["BASEDIR"] = "%s/opt" % env['HOME']
+                else:
+                    env["BASEDIR"] = "/opt"
+
+        if not "JSBASE" in env:
+            env["JSBASE"] = "%s/jumpscale8" % env["BASEDIR"]
+
+        if not "VARDIR" in env:
+            # ON OSX WE ALSO NEED TO SUPPORT /opt !!!
+            if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
+                env["VARDIR"] = "%s/optvar" % env['HOME']
+            else:
+                env["VARDIR"] = "/optvar"
+
+        env["HOMEDIR"] = env["HOME"]
+
+        if not "CFGDIR" in env:
+            env["CFGDIR"] = "%s/cfg" % env["VARDIR"]
+
+        if exists("/tmp"):
+            if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
+                env["TMPDIR"] = "%s/tmp" % env['HOME']
+            else:
+                env["TMPDIR"] = "/tmp"
+        if not "TMPDIR" in env:
+            raise RuntimeError("Cannot define a tmp dir, set env variable")
+
+        change = {}
+        change["JSAPPSDIR"] = lambda x: "%s/apps" % x["JSBASE"]
+        change["JSBASEDIR"] = lambda x: x["JSBASE"]
+        change["BINDIR"] = lambda x: "%s/bin" % x["JSBASE"]
+        change["DATADIR"] = lambda x: "%s/data" % x["VARDIR"]
+        change["CODEDIR"] = lambda x: "%s/code" % x["BASEDIR"]
+        change["BUILDDIR"] = lambda x: "%s/build" % x["VARDIR"]
+        change["LOGDIR"] = lambda x: "%s/log" % x["VARDIR"]
+        change["PIDDIR"] = lambda x: "%s/pid" % x["CFGDIR"]
+        change["HRDDIR"] = lambda x: "%s/hrd" % x["CFGDIR"]
+        change["GOROOTDIR"] = lambda x: "%s/go/root/" % x["BASEDIR"]
+        change["GOPATHDIR"] = lambda x: "%s/go/proj/" % x["BASEDIR"]
+        change["NIMDIR"] = lambda x: "%s/nim/" % x["BASEDIR"]
+        change["JSLIBDIR"] = lambda x: "%s/lib/JumpScale/" % x["JSBASE"]
+        change["JSLIBEXTDIR"] = lambda x: "%s/lib/JumpScaleExtra/" % x["JSBASE"]
+        change["JSCFGDIR"] = lambda x: "%s/jumpscale/" % x["CFGDIR"]
+        change["LIBDIR"] = lambda x: "%s/lib/" % x["BASEDIR"]
+        change['TEMPLATEDIR'] = lambda x: "%s/templates" % x["BASEDIR"]
+
+        for key, method in change.items():
+            if key not in env:
+                env[key] = method(env)
+
+        return env
+
     @property
     def dir_paths(self):
         env = self.executor.env
-        env = j.do.initEnv(env)  # put the missing paths in there
+        env = self.initEnv(env=env)  # put the missing paths in there
         res = {}
         for key, val in env.items():
             if "DIR" in key:

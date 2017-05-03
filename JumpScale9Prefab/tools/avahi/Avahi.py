@@ -5,8 +5,8 @@ class Avahi:
 
     def __init__(self):
         self.__jslocation__ = "j.tools.avahi"
-        self._prefab = j.tools.prefab.get()
-        self.executor = self._prefab._executor
+        self.prefab = j.tools.prefab.get()
+        self.executor = self.prefab.executor
 
     def get(self, prefab, executor):
         b = Avahi()
@@ -15,11 +15,11 @@ class Avahi:
         return b
 
     def install(self):
-        if self._prefab.core.isUbuntu:
-            self._prefab.package.install("avahi-daemon")
-            self._prefab.package.install("avahi-utils")
-        if self._prefab.core.isArch:
-            self._prefab.package.install("avahi")
+        if self.prefab.core.isUbuntu:
+            self.prefab.package.install("avahi-daemon")
+            self.prefab.package.install("avahi-utils")
+        if self.prefab.core.isArch:
+            self.prefab.package.install("avahi")
 
         configfile = "/etc/avahi/avahi-daemon.conf"
 
@@ -73,23 +73,23 @@ class Avahi:
         rlimit-stack=4194304
         rlimit-nproc=3
         """
-        domains = "%s.%s" % (self._prefab.grid, self._prefab.domain)
-        C = C.replace("$hostname", self._prefab.core.name)
+        domains = "%s.%s" % (self.prefab.grid, self.prefab.domain)
+        C = C.replace("$hostname", self.prefab.core.name)
         C = C.replace("$domains", domains)
-        self._prefab.core.file_write(configfile, C)
+        self.prefab.core.file_write(configfile, C)
 
-        if self._prefab.core.isUbuntu:
+        if self.prefab.core.isUbuntu:
             pre = ""
         else:
             pre = "/usr"
-        self._prefab.core.file_link(
+        self.prefab.core.file_link(
             source="%s/lib/systemd/system/avahi-daemon.service",
             destination="/etc/systemd/system/multi-user.target.wants/avahi-daemon.service",
             symbolic=True,
             mode=None,
             owner=None,
             group=None)
-        self._prefab.core.file_link(
+        self.prefab.core.file_link(
             source="%s/lib/systemd/system/docker.socket",
             destination="/etc/systemd/system/sockets.target.wants/docker.socket",
             symbolic=True,
@@ -97,12 +97,12 @@ class Avahi:
             owner=None,
             group=None)
 
-        self._prefab.systemd.start("avahi-daemon")
+        self.prefab.systemd.start("avahi-daemon")
 
     def _servicePath(self, servicename):
         path = "/etc/avahi/services"
-        if not self._prefab.core.dir_exists(path):
-            self._prefab.core.dir_ensure(path)
+        if not self.prefab.core.dir_exists(path):
+            self.prefab.core.dir_ensure(path)
         service = '%s.service' % servicename
         return j.sal.fs.joinPaths(path, service)
 
@@ -125,23 +125,23 @@ class Avahi:
         content = content.replace("${port}", str(port))
         content = content.replace("${type}", type)
         path = self._servicePath(servicename)
-        self._prefab.core.file_write(path, content)
+        self.prefab.core.file_write(path, content)
 
         self.reload()
 
     def reload(self):
         cmd = "avahi-daemon --reload"
-        self._prefab.core.run(cmd)
+        self.prefab.core.run(cmd)
 
     def removeService(self, servicename):
         path = self._servicePath(servicename)
-        # if self._prefab.core.dir_exists(path=path):
-        self._prefab.core.dir_remove(path)
+        # if self.prefab.core.dir_exists(path=path):
+        self.prefab.core.dir_remove(path)
         self.reload()
 
     def getServices(self):
         cmd = "avahi-browse -a -r -t"
-        result, output, err = self._prefab.core.run(cmd, die=False, force=True)
+        result, output, err = self.prefab.core.run(cmd, die=False, force=True)
         if result > 0:
             raise j.exceptions.RuntimeError(
                 "cannot use avahi command line to find services, please check avahi is installed on system (ubunutu apt-get install avahi-utils)\nCmd Used:%s" %
@@ -187,7 +187,7 @@ class Avahi:
         if not j.sal.nettools.validateIpAddress(ipAddress):
             raise ValueError('Invalid Ip Address')
         cmd = 'avahi-resolve-address %s'
-        rc, out, err = self._prefab.core.run(cmd % ipAddress, die=False, showout=False)
+        rc, out, err = self.prefab.core.run(cmd % ipAddress, die=False, showout=False)
         if rc or not out:  # if the ouput string is '' then something is wrong
             raise j.exceptions.RuntimeError('Cannot resolve the hostname of ipaddress: %s' % ipAddress)
         out = out.strip()

@@ -7,7 +7,7 @@ class ProcessManagerFactory:
 
     def __init__(self, prefab):
         self.pms = {}
-        self._prefab = prefab
+        self.prefab = prefab
         self._logger = None
 
     @property
@@ -17,12 +17,12 @@ class ProcessManagerFactory:
         return self._logger
 
     def systemdOK(self):
-        res = not self._prefab.core.isDocker and self._prefab.core.command_check("systemctl")
+        res = not self.prefab.core.isDocker and self.prefab.core.command_check("systemctl")
         self.logger.info("systemd:%s" % res)
         return res
 
     def svOK(self):
-        res = self._prefab.core.command_check("sv")
+        res = self.prefab.core.command_check("sv")
         self.logger.info("systemd:%s" % res)
         return res
 
@@ -54,11 +54,11 @@ class ProcessManagerFactory:
 
         if pm not in self.pms:
             if pm == "systemd":
-                inst = PrefabSystemd(self._prefab.core.executor, self._prefab)
+                inst = PrefabSystemd(self.prefab.core.executor, self.prefab)
             elif pm == "sv":
-                inst = PrefabRunit(self._prefab.core.executor, self._prefab)
+                inst = PrefabRunit(self.prefab.core.executor, self.prefab)
             elif pm == "tmux":
-                inst = PrefabTmuxec(self._prefab.core.executor, self._prefab)
+                inst = PrefabTmuxec(self.prefab.core.executor, self.prefab)
             self.pms[pm] = inst
 
         return self.pms[pm]

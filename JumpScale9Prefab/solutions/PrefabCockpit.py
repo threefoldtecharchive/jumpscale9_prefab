@@ -22,7 +22,7 @@ class PrefabCockpit(base):
         """
         self.install_deps()
         # install mongodb, required for portal
-        self._prefab.apps.mongodb.install(start=start, reset=reset)
+        self.prefab.apps.mongodb.install(start=start, reset=reset)
 
         # install portal
         self.prefab.apps.portal.install(start=False, branch=branch, reset=reset)

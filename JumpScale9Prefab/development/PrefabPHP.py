@@ -26,7 +26,7 @@ class PrefabPHP(app):
     def build(self, **config):
 
         pkgs = "libxml2-dev libpng-dev libcurl4-openssl-dev libzip-dev zlibc zlib1g zlib1g-dev libmysqld-dev libmysqlclient-dev re2c bison bzip2 build-essential libaprutil1-dev libapr1-dev openssl pkg-config libssl-dev libsslcommon2-dev file"
-        list(map(self._prefab.package.ensure, pkgs.split(sep=" ")))
+        list(map(self.prefab.package.ensure, pkgs.split(sep=" ")))
 
         compileconfig['with_apxs2'] = self.prefab.core.replace("$JSAPPSDIR/apache2/bin/apxs")
         buildconfig = deepcopy(compileconfig)
@@ -34,7 +34,7 @@ class PrefabPHP(app):
 
         # check for apxs2 binary if it's valid.
         apxs = buildconfig['with_apxs2']
-        if not self._prefab.core.file_exists(apxs):
+        if not self.prefab.core.file_exists(apxs):
             buildconfig.pop('with_apxs2')
 
         args_string = ""

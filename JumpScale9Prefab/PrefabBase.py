@@ -10,8 +10,6 @@ class PrefabBase:
         self._cache = None
         self.executor = executor
         self.prefab = prefab
-        self._prefab = prefab
-        self._executor = executor
         self._logger = None
         self.CURDIR = executor.CURDIR
         self.env = executor.env
@@ -179,7 +177,7 @@ class PrefabApp(PrefabBase):
         Checks if a package already started
         You can ovveride it to use another way for checking
         """
-        return not self._prefab.core.run('pgrep %s' % self.NAME, die=False)[0]
+        return not self.prefab.core.run('pgrep %s' % self.NAME, die=False)[0]
 
     def install(self):
         if not self.isInstalled():

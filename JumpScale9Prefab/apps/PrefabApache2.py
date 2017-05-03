@@ -11,27 +11,27 @@ class PrefabApache2(app):
     def build(self, reset=True):
 
         pkgs = "wget curl gcc libssl-dev zlib1g-dev libaprutil1-dev libapr1-dev libpcre3-dev libxml2-dev build-essential unzip".split()
-        self._prefab.package.multiInstall(pkgs)
+        self.prefab.package.multiInstall(pkgs)
 
         httpdir = "/optvar/build/httpd"
 
-        if reset and self._prefab.core.dir_exists(httpdir):
-            self._prefab.core.dir_remove("$JSAPPSDIR/apache2")
+        if reset and self.prefab.core.dir_exists(httpdir):
+            self.prefab.core.dir_remove("$JSAPPSDIR/apache2")
 
-        self._prefab.core.dir_ensure("/optvar/build")
+        self.prefab.core.dir_ensure("/optvar/build")
 
         # DOWNLOAD LINK
         DOWNLOADLINK = 'https://www.apache.org/dist/httpd/httpd-2.4.25.tar.bz2'
         dest = j.sal.fs.joinPaths("/optvar", 'httpd-2.4.25.tar.bz2')
 
-        if not self._prefab.core.file_exists(dest):
-            self._prefab.core.file_download(DOWNLOADLINK, dest)
+        if not self.prefab.core.file_exists(dest):
+            self.prefab.core.file_download(DOWNLOADLINK, dest)
 
         # EXTRACT SROURCE CODE
-        self._prefab.core.run(
+        self.prefab.core.run(
             "cd /optvar/build && tar xjf {dest} && cp -r /optvar/build/httpd-2.4.25 /optvar/build/httpd".format(**locals()))
-        self._prefab.core.dir_ensure("$JSAPPSDIR/apache2/bin")
-        self._prefab.core.dir_ensure("$JSAPPSDIR/apache2/lib")
+        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/bin")
+        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/lib")
 
         buildscript = """
 
@@ -50,20 +50,20 @@ class PrefabApache2(app):
               --enable-xml2enc && make && make test\
         """.format(httpdir=httpdir)
 
-        self._prefab.core.run(buildscript)
+        self.prefab.core.run(buildscript)
 
         return True
 
     def install(self):
         httpdir = j.sal.fs.joinPaths("/optvar/build", 'httpd')
         installscript = """cd {httpdir} &&  make install""".format(httpdir=httpdir)
-        self._prefab.core.run(installscript)
+        self.prefab.core.run(installscript)
 
         # COPY APACHE BINARIES to /opt/jumpscale9/bin
-        self._prefab.core.file_copy("$JSAPPSDIR/apache2/bin/*", '$BINDIR/')
+        self.prefab.core.file_copy("$JSAPPSDIR/apache2/bin/*", '$BINDIR/')
 
     def configure(self):
-        conffile = self._prefab.core.file_read("$JSAPPSDIR/apache2/conf/httpd.conf")
+        conffile = self.prefab.core.file_read("$JSAPPSDIR/apache2/conf/httpd.conf")
         # SANE CONFIGURATIONS
         lines = """
         #LoadModule negotiation_module
@@ -95,24 +95,24 @@ class PrefabApache2(app):
             if line:
                 mod = "#" + line
                 conffile = conffile.replace(line, mod)
-        sitesdirconf = self._prefab.core.replace("\nInclude $JSCFGDIR/apache2/sites-enabled/*")
+        sitesdirconf = self.prefab.core.replace("\nInclude $JSCFGDIR/apache2/sites-enabled/*")
         conffile += sitesdirconf
         conffile += "\nAddType application/x-httpd-php .php"
 
         # MAKE VHOSTS DIRECTORY
-        self._prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-available")
-        self._prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-enabled")
+        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-available")
+        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-enabled")
         #self.logger.info("Config to be written = ", conffile)
-        self._prefab.core.file_write("$JSAPPSDIR/apache2/conf/httpd.conf", conffile)
+        self.prefab.core.file_write("$JSAPPSDIR/apache2/conf/httpd.conf", conffile)
 
     def start(self):
         """start Apache."""
-        self._prefab.core.run("apachectl start", profile=True)
+        self.prefab.core.run("apachectl start", profile=True)
 
     def stop(self):
         """stop Apache."""
-        self._prefab.core.run("apachectl stop", profile=True)
+        self.prefab.core.run("apachectl stop", profile=True)
 
     def restart(self):
         """restart Apache."""
-        self._prefab.core.run("apachectl restart", profile=True)
+        self.prefab.core.run("apachectl restart", profile=True)

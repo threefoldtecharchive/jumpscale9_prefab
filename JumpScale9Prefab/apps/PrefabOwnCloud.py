@@ -269,9 +269,9 @@ class PrefabOwnCloud(app):
         if nginx:
             owncloudsiterules = self._get_default_conf_nginx_site()
             owncloudsiterules = owncloudsiterules % {"sitename": sitename}
-            self._prefab.core.file_write(
+            self.prefab.core.file_write(
                 "$JSCFGDIR/nginx/etc/sites-enabled/{sitename}".format(sitename=sitename), content=owncloudsiterules)
-            basicnginxconf = self._prefab.apps.nginx.get_basic_nginx_conf()
+            basicnginxconf = self.prefab.apps.nginx.get_basic_nginx_conf()
             basicnginxconf = basicnginxconf.replace(
                 "include $JSAPPSDIR/nginx/etc/sites-enabled/*;", "include $JSCFGDIR/nginx/etc/sites-enabled/*;")
             basicnginxconf = self.prefab.core.replace(basicnginxconf)

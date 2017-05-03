@@ -66,14 +66,14 @@ class ResticRepository:
     def __init__(self, path, password, prefab):
         self.path = path
         self.__password = password
-        self._prefab = prefab
+        self.prefab = prefab
 
         if not self._exists():
             self.initRepository()
 
     def _exists(self):
         test_file = j.sal.fs.joinPaths(self.path, 'config')
-        return self._prefab.core.file_exists(test_file)
+        return self.prefab.core.file_exists(test_file)
 
     def _run(self, cmd, env=None, die=True, showout=True):
         env = {
@@ -82,7 +82,7 @@ class ResticRepository:
         }
         if env:
             env.update(env)
-        return self._prefab.core.run(cmd=cmd, env=env, die=die, showout=showout)
+        return self.prefab.core.run(cmd=cmd, env=env, die=die, showout=showout)
 
     def initRepository(self):
         """

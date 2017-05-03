@@ -36,7 +36,7 @@ class PrefabDocker(app):
             #     chmod +x /usr/local/bin/docker-compose
             #     """
             #     self.prefab.core.run(C)
-        if self._prefab.core.isArch:
+        if self.prefab.core.isArch:
             self.prefab.package.install("docker")
             # self.prefab.package.install("docker-compose")
         self._init_docker()
@@ -130,7 +130,7 @@ class Prefabdockerobj:
         self.name = name
         self.login = "root"
         self.prefabDockerHost = prefabDockerHost
-        self._prefab = None
+        self.prefab = None
         self.CURDIR = "/root"  # required by PrefabFactory
         self.env = {}  # required by prefabFactory
 
@@ -150,9 +150,9 @@ class Prefabdockerobj:
 
     @property
     def prefab(self):
-        if not self._prefab:
-            self._prefab = j.tools.prefab.get(self)
-        return self._prefab
+        if not self.prefab:
+            self.prefab = j.tools.prefab.get(self)
+        return self.prefab
 
 
 # def archBuild(self):

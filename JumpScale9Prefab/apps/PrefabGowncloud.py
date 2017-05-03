@@ -13,7 +13,7 @@ class PrefabGowncloud(app):
         build gowncloud and build
         """
         self.prefab.development.golang.get("github.com/gowncloud/gowncloud")
-        self._prefab.core.file_copy("$goDir/bin/gowncloud", "$binDir")
+        self.prefab.core.file_copy("$goDir/bin/gowncloud", "$binDir")
 
     def start(
             self,

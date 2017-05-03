@@ -47,7 +47,7 @@ class PrefabPackage(base):
         update metadata of system
         """
         self.logger.info("packages mdupdate")
-        if self._prefab.core.isUbuntu:
+        if self.prefab.core.isUbuntu:
             with FileLock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
                 self.prefab.core.run("apt-get update")
         elif self.prefab.core.isAlpine:
@@ -248,7 +248,7 @@ class PrefabPackage(base):
         @param agressive if True will delete full cache
 
         """
-        if self._prefab.core.isUbuntu:
+        if self.prefab.core.isUbuntu:
             with FileLock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
                 if package is not None:
                     return self._apt_get("-y --purge remove %s" % package)
