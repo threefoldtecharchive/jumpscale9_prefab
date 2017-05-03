@@ -50,7 +50,7 @@ class ProcessManagerFactory:
             pm = self.get_prefered()
         else:
             if not self.is_available(pm):
-                return j.errorconditionhandler.raiseCritical('%s processmanager is not available on your system' % (pm))
+                return j.errorhandler.raiseCritical('%s processmanager is not available on your system' % (pm))
 
         if pm not in self.pms:
             if pm == "systemd":
