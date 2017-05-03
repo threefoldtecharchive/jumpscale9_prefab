@@ -108,7 +108,7 @@ class PrefabGolang(app):
 
     @property
     def GOPATH(self):
-        return j.dirs.GOPATHDIR
+        return self.prefab.core.dir_paths['GOPATHDIR']
 
     def clean_src_path(self):
         srcpath = self.prefab.core.joinpaths(self.GOPATH, 'src')
