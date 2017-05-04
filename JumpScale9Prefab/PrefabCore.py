@@ -439,7 +439,7 @@ class PrefabCore(base):
             expand=False,
             minsizekb=40,
             removeTopDir=False,
-            processtimeout=300):
+            processtimeout=900):
         """
         download from url
         @return path of downloaded file
