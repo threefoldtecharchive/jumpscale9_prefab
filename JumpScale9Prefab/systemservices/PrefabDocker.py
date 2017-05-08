@@ -1,8 +1,7 @@
 
 from js9 import j
-from JumpScale9.sal.fs.SystemFS import FileLock
-from JumpScale9Prefab.PrefabPackage import LOCK_NAME, LOCK_TIMEOUT
 import random
+import time
 
 app = j.tools.prefab._getBaseAppClass()
 
@@ -28,8 +27,12 @@ class PrefabDocker(app):
                 C = """
                 wget -qO- https://get.docker.com/ | sh
                 """
-                # with FileLock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-                self.prefab.core.run(C)
+                timeout = time.time() + 500
+                while time.time() < timeout:
+                    if self.prefab.process.find('fuser /var/lib/dpkg/lock'):
+                        time.sleep(2)
+                    else:
+                        self.prefab.core.run(C, die=die)
              # if not self.prefab.core.command_check('docker-compose'):
             #     C = """
             #     curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose

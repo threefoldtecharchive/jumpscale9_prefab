@@ -72,7 +72,7 @@ class PrefabARDB(app):
         if self.doneGet("buildardb") and not reset:
             return
 
-        if self.prefab.platformtype.isOSX():
+        if self.prefab.platformtype.isMac:
             storageEngine = "rocksdb"
             # self.prefab.package.install("boost")
 
@@ -89,10 +89,11 @@ class PrefabARDB(app):
         packages += ["unzip"]
 
         # Install dependancies
-        self.prefab.package.multiInstall(packages)
+        self.cuisine.package.multiInstall(packages)
+
 
         url = "https://github.com/yinqiwen/ardb.git"
-        cpath = self.prefab.development.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
+        cpath = self.cuisine.development.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
         self.logger.info(cpath)
 
         assert cpath.rstrip("/") == self.CODEDIRARDB.rstrip("/")
@@ -108,7 +109,7 @@ class PrefabARDB(app):
             cp ardb.conf $BUILDDIRARDB/
             """
         C = C.replace("$storageEngine", storageEngine)
-        self.prefab.core.run(self.replace(C))
+        self.cuisine.core.run(self.replace(C))
 
         self.doneSet("buildardb")
 
