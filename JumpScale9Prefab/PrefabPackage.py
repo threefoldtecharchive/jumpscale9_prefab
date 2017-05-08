@@ -18,7 +18,7 @@ class PrefabPackage(base):
                 time.sleep(2)
             else:
                 return self.prefab.core.sudo(cmd, die=die)
-        return "Timeout"
+        raise TimeoutError("resource dpkg is busy")
 
 
     def _apt_get(self, cmd):

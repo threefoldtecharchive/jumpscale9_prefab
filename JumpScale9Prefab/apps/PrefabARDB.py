@@ -89,11 +89,11 @@ class PrefabARDB(app):
         packages += ["unzip"]
 
         # Install dependancies
-        self.cuisine.package.multiInstall(packages)
+        self.prefab.package.multiInstall(packages)
 
 
         url = "https://github.com/yinqiwen/ardb.git"
-        cpath = self.cuisine.development.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
+        cpath = self.prefab.development.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
         self.logger.info(cpath)
 
         assert cpath.rstrip("/") == self.CODEDIRARDB.rstrip("/")
@@ -109,7 +109,7 @@ class PrefabARDB(app):
             cp ardb.conf $BUILDDIRARDB/
             """
         C = C.replace("$storageEngine", storageEngine)
-        self.cuisine.core.run(self.replace(C))
+        self.prefab.core.run(self.replace(C))
 
         self.doneSet("buildardb")
 
