@@ -28,11 +28,15 @@ class PrefabDocker(app):
                 wget -qO- https://get.docker.com/ | sh
                 """
                 timeout = time.time() + 500
-                while time.time() < timeout:
-                    if self.prefab.process.find('fuser /var/lib/dpkg/lock'):
-                        time.sleep(2)
+                while True:
+                    if time.time() < timeout:
+                        if self.prefab.process.find('fuser /var/lib/dpkg/lock'):
+                            time.sleep(2)
+                        else:
+                            self.prefab.core.run(C, die=die)
+                            break
                     else:
-                        self.prefab.core.run(C, die=die)
+                        raise TimeoutError('resource dpkg is busy')
              # if not self.prefab.core.command_check('docker-compose'):
             #     C = """
             #     curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
