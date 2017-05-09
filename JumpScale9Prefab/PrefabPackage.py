@@ -14,7 +14,8 @@ class PrefabPackage(base):
     def _apt_exec(self, cmd, die=True):
         timeout = time.time() + 500
         while time.time() < timeout:
-            if self.prefab.process.find('fuser /var/lib/dpkg/lock'):
+            _, out, _ = self.prefab.core.sudo('fuser /var/lib/dpkg/lock', showout=False, die=False)
+            if out.strip():
                 time.sleep(2)
             else:
                 return self.prefab.core.sudo(cmd, die=die)
