@@ -1,10 +1,8 @@
 
 from js9 import j
+import time
 
 base = j.tools.prefab._getBaseClass()
-
-LOCK_NAME = 'APT-LOCK'
-LOCK_TIMEOUT = 500
 
 
 class PrefabPackage(base):
@@ -13,18 +11,26 @@ class PrefabPackage(base):
         self.ensure('python-software-properties')
         self.prefab.core.sudo("add-apt-repository --yes " + repository)
 
+    def _apt_exec(self, cmd, die=True):
+        timeout = time.time() + 500
+        while time.time() < timeout:
+            if self.prefab.process.find('fuser /var/lib/dpkg/lock'):
+                time.sleep(2)
+            else:
+                return self.prefab.core.sudo(cmd, die=die)
+        raise TimeoutError("resource dpkg is busy")
+
+
     def _apt_get(self, cmd):
         CMD_APT_GET = 'DEBIAN_FRONTEND=noninteractive apt-get -q --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" '
         cmd = CMD_APT_GET + cmd
-        with j.tools.lock.lock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-            result = self.prefab.core.sudo(cmd)
+        result = self._apt_exec(cmd)
         # If the installation process was interrupted, we might get the following message
         # E: dpkg was interrupted, you must manually self.prefab.core.run 'sudo
         # dpkg --configure -a' to correct the problem.
         if "sudo dpkg --configure -a" in result:
-            with j.tools.lock.lock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-                self.prefab.core.sudo("DEBIAN_FRONTEND=noninteractive dpkg --configure -a")
-                result = self.prefab.core.sudo(cmd)
+            self._apt_exec("DEBIAN_FRONTEND=noninteractive dpkg --configure -a")
+            result = self._apt_exec(cmd)
         return result
 
     def update(self, package=None):
@@ -47,8 +53,7 @@ class PrefabPackage(base):
         """
         self.logger.info("packages mdupdate")
         if self.prefab.core.isUbuntu:
-            with j.tools.lock.lock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-                self.prefab.core.run("apt-get update")
+            self._apt_exec("apt-get update")
         elif self.prefab.core.isAlpine:
             self.core.run("apk update")
         elif self.prefab.core.isMac:
@@ -146,22 +151,21 @@ class PrefabPackage(base):
             raise j.exceptions.RuntimeError("could not install:%s, platform not supported" % package)
 
         mdupdate = False
-        with j.tools.lock.lock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-            while True:
-                rc, out, err = self.prefab.core.run(cmd, die=False)
+        while True:
+            rc, out, err = self._apt_exec(cmd, die=False)
 
-                if rc > 0:
-                    if mdupdate is True:
-                        raise j.exceptions.RuntimeError("Could not install:'%s' \n%s" % (package, out))
+            if rc > 0:
+                if mdupdate is True:
+                    raise j.exceptions.RuntimeError("Could not install:'%s' \n%s" % (package, out))
 
-                    if out.find("not found") != -1 or out.find("failed to retrieve some files") != -1:
-                        self.mdupdate()
-                        mdupdate = True
-                        continue
-                    raise j.exceptions.RuntimeError("Could not install:%s %s" % (package, err))
-                if rc == 0:
-                    self.doneSet("install_%s" % package)
-                    return out
+                if out.find("not found") != -1 or out.find("failed to retrieve some files") != -1:
+                    self.mdupdate()
+                    mdupdate = True
+                    continue
+                raise j.exceptions.RuntimeError("Could not install:%s %s" % (package, err))
+            if rc == 0:
+                self.doneSet("install_%s" % package)
+                return out
 
     def multiInstall(self, packagelist, allow_unauthenticated=False):
         """
@@ -216,9 +220,8 @@ class PrefabPackage(base):
                     continue
                 # The most reliable way to detect success is to use the command status
                 # and suffix it with OK. This won't break with other locales.
-                with j.tools.lock.lock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-                    _, status, _ = self.prefab.core.run("dpkg-query -W -f='${Status} ' %s && echo **OK**;true" % p)
-                if not status.endswith("OK") or "not-installed" in status:
+                status = self._apt_exec("dpkg-query -W -f='${Status} ' %s && echo **OK**;true" % p)
+                if "not-installed" in status:
                     self.install(p)
                     res[p] = False
                 else:
@@ -248,11 +251,11 @@ class PrefabPackage(base):
 
         """
         if self.prefab.core.isUbuntu:
-            with j.tools.lock.lock(LOCK_NAME, locktimeout=LOCK_TIMEOUT):
-                if package is not None:
-                    return self._apt_get("-y --purge remove %s" % package)
-                else:
-                    self.prefab.core.run("apt-get autoremove -y")
+
+            if package is not None:
+                return self._apt_get("-y --purge remove %s" % package)
+            else:
+                self._apt_exec("apt-get autoremove -y")
 
             self._apt_get("autoclean")
             C = """

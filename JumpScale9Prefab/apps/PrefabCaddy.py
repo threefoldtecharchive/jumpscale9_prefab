@@ -7,7 +7,7 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabCaddy(app):
 
     NAME = "caddy"
-    defaultfeatures = ['filemanager', 'cors']
+    defaultplugins = ['http.filemanager', 'http.cors']
 
     def _init(self):
         self.BUILDDIR_ = self.replace("$BUILDDIR/caddy")
@@ -25,21 +25,21 @@ class PrefabCaddy(app):
             reset=False,
             wwwrootdir=None,
             install=True,
-            features=defaultfeatures):
+            plugins=defaultplugins):
         """
         Get/Build the binaries of caddy itself.
-        :param features: is used to specify the required features in the installation. Currently the default installation
-        will add the following features: filemanager, cors
+        :param plugins: is used to specify the required plugins in the installation. Currently the default installation
+        will add the following plugins: filemanager, cors
         """
         if self.doneGet('build') and reset is False:
             return
 
-        features = ",".join(features)
+        plugins = ",".join(plugins)
         if self.core.isMac:
-            caddy_url = 'https://caddyserver.com/download/build?os=darwin&arch=amd64&features=%s' % features
+            caddy_url = 'https://caddyserver.com/download/darwin/amd64?plugins=%s' % plugins
             dest = '$TMPDIR/caddy_darwin_amd64_custom.zip'
         else:
-            caddy_url = 'https://caddyserver.com/download/build?os=linux&arch=amd64&features=%s' % features
+            caddy_url = 'https://caddyserver.com/download/linux/amd64?plugins=%s' % plugins
             dest = '$TMPDIR/caddy_linux_amd64_custom.tar.gz'
         self.prefab.core.file_download(caddy_url, dest)
         self.prefab.core.run('cd $TMPDIR && tar xvf %s' % dest)

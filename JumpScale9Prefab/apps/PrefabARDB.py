@@ -72,7 +72,7 @@ class PrefabARDB(app):
         if self.doneGet("buildardb") and not reset:
             return
 
-        if self.prefab.platformtype.isOSX():
+        if self.prefab.platformtype.isMac:
             storageEngine = "rocksdb"
             # self.prefab.package.install("boost")
 
@@ -90,6 +90,7 @@ class PrefabARDB(app):
 
         # Install dependancies
         self.prefab.package.multiInstall(packages)
+
 
         url = "https://github.com/yinqiwen/ardb.git"
         cpath = self.prefab.development.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
