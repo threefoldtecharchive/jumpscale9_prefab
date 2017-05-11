@@ -208,13 +208,6 @@ class PrefabCore(base):
         path = "".join([("\\" + _) if _ in SHELL_ESCAPE else _ for _ in path])
         return path
 
-    # @property
-    # def isJS8Sandbox(self):
-    #     def get():
-    #         # TODO: need to implement when sandbox, what is the right check?
-    #         return self.file_exists("/JS8/opt/jumpscale9/bin/libasn1.so.8")
-    #     return self.cache.get("isJS8Sandbox", get)
-
     def initEnv(self, env):
 
         curdir = self.executor.CURDIR
@@ -233,9 +226,6 @@ class PrefabCore(base):
         else:
             env["READONLY"] = "0"
             self.readonly = False
-
-        if "AYSBRANCH" not in env and "JSBRANCH" in env:
-            env["AYSBRANCH"] = env["JSBRANCH"]
 
         # if we start from a directory where there is a env.sh then we use that as base
         if not "BASEDIR" in env:
@@ -274,7 +264,7 @@ class PrefabCore(base):
         change = {}
         change["JSAPPSDIR"] = lambda x: "%s/apps" % x["JSBASE"]
         change["JSBASEDIR"] = lambda x: x["JSBASE"]
-        change["BINDIR"] = lambda x: "%s/bin" % x["JSBASE"]
+        change["BINDIR"] = lambda x: "%s/bin" % x["BASEDIR"]
         change["DATADIR"] = lambda x: "%s/data" % x["VARDIR"]
         change["CODEDIR"] = lambda x: "%s/code" % x["BASEDIR"]
         change["BUILDDIR"] = lambda x: "%s/build" % x["VARDIR"]
@@ -305,6 +295,18 @@ class PrefabCore(base):
             if "DIR" in key:
                 res[key] = val
         return res
+
+    def dir_paths_create(self):
+        """
+        make sure all dir paths do exist
+        """
+        if self.doneGet("dir_paths_create") == False:
+            C = ""
+            for key, path in self.dir_paths.items():
+                C += "mkdir -p %s\n" % path
+            self.execute_bash(C)
+            self.prefab.bash.profileJS.addPath(self.prefab.core.dir_paths["BINDIR"])
+            self.doneSet("dir_paths_create")
 
     # =============================================================================
     #

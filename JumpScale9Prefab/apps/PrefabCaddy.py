@@ -45,6 +45,7 @@ class PrefabCaddy(app):
         self.prefab.core.run('cd $TMPDIR && tar xvf %s' % dest)
         if install:
             self.install(ssl, start, dns, reset, wwwrootdir)
+        self.doneSet('build')
 
     def install(self, ssl=False, start=True, dns=None, reset=False, wwwrootdir=None):
         """
@@ -55,8 +56,13 @@ class PrefabCaddy(app):
         @param dns str: default address to run caddy on.
         @param reset bool:  if True this will install even if the service is already installed.
         """
+
+        if not self.doneGet('build'):
+            self.build(ssl=ssl, install=False, dns=dns, reset=reset, wwwrootdir=wwwrootdir)
         if self.doneGet('install') and reset is False and self.isInstalled():
             return
+
+        self.prefab.core.dir_paths_create()
 
         self.prefab.core.file_copy(
             '$TMPDIR/caddy', '$BINDIR/caddy')

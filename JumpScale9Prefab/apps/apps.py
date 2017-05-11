@@ -8,6 +8,7 @@ class apps(base):
     def __init__(self, executor, prefab):
         self._dnsmasq = None
         base.__init__(self, executor, prefab)
+        self.prefab.core.dir_paths_create()
 
     @property
     def dnsmasq(self):
