@@ -239,7 +239,7 @@ class PrefabCore(base):
                     env["BASEDIR"] = "/opt"
 
         if not "JSBASE" in env:
-            env["JSBASE"] = "%s/jumpscale8" % env["BASEDIR"]
+            env["JSBASE"] = "%s/jumpscale9" % env["BASEDIR"]
 
         if not "VARDIR" in env:
             # ON OSX WE ALSO NEED TO SUPPORT /opt !!!

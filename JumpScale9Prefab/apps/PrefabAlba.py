@@ -42,7 +42,7 @@ class PrefabAlba(base):
 
         # self.prefab.core.run('wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh')
         self.prefab.core.file_download(
-            'https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh', to='$TMPDIR/opam_installer.sh')
+            'https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh', to='$TMPDIR/opam_installer.sh', minsizekb=0)
         self.prefab.core.run('sed -i "/read -p/d" $TMPDIR/opam_installer.sh')  # remove any confirmation
         self.prefab.core.run('bash $TMPDIR/opam_installer.sh $BINDIR %s' %
                               self.ocaml_version, profile=True, shell=True)
