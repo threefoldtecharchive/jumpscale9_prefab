@@ -14,42 +14,11 @@ def _post_install(libname, libpath):
         j.application.config['plugins'] = {}
 
     # add this plugin to the config
-    j.application.config['plugins'][libname] = libpath
+    c = j.core.state.configGet('plugins', defval={})
+    c[libname] = libpath
+    j.core.state.configSet('plugins', c)
 
-    moduleList = {}
-    gigdir = os.environ.get('GIGDIR', '/root/gig')
-    mounted_lib_path = os.path.join(gigdir, 'python_libs')
-
-    for name, path in j.application.config['plugins'].items():
-        if j.sal.fs.exists(path, followlinks=True):
-            moduleList = j.tools.jsloader.findModules(path=path, moduleList=moduleList)
-            # link libs to location for hostos
-            j.do.copyTree(path,
-                          os.path.join(mounted_lib_path, libname),
-                          overwriteFiles=True,
-                          ignoredir=['*.egg-info',
-                                     '*.dist-info',
-                                     "*JumpScale*",
-                                     "*Tests*",
-                                     "*tests*"],
-
-                          ignorefiles=['*.egg-info',
-                                       "*.pyc",
-                                       "*.so",
-                                       ],
-                          rsync=True,
-                          recursive=True,
-                          rsyncdelete=True,
-                          createdir=True)
-
-    # DO NOT AUTOPIP the deps are now installed while installing the libs
-    j.application.config["system"]["autopip"] = False
-    j.application.config["system"]["debug"] = True
-
-    j.tools.jsloader.generate(path=path, moduleList=moduleList)
-    j.tools.jsloader.generate(path=path, moduleList=moduleList, codecompleteOnly=True)
-
-    j.do.initEnv()
+    j.tools.jsloader.generatePlugins()
 
 
 class install(_install):
