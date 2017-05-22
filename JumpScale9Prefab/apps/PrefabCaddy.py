@@ -97,14 +97,14 @@ class PrefabCaddy(app):
             self.start(ssl)
 
     def start(self, ssl, agree=True, cfg_path='', email='info@greenitglobe.com'):
-        cpath = self.replace("$JSCFGDIR/caddy/caddyfile.conf")
-        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/caddy", "$JSCFGDIR/caddy", recursive=True)
+        cpath = self.replace("$CFGDIR/caddy/caddyfile.conf")
+        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/caddy", "$CFGDIR/caddy", recursive=True)
 
         # adjust confguration file
         conf = self.prefab.core.file_read(cpath)
-        conf.replace("$TEMPLATEDIR/cfg", "$JSCFGDIR")
+        conf.replace("$TEMPLATEDIR/cfg", "$CFGDIR")
         conf = self.replace(conf)
-        self.prefab.core.file_write("$JSCFGDIR/caddy/caddyfile.conf", conf, replaceArgs=True)
+        self.prefab.core.file_write("$CFGDIR/caddy/caddyfile.conf", conf, replaceArgs=True)
 
         self.prefab.processmanager.stop("caddy")  # will also kill
 

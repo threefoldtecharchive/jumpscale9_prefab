@@ -33,7 +33,7 @@ class PrefabNodeJS(app):
             self.prefab.core.run("cd %s;bower --allow-root install  %s" % (self._bowerDir, name), profile=True)
 
     def isInstalled(self):
-        rc, out, err = self.prefab.core.run("npm version", die=False, showout=False, profile=True)
+        rc, out, err = self.prefab.core.run("npm version", die=False, showout=False)
         if rc > 0:
             return False
         installedDict = j.data.serializer.yaml.loads(out)
