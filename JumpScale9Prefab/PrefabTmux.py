@@ -3,7 +3,8 @@ import time
 import os
 
 base = j.tools.prefab._getBaseClass()
-
+os.environ['LC_ALL'] = "C.UTF-8"
+os.environ['LANG'] = "C.UTF-8"
 
 class PrefabTmux(base):
 
