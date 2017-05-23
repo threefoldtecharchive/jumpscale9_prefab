@@ -45,7 +45,7 @@ class PrefabPortal(base):
 
     @property
     def configPath(self):
-        return j.sal.fs.joinPaths(self.prefab.core.dir_paths['JSCFGDIR'],
+        return j.sal.fs.joinPaths(self.prefab.core.dir_paths['CFGDIR'],
                                   "portals", "main", "config.yaml")
 
     def install(self, start=True, branch='master', reset=False):
@@ -275,12 +275,12 @@ class PrefabPortal(base):
                 CODE_DIR,
                 'github/jumpscale/portal9/apps/portalbase/config.yaml'),
             '$TEMPLATEDIR/cfg/portal/config.yaml')
-        self.prefab.core.dir_ensure("$JSCFGDIR/portals/main/")
+        self.prefab.core.dir_ensure("$CFGDIR/portals/main/")
         self.prefab.core.file_copy(
             j.sal.fs.joinPaths(
                 CODE_DIR,
                 'github/jumpscale/portal9/apps/portalbase/config.yaml'),
-            "$JSCFGDIR/portals/main/config.yaml")
+            "$CFGDIR/portals/main/config.yaml")
         # copy portal_start.py
         self.prefab.core.file_copy(
             j.sal.fs.joinPaths(
@@ -319,7 +319,7 @@ class PrefabPortal(base):
         passwd : if not None, change the admin password to passwd after start
         """
         self.prefab.apps.mongodb.start()
-        cmd = "jspython portal_start.py"
+        cmd = "python3 portal_start.py"
         self.prefab.processmanager.ensure('portal', cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, 'main'))
 
         if passwd is not None:
