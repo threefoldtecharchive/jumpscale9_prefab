@@ -1,9 +1,9 @@
-from js9 import j
+from JumpScale import j
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.cuisine._getBaseAppClass()
 
 
-class PrefabG8OSUfs(app):
+class CuisineG8OSUfs(app):
     """
     """
     NAME = 'g8ufs'
@@ -12,11 +12,11 @@ class PrefabG8OSUfs(app):
         if reset is False and self.isInstalled():
             return
 
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('build-essential')
+        self.cuisine.package.mdupdate()
+        self.cuisine.package.install('build-essential')
 
-        self.prefab.development.golang.get("github.com/g8os/g8ufs")
-        self.prefab.core.file_copy("$GOPATHDIR/bin/g8ufs", "$BASEDIR/bin/")
+        self.cuisine.development.golang.get("github.com/g8os/g8ufs")
+        self.cuisine.core.file_copy("$GOPATHDIR/bin/g8ufs", "$BASEDIR/bin/")
 
         if install:
             self.install(start)

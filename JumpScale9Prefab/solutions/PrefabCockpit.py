@@ -51,7 +51,7 @@ class PrefabCockpit(base):
             client_secret=ays_secret,
             client_id=client_id,
             organization=organization,
-            redirect_address='%s:8200' %
+            redirect_address='%s:5000' %
             ip)
 
         # configure base URI for api-console

@@ -51,9 +51,9 @@ class PrefabRedis(app):
             # move action
             C = """
             set -ex
-            mkdir -p $BASEDIR/bin/
-            cp -f $TMPDIR/build/redis/redis-stable/src/redis-server $BASEDIR/bin/
-            cp -f $TMPDIR/build/redis/redis-stable/src/redis-cli $BASEDIR/bin/
+            mkdir -p $BINDIR
+            cp -f $TMPDIR/build/redis/redis-stable/src/redis-server $BINDIR
+            cp -f $TMPDIR/build/redis/redis-stable/src/redis-cli $BINDIR
             rm -rf $BASEDIR/apps/redis
             """
             C = self.prefab.core.replace(C)
@@ -75,6 +75,9 @@ class PrefabRedis(app):
     def start(self, name="main", ip="localhost", port=6379, maxram="50mb", appendonly=True,
               snapshot=False, slave=(), ismaster=False, passwd=None, unixsocket=None):
         redis_cli = j.sal.redis.getInstance(self.prefab)
+        if unixsocket is not None:
+            redisSocket = j.sal.fs.getParent(unixsocket)
+            self.prefab.core.dir_ensure(redisSocket)
         redis_cli.configureInstance(name,
                                     ip,
                                     port,
