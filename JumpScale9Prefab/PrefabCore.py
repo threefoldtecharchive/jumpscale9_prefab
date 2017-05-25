@@ -484,8 +484,7 @@ class PrefabCore(base):
             multithread=False,
             expand=False,
             minsizekb=40,
-            removeTopDir=False,
-            processtimeout=900):
+            removeTopDir=False):
         """
         download from url
         @return path of downloaded file
@@ -529,18 +528,18 @@ class PrefabCore(base):
                 else:
                     user = ""
 
-                cmd = "curl -L '%s' -o '%s' %s %s --connect-timeout 5 --retry %s --retry-max-time %s" % (
+                cmd = "curl -L '%s' -o '%s' %s %s --connect-timeout 30 --retry %s --retry-max-time %s" % (
                     url, to, user, minsp, retry, timeout)
                 if self.file_exists(to):
                     cmd += " -C -"
                 self.logger.info(cmd)
                 self.file_unlink("%s.downloadok" % to)
-                rc, out, err = self.run(cmd, die=False, timeout=processtimeout)
+                rc, out, err = self.run(cmd, die=False, timeout=timeout)
                 if rc == 33:  # resume is not support try again withouth resume
                     self.file_unlink(to)
                     cmd = "curl -L '%s' -o '%s' %s %s --connect-timeout 5 --retry %s --retry-max-time %s" % (
                         url, to, user, minsp, retry, timeout)
-                    rc, out, err = self.run(cmd, die=False, timeout=processtimeout)
+                    rc, out, err = self.run(cmd, die=False, timeout=timeout)
                 fsize = self.file_size(to)
                 if minsizekb != 0 and fsize < minsizekb:
                     raise j.exceptions.RuntimeError(

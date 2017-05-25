@@ -10,7 +10,7 @@ class PrefabOdoo(app):
         return groupname in open("/etc/group").read()
 
     def _install_pip(self):
-        self.prefab.core.run('apt-get --assume-yes install python2.7 python2.7-dev')
+        self.prefab.core.run('apt-get --assume-yes install python2.7 python2.7-dev libpq-dev')
         cmd = """
         cd $TMPDIR
         wget https://bootstrap.pypa.io/get-pip.py
@@ -23,8 +23,10 @@ class PrefabOdoo(app):
             self.prefab.apps.postgresql.build()
             self.prefab.apps.postgresql.install()
         self._install_pip()
+        self.prefab.apps.nodejs.install()
+        self.prefab.core.run("npm install -g less less-plugin-clean-css -y", profile=True)
         cmd = """
-        cd $TMPDIR && git clone https://github.com/odoo/odoo.git --depth=1
+        cd $TMPDIR && git clone https://github.com/odoo/odoo.git --depth=1 --branch=10.0
         export PATH=$PATH:$BINDIR/postgres/
         apt-get -y install python-ldap libldap2-dev libsasl2-dev libssl-dev libxml2-dev libxslt-dev python-dev
         cd $TMPDIR/odoo && pip2 install -r requirements.txt
@@ -38,6 +40,7 @@ class PrefabOdoo(app):
             self.prefab.core.run('adduser --system --quiet  \
         --shell /bin/bash --group --gecos "Odoo administrator" odoo')
             self.prefab.core.run('sudo -u postgres $BINDIR/createuser -s odoo')
+        self.prefab.core.dir_ensure("$JSLIBEXTDIR")
 
         c = """
         cp $TMPDIR/odoo/odoo-bin $BINDIR/odoo-bin

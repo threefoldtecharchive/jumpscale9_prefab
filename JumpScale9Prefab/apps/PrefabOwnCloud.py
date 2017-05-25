@@ -65,7 +65,7 @@ class PrefabOwnCloud(app):
         mv $TMPDIR/owncloud $JSAPPSDIR/owncloud
 
         # copy config.php to new owncloud home httpd/docs
-        /bin/cp -Rf $TMPDIR/ays_owncloud/owncloud/config.php $appDir/owncloud/config/
+        /bin/cp -Rf $TMPDIR/ays_owncloud/owncloud/config.php $JSAPPSDIR/owncloud/config/
         # copy gig theme
         /bin/cp -Rf $TMPDIR/ays_owncloud/owncloud/gig $JSAPPSDIR/owncloud/themes/
 
@@ -270,10 +270,10 @@ class PrefabOwnCloud(app):
             owncloudsiterules = self._get_default_conf_nginx_site()
             owncloudsiterules = owncloudsiterules % {"sitename": sitename}
             self.prefab.core.file_write(
-                "$JSCFGDIR/nginx/etc/sites-enabled/{sitename}".format(sitename=sitename), content=owncloudsiterules)
+                "$CFGDIR/nginx/etc/sites-enabled/{sitename}".format(sitename=sitename), content=owncloudsiterules)
             basicnginxconf = self.prefab.apps.nginx.get_basic_nginx_conf()
             basicnginxconf = basicnginxconf.replace(
-                "include $JSAPPSDIR/nginx/etc/sites-enabled/*;", "include $JSCFGDIR/nginx/etc/sites-enabled/*;")
+                "include $JSAPPSDIR/nginx/etc/sites-enabled/*;", "include $CFGDIR/nginx/etc/sites-enabled/*;")
             basicnginxconf = self.prefab.core.replace(basicnginxconf)
             C = """
             chown -R www-data:www-data $JSAPPSDIR/owncloud $cfgDir/nginx
@@ -281,7 +281,7 @@ class PrefabOwnCloud(app):
             chown -R www-data:www-data /data
             """
             self.prefab.core.execute_bash(C)
-            self.prefab.core.file_write("$JSCFGDIR/nginx/etc/nginx.conf", content=basicnginxconf)
+            self.prefab.core.file_write("$CFGDIR/nginx/etc/nginx.conf", content=basicnginxconf)
             self.prefab.processmanager.stop("nginx")
             self.prefab.apps.nginx.start()
             self.prefab.development.php.start()
@@ -289,12 +289,12 @@ class PrefabOwnCloud(app):
             # APACHE CONF.
             apachesiteconf = self.prefab.core.replace(self._get_apache_siteconf())
             apachesiteconf = apachesiteconf.format(ServerName=sitename)
-            self.prefab.core.dir_ensure("$JSCFGDIR/apache2/sites-enabled")
-            self.prefab.core.file_write("$JSCFGDIR/apache2/sites-enabled/owncloud.conf", apachesiteconf)
+            self.prefab.core.dir_ensure("$CFGDIR/apache2/sites-enabled")
+            self.prefab.core.file_write("$CFGDIR/apache2/sites-enabled/owncloud.conf", apachesiteconf)
             self.prefab.apps.apache2.stop()
             C = """
-            chown -R daemon:daemon $appDir/owncloud
-            chmod 777 -R $appDir/owncloud/config
+            chown -R daemon:daemon $JSAPPSDIR/owncloud
+            chmod 777 -R $JSAPPSDIR/owncloud/config
             chown -R daemon:daemon /data
             """
             self.prefab.core.execute_bash(C)

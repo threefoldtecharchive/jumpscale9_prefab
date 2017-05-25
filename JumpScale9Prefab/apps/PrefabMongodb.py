@@ -34,7 +34,7 @@ class PrefabMongodb(app):
 
         if url:
             self.logger.info('Downloading mongodb.')
-            self.prefab.core.file_download(url, to="$TMPDIR", overwrite=False, expand=True, processtimeout=700)
+            self.prefab.core.file_download(url, to="$TMPDIR", overwrite=False, expand=True)
             tarpaths = self.prefab.core.find("$TMPDIR", recursive=False, pattern="*mongodb*.tgz", type='f')
             if len(tarpaths) == 0:
                 raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (
