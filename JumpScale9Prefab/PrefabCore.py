@@ -27,6 +27,7 @@ import os
 # import types
 # import threading
 import sys
+import pystache
 # import functools
 # import platform
 
@@ -213,7 +214,7 @@ class PrefabCore(base):
         curdir = self.executor.CURDIR
 
         def exists(path):
-            return self.executor.exists(path)
+            return self.executor.exists(path, replace=False)
 
         if "DEBUG" in env and str(env["DEBUG"]).lower() in ["true", "1", "yes"]:
             env["DEBUG"] = "1"
@@ -228,7 +229,7 @@ class PrefabCore(base):
             self.readonly = False
 
         # if we start from a directory where there is a env.sh then we use that as base
-        if not "BASEDIR" in env:
+        if "BASEDIR" not in env:
             if exists("%s/env.sh" % curdir) and exists("%s/js.sh" % (curdir)):
                 env["BASEDIR"] = os.getcwd()
             else:
@@ -326,36 +327,79 @@ class PrefabCore(base):
         colored = pygments.highlight(text, lexer, formatter)
         sys.stdout.write(colored)
 
-    def replace(self, text):
+    def replace(self, text, args={}):
         """
         replace following args (when jumpscale installed it will take the args from there)
+
+        uses http://mustache.github.io/ syntax
+        {{varname}}
+
+
         dirs:
-        - $BASEDIR
-        - $JSAPPSDIR
-        - $TEMPLATEDIR
-        - $VARDIR
-        - $GOPATH
-        - $GOROOT
-        - $BINDIR
-        - $CODEDIR
-        - $JSCFGDIR
-        - $HOMEDIR
-        - $JSLIBDIR
-        - $LIBDIR
-        - $LOGDIR
-        - $PIDDIR
-        - $TMPDIR
+        - BASEDIR
+        - JSAPPSDIR
+        - TEMPLATEDIR
+        - VARDIR
+        - GOPATH
+        - GOROOT
+        - BINDIR
+        - CODEDIR
+        - JSCFGDIR
+        - HOMEDIR
+        - JSLIBDIR
+        - LIBDIR
+        - LOGDIR
+        - PIDDIR
+        - TMPDIR
         system
-        - $hostname
+        - HOSTNAME
+
+        args are additional arguments in dict form
 
         """
+
+        # for backwards compatibility
         if "$" in text:
             for key, var in self.dir_paths.items():
                 text = text.replace("$%s" % key, var)
                 text = text.replace("$%s" % key.lower(), var)
             text = text.replace("$hostname", self.hostname)
             text = text.replace("$HOSTNAME", self.hostname)
+
+        args2 = self.getArgsDict()
+        args2.update(args)
+        text = pystache.render(text, args2)
         return text
+
+    def getArgsDict(self):
+        """
+        get all arguments in a dict, keys are in uppercase
+
+        dirs:
+        - BASEDIR
+        - JSAPPSDIR
+        - TEMPLATEDIR
+        - VARDIR
+        - GOPATH
+        - GOROOT
+        - BINDIR
+        - CODEDIR
+        - JSCFGDIR
+        - HOMEDIR
+        - JSLIBDIR
+        - LIBDIR
+        - LOGDIR
+        - PIDDIR
+        - TMPDIR
+        system
+        - HOSTNAME
+
+        """
+        args = {}
+        for key, var in self.dir_paths.items():
+            args[key.upper()] = var
+        args["HOSTNAME"] = self.hostname
+        return args
 
     def system_uuid_alias_add(self):
         """Adds system UUID alias to /etc/hosts.
@@ -568,21 +612,22 @@ class PrefabCore(base):
         frame = self.file_base64(location)
         return base64.decodebytes(frame.encode(errors='replace')).decode()
 
-    def _check_is_ok(self, cmd, location):
-        location = self.replace(location)
+    def _check_is_ok(self, cmd, location, replace=True):
+        if replace:
+            location = self.replace(location)
         cmd += ' %s' % location
-        rc, out, err = self.run(cmd, showout=False, die=False)
+        rc, out, err = self.run(cmd, showout=False, die=False, replaceArgs=False)
         return rc == 0
 
     def file_exists(self, location):
         """Tests if there is a *remote* file at the given location."""
         return self._check_is_ok('test -e', location)
 
-    def exists(self, location):
+    def exists(self, location, replace=True):
         """
         check if dir or file or exists
         """
-        return self._check_is_ok('test -e', location)
+        return self._check_is_ok('test -e', location, replace=replace)
 
     def file_is_file(self, location):
         return self._check_is_ok('test -f', location)
