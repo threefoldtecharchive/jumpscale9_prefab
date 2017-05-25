@@ -62,8 +62,8 @@ class PrefabCaddy(app):
 
         self.doneSet('install')
 
-    def start(self, ssl=False, wwwrootdir="$DATADIR/www/", configpath="$CFGDIR/caddy.cfg",
-              logdir="$LOGDIR/caddy/log/", agree=True, email='info@greenitglobe.com', port=8000,
+    def start(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{CFGDIR}}/caddy.cfg",
+              logdir="{{LOGDIR}}/caddy/log", agree=True, email='info@greenitglobe.com', port=8000,
               caddyconfigfile="", plugins=defaultplugins):
         """
         @param caddyconfigfile
@@ -82,20 +82,16 @@ class PrefabCaddy(app):
         """
 
         args = {}
-        args["WWWROOTDIR"] = wwwrootdir
-        args["LOGDIR"] = logdir
+        args["WWWROOTDIR"] = self.replace(wwwrootdir).rstrip("/")
+        args["LOGDIR"] = self.replace(logdir).rstrip("/")
         args["PORT"] = str(port)
         args["EMAIL"] = email
+        args["CONFIGPATH"] = self.replace(configpath)
 
         C = self.replace(C, args)
 
-        from IPython import embed
-        print("DEBUG NOW 87878")
-        embed()
-        raise RuntimeError("stop debug here")
-
-        self.prefab.core.dir_ensure("$LOGDIR/caddy/log/")
-        self.prefab.core.dir_ensure(wwwrootdir)
+        self.prefab.core.dir_ensure(args["LOGDIR"])
+        self.prefab.core.dir_ensure(args["WWWROOTDIR"])
 
         self.prefab.core.file_write(configpath, C)
 
@@ -111,13 +107,11 @@ class PrefabCaddy(app):
             raise RuntimeError("port %s is occupied, cannot install caddy" % port)
 
         cmd = self.prefab.bash.cmdGetPath("caddy")
-        if cfg_path:
-            cpath = cfg_path
         if agree:
             agree = " -agree"
 
         self.prefab.processmanager.ensure(
-            "caddy", 'ulimit -n 8192; %s -conf=%s -email=%s %s' % (cmd, cpath, email, agree))
+            "caddy", 'ulimit -n 8192; %s -conf=%s -email=%s %s' % (cmd, args["CONFIGPATH"], args["EMAIL"], agree), wait=1)
 
     def stop(self):
         self.prefab.processmanager.stop("caddy")

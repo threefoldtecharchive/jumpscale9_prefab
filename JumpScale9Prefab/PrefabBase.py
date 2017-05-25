@@ -26,12 +26,12 @@ class PrefabBase:
     def _init(self):
         pass
 
-    def replace(self, txt):
+    def replace(self, txt, args={}):
         txt = j.data.text.strip(txt)
         for item in self.__dict__.keys():
             if item == item.upper():
                 txt = txt.replace("$%s" % item, self.__dict__[item])
-        txt = self.core.replace(txt)
+        txt = self.core.replace(txt, args=args)
         return txt
 
     def configReset(self):
