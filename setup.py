@@ -47,6 +47,7 @@ setup(
         'JumpScale9>=9.0.0',
         'paramiko>=2.1.2',
         'asyncssh>=1.9.0',
+        'pymongo>=3.4.0',
     ],
     cmdclass={
         'install': install,
