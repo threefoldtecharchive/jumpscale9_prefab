@@ -28,7 +28,7 @@ class PrefabOdoo(app):
         cmd = """
         cd $TMPDIR && git clone https://github.com/odoo/odoo.git --depth=1 --branch=10.0
         export PATH=$PATH:$BINDIR/postgres/
-        apt-get -y install python-ldap libldap2-dev libsasl2-dev libssl-dev libxml2-dev libxslt-dev python-dev
+        apt-get -y install python-ldap libldap2-dev libsasl2-dev libssl-dev libxml2-dev libxslt-dev python-dev python-six
         cd $TMPDIR/odoo && pip2 install -r requirements.txt
         """
         self.prefab.core.run(cmd, profile=True)
@@ -53,7 +53,11 @@ class PrefabOdoo(app):
         if not self.prefab.apps.postgresql.isStarted():
             self.prefab.apps.postgresql.start()
         cmd = """
-        cd $BINDIR
-        sudo -H -u odoo PYTHONPATH=$JSLIBEXTDIR:$PYTHONPATH LD_LIBRARY_PATH=$LIBDIR/postgres/:$LD_LIBRARY_PATH ./odoo-bin --addons-path=$JSLIBEXTDIR/odoo-addons,$JSLIBEXTDIR/odoo/addons/
+             cd $BINDIR
+             sudo -H -u odoo \
+             PATH=$PATH \
+             PYTHONPATH=$JSLIBEXTDIR:$PYTHONPATH \
+             LD_LIBRARY_PATH=$LIBDIR/postgres/:$LD_LIBRARY_PATH \
+             ./odoo-bin --addons-path=$JSLIBEXTDIR/odoo-addons,$JSLIBEXTDIR/odoo/addons/ --db-template=template0
         """
         self.prefab.core.execute_bash(cmd, profile=True)
