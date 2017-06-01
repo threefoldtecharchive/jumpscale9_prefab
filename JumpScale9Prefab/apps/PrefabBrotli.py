@@ -5,31 +5,38 @@ app = j.tools.prefab._getBaseAppClass()
 
 class PrefabBrotli(app):
 
-    NAME = 'bro'
+    NAME = 'brotli'
+
+    def _init(self):
+        self.src_dir = "$TMPDIR/brotli"
 
     def build(self, reset=False):
         if reset is False and self.isInstalled():
             return
-        sudo = 'sudo'
-        if self.prefab.core.isMac:
-            sudo = ''
-        C = """
-        cd /tmp
-        %s rm -rf brotli/
-        git clone https://github.com/google/brotli.git
-        cd /tmp/brotli/
-        ./configure
-        make bro
-        """ % sudo
-        C = self.replace(C)
-        self.prefab.core.run(C)
+        cmake = self.prefab.development.cmake
+        if not cmake.isInstalled():
+            cmake.install()
+        git_url = "https://github.com/google/brotli.git"
+        self.prefab.development.git.pullRepo(git_url, dest=self.src_dir, branch='master', depth=1, ssh=False)
+        cmd = """
+        cd {}
+        mkdir out && cd out
+        ../configure-cmake
+        make
+        make test
+        """.format(self.src_dir)
+        cmd = self.replace(cmd)
+        self.prefab.core.run(cmd)
 
     def install(self, reset=False):
         if reset is False and self.isInstalled():
+            self.logger.info("Brotli already installed")
             return
-        C = """
-        cp /tmp/brotli/bin/bro /usr/local/bin/
-        rm -rf /tmp/brotli
-        """
-        self.prefab.core.run(C)
+        if not self.prefab.core.exists("%s/out" % self.src_dir):
+            self.build()
+        cmd = """
+        cd {}/out
+        make install
+        """.format(self.src_dir)
+        self.prefab.core.run(cmd)
         self.prefab.development.pip.install('brotli>=0.5.2')
