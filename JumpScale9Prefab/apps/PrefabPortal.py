@@ -207,12 +207,12 @@ class PrefabPortal(base):
             self.prefab.core.run('CPPFLAGS="-I/usr/local/include -L/usr/local/lib" pip3 install python-snappy')
         else:
             self.prefab.package.multiInstall(['libjpeg-dev', 'libffi-dev', 'zlib1g-dev'])
-            self.prefab.development.pip.install('python-snappy')
 
         # snappy install
         if "darwin" not in self.prefab.platformtype.osname:
             self.prefab.package.ensure('libsnappy-dev')
             self.prefab.package.ensure('libsnappy1v5')
+            self.prefab.development.pip.install('python-snappy')
 
         self.doneSet("installdeps")
 
