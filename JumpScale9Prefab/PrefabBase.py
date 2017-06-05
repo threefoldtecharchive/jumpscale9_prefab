@@ -140,10 +140,6 @@ class PrefabBase:
             self._classname = str(self.__class__).split(".")[-1].strip("'>")
         return self._classname
 
-    def reset(self):
-        self.cacheReset()
-        self.configReset()
-
     @property
     def id(self):
         return self.executor.id
