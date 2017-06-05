@@ -15,8 +15,12 @@ class PrefabCaddy(app):
         self.CODEDIR_ = self.replace("$CODEDIR/github/mholt/caddy")
 
     def reset(self):
+        self.stop()
         app.reset(self)
         self._init()
+        self.prefab.core.dir_remove(self.BUILDDIR_)
+        self.prefab.core.dir_remove("$BINDIR/caddy")
+
 
     def build(
             self,
