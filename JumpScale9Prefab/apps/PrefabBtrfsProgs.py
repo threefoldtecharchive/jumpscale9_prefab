@@ -10,7 +10,7 @@ class PrefabBtrfsProgs(PrefabApp):
     def _init(self):
         # if the module builds something, define BUILDDIR and CODEDIR folders.
         self.BUILDDIR = self.core.replace("$BUILDDIR/btrfs-progs/")
-        self.CODEDIR = self.core.replace("$CODEDIR/btrfs-progs-v4.8")
+        self.CODEDIR = self.core.replace("$CODEDIR")
 
         self._host = "https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs"
         self._file = "btrfs-progs-v4.8.tar.xz"
@@ -24,19 +24,27 @@ class PrefabBtrfsProgs(PrefabApp):
         """
         super().reset()
         self.core.dir_remove(self.BUILDDIR)
-        self.core.dir_remove(self.CODEDIR)
+        self.core.dir_remove(self.CODEDIR + 'btrfs-progs-v4.8')
+        self.doneDelete('build')
+        self._run("cd $LIBDIR; rm libbtrfs.so.0.1")
+        self._run("cd $LIBDIR; rm libbtrfs.so.0")
+        self._run("rm $BINDIR/btrfs")
         self.prefab.development.pip.reset()
 
     def build(self, reset=False):
         if reset is False and (self.isInstalled() or self.doneGet('build')):
             return
-
+        self.core.run('apt-get -y install asciidoc xmlto --no-install-recommends')
+        deps = """
+        uuid-dev libattr1-dev zlib1g-dev libacl1-dev e2fslibs-dev libblkid-dev liblzo2-dev autoconf
+        """
+        self.prefab.package.multiInstall(deps)
         self._run("cd $TMPDIR; wget -c %s/%s" % (self._host, self._file))
         self._run("cd $TMPDIR; tar -xf %s -C $CODEDIR" % self._file)
-
-        self._run("cd $CODEDIR; ./configure --prefix=$BUILDDIR --disable-documentation")
-        self._run("cd $CODEDIR; make")
-        self._run("cd $CODEDIR; make install")
+        self._run("cd $CODEDIR/btrfs-progs-v4.8; ./autogen.sh")
+        self._run("cd $CODEDIR/btrfs-progs-v4.8; ./configure --prefix=$BUILDDIR --disable-documentation")
+        self._run("cd $CODEDIR/btrfs-progs-v4.8; make")
+        self._run("cd $CODEDIR/btrfs-progs-v4.8; make install")
 
         self.doneSet('build')
 
