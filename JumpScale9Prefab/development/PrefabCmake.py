@@ -17,12 +17,13 @@ class PrefabCmake(app):
         cd %s && ./bootstrap && make
         """ % self.src_dir
         self.prefab.core.run(cmd)
+        self.doneSet('build')
         return
 
     def install(self):
         if self.isInstalled():
             return
-        if not self.prefab.core.exists(self.src_dir):
+        if not self.doneGet('build'):
             self.build()
         cmd = """
         cd %s && make install

@@ -11,7 +11,7 @@ class PrefabBrotli(app):
         self.src_dir = "$TMPDIR/brotli"
 
     def build(self, reset=False):
-        if reset is False and self.isInstalled():
+        if reset is False and (self.isInstalled() or self.doneGet('build')):
             return
         cmake = self.prefab.development.cmake
         if not cmake.isInstalled():
@@ -27,12 +27,13 @@ class PrefabBrotli(app):
         """.format(self.src_dir)
         cmd = self.replace(cmd)
         self.prefab.core.run(cmd)
+        self.doneSet('build')
 
     def install(self, reset=False):
         if reset is False and self.isInstalled():
             self.logger.info("Brotli already installed")
             return
-        if not self.prefab.core.exists("%s/out" % self.src_dir):
+        if not self.doneGet('build'):
             self.build()
         cmd = """
         cd {}/out

@@ -6,22 +6,25 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabPostgresql(app):
     NAME = "psql"
 
+    def _init(self):
+        self.BUILD_DIR = '$TMPDIR/postgresql'
+
     def build(self):
-        postgre_url = 'https://ftp.postgresql.org/pub/source/v9.6.1/postgresql-9.6.1.tar.gz'
-        dest = '$TMPDIR/postgresql-9.6.1.tar.gz'
-        self.prefab.core.file_download(postgre_url, dest)
-        self.prefab.core.run('cd $TMPDIR; tar xvf $TMPDIR/postgresql-9.6.1.tar.gz')
+        if self.doneGet('build') or self.isInstalled():
+            return
+        postgres_url = 'https://ftp.postgresql.org/pub/source/v9.6.1/postgresql-9.6.1.tar.gz'
+        self.prefab.core.file_download(postgres_url, overwrite=False, to=self.BUILD_DIR, expand=True, removeTopDir=True)
         self.prefab.core.dir_ensure("$JSAPPSDIR/pgsql")
         self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.dir_ensure("$LIBDIR/postgres")
-        self.prefab.package.multiInstall(['build-essential', 'zlib1g-dev'])
+        self.prefab.package.multiInstall(['build-essential', 'zlib1g-dev', 'libreadline-dev'])
         cmd = """
-        apt-get --assume-yes install libreadline-dev
-        cd $TMPDIR/postgresql-9.6.1
+        cd {}
         ./configure --prefix=$JSAPPSDIR/pgsql --bindir=$BINDIR --sysconfdir=$CFGDIR --libdir=$LIBDIR/postgres --datarootdir=$JSAPPSDIR/pgsql/share
         make
-        """
+        """.format(self.BUILD_DIR)
         self.prefab.core.execute_bash(cmd, profile=True)
+        self.doneSet('build')
 
     def _group_exists(self, groupname):
         return groupname in open("/etc/group").read()
@@ -29,10 +32,12 @@ class PrefabPostgresql(app):
     def install(self, reset=False, start=False, port=5432):
         if reset is False and self.isInstalled():
             return
+        if not self.doneGet('build'):
+            self.build()
         cmd = """
-        cd $TMPDIR/postgresql-9.6.1
-        make install with-pgport=%s
-        """ % str(port)
+        cd {build_dir}
+        make install with-pgport={port}
+        """.format(build_dir=self.BUILD_DIR, port=port)
 
         self.prefab.core.execute_bash(cmd, profile=True)
         if not self._group_exists("postgres"):
