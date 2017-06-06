@@ -20,10 +20,6 @@ class PrefabGogs(app):
         self.CODEDIR = self.GOGSPATH
         self.INIPATH = self.replace("$GOGSPATH/custom/conf/app.ini")
 
-    def reset(self):
-        app.reset(self)
-        self._init()
-
     def build(self, install=True, start=True, reset=False, installDeps=False):
 
         if self.doneGet('build') and not reset:
@@ -94,3 +90,4 @@ class PrefabGogs(app):
         super().reset()
         self.core.dir_remove(self.BUILDDIR)
         self.core.dir_remove(self.CODEDIR)
+        self._init()

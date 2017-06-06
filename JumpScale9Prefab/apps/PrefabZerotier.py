@@ -10,7 +10,10 @@ class PrefabZerotier(base):
         self.CLI = j.sal.fs.joinPaths(self.prefab.core.dir_paths['BINDIR'], 'zerotier-cli')
 
     def reset(self):
+        super().reset()
         self.core.dir_remove(self.BUILDDIRL)
+        self._init()
+        self.doneDelete("build")
 
     def build(self, reset=False, install=True):
         if reset:
