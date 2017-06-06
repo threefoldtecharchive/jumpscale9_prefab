@@ -161,6 +161,13 @@ class PrefabApp(PrefabBase):
     NAME = None
     VERSION = None
 
+    def __init__(self, executor, prefab):
+        super().__init__(executor=executor, prefab=prefab)
+        bin_dir = self.prefab.core.replace("$BINDIR")
+        if bin_dir not in self.prefab.bash.profileDefault.paths:
+            self.prefab.bash.profileDefault.addPath()
+            self.prefab.bash.profileDefault.save()
+
     def isInstalled(self):
         """
         Checks if a package is installed or not
