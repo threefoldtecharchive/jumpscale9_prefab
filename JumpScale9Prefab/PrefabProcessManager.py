@@ -280,7 +280,7 @@ class PrefabTmuxec(ProcessManagerBase):
         res = [item.strip().rstrip("*-").strip() for item in res]
         return res
 
-    def ensure(self, name, cmd, env={}, path="", descr="", autostart=False, wait=0):
+    def ensure(self, name, cmd, env={}, path="", descr="", autostart=False, wait=0, expect=""):
         """
         Ensures that the given upstart service is self.running, starting it if necessary.
         auto
@@ -314,7 +314,7 @@ class PrefabTmuxec(ProcessManagerBase):
                 self.prefab.core.file_write(self.startupfile, start_command, append=True)
                 if wait:
                     self.prefab.core.file_write(self.startupfile, 'sleep %s' % wait, append=True)
-        self.prefab.tmux.executeInScreen("main", name, cmd)
+        self.prefab.tmux.executeInScreen("main", name, cmd, wait=wait, expect=expect)
 
     def stop(self, name):
         self.logger.info("stop...")

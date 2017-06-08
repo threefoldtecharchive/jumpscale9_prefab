@@ -51,6 +51,18 @@ class PrefabProcess(base):
                     if d["state"] == "LISTEN":
                         d.pop("state")
                         result.append(d)
+            # now tcp6
+            p = re.compile(
+                u"tcp6 *(?P<receive>[0-9]*) *(?P<send>[0-9]*) *(?P<local>[0-9*.:]*):(?P<localport>[0-9*]*) *(?P<remote>[0-9.*:]*):(?P<remoteport>[0-9*]*) *(?P<state>[A-Z]*) *(?P<pid>[0-9]*)/(?P<process>\w*)")
+            for line in out.split("\n"):
+                res = re.search(p, line)
+                if res is not None:
+                    # self.logger.info(line)
+                    d = res.groupdict()
+                    d["process"] = d["process"].lower()
+                    if d["state"] == "LISTEN":
+                        d.pop("state")
+                        result.append(d)
 
         elif "darwin" in self.prefab.platformtype.platformtypes:
             # cmd='sudo netstat -anp tcp'

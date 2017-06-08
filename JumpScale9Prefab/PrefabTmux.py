@@ -6,6 +6,7 @@ base = j.tools.prefab._getBaseClass()
 os.environ['LC_ALL'] = "C.UTF-8"
 os.environ['LANG'] = "C.UTF-8"
 
+
 class PrefabTmux(base):
 
     def createSession(self, sessionname, screens, user=None, killifexists=True, returnifexists=True):
@@ -47,7 +48,7 @@ class PrefabTmux(base):
                 self.prefab.core.run(cmd, showout=False, profile=True)
 
     def executeInScreen(self, sessionname, screenname, cmd, wait=10, cwd=None, env=None, user="root",
-                        tmuxuser=None, reset=False, replaceArgs=True, resetAfter=False, die=True, async=False):
+                        tmuxuser=None, reset=False, replaceArgs=True, resetAfter=False, die=True, expect=""):
         """
 
         execute command in tmux & wait till error or till ok, default 10 sec
@@ -61,7 +62,7 @@ class PrefabTmux(base):
         @param cmd command to execute
         @param cwd workingdir for command only in new screen see newscr
         @param env environment variables for cmd only in new screen see newscr (dict)
-        @param async, if async will fire & forget
+        @param wait=0, will fire & forget
         @param resetAfter if True, will remove the tmux session after execution (error or not)
 
         will return rc,out
@@ -118,72 +119,55 @@ class PrefabTmux(base):
             cmd2 = "sudo -u %s -i %s" % (tmuxuser, cmd2)
         rc, out, err = self.prefab.core.run(cmd2, showout=False, die=False, profile=True)
 
-        def checkOutput(die, async=False):
+        def checkOutput():
             out = ""
-            counter = 0
-            ffound = False
-            while not ffound:
-                rc, out, err = self.prefab.core.run("tmux capture-pane -pS -5000", showout=False, profile=True)
-                # initial command needs to go
-                out = out.split('%s\n' % cmd)[-1]
-                ffound = '**START**' in out
-                if not ffound:
-                    time.sleep(0.1)
-                    self.logger.info("reread from tmux, cmd did not start yet")
-                counter += 1
-                if out.find("**ERROR**") != -1:
-                    break
-                if counter > 10:
-                    break
+            end = j.data.time.getTimeEpoch() + wait
+            while True:
 
-            out = out.split("**START**")[-1]
-            if out.find("**OK**") != -1:
-                out = out.split("**OK**")[0]
-                out = out.replace("**OK**", "")
-                out = out.strip()
-                if not out.endswith("\n"):
-                    out += "\n"
-                return 0, out
-            # NEXT LINE CANNOT WORK, IS NOT CUISINE ENABLED !!!
-            # elif j.sal.process.checkProcessRunning(cmd):
-            #     # Warning: It's either hanging or running until explicitly closed
-            #     if not out.endswith("\n"):
-            #         out += "\n"
-            #     return 0, out
-            elif out.find("**ERROR**") != -1:
-                out = out.replace("**OK**", "")
-                out = out.split("**ERROR**")[-2]
-                out = out.replace("**ERROR**", "")
-                out = out.strip() + "\n"
-                msg = "Could not execute cmd:%s\n" % cmdorg
-                msg += "Out/Err:\n%s\n" % out
-                if die:
-                    raise j.exceptions.RuntimeError(msg)
-                else:
-                    return 1, msg
-            return 999, out
+                rc, out, err = self.prefab.core.run("tmux capture-pane -pS -5000", showout=False, profile=True)
+
+                out = out.split("**ERROR**", 1)[1]  # this removes the initial cmd
+
+                if '**START**' not in out:
+                    self.logger.info("reread from tmux, cmd did not start yet")
+                    time.sleep(0.1)
+                    continue
+
+                if expect is not "" and expect in out:
+                    return 0, out
+
+                if '**OK**' in out:
+                    out = out.replace("**OK**", "")
+                    out = out.strip()
+                    if not out.endswith("\n"):
+                        out += "\n"
+                    return 0, out
+
+                if out.find("**ERROR**") != -1:
+                    out = out.replace("**OK**", "")
+                    out = out.replace("**ERROR**", "")
+                    out = out.strip() + "\n"
+                    msg = "Could not execute cmd:%s\n" % cmdorg
+                    msg += "Out/Err:\n%s\n" % out
+                    if die:
+                        raise j.exceptions.RuntimeError(msg)
+                    else:
+                        return 1, msg
+
+                if j.data.time.getTimeEpoch() > end:
+                    if wait == 0:
+                        return 0, out
+                    return 999, out
 
         if rc == 0:
-            if async:
-                # we want to check to see if command really executed
-                time.sleep(1)
-                rc, out = checkOutput(die, async=async)
-            elif wait == 0:
-                rc, out = checkOutput(die)
-            else:
-                end = j.data.time.getTimeEpoch() + wait + 1
-                while j.data.time.getTimeEpoch() < end:
-                    rc, out = checkOutput(die)
-                    if rc == 999:
-                        rc = 0
-                    elif rc > 0 or rc == 0:
-                        break
+            # we want to check to see if command really executed
+            rc, out = checkOutput()
 
         if resetAfter:
             self.killWindow(sessionname, screenname)
 
         if die and rc > 0:
-            raise j.exceptions.RuntimeError(out)
+            raise j.exceptions.RuntimeError(out)  # TODO: *1 does not seem to stop
 
         return rc, out
 
