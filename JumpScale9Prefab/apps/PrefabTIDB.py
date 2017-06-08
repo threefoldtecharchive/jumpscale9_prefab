@@ -1,7 +1,6 @@
 from js9 import j
 from time import sleep
 
-
 app = j.tools.prefab._getBaseAppClass()
 
 
@@ -14,33 +13,12 @@ class PrefabTIDB(app):
     def _init(self):
         self.BUILDDIR = self.replace("$BUILDDIR/tidb/")
 
-    def reset(self):
-        app.reset(self)
-        self._init()
-
     def build(self, install=True, reset=False):
-        """
-        Build requires both golang and rust to be available on the system
-        """
-
         if self.doneGet('build') and reset is False:
             return
-
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('build-essential')
-
         self.prefab.core.dir_ensure(self.BUILDDIR)
         tidb_url = 'http://download.pingcap.org/tidb-latest-linux-amd64.tar.gz'
-        dest = j.sal.fs.joinPaths("$BUILDDIR", 'tidb-latest-linux-amd64.tar.gz')
-        # build_script = self.prefab.core.file_download('https://raw.githubusercontent.com/pingcap/docs/master/scripts/build.sh', \
-        #     j.sal.fs.joinPaths(self.BUILDDIR, 'build.sh'),minsizekb=0)
-        #
-        # self.prefab.core.run('cd {builddir}; bash {build}'.format(builddir=self.BUILDDIR, build=build_script), profile=True, timeout=1000)
-        if not self.prefab.core.file_exists(dest):
-            self.prefab.core.file_download(tidb_url, dest, timeout=900)
-        self.prefab.core.run(
-            'cd $BUILDDIR && tar xvf tidb-latest-linux-amd64.tar.gz && cp -r $BUILDDIR/tidb-latest-linux-amd64/* {builddir}'.format(
-                builddir=self.BUILDDIR))
+        self.prefab.core.file_download(tidb_url, overwrite=False, to=self.BUILDDIR, expand=True, removeTopDir=True)
         self.doneSet('build')
 
         if install:
@@ -54,46 +32,32 @@ class PrefabTIDB(app):
             return
 
         self.prefab.core.run("cp $BUILDDIR/tidb/bin/* $BINDIR/")
-        # for path in self.prefab.core.find(j.sal.fs.joinPaths(self.BUILDDIR, 'bin'), type='f'):
-        #    self.prefab.core.file_copy(path, '$BINDIR')
-
         self.doneSet('install')
 
         if start:
             self.start()
 
-    def start_pd_server(self, clusterId=1):
-        config = {
-            'clusterId': clusterId,
-            'dataDir': j.sal.fs.joinPaths(j.dirs.VARDIR, 'tidb'),
-        }
+    def start_pd_server(self):
+        data_dir = j.sal.fs.joinPaths(j.dirs.VARDIR, 'pd')
         self.prefab.processmanager.ensure(
-            'tipd',
-            'pd-server --data-dir={dataDir}'.format(**config),
+            'pd-server',
+            'pd-server --data-dir={data_dir}'.format(data_dir=data_dir)
         )
 
-    def start_tikv(self, clusterId=1):
-        config = {
-            'clusterId': clusterId,
-            'dataDir': j.sal.fs.joinPaths(j.dirs.VARDIR, 'tidb'),
-        }
+    def start_tikv(self):
+        store_dir = j.sal.fs.joinPaths(j.dirs.VARDIR, 'tikv')
         self.prefab.processmanager.ensure(
-            'tikv',
-            'tikv-server --pd 127.0.0.1:2379 -s tikv1'.format(**config)
+            "tikv-server",
+            "tikv-server --pd='127.0.0.1:2379' --store={store_dir}".format(store_dir=store_dir)
         )
 
-    def start_tidb(self, clusterId=1):
-        config = {
-            'clusterId': clusterId,
-            'dataDir': j.sal.fs.joinPaths(j.dirs.VARDIR, 'tidb'),
-        }
+    def start_tidb(self):
         self.prefab.processmanager.ensure(
-            'tidb',
-            'tidb-server -P 3306 --store=tikv \
-            --path="127.0.0.1:2379"'.format(**config)
+            "tidb-server",
+            "tidb-server --path='127.0.0.1:2379' --store=TiKV"
         )
 
-    def start(self, clusterId=1):
+    def start(self):
         """
         Read docs here.
         https://github.com/pingcap/docs/blob/master/op-guide/clustering.md
