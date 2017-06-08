@@ -39,7 +39,7 @@ class PrefabCockroachDB(app):
     def build(self, start=True, reset=False):
         raise RuntimeError("not implemented")
 
-    def start(self, host="localhost", insecure=True, background=True, reset=False):
+    def start(self, host="localhost", insecure=True, background=False, reset=False, port=26257, http_port=8581):
         if self.isStarted() and not reset:
             return
         cmd = "$BINDIR/cockroach start --host=%s" % host
@@ -47,6 +47,8 @@ class PrefabCockroachDB(app):
             cmd = "%s --insecure" % (cmd)
         if background:
             cmd = "%s --background" % (cmd)
+        cmd = "%s --port=%s --http-port=%s" % (cmd, port, http_port)
+
         # cmd = "$BINDIR/cockroach start --insecure --host=localhost --background"
         self.prefab.process.kill("cockroach")
         self.prefab.processmanager.ensure(name="cockroach", cmd=cmd, env={}, path="", autostart=True)
