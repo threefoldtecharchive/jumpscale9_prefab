@@ -75,7 +75,6 @@ class PrefabGolang(app):
         self.prefab.core.dir_ensure("%s/bin" % self.GOPATHDIR)
 
         self.get("github.com/tools/godep")
-        self.goraml()
         self.glide()
 
         self.doneSet("install")
