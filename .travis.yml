@@ -9,6 +9,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
 
-install: ./travis_ci/prepare.sh
+install: ./.travis_ci/prepare.sh
 
 script: ./run_tests.sh
