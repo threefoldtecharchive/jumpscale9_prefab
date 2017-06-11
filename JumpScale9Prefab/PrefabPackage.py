@@ -221,8 +221,8 @@ class PrefabPackage(base):
                     continue
                 # The most reliable way to detect success is to use the command status
                 # and suffix it with OK. This won't break with other locales.
-                status = self._apt_exec("dpkg-query -W -f='${Status} ' %s && echo **OK**;true" % p)
-                if "not-installed" in status:
+                rc, _, status = self._apt_exec("dpkg-query -W -f='${Status} ' %s && echo **OK**;true" % p)
+                if "no packages found" in status:
                     self.install(p)
                     res[p] = False
                 else:
