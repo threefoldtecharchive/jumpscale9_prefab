@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo docker exec js9 js9 "j.tools.prefab.test()"
+sudo docker exec js9_base js9 "j.tools.prefab.test()"
