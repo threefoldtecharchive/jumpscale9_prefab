@@ -8,16 +8,19 @@ base = j.tools.prefab._getBaseClass()
 class PrefabAtYourService(base):
 
     def configure(self, production=False, client_secret='', client_id='', organization='', redirect_address='locahost:5000'):
-        C = """
-        production: {}
-        oauth:
-           jwt_key: "-----BEGIN PUBLIC KEY-----\\nMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n2\\n7MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny6\\n6+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv\\n-----END PUBLIC KEY-----\\n"
-           client_secret: "{}"
-           redirect_uri: "http://{}"
-           client_id: "{}"
-           organization: "{}"
-        """.format(production, client_secret, redirect_address, client_id, organization)
-        self.core.file_write("$JSCFGDIR/ays.yaml", C)
+        jwt_key = "-----BEGIN PUBLIC KEY-----\\nMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n2\\n7MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny6\\n6+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv\\n-----END PUBLIC KEY-----\\n"
+        ays_config = {
+            'production': production,
+            'oauth': {
+                'jwt_key': jwt_key,
+                'client_secret': client_secret,
+                'redirect_uri': "https://{}".format(redirect_address),
+                'client_id': client_id,
+                'organization': organization
+            }
+        }
+        j.application.config['ays'] = ays_config
+        j.core.state.configSave()
 
     def install(self):
         self.prefab.development.pip.multiInstall([
