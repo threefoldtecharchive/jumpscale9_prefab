@@ -123,8 +123,8 @@ class PrefabTmux(base):
             out = ""
             end = j.data.time.getTimeEpoch() + wait
             while True:
-
-                rc, out, err = self.prefab.core.run("tmux capture-pane -pS -5000", showout=False, profile=True)
+        
+                rc, out, err = self.prefab.core.run("tmux capture-pane -pS -5000 -J", showout=False, profile=True)
 
                 out = out.split("**ERROR**", 1)[1]  # this removes the initial cmd
 
