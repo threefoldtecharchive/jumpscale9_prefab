@@ -12,8 +12,9 @@ def _post_install(libname, libpath):
     c[libname] = libpath
     j.core.state.configSet('plugins', c)
 
-    j.tools.jsloader.generatePlugins()
-    j.tools.jsloader.copyPyLibs()
+    # j.tools.jsloader.generateJumpscalePlugins()
+    # j.tools.jsloader.copyPyLibs()
+    j.tools.jsloader.generate()
 
 
 class install(_install):
@@ -46,8 +47,7 @@ setup(
     install_requires=[
         'JumpScale9>=9.0.0',
         'paramiko>=2.1.2',
-        'asyncssh>=1.9.0',
-        'pymongo>=3.4.0',
+        'asyncssh>=1.10.1'
     ],
     cmdclass={
         'install': install,
