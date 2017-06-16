@@ -47,7 +47,7 @@ setup(
     install_requires=[
         'JumpScale9>=9.0.0',
         # 'paramiko>=2.1.2',
-        'asyncssh>=1.10.1'
+        # 'asyncssh>=1.10.1'
     ],
     cmdclass={
         'install': install,
