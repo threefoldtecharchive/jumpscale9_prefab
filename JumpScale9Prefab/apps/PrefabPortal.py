@@ -33,7 +33,7 @@ class PrefabPortal(base):
             cfg['oauth.client_id'] = client_id
             cfg['oauth.client_scope'] = 'user:email:main,user:memberof:%s' % client_id
             cfg['oauth.client_secret'] = client_secret
-            cfg['oauth.force_oauth_instance'] = 'itsyou.online'
+            cfg['force_oauth_instance'] = 'itsyou.online'
             cfg['oauth.default_groups'] = ['admin', 'user']
             cfg['oauth.organization'] = organization
             cfg['oauth.redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
