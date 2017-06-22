@@ -36,7 +36,7 @@ class develop(_develop):
 
 setup(
     name='JumpScale9Prefab',
-    version='9.0.0',
+    version='9.0.3',
     description='Automation framework for cloud workloads remote sal, sal= system abstraction layer',
     url='https://github.com/Jumpscaler/prefab9',
     author='GreenItGlobe',
@@ -44,7 +44,7 @@ setup(
     license='Apache',
     packages=['JumpScale9Prefab'],
     install_requires=[
-        'JumpScale9>=9.0.2',
+        'JumpScale9>=9.0.3',
         'paramiko>=2.1.2',
         'asyncssh>=1.9.0',
         'pymongo>=3.4.0',
