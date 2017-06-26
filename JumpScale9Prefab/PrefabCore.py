@@ -196,6 +196,7 @@ class PrefabCore(base):
 
     def _init(self):
         self.sudomode = False
+        self._cd = '/root'
 
     @property
     def logger(self):
@@ -1065,6 +1066,7 @@ class PrefabCore(base):
 
     def dir_attribs(self, location, mode=None, owner=None, group=None, recursive=False, showout=False):
         """Updates the mode / owner / group for the given remote directory."""
+        
         location = self.replace(location)
         if showout:
             # self.logger.info("set dir attributes:%s"%location)
@@ -1218,7 +1220,7 @@ class PrefabCore(base):
             env = {}
         if replaceArgs:
             cmd = self.replace(cmd)
-        self.executor.curpath = self.cd
+        self.executor.curpath = self._cd
         # self.logger.info("CMD:'%s'"%cmd)
         if debug:
             debugremember = copy.copy(debug)
@@ -1297,10 +1299,10 @@ class PrefabCore(base):
     def cd(self, path):
         """cd to the given path"""
         path = self.replace(path)
-        self.cd = path
+        self._cd = path
 
     def pwd(self):
-        return self.cd
+        return self._cd
 
     def execute_script(self, content, die=True, profile=False, interpreter="bash", tmux=True,
                        replace=True, showout=True):
