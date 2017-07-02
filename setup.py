@@ -11,9 +11,7 @@ def _post_install(libname, libpath):
     c = j.core.state.configGet('plugins', defval={})
     c[libname] = libpath
     j.core.state.configSet('plugins', c)
-
-    j.tools.jsloader.generatePlugins()
-    j.tools.jsloader.copyPyLibs()
+    j.tools.jsloader.generateJumpscalePlugins()
 
 
 class install(_install):
