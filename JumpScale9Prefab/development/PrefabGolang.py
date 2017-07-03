@@ -75,23 +75,30 @@ class PrefabGolang(app):
         self.prefab.core.dir_ensure("%s/bin" % self.GOPATHDIR)
 
         self.get("github.com/tools/godep")
-        self.glide()
-
         self.doneSet("install")
 
     def goraml(self):
         """
-        Install (using go get) goraml and go-bindata.
+        Install (using go get) goraml.
         """
         C = '''
         go get -u github.com/Jumpscale/go-raml
+        set -ex
+        cd $GOPATH/src/github.com/Jumpscale/go-raml
+        sh build.sh
+        '''
+        self.prefab.core.execute_bash(C, profile=True)
+
+    def bindata(self):
+        """
+        Install (using go get) go-bindata.
+        """
+        C = '''
         set -ex
         go get -u github.com/jteeuwen/go-bindata/...
         cd $GOPATH/src/github.com/jteeuwen/go-bindata/go-bindata
         go build
         go install
-        cd $GOPATH/src/github.com/Jumpscale/go-raml
-        sh build.sh
         '''
         self.prefab.core.execute_bash(C, profile=True)
 
