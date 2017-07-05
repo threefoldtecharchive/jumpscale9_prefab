@@ -114,8 +114,8 @@ class PrefabSSH(base):
             self.prefab.core.dir_ensure(home + "/.ssh", mode="0700", owner=user, group=user)
 
             self.prefab.core.run("ssh-keygen -q -t %s -f %s -N ''" % (keytype, path))
-            self.prefab.core.file_attribs(path, owner=user, group=user)
-            self.prefab.core.file_attribs("%s.pub" % path, owner=user, group=user)
+            self.prefab.core.file_attribs(path, mode="0600", owner=user, group=user)
+            self.prefab.core.file_attribs("%s.pub" % path, mode="0600", owner=user, group=user)
             return "%s.pub" % path
         else:
             return "%s.pub" % path
@@ -219,7 +219,7 @@ class PrefabSSH(base):
         """
         self.logger.info("add ssh key to ssh-agent: %s" % path)
         self.prefab.core.run("ssh-add -d '%s'" % path, die=False, showout=False)
-        _, keys, _ = self.prefab.core.run("ssh-add -l", showout=False)
+        _, keys, _ = self.prefab.core.run("ssh-add -l", die=False, showout=False)
         if path in keys:
             raise j.exceptions.RuntimeError("ssh-key is still loaded in ssh-agent, please remove manually")
         self.prefab.core.run("ssh-add '%s'" % path, showout=False)
