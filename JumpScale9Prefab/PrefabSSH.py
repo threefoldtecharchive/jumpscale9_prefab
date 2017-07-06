@@ -218,10 +218,11 @@ class PrefabSSH(base):
         @path is path to private key
         """
         self.logger.info("add ssh key to ssh-agent: %s" % path)
-        self.prefab.core.run("ssh-add -d '%s'" % path, die=False, showout=False)
-        _, keys, _ = self.prefab.core.run("ssh-add -l", die=False, showout=False)
-        if path in keys:
-            raise j.exceptions.RuntimeError("ssh-key is still loaded in ssh-agent, please remove manually")
+        if removeFirst:
+            self.prefab.core.run("ssh-add -d '%s'" % path, die=False, showout=False)
+            _, keys, _ = self.prefab.core.run("ssh-add -l", die=False, showout=False)
+            if path in keys:
+                raise j.exceptions.RuntimeError("ssh-key is still loaded in ssh-agent, please remove manually")
         self.prefab.core.run("ssh-add '%s'" % path, showout=False)
 
     def sshagent_remove(self, path):
