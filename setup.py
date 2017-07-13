@@ -35,7 +35,7 @@ class develop(_develop):
 long_description = ""
 try:
     from pypandoc import convert
-    long_description = lambda f: convert(f, 'rst')
+    long_description = convert("README.md", 'rst')
 except ImportError:
     long_description = ""
 
