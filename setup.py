@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.install import install as _install
 from setuptools.command.develop import develop as _develop
 import os
@@ -32,15 +32,24 @@ class develop(_develop):
         self.execute(_post_install, (libname, libpath), msg="Running post install task")
 
 
+long_description = ""
+try:
+    from pypandoc import convert
+    long_description = lambda f: convert(f, 'rst')
+except ImportError:
+    long_description = ""
+
+
 setup(
     name='JumpScale9Prefab',
     version='9.0.3',
     description='Automation framework for cloud workloads remote sal, sal= system abstraction layer',
+    long_description=long_description,
     url='https://github.com/Jumpscaler/prefab9',
     author='GreenItGlobe',
     author_email='info@gig.tech',
     license='Apache',
-    packages=['JumpScale9Prefab'],
+    packages=find_packages(),
     install_requires=[
         'JumpScale9>=9.0.3',
         'paramiko>=2.1.2',
