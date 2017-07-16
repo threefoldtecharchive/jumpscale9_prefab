@@ -47,7 +47,7 @@ class PrefabCockpit(base):
         # configure base URI for api-console
         raml_path = "$JSAPPSDIR/atyourservice/JumpScale9AYS/ays/server/apidocs/api.raml"
         raml = self.prefab.core.file_read(raml_path)
-        raml = raml.replace('baseUri: http://localhost:5000', "baseUri: http://{ip}:5000".format(ip=ip))
+        raml = raml.replace('baseUri: https://localhost:5000', "baseUri: http://{ip}:5000".format(ip=ip))
         self.prefab.core.file_write(raml_path, raml)
 
         if start:
