@@ -160,7 +160,7 @@ class PrefabPortal(base):
         # pygo
         # pygobject
         pylzma
-        pymongo==3.2.1
+        #pymongo==3.2.1
         pystache
         # python-apt
         python-dateutil
@@ -170,7 +170,7 @@ class PrefabPortal(base):
         # pyzmq
         # redis
         # reparted
-        requests
+        #requests
         simplegeneric
         simplejson
         six
@@ -179,7 +179,7 @@ class PrefabPortal(base):
         traitlets
         ujson
         # unattended-upgrades
-        urllib3
+        #urllib3
         visitor
         watchdog
         websocket
