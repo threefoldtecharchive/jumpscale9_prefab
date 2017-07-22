@@ -9,10 +9,16 @@ class PrefabPostgresql(app):
     def _init(self):
         self.BUILD_DIR = '$TMPDIR/postgresql'
 
-    def build(self):
+    def build(self, beta=False):
+        """
+        beta is 2 for 10 release
+        """
         if self.doneGet('build') or self.isInstalled():
             return
-        postgres_url = 'https://ftp.postgresql.org/pub/source/v9.6.1/postgresql-9.6.1.tar.gz'
+        if beta:
+            postgres_url = 'https://ftp.postgresql.org/pub/source/v10beta2/postgresql-10beta2.tar.bz2'
+        else:
+            postgres_url = 'https://ftp.postgresql.org/pub/source/v9.6.3/postgresql-9.6.3.tar.gz'
         self.prefab.core.file_download(postgres_url, overwrite=False, to=self.BUILD_DIR, expand=True, removeTopDir=True)
         self.prefab.core.dir_ensure("$JSAPPSDIR/pgsql")
         self.prefab.core.dir_ensure("$BINDIR")
@@ -29,11 +35,11 @@ class PrefabPostgresql(app):
     def _group_exists(self, groupname):
         return groupname in open("/etc/group").read()
 
-    def install(self, reset=False, start=False, port=5432):
+    def install(self, reset=False, start=False, port=5432, beta=False):
         if reset is False and self.isInstalled():
             return
         if not self.doneGet('build'):
-            self.build()
+            self.build(beta=beta)
         cmd = """
         cd {build_dir}
         make install with-pgport={port}

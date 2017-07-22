@@ -7,7 +7,7 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabEtcd(app):
     NAME = "etcd"
 
-    def build(self, start=True, host=None, peers=[], reset=False):
+    def build(self, reset=False):
         """
         Build and start etcd
 
@@ -42,8 +42,12 @@ class PrefabEtcd(app):
         self.prefab.core.run(script, profile=True)
         self.prefab.bash.addPath("$BASEDIR/bin")
 
-        if start:
-            self.start(host, peers)
+    def install(self):
+        url = "https://github.com/coreos/etcd/releases/download/v3.2.4/etcd-v3.2.4-linux-amd64.tar.gz"
+        from IPython import embed
+        print("DEBUG NOW ")
+        embed()
+        raise RuntimeError("stop debug here")
 
     def start(self, host=None, peers=None):
         self.prefab.process.kill("etcd")

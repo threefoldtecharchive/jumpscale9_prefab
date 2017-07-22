@@ -1,6 +1,4 @@
 from js9 import j
-# import threading
-# import inspect
 from JumpScale9Prefab.PrefabBase import *
 
 
@@ -38,26 +36,9 @@ class PrefabRootClassFactory:
 
     def resetAll(self):
         """
-        reset cache of prefab isntances
+        reset cache of prefab instances
         """
         self.prefabs_instance = {}
-
-    # def (self):
-    #     if not j.do.SSHAgentAvailable():
-    #         j.do._loadSSHAgent()
-    #     rc, out, err = j.sal.process.execute("ssh-add -l")
-    #     keys = []
-    #     for line in out.split("\n"):
-    #         try:
-    #             # TODO: ugly needs to be done better
-    #             item = line.split(" ", 2)[2]
-    #             keyname = item.split("(", 1)[0].strip()
-    #             keys.append(keyname)
-    #         except BaseException:
-    #             pass
-    #     key = j.tools.console.askChoice(keys, "please select key")
-    #     # key = j.sal.fs.getBaseName(key)
-    #     return j.sal.fs.fileGetContents(key + ".pub")
 
     def get_pubkey(self, keyname=''):
         if keyname == '':
@@ -78,6 +59,10 @@ class PrefabRootClassFactory:
                                                 port=port,
                                                 login=login,
                                                 passwd=passwd)
+
+    def getFromSSH(self, addr, port=22):
+        e = j.tools.executor.getSSHBased(addr, port=port)
+        return self.get(executor=e)
 
     def get(self, executor=None, usecache=True):
         """
@@ -109,7 +94,7 @@ class PrefabRootClassFactory:
         executor can be a real executor or a hostname e.g. ovh4:22
         """
         if j.data.types.string.check(executor):
-            c = j.tools.prefab.get("ovh4")
+            c = j.tools.prefab.get(executor)
             e = c.executor
             assert e.prefab == c
         elif executor is None:
