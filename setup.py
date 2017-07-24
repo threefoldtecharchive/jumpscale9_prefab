@@ -42,7 +42,7 @@ except ImportError:
 
 setup(
     name='JumpScale9Prefab',
-    version='9.0.3',
+    version='9.1.0',
     description='Automation framework for cloud workloads remote sal, sal= system abstraction layer',
     long_description=long_description,
     url='https://github.com/Jumpscaler/prefab9',
