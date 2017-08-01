@@ -210,7 +210,11 @@ class PrefabCore(base):
         path = "".join([("\\" + _) if _ in SHELL_ESCAPE else _ for _ in path])
         return path
 
-    def initEnv(self, env):
+    def initEnv(self, env=None):
+
+        if env==None:
+            env = self.executor.env
+            
 
         curdir = self.executor.CURDIR
 
@@ -229,22 +233,25 @@ class PrefabCore(base):
             env["READONLY"] = "0"
             self.readonly = False
 
+        if str(sys.platform).startswith("linux"):
+            return "/optvar"
+        else:
+            return "%s/optvar"%os.environ["HOME"]            
+
         # if we start from a directory where there is a env.sh then we use that as base
         if "BASEDIR" not in env:
             if exists("%s/env.sh" % curdir) and exists("%s/js.sh" % (curdir)):
                 env["BASEDIR"] = os.getcwd()
             else:
-                # ON OSX WE ALSO NEED TO SUPPORT /opt !!!
                 if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
-                    env["BASEDIR"] = "%s/opt" % env['HOME']
+                    env["BASEDIR"] = "%s/opt/jumpscale9" % env['HOME']
                 else:
-                    env["BASEDIR"] = "/opt"
+                    env["BASEDIR"] = "/opt/jumpscale9"
 
         if not "JSBASE" in env:
             env["JSBASE"] = "%s/jumpscale9" % env["BASEDIR"]
 
         if not "VARDIR" in env:
-            # ON OSX WE ALSO NEED TO SUPPORT /opt !!!
             if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
                 env["VARDIR"] = "%s/optvar" % env['HOME']
             else:
@@ -290,8 +297,7 @@ class PrefabCore(base):
 
     @property
     def dir_paths(self):
-        env = self.executor.env
-        env = self.initEnv(env=env)  # put the missing paths in there
+        env = self.initEnv()
         res = {}
         for key, val in env.items():
             if "DIR" in key:
@@ -674,7 +680,7 @@ class PrefabCore(base):
     def hostname(self):
         def get():
             if self.isMac or self.isCygwin:
-                hostname = self.run("hostname")[1]
+                hostname = self.run("hostname",replaceArgs=False)[1]
             else:
                 hostfile = "/etc/hostname"
                 rc, out, err = self.run("cat %s" % hostfile, showout=False, replaceArgs=False)
