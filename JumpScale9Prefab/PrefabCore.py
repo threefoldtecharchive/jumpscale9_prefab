@@ -214,7 +214,7 @@ class PrefabCore(base):
 
         if env==None:
             env = self.executor.env
-            
+
 
         curdir = self.executor.CURDIR
 
@@ -233,11 +233,6 @@ class PrefabCore(base):
             env["READONLY"] = "0"
             self.readonly = False
 
-        if str(sys.platform).startswith("linux"):
-            return "/optvar"
-        else:
-            return "%s/optvar"%os.environ["HOME"]            
-
         # if we start from a directory where there is a env.sh then we use that as base
         if "BASEDIR" not in env:
             if exists("%s/env.sh" % curdir) and exists("%s/js.sh" % (curdir)):
@@ -248,18 +243,18 @@ class PrefabCore(base):
                 else:
                     env["BASEDIR"] = "/opt/jumpscale9"
 
-        if not "JSBASE" in env:
+        if "JSBASE" not in env:
             env["JSBASE"] = "%s/jumpscale9" % env["BASEDIR"]
 
-        if not "VARDIR" in env:
-            if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
+        if "VARDIR" not in env:
+            if not self.prefab.platformtype.isLinux:
                 env["VARDIR"] = "%s/optvar" % env['HOME']
             else:
                 env["VARDIR"] = "/optvar"
 
         env["HOMEDIR"] = env["HOME"]
 
-        if not "CFGDIR" in env:
+        if "CFGDIR" not in env:
             env["CFGDIR"] = "%s/cfg" % env["VARDIR"]
 
         if exists("/tmp"):
@@ -267,7 +262,7 @@ class PrefabCore(base):
                 env["TMPDIR"] = "%s/tmp" % env['HOME']
             else:
                 env["TMPDIR"] = "/tmp"
-        if not "TMPDIR" in env:
+        if "TMPDIR" not in env:
             raise RuntimeError("Cannot define a tmp dir, set env variable")
 
         change = {}
@@ -297,7 +292,9 @@ class PrefabCore(base):
 
     @property
     def dir_paths(self):
-        env = self.initEnv()
+        env = self.executor.env
+        env = self.initEnv(env=env)  # put the missing paths in there
+
         res = {}
         for key, val in env.items():
             if "DIR" in key:
@@ -1072,7 +1069,7 @@ class PrefabCore(base):
 
     def dir_attribs(self, location, mode=None, owner=None, group=None, recursive=False, showout=False):
         """Updates the mode / owner / group for the given remote directory."""
-        
+
         location = self.replace(location)
         if showout:
             # self.logger.info("set dir attributes:%s"%location)
