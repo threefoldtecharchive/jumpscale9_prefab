@@ -122,7 +122,7 @@ class PrefabPortal(base):
         cmd = """
             cd {CODEDIR}/github/jumpscale/portal9
             pip3 install -e .
-            """.format(codedir=self.prefab.core.dir_paths["CODEDIR"])
+            """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
         self.prefab.core.execute_bash(cmd)
         self.doneSet("installdeps")
 
