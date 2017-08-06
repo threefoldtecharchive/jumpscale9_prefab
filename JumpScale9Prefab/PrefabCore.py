@@ -252,7 +252,7 @@ class PrefabCore(base):
             else:
                 env["VARDIR"] = "/optvar"
 
-        env["HOMEDIR"] = env["HOME"]
+        env["HOMEDIR"] = env.get("HOME", "/root")
 
         if "CFGDIR" not in env:
             env["CFGDIR"] = "%s/cfg" % env["VARDIR"]
