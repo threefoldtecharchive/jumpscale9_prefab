@@ -11,7 +11,6 @@ class PrefabPortal(base):
     def _init(self):
         self.portal_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["JSAPPSDIR"], "portals/")
         self.main_portal_dir = j.sal.fs.joinPaths(self.portal_dir, 'main')
-        self.cfg_path = j.sal.fs.joinPaths(self.main_portal_dir, 'config.hrd')
 
     def configure(
             self,
@@ -68,10 +67,10 @@ class PrefabPortal(base):
         self.prefab.bash.profileDefault.save()
 
         # install the dependencies if required
+        self.getcode(branch=branch)
         self.installDeps(reset=reset)
 
         # pull repo with required branch ; then link dirs and files in required places
-        self.getcode(branch=branch)
         self.linkCode()
 
         if start:
@@ -101,106 +100,12 @@ class PrefabPortal(base):
         """
         if not reset and self.doneGet("installdeps"):
             return
-        self.prefab.development.pip.ensure(reset=reset)
-
-        deps = """
-        cffi==1.5.2
-        setuptools
-        aioredis
-        # argh
-        bcrypt
-        Beaker
-        blinker
-        blosc
-        # Cerberus
-        # certifi
-        # cffi
-        # click
-        # credis
-        # crontab
-        # Cython
-        decorator
-        # docker-py
-        # dominate
-        # ecdsa
-        # Events
-        # Flask
-        # Flask-Bootstrap
-        # Flask-PyMongo
-        # gitdb
-        gitlab3
-        # GitPython
-        greenlet
-        # hiredis
-        html2text
-        # influxdb
-        # ipdb
-        # ipython
-        # ipython-genutils
-        itsdangerous
-        Jinja2
-        # marisa-trie
-        MarkupSafe
-        mimeparse
-        mongoengine==0.10.6
-        msgpack-python
-        netaddr
-        # paramiko
-        # path.py
-        pathtools
-        # pexpect
-        # pickleshare
-        psutil
-        pyjwt
-        # psycopg2
-        # ptyprocess
-        # pycparser
-        # pycrypto
-        # pycurl
-        # pygo
-        # pygobject
-        pylzma
-        #pymongo==3.2.1
-        pystache
-        # python-apt
-        python-dateutil
-        pytoml
-        pytz
-        PyYAML
-        # pyzmq
-        # redis
-        # reparted
-        #requests
-        simplegeneric
-        simplejson
-        six
-        # smmap
-        # SQLAlchemy
-        traitlets
-        ujson
-        # unattended-upgrades
-        #urllib3
-        visitor
-        watchdog
-        websocket
-        websocket-client
-        Werkzeug
-        wheel
-        # zmq
-        pillow
-        gevent
-        flask
-        Flask-Bootstrap
-        snakeviz
-        """
 
         if "darwin" not in self.prefab.platformtype.osname:
             self.prefab.package.ensure('build-essential')
             self.prefab.package.ensure('libssl-dev')
             self.prefab.package.ensure('libffi-dev')
             self.prefab.package.ensure('python3-dev')
-
-        self.prefab.development.pip.multiInstall(deps)
 
         if "darwin" in self.prefab.platformtype.osname:
             self.prefab.package.multiInstall(['libtiff', 'libjpeg', 'webp', 'little-cms2', 'snappy'])
@@ -214,6 +119,11 @@ class PrefabPortal(base):
             self.prefab.package.ensure('libsnappy1v5')
             self.prefab.development.pip.install('python-snappy')
 
+        cmd = """
+            cd {CODEDIR}/github/jumpscale/portal9
+            pip3 install -e .
+            """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
+        self.prefab.core.execute_bash(cmd)
         self.doneSet("installdeps")
 
     def getcode(self, branch='master'):
@@ -224,28 +134,6 @@ class PrefabPortal(base):
             "https://github.com/Jumpscale/portal9.git", branch=branch)
 
     def linkCode(self):
-
-        destjslib = self.prefab.core.dir_paths['JSLIBDIR']
-
-        # _, destjslib, _ = self.prefab.core.run("js --quiet 'self.logger.info(j.do.getPythonLibSystem(jumpscale=True))'",
-        #                                          showout=False)
-        #
-        # if "darwin" in self.prefab.platformtype.osname:
-        #     # Needs refining,In osx destjslib='load dirs\n/usr/local/lib/python3.5/site-packages/JumpScale/'
-        #     destjslib = destjslib.split("\n")[1]
-
-        if self.prefab.core.file_exists(destjslib):
-            self.prefab.core.file_link(
-                "%s/github/jumpscale/portal9/lib/portal" %
-                self.prefab.core.dir_paths["CODEDIR"],
-                "%s/portal" %
-                destjslib,
-                symbolic=True,
-                mode=None,
-                owner=None,
-                group=None)
-
-        self.prefab.core.run("js --quiet 'j.application.reload()'", showout=False, die=False)
 
         if not self.portal_dir.endswith("/"):
             self.portal_dir += '/'
@@ -266,8 +154,7 @@ class PrefabPortal(base):
 
         self.prefab.core.dir_ensure(self.main_portal_dir)
 
-        self.prefab.core.dir_ensure('%s/base/home/.space' % self.main_portal_dir)
-        self.prefab.core.file_ensure('%s/base/home/home.md' % self.main_portal_dir)
+        self.prefab.core.dir_ensure('%s/base/' % self.main_portal_dir)
 
         self.prefab.core.dir_ensure('$TEMPLATEDIR/cfg/portal')
         self.prefab.core.file_copy(
@@ -298,7 +185,7 @@ class PrefabPortal(base):
         to_link = [j.sal.fs.getParent(x) for x in spaces]
         for space in to_link:
             space_name = j.sal.fs.getBaseName(space)
-            if space_name.casefold() != 'home':
+            if space_name not in ['home', 'TestWebsite', 'TestSpace']:
                 self.prefab.core.file_link(source=space, destination='$JSAPPSDIR/portals/main/base/%s' % space_name)
 
     def addSpace(self, spacepath):
