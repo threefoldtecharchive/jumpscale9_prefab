@@ -51,7 +51,7 @@ setup(
     license='Apache',
     packages=find_packages(),
     install_requires=[
-        'JumpScale9>=9.0.3',
+        'JumpScale9>=9.1.0',
         'paramiko>=2.1.2',
         'asyncssh>=1.9.0',
         'pymongo>=3.4.0',
