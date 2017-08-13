@@ -2,6 +2,7 @@ from js9 import j
 import inspect
 
 
+
 class PrefabBase:
 
     def __init__(self, executor, prefab):
@@ -10,8 +11,7 @@ class PrefabBase:
         self.executor = executor
         self.prefab = prefab
         self._logger = None
-        self.CURDIR = executor.CURDIR
-        self.env = executor.env
+
         if self.classname != 'PrefabCore':
             self.core = prefab.core
         self._init()
@@ -33,6 +33,34 @@ class PrefabBase:
         txt = self.core.replace(txt, args=args)
         return txt
 
+    @property
+    def env(self,env=None):
+        return self.executor.env
+
+
+    @property
+    def config(self):
+        """
+        is dict which is stored on node itself in msgpack format in /etc/jsexecutor.msgpack
+        organized per prefab module
+        """
+        cfg=self.executor.config    
+        from IPython import embed;embed(colors='Linux')
+        if self.classname not in self.executor.config:
+            self.executor.config[self.classname] = {}
+        return self.executor.config[self.classname]
+
+    @property
+    def dir_paths(self):
+        env = self.executor.env
+        env = self.initEnv(env=env)  # put the missing paths in there
+
+        res = {}
+        for key, val in env.items():
+            if "DIR" in key:
+                res[key] = val
+        return res
+
     def configReset(self):
         """
         resets config & done memory on node as well as in memory
@@ -50,15 +78,7 @@ class PrefabBase:
         self.cacheReset()
         self._init()
 
-    @property
-    def config(self):
-        """
-        is dict which is stored on node itself in msgpack format in /etc/jsexecutor.msgpack
-        organized per prefab module
-        """
-        if self.classname not in self.executor.config:
-            self.executor.config[self.classname] = {}
-        return self.executor.config[self.classname]
+
 
     def configGet(self, key, defval=None):
         """

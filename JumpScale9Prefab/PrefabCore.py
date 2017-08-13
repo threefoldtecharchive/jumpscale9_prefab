@@ -190,7 +190,7 @@ def text_strip_margin(text, margin="|"):
 
 
 base = j.tools.prefab._getBaseClass()
-
+import pytoml
 
 class PrefabCore(base):
 
@@ -210,108 +210,19 @@ class PrefabCore(base):
         path = "".join([("\\" + _) if _ in SHELL_ESCAPE else _ for _ in path])
         return path
 
-    def initEnv(self, env=None):
-
-        if env==None:
-            env = self.executor.env
 
 
-        curdir = self.executor.CURDIR
-
-        def exists(path):
-            return self.executor.exists(path, replace=False)
-
-        if "DEBUG" in env and str(env["DEBUG"]).lower() in ["true", "1", "yes"]:
-            env["DEBUG"] = "1"
-        else:
-            env["DEBUG"] = "0"
-
-        if "READONLY" in env and str(env["READONLY"]).lower() in ["true", "1", "yes"]:
-            env["READONLY"] = "1"
-            self.readonly = True
-        else:
-            env["READONLY"] = "0"
-            self.readonly = False
-
-        # if we start from a directory where there is a env.sh then we use that as base
-        if "BASEDIR" not in env:
-            if exists("%s/env.sh" % curdir) and exists("%s/js.sh" % (curdir)):
-                env["BASEDIR"] = os.getcwd()
-            else:
-                if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
-                    env["BASEDIR"] = "%s/opt/jumpscale9" % env['HOME']
-                else:
-                    env["BASEDIR"] = "/opt/jumpscale9"
-
-        if "JSBASE" not in env:
-            env["JSBASE"] = "%s/jumpscale9" % env["BASEDIR"]
-
-        if "VARDIR" not in env:
-            if not self.prefab.platformtype.isLinux:
-                env["VARDIR"] = "%s/optvar" % env['HOME']
-            else:
-                env["VARDIR"] = "/optvar"
-
-        env["HOMEDIR"] = env["HOME"]
-
-        if "CFGDIR" not in env:
-            env["CFGDIR"] = "%s/cfg" % env["VARDIR"]
-
-        if exists("/tmp"):
-            if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
-                env["TMPDIR"] = "%s/tmp" % env['HOME']
-            else:
-                env["TMPDIR"] = "/tmp"
-        if "TMPDIR" not in env:
-            raise RuntimeError("Cannot define a tmp dir, set env variable")
-
-        change = {}
-        change["JSAPPSDIR"] = lambda x: "%s/apps" % x["JSBASE"]
-        change["JSBASEDIR"] = lambda x: x["JSBASE"]
-        change["BINDIR"] = lambda x: "%s/bin" % x["BASEDIR"]
-        change["DATADIR"] = lambda x: "%s/data" % x["VARDIR"]
-        change["CODEDIR"] = lambda x: "%s/code" % x["BASEDIR"]
-        change["BUILDDIR"] = lambda x: "%s/build" % x["VARDIR"]
-        change["LOGDIR"] = lambda x: "%s/log" % x["VARDIR"]
-        change["PIDDIR"] = lambda x: "%s/pid" % x["CFGDIR"]
-        change["HRDDIR"] = lambda x: "%s/hrd" % x["CFGDIR"]
-        change["GOROOTDIR"] = lambda x: "%s/go/root/" % x["BASEDIR"]
-        change["GOPATHDIR"] = lambda x: "%s/go/proj/" % x["BASEDIR"]
-        change["NIMDIR"] = lambda x: "%s/nim/" % x["BASEDIR"]
-        change["JSLIBDIR"] = lambda x: "%s/lib/JumpScale/" % x["JSBASE"]
-        change["JSLIBEXTDIR"] = lambda x: "%s/lib/JumpScaleExtra/" % x["JSBASE"]
-        change["JSCFGDIR"] = lambda x: "%s/jumpscale/" % x["CFGDIR"]
-        change["LIBDIR"] = lambda x: "%s/lib/" % x["BASEDIR"]
-        change['TEMPLATEDIR'] = lambda x: "%s/templates" % x["BASEDIR"]
-
-        for key, method in change.items():
-            if key not in env:
-                env[key] = method(env)
-
-        return env
-
-    @property
-    def dir_paths(self):
-        env = self.executor.env
-        env = self.initEnv(env=env)  # put the missing paths in there
-
-        res = {}
-        for key, val in env.items():
-            if "DIR" in key:
-                res[key] = val
-        return res
-
-    def dir_paths_create(self):
-        """
-        make sure all dir paths do exist
-        """
-        if self.doneGet("dir_paths_create") == False:
-            C = ""
-            for key, path in self.dir_paths.items():
-                C += "mkdir -p %s\n" % path
-            self.execute_bash(C)
-            self.prefab.bash.profileJS.addPath(self.prefab.core.dir_paths["BINDIR"])
-            self.doneSet("dir_paths_create")
+    # def dir_paths_create(self):
+    #     """
+    #     make sure all dir paths do exist
+    #     """
+    #     if self.doneGet("dir_paths_create") == False:
+    #         C = ""
+    #         for key, path in self.dir_paths.items():
+    #             C += "mkdir -p %s\n" % path
+    #         self.execute_bash(C)
+    #         self.prefab.bash.profileJS.addPath(self.prefab.core.dir_paths["BINDIR"])
+    #         self.doneSet("dir_paths_create")
 
     # =============================================================================
     #
@@ -361,6 +272,7 @@ class PrefabCore(base):
         args are additional arguments in dict form
 
         """
+        #TODO: *1
 
         # for backwards compatibility
         if "$" in text:
