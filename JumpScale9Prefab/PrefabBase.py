@@ -37,9 +37,11 @@ class PrefabBase:
     def env(self,env=None):
         return self.executor.env
 
-
     @property
-    def config(self):
+    def dir_paths(self):
+        return self.executor.dir_paths
+
+    def _configLocalGetFromParent(self):
         """
         is dict which is stored on node itself in msgpack format in /etc/jsexecutor.msgpack
         organized per prefab module
@@ -50,37 +52,7 @@ class PrefabBase:
             self.executor.config[self.classname] = {}
         return self.executor.config[self.classname]
 
-    @property
-    def dir_paths(self):
-        env = self.executor.env
-        env = self.initEnv(env=env)  # put the missing paths in there
-
-        res = {}
-        for key, val in env.items():
-            if "DIR" in key:
-                res[key] = val
-        return res
-
-    def configReset(self):
-        """
-        resets config & done memory on node as well as in memory
-        """
-        if self.classname in self.executor.config:
-            self.executor.config.pop(self.classname)
-        self.executor.configSave()
-
-    def cacheReset(self):
-        self.executor.cacheReset()
-        j.data.cache.reset(self.id)
-
-    def reset(self):
-        self.configReset()
-        self.cacheReset()
-        self._init()
-
-
-
-    def configGet(self, key, defval=None):
+    def configLocalGet(self, key, defval=None):
         """
         """
         if key in self.config:
@@ -93,7 +65,7 @@ class PrefabBase:
                 raise j.exceptions.Input(message="could not find config key:%s in prefab:%s" %
                                          (key, self.classname), level=1, source="", tags="", msgpub="")
 
-    def configSet(self, key, val):
+    def configLocalSet(self, key, val):
         """
         @return True if changed
         """
@@ -109,6 +81,23 @@ class PrefabBase:
         else:
             self.logger.debug("config not set(was same): %s:%s" % (key, val))
             return False
+
+    def configLocalReset(self):
+        """
+        resets config & done memory on node as well as in memory
+        """
+        if self.classname in self.executor.config:
+            self.executor.config.pop(self.classname)
+        self.executor.configSave()
+
+    def cacheReset(self):
+        self.executor.cacheReset()
+        j.data.cache.reset(self.id)
+
+    def reset(self):
+        self.configReset()
+        self.cacheReset()
+        self._init()
 
     @property
     def done(self):
