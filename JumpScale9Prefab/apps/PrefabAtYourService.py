@@ -25,7 +25,18 @@ class PrefabAtYourService(base):
         j.application.config['ays'] = ays_config
         j.core.state.configSave()
 
-    def install(self):
+    def load_ays_space(self, install_portal=False):
+        """
+        add ays space to portal
+        """
+        code_dir = self.prefab.core.dir_paths["CODEDIR"]
+        if install_portal:
+            self.prefab.apps.portal.install()
+        if j.sal.fs.exists('/opt/jumpscale9/apps/portals'):
+            self.prefab.apps.portal.addSpace('%s/github/jumpscale/ays9/apps/AYS' % code_dir)
+            self.prefab.apps.portal.addActor('%s/github/jumpscale/ays9/apps/ays_tools' % code_dir)
+
+    def install(self, install_portal=False):
         self.prefab.core.dir_ensure(self.base_dir)
         server_dir = j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/')
         self.prefab.core.dir_ensure(server_dir)
@@ -45,6 +56,7 @@ class PrefabAtYourService(base):
             j.sal.fs.joinPaths(code_dir, 'github/jumpscale/ays9/main.py'),
             j.sal.fs.joinPaths(self.base_dir, 'main.py')
         )
+        self.load_ays_space(install_portal)
 
     def start(self, host='localhost', port=5000):
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port}'.format(base_dir=self.base_dir, host=host, port=port)
