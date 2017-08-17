@@ -34,7 +34,7 @@ class PrefabAtYourService(base):
             self.prefab.apps.portal.install()
         if j.sal.fs.exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
             self.prefab.apps.portal.addSpace('{}/github/jumpscale/ays9/apps/AYS'.format(code_dir))
-            self.prefab.apps.portal.addActor('{}/github/jumpscale/ays9/apps/ays_tools'.format(code_dir))
+            self.prefab.apps.portal.addActor('{}/github/jumpscale/ays9/apps/ays__tools'.format(code_dir))
 
     def install(self, install_portal=False):
         self.prefab.core.dir_ensure(self.base_dir)
