@@ -46,7 +46,7 @@ class PrefabBase:
         is dict which is stored on node itself in msgpack format in /etc/jsexecutor.msgpack
         organized per prefab module
         """
-        cfg=self.executor.config    
+        cfg=self.executor.config
         from IPython import embed;embed(colors='Linux')
         if self.classname not in self.executor.config:
             self.executor.config[self.classname] = {}

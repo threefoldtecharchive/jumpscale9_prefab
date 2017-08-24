@@ -59,7 +59,7 @@ class PrefabNodeJS(app):
         self.prefab.core.file_unlink("$BINDIR/node")
         self.prefab.core.dir_remove("$JSAPPSDIR/npm")
 
-        version = "8.2.1"
+        version = "7.7.1"
         if reset == False and self.prefab.core.file_exists('$BINDIR/npm'):
             return
 
