@@ -41,13 +41,12 @@ class PrefabBase:
     def dir_paths(self):
         return self.executor.dir_paths
 
-    def _configLocalGetFromParent(self):
+    @property
+    def config(self):
         """
         is dict which is stored on node itself in msgpack format in /etc/jsexecutor.msgpack
         organized per prefab module
         """
-        cfg=self.executor.config
-        from IPython import embed;embed(colors='Linux')
         if self.classname not in self.executor.config:
             self.executor.config[self.classname] = {}
         return self.executor.config[self.classname]

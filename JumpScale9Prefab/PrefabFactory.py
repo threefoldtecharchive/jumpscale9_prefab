@@ -44,7 +44,7 @@ class PrefabRootClassFactory:
         if keyname == '':
             return self._generate_pubkey()
 
-        key = j.do.SSHKeyGetPathFromAgent(keyname)
+        key = j.clients.ssh.SSHKeyGetPathFromAgent(keyname)
         return j.sal.fs.fileGetContents(key + '.pub')
 
     def _get_ssh_executor(self, addr, port, login, passphrase, passwd):

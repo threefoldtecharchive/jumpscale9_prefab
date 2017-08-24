@@ -219,7 +219,7 @@ class PrefabCore(base):
         curdir = self.executor.CURDIR
 
         def exists(path):
-            return self.executor.exists(path, replace=False)
+            return self.executor.exists(path)
 
         if "DEBUG" in env and str(env["DEBUG"]).lower() in ["true", "1", "yes"]:
             env["DEBUG"] = "1"
@@ -308,7 +308,8 @@ class PrefabCore(base):
         if self.doneGet("dir_paths_create") == False:
             C = ""
             for key, path in self.dir_paths.items():
-                C += "mkdir -p %s\n" % path
+                if path:
+                    C += "mkdir -p %s\n" % path
             self.execute_bash(C)
             self.prefab.bash.profileJS.addPath(self.prefab.core.dir_paths["BINDIR"])
             self.doneSet("dir_paths_create")

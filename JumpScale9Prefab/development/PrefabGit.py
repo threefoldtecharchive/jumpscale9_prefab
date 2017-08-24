@@ -31,7 +31,7 @@ class PrefabGit(base):
                  ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh="first"):
 
         if dest is None:
-            base, provider, account, repo, dest, url = j.do.getGitRepoArgs(
+            base, provider, account, repo, dest, url = j.clients.git.getGitRepoArgs(
                 url, dest, login, passwd, reset=reset, ssh=ssh, codeDir=self.prefab.core.dir_paths["CODEDIR"])
             # we need to work in remote linux so we only support /opt/code
         else:
@@ -46,6 +46,6 @@ class PrefabGit(base):
 
         self.logger.info("pull %s with depth:%s" % (url, depth))
 
-        return j.do.pullGitRepo(url=url, dest=dest, login=login, passwd=passwd, depth=depth,
+        return j.clients.git.pullGitRepo(url=url, dest=dest, login=login, passwd=passwd, depth=depth,
                                 ignorelocalchanges=ignorelocalchanges, reset=reset, branch=branch, revision=revision,
                                 ssh=ssh, executor=self.executor, tag=tag)
