@@ -10,6 +10,7 @@ class PrefabBase:
         self._cache = None
         self.executor = executor
         self.prefab = prefab
+        self._initenvDone=False
         self._logger = None
 
         if self.classname != 'PrefabCore':
