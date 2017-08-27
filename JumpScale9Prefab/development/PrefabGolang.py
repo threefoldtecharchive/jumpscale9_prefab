@@ -35,8 +35,8 @@ class PrefabGolang(app):
         self._init()
 
     def _init(self):
-        self.GOROOTDIR = self.prefab.core.dir_paths['GOROOTDIR']
-        self.GOPATHDIR = self.prefab.core.dir_paths['GOPATHDIR']
+        self.GOROOTDIR = self.prefab.core.dir_paths['BASEDIR']+"/go"
+        self.GOPATHDIR = self.prefab.core.dir_paths['BASEDIR']+"/go_proj"
 
     def isInstalled(self):
         rc, out, err = self.prefab.core.run("go version", die=False, showout=False, profile=True)
@@ -111,12 +111,8 @@ class PrefabGolang(app):
         self.prefab.core.run('. $TMPDIR/installglide.sh', profile=True)
         self.doneSet('glide')
 
-    @property
-    def GOPATH(self):
-        return self.prefab.core.dir_paths['GOPATHDIR']
-
     def clean_src_path(self):
-        srcpath = self.prefab.core.joinpaths(self.GOPATH, 'src')
+        srcpath = self.prefab.core.joinpaths(self.GOPATHDIR, 'src')
         self.prefab.core.dir_remove(srcpath)
 
     def get(self, url):

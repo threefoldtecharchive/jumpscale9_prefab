@@ -726,7 +726,7 @@ class PrefabCore(base):
         """
         @param append if append then will add to file
         """
-        path = self.replace(path)
+        path = self.replace(location)
         self.executor.file_write(path=path, content=content, mode=mode, owner=owner, group=group, append=append)
 
         if strip:
