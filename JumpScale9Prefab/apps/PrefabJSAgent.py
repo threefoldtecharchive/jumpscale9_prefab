@@ -1,6 +1,5 @@
 from js9 import j
 
-
 app = j.tools.prefab._getBaseAppClass()
 
 # TODO: is this still correct, maybe our docker approach better, need to check
