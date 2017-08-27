@@ -1086,6 +1086,7 @@ class PrefabCore(base):
         finally:
             self.sudomode = sudomode
 
+
     def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=False, replaceArgs=True,
             shell=False, env=None, timeout=600):
         """
