@@ -37,7 +37,8 @@ class PrefabGolang(app):
     def _init(self):
         self.GOROOTDIR = self.prefab.core.dir_paths['BASEDIR']+"/go"
         self.GOPATHDIR = self.prefab.core.dir_paths['BASEDIR']+"/go_proj"
-
+        self.GOPATH=self.GOPATHDIR #backwards compatibility
+        
     def isInstalled(self):
         rc, out, err = self.prefab.core.run("go version", die=False, showout=False, profile=True)
         if rc > 0 or "1.8" not in out:

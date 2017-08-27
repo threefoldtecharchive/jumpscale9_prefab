@@ -56,8 +56,6 @@ class PrefabCaddy(app):
         if self.doneGet('install') and reset is False and self.isInstalled():
             return
 
-        self.prefab.core.dir_paths_create()
-
         self.prefab.core.file_copy(
             '$TMPDIR/caddy', '$BINDIR/caddy')
 
