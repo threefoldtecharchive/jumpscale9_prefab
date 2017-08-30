@@ -16,14 +16,16 @@ class PrefabPostgresql(app):
         if self.doneGet('build') or self.isInstalled():
             return
         if beta:
-            postgres_url = 'https://ftp.postgresql.org/pub/source/v10beta2/postgresql-10beta2.tar.bz2'
+            postgres_url = 'https://ftp.postgresql.org/pub/source/v10beta2/postgresql-10beta3.tar.bz2'
         else:
             postgres_url = 'https://ftp.postgresql.org/pub/source/v9.6.3/postgresql-9.6.3.tar.gz'
-        self.prefab.core.file_download(postgres_url, overwrite=False, to=self.BUILD_DIR, expand=True, removeTopDir=True)
+        self.prefab.core.file_download(
+            postgres_url, overwrite=False, to=self.BUILD_DIR, expand=True, removeTopDir=True)
         self.prefab.core.dir_ensure("$JSAPPSDIR/pgsql")
         self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.dir_ensure("$LIBDIR/postgres")
-        self.prefab.package.multiInstall(['build-essential', 'zlib1g-dev', 'libreadline-dev'])
+        self.prefab.package.multiInstall(
+            ['build-essential', 'zlib1g-dev', 'libreadline-dev'])
         cmd = """
         cd {}
         ./configure --prefix=$JSAPPSDIR/pgsql --bindir=$BINDIR --sysconfdir=$CFGDIR --libdir=$LIBDIR/postgres --datarootdir=$JSAPPSDIR/pgsql/share
