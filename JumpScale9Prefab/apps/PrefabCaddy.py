@@ -21,7 +21,6 @@ class PrefabCaddy(app):
         self.prefab.core.dir_remove(self.BUILDDIR_)
         self.prefab.core.dir_remove("$BINDIR/caddy")
 
-
     def build(
             self,
             reset=False,
@@ -31,18 +30,70 @@ class PrefabCaddy(app):
         :param plugins: is used to specify the required plugins in the installation. Currently the default installation
         will add the following plugins: filemanager, cors
         """
+
+        # j.tools.prefab.local.apps.caddy.build()
+
+        if not self.core.isUbuntu:
+            raise j.exceptions.RuntimeError("only ubuntu supported")
+
         if self.doneGet('build') and reset is False:
             return
 
-        plugins = ",".join(plugins)
-        if self.core.isMac:
-            caddy_url = 'https://caddyserver.com/download/darwin/amd64?plugins=%s' % plugins
-            dest = '$TMPDIR/caddy_darwin_amd64_custom.zip'
-        else:
-            caddy_url = 'https://caddyserver.com/download/linux/amd64?plugins=%s' % plugins
-            dest = '$TMPDIR/caddy_linux_amd64_custom.tar.gz'
-        self.prefab.core.file_download(caddy_url, dest)
-        self.prefab.core.run('cd $TMPDIR && tar xvf %s' % dest)
+        self.prefab.systemservices.base.install()
+        self.prefab.development.golang.install()
+
+        C = """
+        set -e
+
+        cd /tmp
+
+        go get -v github.com/gohugoio/hugo
+        go get -u -v github.com/gohugoio/hugo
+
+        go get -u -v github.com/mholt/caddy
+        go get -v github.com/caddyserver/buildworker/cmd/buildworker
+
+        git clone https://github.com/itsyouonline/caddyman
+        cd caddyman
+        chmod u+x caddyman.sh
+
+        # checkout
+        git fetch origin master-caddy-build:master-caddy-build
+        git checkout master-caddy-build
+
+        ./caddyman.sh install git
+        ./caddyman.sh install iyo
+        ./caddyman.sh install iyofilemanager
+
+        # plugins checkout
+        pushd $GOPATH/src/github.com/itsyouonline/filemanager
+        git fetch origin master-iyo-auth:master-iyo-auth
+        git checkout master-iyo-auth
+        popd
+
+        pushd $GOPATH/src/github.com/itsyouonline/caddy-integration
+        git fetch origin master-jwt-values:master-jwt-values
+        git checkout master-jwt-values
+        popd
+
+        pushd $GOPATH/src/github.com/mholt/caddy/caddy
+        go run build.go
+        cp -v caddy $GOPATH/bin/
+        popd
+
+        """
+
+        self.core.run(C)
+
+        # plugins = ",".join(plugins)
+        # if self.core.isMac:
+        #     caddy_url = 'https://caddyserver.com/download/darwin/amd64?plugins=%s' % plugins
+        #     dest = '$TMPDIR/caddy_darwin_amd64_custom.zip'
+        # else:
+        #     caddy_url = 'https://caddyserver.com/download/linux/amd64?plugins=%s' % plugins
+        #     dest = '$TMPDIR/caddy_linux_amd64_custom.tar.gz'
+        # self.prefab.core.file_download(caddy_url, dest)
+        # self.prefab.core.run('cd $TMPDIR && tar xvf %s' % dest)
         self.doneSet('build')
 
     def install(self, plugins=defaultplugins, reset=False, configpath="{{CFGDIR}}/caddy.cfg"):
@@ -59,13 +110,15 @@ class PrefabCaddy(app):
         self.prefab.core.file_copy(
             '$TMPDIR/caddy', '$BINDIR/caddy')
 
-        self.prefab.bash.profileDefault.addPath(self.prefab.core.dir_paths['BINDIR'])
+        self.prefab.bash.profileDefault.addPath(
+            self.prefab.core.dir_paths['BINDIR'])
         self.prefab.bash.profileDefault.save()
 
         configpath = self.replace(configpath)
 
         if not self.prefab.core.exists(configpath):
-            self.configure(configpath=configpath)  # default configuration, can overwrite
+            # default configuration, can overwrite
+            self.configure(configpath=configpath)
 
         fw = not self.prefab.core.run("ufw status 2> /dev/null", die=False)[0]
 
@@ -76,7 +129,8 @@ class PrefabCaddy(app):
             self.prefab.systemservices.ufw.allowIncoming(port)
 
         if self.prefab.process.tcpport_check(port, ""):
-            raise RuntimeError("port %s is occupied, cannot install caddy" % port)
+            raise RuntimeError(
+                "port %s is occupied, cannot install caddy" % port)
 
         self.doneSet('install')
 
@@ -129,7 +183,8 @@ class PrefabCaddy(app):
         for line in C.split("\n"):
             if "#tcpport:" in line:
                 return line.split(":")[1].strip()
-        raise RuntimeError("Can not find tcpport arg in config file, needs to be '#tcpport:'")
+        raise RuntimeError(
+            "Can not find tcpport arg in config file, needs to be '#tcpport:'")
 
     def start(self, configpath="{{CFGDIR}}/caddy.cfg", agree=True, expect="done."):
         """
@@ -141,7 +196,8 @@ class PrefabCaddy(app):
         self.install()
 
         if not j.sal.fs.exists(configpath, followlinks=True):
-            raise RuntimeError("could not find caddyconfigfile:%s" % configpath)
+            raise RuntimeError(
+                "could not find caddyconfigfile:%s" % configpath)
 
         tcpport = int(self.getTCPPort(configpath=configpath))
 
