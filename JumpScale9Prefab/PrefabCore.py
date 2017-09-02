@@ -1087,7 +1087,7 @@ class PrefabCore(base):
             self.sudomode = sudomode
 
 
-    def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=False, replaceArgs=True,
+    def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
             shell=False, env=None, timeout=600):
         """
         @param profile, execute the bash profile first
@@ -1271,15 +1271,15 @@ class PrefabCore(base):
 
         return rc, out
 
-    def execute_bash(self, script, die=True, profile=False, tmux=False, replace=True, showout=True):
+    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)
 
-    def execute_python(self, script, die=True, profile=False, tmux=False, replace=True, showout=True):
+    def execute_python(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
         return self.execute_script(script, die=die, profile=profile, interpreter="python3", tmux=tmux,
                                    replace=replace, showout=showout)
 
-    def execute_jumpscript(self, script, die=True, profile=False, tmux=False, replace=True, showout=True):
+    def execute_jumpscript(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
         """
         execute a jumpscript(script as content) in a remote tmux command, the stdout will be returned
         """

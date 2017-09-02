@@ -4,6 +4,7 @@ from js9 import j
 app = j.tools.prefab._getBaseAppClass()
 import pystache
 
+#TODO: *1 plugins are not implemented, should do so
 
 class PrefabCaddy(app):
 
@@ -57,10 +58,6 @@ class PrefabCaddy(app):
         cd caddyman
         chmod u+x caddyman.sh
 
-        # checkout
-        git fetch origin master-caddy-build:master-caddy-build
-        git checkout master-caddy-build
-
         ./caddyman.sh install git
         ./caddyman.sh install iyo
         ./caddyman.sh install iyofilemanager
@@ -71,19 +68,17 @@ class PrefabCaddy(app):
         git checkout master-iyo-auth
         popd
 
-        pushd $GOPATH/src/github.com/itsyouonline/caddy-integration
-        git fetch origin master-jwt-values:master-jwt-values
-        git checkout master-jwt-values
-        popd
-
         pushd $GOPATH/src/github.com/mholt/caddy/caddy
         go run build.go
         cp -v caddy $GOPATH/bin/
         popd
 
         """
+        C=j.data.text.strip(C)
 
-        self.core.run(C)
+        self.prefab.core.execute_bash(C, die=True, profile=True, tmux=False, replace=True, showout=True)
+
+        # self.core.run(C)
 
         # plugins = ",".join(plugins)
         # if self.core.isMac:
@@ -149,6 +144,8 @@ class PrefabCaddy(app):
         @param caddyconfigfile
             template args available DATADIR, LOGDIR, WWWROOTDIR, PORT, TMPDIR, EMAIL ... (using mustasche)
         """
+        
+        self.install()
 
         C = """
         #tcpport:{{PORT}}

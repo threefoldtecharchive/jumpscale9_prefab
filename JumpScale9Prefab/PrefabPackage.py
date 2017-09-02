@@ -9,16 +9,16 @@ class PrefabPackage(base):
 
     def _repository_ensure_apt(self, repository):
         self.ensure('python-software-properties')
-        self.prefab.core.sudo("add-apt-repository --yes " + repository)
+        self.prefab.core.run("add-apt-repository --yes " + repository)
 
     def _apt_exec(self, cmd, die=True):
         timeout = time.time() + 500
         while time.time() < timeout:
-            _, out, _ = self.prefab.core.sudo('fuser /var/lib/dpkg/lock', showout=False, die=False)
+            _, out, _ = self.prefab.core.run('fuser /var/lib/dpkg/lock', showout=False, die=False)
             if out.strip():
                 time.sleep(2)
             else:
-                return self.prefab.core.sudo(cmd, die=die)
+                return self.prefab.core.run(cmd, die=die)
         raise TimeoutError("resource dpkg is busy")
 
 
@@ -27,9 +27,9 @@ class PrefabPackage(base):
         cmd = CMD_APT_GET + cmd
         result = self._apt_exec(cmd)
         # If the installation process was interrupted, we might get the following message
-        # E: dpkg was interrupted, you must manually self.prefab.core.run 'sudo
+        # E: dpkg was interrupted, you must manually self.prefab.core.run 'run
         # dpkg --configure -a' to correct the problem.
-        if "sudo dpkg --configure -a" in result:
+        if "run dpkg --configure -a" in result:
             self._apt_exec("DEBIAN_FRONTEND=noninteractive dpkg --configure -a")
             result = self._apt_exec(cmd)
         return result
@@ -59,7 +59,7 @@ class PrefabPackage(base):
             self.core.run("apk update")
         elif self.prefab.core.isMac:
             location = self.prefab.core.command_location("brew")
-            # self.prefab.core.run("sudo chown root %s" % location)
+            # self.prefab.core.run("run chown root %s" % location)
             self.prefab.core.run("brew update")
         elif self.prefab.core.isArch:
             self.prefab.core.run("pacman -Syy")
@@ -140,7 +140,7 @@ class PrefabPackage(base):
             cmd = "brew install %s " % package
 
         elif self.prefab.core.isCygwin:
-            if package in ["sudo", "net-tools"]:
+            if package in ["run", "net-tools"]:
                 return
 
             installed = self.prefab.core.run("apt-cyg list&")[1].splitlines()
@@ -179,29 +179,29 @@ class PrefabPackage(base):
 
         @param runid, if specified actions will be used to execute
         """
-        previous_sudo = self.prefab.core.sudomode
-        try:
-            self.prefab.core.sudomode = True
+        # previous_run = self.prefab.core.runmode
+        # try:
+        #     self.prefab.core.runmode = True
 
-            if j.data.types.string.check(packagelist):
-                packages = packagelist.strip().splitlines()
-            elif j.data.types.list.check(packagelist):
-                packages = packagelist
-            else:
-                raise j.exceptions.Input('packagelist should be string or a list. received a %s' % type(packagelist))
+        if j.data.types.string.check(packagelist):
+            packages = packagelist.strip().splitlines()
+        elif j.data.types.list.check(packagelist):
+            packages = packagelist
+        else:
+            raise j.exceptions.Input('packagelist should be string or a list. received a %s' % type(packagelist))
 
-            to_install = []
-            for dep in packages:
-                dep = dep.strip()
-                if dep is None or dep == "" or dep[0] == '#':
-                    continue
-                to_install.append(dep)
+        to_install = []
+        for dep in packages:
+            dep = dep.strip()
+            if dep is None or dep == "" or dep[0] == '#':
+                continue
+            to_install.append(dep)
 
-            for package in to_install:
-                self.install(package, allow_unauthenticated=allow_unauthenticated)
+        for package in to_install:
+            self.install(package, allow_unauthenticated=allow_unauthenticated)
 
-        finally:
-            self.prefab.core.sudomode = previous_sudo
+        # finally:
+        #     self.prefab.core.runmode = previous_run
 
     def start(self, package):
         if self.prefab.core.isArch or self.prefab.core.isUbuntu or self.prefab.core.isMac:

@@ -80,32 +80,10 @@ class PrefabNodeJS(app):
         cdest = self.prefab.core.file_download(
             url, expand=True, overwrite=False, to="$TMPDIR")
 
-        # copy file to correct locations.
-        self.prefab.core.dir_ensure('$BASEDIR/node/npm')
-        self.prefab.core.dir_ensure('$BASEDIR/node/bin')
-        self.prefab.core.dir_ensure(self.NODE_PATH)
-        src = '%s/bin/node' % cdest
-        self.prefab.core.file_copy(
-            src, '$BASEDIR/node/bin/', recursive=True, overwrite=True)
-        src = '%s/lib/node_modules/npm/*' % cdest
-        self.prefab.core.file_copy(
-            src, '$BASEDIR/node/npm', recursive=True, overwrite=True)
-        if self.prefab.core.file_exists('$BASEDIR/node/bin/npm'):
-            self.prefab.core.file_unlink('$BASEDIR/node/bin/npm')
-        self.prefab.core.file_link(
-            '$BASEDIR/node/npm/cli.js', '$BASEDIR/node/bin/npm')
-
-        for item in self.prefab.bash.profileDefault.paths:
-            if "node" in item or "npm" in item:
-                self.logger.info(
-                    "remove %s from path in default profile." % item)
-                self.prefab.bash.profileDefault.pathDelete(item)
-
-        for item in self.prefab.bash.profileJS.paths:
-            if "node" in item or "npm" in item:
-                self.logger.info(
-                    "remove %s from path in default profile." % item)
-                self.prefab.bash.profileDefault.pathDelete(item)
+        self.core.run("mv %s /opt/node"%(cdest))
+        self.core.run("ln -s /opt/node/bin/node /usr/local/bin/node")
+        self.core.run("ln -s /opt/node/bin/npm /usr/local/bin/npm")
+        self.core.run("ln -s /opt/node/bin/npx /usr/local/bin/npx")
 
         self.prefab.bash.profileDefault.envSet("NODE_PATH", self.NODE_PATH)
         self.prefab.bash.profileDefault.addPath(
@@ -113,9 +91,10 @@ class PrefabNodeJS(app):
         self.prefab.bash.profileDefault.save()
 
         rc, out, err = self.prefab.core.run("npm -v", profile=True)
-        if out != '4.1.2':
+        if out != '5.3.0': #4.1.2
             # needs to be this version because is part of the package which was downloaded
-            self.prefab.core.run("npm install npm@4.1.2 -g", profile=True)
+            # self.prefab.core.run("npm install npm@4.1.2 -g", profile=True)
+            raise RuntimeError("npm version error")
 
         rc, initmodulepath, err = self.prefab.core.run(
             "npm config get init-module", profile=True)
