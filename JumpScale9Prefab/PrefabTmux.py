@@ -83,7 +83,8 @@ class PrefabTmux(base):
             self.killWindow(sessionname, screenname)
 
         if cmd.strip() is "":
-            raise j.exceptions.Input(message="cmd cannot be empty", level=1, source="", tags="", msgpub="")
+            raise j.exceptions.Input(
+                message="cmd cannot be empty", level=1, source="", tags="", msgpub="")
 
         self.createWindow(sessionname, screenname, cmd=cmd, user=tmuxuser)
         pane = self._getPane(sessionname, screenname, user=tmuxuser)
@@ -117,21 +118,25 @@ class PrefabTmux(base):
         cmd2 = "tmux send-keys -t '%s' \"%s\" ENTER" % (pane, cmd)
         if tmuxuser is not None:
             cmd2 = "sudo -u %s -i %s" % (tmuxuser, cmd2)
-        rc, out, err = self.prefab.core.run(cmd2, showout=False, die=False, profile=True)
+        rc, out, err = self.prefab.core.run(
+            cmd2, showout=False, die=False, profile=True)
 
         def checkOutput():
             out = ""
             end = j.data.time.getTimeEpoch() + wait
             while True:
-        
-                rc, out, err = self.prefab.core.run("tmux capture-pane -pS -5000 -J", showout=False, profile=True)
 
-                out = out.split("**ERROR**", 1)[1]  # this removes the initial cmd
+                rc, out, err = self.prefab.core.run(
+                    "tmux capture-pane -pS -5000 -J", showout=False, profile=True)
+
+                # this removes the initial cmd
 
                 if '**START**' not in out:
                     self.logger.info("reread from tmux, cmd did not start yet")
                     time.sleep(0.1)
                     continue
+
+                out = out.split("**ERROR**", 1)[1]
 
                 if expect is not "" and expect in out:
                     return 0, out
@@ -167,7 +172,8 @@ class PrefabTmux(base):
             self.killWindow(sessionname, screenname)
 
         if die and rc > 0:
-            raise j.exceptions.RuntimeError(out)  # TODO: *1 does not seem to stop
+            # TODO: *1 does not seem to stop
+            raise j.exceptions.RuntimeError(out)
 
         return rc, out
 
@@ -175,7 +181,8 @@ class PrefabTmux(base):
         cmd = 'tmux list-sessions -F "#{session_name}"'
         if user:
             cmd = "sudo -u %s -i %s" % (user, cmd)
-        rc, out, err = self.prefab.core.run(cmd, die=False, showout=False, profile=True)
+        rc, out, err = self.prefab.core.run(
+            cmd, die=False, showout=False, profile=True)
         if err:
             out = ""
         return [name.strip() for name in out.split()]
@@ -184,7 +191,8 @@ class PrefabTmux(base):
         cmd = 'tmux list-panes -t "%s" -F "#{pane_pid};#{window_name}" -a' % session
         if user:
             cmd = "sudo -u %s -i %s" % (user, cmd)
-        rc, out, err = self.prefab.core.run(cmd, die=False, showout=False, profile=True)
+        rc, out, err = self.prefab.core.run(
+            cmd, die=False, showout=False, profile=True)
         if err:
             return None
         for line in out.split():
@@ -199,7 +207,8 @@ class PrefabTmux(base):
         cmd = 'tmux list-windows -F "#{window_index}:#{window_name}" -t "%s"' % session
         if user:
             cmd = "sudo -u %s -i %s" % (user, cmd)
-        rc, out, err = self.prefab.core.run(cmd, die=False, showout=False, profile=True)
+        rc, out, err = self.prefab.core.run(
+            cmd, die=False, showout=False, profile=True)
         if err:
             return result
         for line in out.split():
@@ -254,13 +263,15 @@ class PrefabTmux(base):
         cmd = "tmux kill-server"
         if user:
             cmd = "sudo -u %s -i %s" % (user, cmd)
-        self.prefab.core.run(cmd, die=False, showout=False, profile=True)  # todo checking
+        self.prefab.core.run(cmd, die=False, showout=False,
+                             profile=True)  # todo checking
 
     def killSession(self, sessionname, user=None):
         cmd = "tmux kill-session -t '%s'" % sessionname
         if user:
             cmd = "sudo -u %s -i %s" % (user, cmd)
-        self.prefab.core.run(cmd, die=False, showout=False, profile=True)  # todo checking
+        self.prefab.core.run(cmd, die=False, showout=False,
+                             profile=True)  # todo checking
 
     def attachSession(self, sessionname, windowname=None, user=None):
         if windowname:

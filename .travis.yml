@@ -9,7 +9,7 @@ branches:
     - master
 
 python:
-    - "3.5"
+  - "3.5"
 
 install: ./.travis_ci/prepare.sh
 

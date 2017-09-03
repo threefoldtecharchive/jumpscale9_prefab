@@ -9,7 +9,11 @@ class PrefabBase(base):
     the base for any install
     """
 
-    def install(self):
+    def install(self, reset=False):
+
+        if self.doneGet('install') and reset is False:
+            return
+
         self.prefab.bash.fixlocale()
 
         if self.prefab.core.isMac:
@@ -41,7 +45,8 @@ class PrefabBase(base):
             self.prefab.package.install("fuse")
 
         if self.prefab.core.isArch:
-            self.prefab.package.install("wpa_actiond")  # is for wireless auto start capability
+            # is for wireless auto start capability
+            self.prefab.package.install("wpa_actiond")
             self.prefab.package.install("redis-server")
 
         self.prefab.package.multiInstall(C)
@@ -49,5 +54,8 @@ class PrefabBase(base):
 
         self.prefab.package.clean()
 
-        self.prefab.bash.profileJS.addPath(j.sal.fs.joinPaths(self.prefab.core.dir_paths["BASEDIR"], "bin"))
+        self.prefab.bash.profileJS.addPath(j.sal.fs.joinPaths(
+            self.prefab.core.dir_paths["BASEDIR"], "bin"))
         self.prefab.bash.profileJS.save()
+
+        self.doneSet("install")
