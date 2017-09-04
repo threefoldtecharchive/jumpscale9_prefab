@@ -210,108 +210,10 @@ class PrefabCore(base):
         path = "".join([("\\" + _) if _ in SHELL_ESCAPE else _ for _ in path])
         return path
 
-    def initEnv(self, env=None):
-
-        if env==None:
-            env = self.executor.env
-
-
-        curdir = self.executor.CURDIR
-
-        def exists(path):
-            return self.executor.exists(path, replace=False)
-
-        if "DEBUG" in env and str(env["DEBUG"]).lower() in ["true", "1", "yes"]:
-            env["DEBUG"] = "1"
-        else:
-            env["DEBUG"] = "0"
-
-        if "READONLY" in env and str(env["READONLY"]).lower() in ["true", "1", "yes"]:
-            env["READONLY"] = "1"
-            self.readonly = True
-        else:
-            env["READONLY"] = "0"
-            self.readonly = False
-
-        # if we start from a directory where there is a env.sh then we use that as base
-        if "BASEDIR" not in env:
-            if exists("%s/env.sh" % curdir) and exists("%s/js.sh" % (curdir)):
-                env["BASEDIR"] = os.getcwd()
-            else:
-                if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
-                    env["BASEDIR"] = "%s/opt/jumpscale9" % env['HOME']
-                else:
-                    env["BASEDIR"] = "/opt/jumpscale9"
-
-        if "JSBASE" not in env:
-            env["JSBASE"] = "%s/jumpscale9" % env["BASEDIR"]
-
-        if "VARDIR" not in env:
-            if not self.prefab.platformtype.isLinux:
-                env["VARDIR"] = "%s/optvar" % env['HOME']
-            else:
-                env["VARDIR"] = "/optvar"
-
-        env["HOMEDIR"] = env["HOME"]
-
-        if "CFGDIR" not in env:
-            env["CFGDIR"] = "%s/cfg" % env["VARDIR"]
-
-        if exists("/tmp"):
-            if not self.prefab.platformtype.isLinux and not self.prefab.platformtype.isMac:
-                env["TMPDIR"] = "%s/tmp" % env['HOME']
-            else:
-                env["TMPDIR"] = "/tmp"
-        if "TMPDIR" not in env:
-            raise RuntimeError("Cannot define a tmp dir, set env variable")
-
-        change = {}
-        change["JSAPPSDIR"] = lambda x: "%s/apps" % x["JSBASE"]
-        change["JSBASEDIR"] = lambda x: x["JSBASE"]
-        change["BINDIR"] = lambda x: "%s/bin" % x["BASEDIR"]
-        change["DATADIR"] = lambda x: "%s/data" % x["VARDIR"]
-        change["CODEDIR"] = lambda x: "%s/code" % x["BASEDIR"]
-        change["BUILDDIR"] = lambda x: "%s/build" % x["VARDIR"]
-        change["LOGDIR"] = lambda x: "%s/log" % x["VARDIR"]
-        change["PIDDIR"] = lambda x: "%s/pid" % x["CFGDIR"]
-        change["HRDDIR"] = lambda x: "%s/hrd" % x["CFGDIR"]
-        change["GOROOTDIR"] = lambda x: "%s/go/root/" % x["BASEDIR"]
-        change["GOPATHDIR"] = lambda x: "%s/go/proj/" % x["BASEDIR"]
-        change["NIMDIR"] = lambda x: "%s/nim/" % x["BASEDIR"]
-        change["JSLIBDIR"] = lambda x: "%s/lib/JumpScale/" % x["JSBASE"]
-        change["JSLIBEXTDIR"] = lambda x: "%s/lib/JumpScaleExtra/" % x["JSBASE"]
-        change["JSCFGDIR"] = lambda x: "%s/jumpscale/" % x["CFGDIR"]
-        change["LIBDIR"] = lambda x: "%s/lib/" % x["BASEDIR"]
-        change['TEMPLATEDIR'] = lambda x: "%s/templates" % x["BASEDIR"]
-
-        for key, method in change.items():
-            if key not in env:
-                env[key] = method(env)
-
-        return env
-
     @property
     def dir_paths(self):
-        env = self.executor.env
-        env = self.initEnv(env=env)  # put the missing paths in there
+        return self.executor.dir_paths
 
-        res = {}
-        for key, val in env.items():
-            if "DIR" in key:
-                res[key] = val
-        return res
-
-    def dir_paths_create(self):
-        """
-        make sure all dir paths do exist
-        """
-        if self.doneGet("dir_paths_create") == False:
-            C = ""
-            for key, path in self.dir_paths.items():
-                C += "mkdir -p %s\n" % path
-            self.execute_bash(C)
-            self.prefab.bash.profileJS.addPath(self.prefab.core.dir_paths["BINDIR"])
-            self.doneSet("dir_paths_create")
 
     # =============================================================================
     #
@@ -744,6 +646,8 @@ class PrefabCore(base):
         self.name  # will do the splitting
         self.ns.hostfile_set_multiple([["127.0.1.1", self.fqn], ["127.0.1.1", self.name], [
                                       "127.0.1.1", self.name + "." + self.grid]], remove=["127.0.1.1"])
+        self.cache.reset()
+
 
     def setIDs(self, name, grid, domain="aydo.com"):
         self.fqn = "%s.%s.%s" % (name, grid, domain)
@@ -767,6 +671,8 @@ class PrefabCore(base):
         else:
             hostfile = "/etc/hosts"
             self.file_write(hostfile, val)
+        self.cache.reset()
+        
 
     def upload(self, source, dest=""):
         """
@@ -786,10 +692,11 @@ class PrefabCore(base):
         source = j.dirs.replaceTxtDirVars(source)
         dest = self.replace(dest)
         self.logger.info("upload local:%s to remote:%s" % (source, dest))
-        if self.prefab.id == 'localhost':
-            j.do.copyTree(source, dest, keepsymlinks=True)
-            return
-        self.executor.sshclient.rsync_up(source, dest)
+        # if self.prefab.id == 'localhost':
+        #     j.do.copyTree(source, dest, keepsymlinks=True)
+        #     return
+        self.executor.upload(source, dest)
+        self.cache.reset()
 
     def download(self, source, dest=""):
         """
@@ -807,60 +714,26 @@ class PrefabCore(base):
         dest = j.dirs.replaceTxtDirVars(dest)
         source = self.replace(source)
         self.logger.info("download remote:%s to local:%s" % (source, dest))
-        if self.prefab.id == 'localhost':
-            j.do.copyTree(source, dest, keepsymlinks=True)
-            return
-        self.executor.sshclient.rsync_down(source, dest)
+        # if self.prefab.id == 'localhost':
+        #     j.do.copyTree(source, dest, keepsymlinks=True)
+        #     return
+        # self.executor.sshclient.rsync_down(source, dest)
+        self.executor.download(source, dest)
+
 
     def file_write(self, location, content, mode=None, owner=None, group=None, check=False,
-                   sudo=False, replaceArgs=False, strip=True, showout=True, append=False):
+                   strip=True, showout=True, append=False,replaceInContent=False):
         """
         @param append if append then will add to file
         """
-        location = self.replace(location)
-        if append:
+        path = self.replace(location)
+        self.executor.file_write(path=path, content=content, mode=mode, owner=owner, group=group, append=append)
+
+        if strip:
             content = j.data.text.strip(content)
-            C = self.file_read(location)
-            C += '\n' + content
-            self.file_write(location, C, mode, owner, group, check, sudo, replaceArgs, strip, showout)
 
-        else:
-            if showout:
-                self.logger.info("write content in %s" % location)
-            if strip:
-                content = j.data.text.strip(content)
-            if replaceArgs:
-                content = self.replace(content)
-
-            # if showout:
-            #     self.logger.info("filewrite: %s"%location)
-
-            self.dir_ensure(j.sal.fs.getParent(location))
-
-            content2 = content.encode('utf-8')
-
-            sig = hashlib.md5(content2).hexdigest()
-            # if sig != self.file_md5(location):
-            # cmd = 'set -ex && echo "%s" | openssl base64 -A -d > %s' % (content_base64, location)
-
-            if len(content2) > 100000:
-                # when contents are too big, bash will crash
-                temp = j.sal.fs.getTempFileName()
-                j.sal.fs.writeFile(filename=temp, contents=content2, append=False)
-                self.upload(temp, location)
-            else:
-                content_base64 = base64.b64encode(content2).decode()
-                # if sig != self.file_md5(location):
-                cmd = 'echo "%s" | base64 -d > %s' % (content_base64, location)
-                if self.isMac:
-                    cmd = 'echo "%s" | base64 -D > %s' % (content_base64, location)
-                res = self.run(cmd, showout=False)
-            if check:
-                file_sig = self.file_md5(location)
-                assert sig == file_sig, "File content does not matches file: %s, got %s, expects %s" % (
-                    location, repr(file_sig), repr(sig))
-
-            self.file_attribs(location, mode=mode, owner=owner, group=group)
+        if replaceInContent:
+            content = self.replace(content)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -871,31 +744,31 @@ class PrefabCore(base):
         else:
             self.file_write(location, "", mode=mode, owner=owner, group=group)
 
-    def _file_stream(self, input, output):
-        while True:
-            piece = input.read(131072)
-            if not piece:
-                break
+    # def _file_stream(self, input, output):
+    #     while True:
+    #         piece = input.read(131072)
+    #         if not piece:
+    #             break
 
-            output.write(piece)
+    #         output.write(piece)
 
-        output.close()
-        input.close()
+    #     output.close()
+    #     input.close()
 
-    def file_upload_binary(self, local, remote):
-        raise NotImplemented("please use upload")
+    # def file_upload_binary(self, local, remote):
+    #     raise NotImplemented("please use upload")
 
-    def file_upload_local(self, local, remote):
-        raise NotImplemented("please use download")
+    # def file_upload_local(self, local, remote):
+    #     raise NotImplemented("please use download")
 
-    def upload_from_local(self, local, remote):
-        raise NotImplemented("please use upload")
+    # def upload_from_local(self, local, remote):
+    #     raise NotImplemented("please use upload")
 
-    def file_download_binary(self, local, remote):
-        raise NotImplemented("please use download")
+    # def file_download_binary(self, local, remote):
+    #     raise NotImplemented("please use download")
 
-    def file_download_local(self, remote, local):
-        raise NotImplemented("please use download")
+    # def file_download_local(self, remote, local):
+    #     raise NotImplemented("please use download")
 
     def file_remove_prefix(self, location, prefix, strip=True):
         # look for each line which starts with prefix & remove
@@ -938,13 +811,13 @@ class PrefabCore(base):
 
         return True
 
-    def check_exist(self, location, content):
-        """check if the file in location contain the content"""
-        location = self.replace(location)
-        content2 = content.encode('utf-8')
-        content_base64 = base64.b64encode(content2).decode()
-        rc, _, _ = self.run('grep -F "$(echo "%s" | openssl base64 -A -d)" %s' % (content_base64, location), die=False)
-        return not rc
+    # def check_exist(self, location, content):
+    #     """check if the file in location contain the content"""
+    #     location = self.replace(location)
+    #     content2 = content.encode('utf-8')
+    #     content_base64 = base64.b64encode(content2).decode()
+    #     rc, _, _ = self.run('grep -F "$(echo "%s" | openssl base64 -A -d)" %s' % (content_base64, location), die=False)
+    #     return not rc
 
     def file_append(self, location, content, mode=None, owner=None, group=None, check_exist=False):
         """Appends the given content to the remote file at the given
@@ -1085,7 +958,7 @@ class PrefabCore(base):
     def dir_exists(self, location):
         """Tells if there is a remote directory at the given location."""
         # self.logger.info("dir exists:%s"%location)
-        return self._check_is_ok('test -d', location)
+        return self.executor.exists(location)
 
     def dir_remove(self, location, recursive=True):
         """ Removes a directory """
@@ -1213,7 +1086,8 @@ class PrefabCore(base):
         finally:
             self.sudomode = sudomode
 
-    def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=False, replaceArgs=True,
+
+    def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
             shell=False, env=None, timeout=600):
         """
         @param profile, execute the bash profile first
@@ -1397,15 +1271,15 @@ class PrefabCore(base):
 
         return rc, out
 
-    def execute_bash(self, script, die=True, profile=False, tmux=False, replace=True, showout=True):
+    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)
 
-    def execute_python(self, script, die=True, profile=False, tmux=False, replace=True, showout=True):
+    def execute_python(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
         return self.execute_script(script, die=die, profile=profile, interpreter="python3", tmux=tmux,
                                    replace=replace, showout=showout)
 
-    def execute_jumpscript(self, script, die=True, profile=False, tmux=False, replace=True, showout=True):
+    def execute_jumpscript(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
         """
         execute a jumpscript(script as content) in a remote tmux command, the stdout will be returned
         """

@@ -11,7 +11,7 @@ class PrefabIssueManager(base):
         self._logger = j.logger.get('j.prefab.issuemanager')
 
     def install(self):
-        j.do.pullGitRepo(url='git@github.com:Jumpscale/issue_manager.git')
+        j.clients.git.pullGitRepo(url='git@github.com:Jumpscale/issue_manager.git')
         self.prefab.core.run('cd %s/libs && pip3 install -e .' % self.code_dir)
         self.prefab.core.file_link(source='%s/apps/IssueManager/' % self.code_dir, destination='$JSAPPSDIR/portals/main/base/IssueManager')
 

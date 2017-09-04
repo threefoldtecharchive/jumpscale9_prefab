@@ -50,7 +50,7 @@ class PrefabVRouter(base):
         self.prefab.development.js8.install()
 
         dest = self.replace('$CODEDIR/github/jumpscale/smartproxy')
-        j.do.pullGitRepo("git@github.com:despiegk/smartproxy.git", dest=dest)
+        j.clients.git.pullGitRepo("git@github.com:despiegk/smartproxy.git", dest=dest)
 
         self.prefab.core.upload("$CODEDIR/github/jumpscale/smartproxy")
         C = """
