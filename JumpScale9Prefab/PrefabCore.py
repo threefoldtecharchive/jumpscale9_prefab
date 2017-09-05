@@ -469,6 +469,8 @@ class PrefabCore(base):
             base = base[:-4]
         if base.endswith(".gz"):
             base = base[:-3]
+        if base.endswith(".bz2"):
+            base = base[:-4]
         if base.endswith(".xz"):
             base = base[:-3]
         if base.endswith(".tar"):
@@ -480,16 +482,23 @@ class PrefabCore(base):
         self.dir_ensure(destination)
         if path.endswith(".tar.gz") or path.endswith(".tgz"):
             cmd = "tar -C %s -xzf %s" % (destination, path)
-            self.run(cmd)
         elif path.endswith(".xz"):
             if self.isMac:
                 self.prefab.package.install('xz')
             else:
                 self.prefab.package.install('xz-utils')
             cmd = "tar -C %s -xzf %s" % (destination, path)
-            self.run(cmd)
+        elif path.endswith("tar.bz2"):      
+            #  cmd = "cd %s;bzip2 -d %s | tar xvf -" % (j.sal.fs.getDirName(path), path)     
+             cmd = "tar -C %s -jxvf %s" % (destination, path)
+            #  tar -jxvf                         
+        elif path.endswith(".bz2"):      
+             cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)      
         else:
             raise j.exceptions.RuntimeError("file_expand format not supported yet for %s" % path)
+
+        # print(cmd)
+        self.run(cmd)
 
         if removeTopDir:
             res = self.find(destination, recursive=False, type="d")

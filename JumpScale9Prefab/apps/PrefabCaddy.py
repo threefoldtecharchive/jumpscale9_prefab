@@ -103,7 +103,7 @@ class PrefabCaddy(app):
             return
 
         self.prefab.core.file_copy(
-            '$TMPDIR/caddy', '$BINDIR/caddy')
+            '/opt/go_proj/bin/caddy', '$BINDIR/caddy')
 
         self.prefab.bash.profileDefault.addPath(
             self.prefab.core.dir_paths['BINDIR'])
@@ -138,23 +138,21 @@ class PrefabCaddy(app):
                 return True
         return False
 
-    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{CFGDIR}}/caddy.cfg",
+    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{HOSTCFGDIR}}/caddy.cfg",
                   logdir="{{LOGDIR}}/caddy/log", email='info@greenitglobe.com', port=8000):
         """
         @param caddyconfigfile
             template args available DATADIR, LOGDIR, WWWROOTDIR, PORT, TMPDIR, EMAIL ... (using mustasche)
         """
-        
-        self.install()
 
         C = """
         #tcpport:{{PORT}}
         :{{PORT}}
         gzip
         log {{LOGDIR}}/access.log
-        # errors {
-        #     log {{LOGDIR}}/errors.log
-        # }
+        errors {
+            log {{LOGDIR}}/errors.log
+        }
         root {{WWWROOTDIR}}
         """
 
@@ -183,14 +181,12 @@ class PrefabCaddy(app):
         raise RuntimeError(
             "Can not find tcpport arg in config file, needs to be '#tcpport:'")
 
-    def start(self, configpath="{{CFGDIR}}/caddy.cfg", agree=True, expect="done."):
+    def start(self, configpath="{{HOSTCFGDIR}}/caddy.cfg", agree=True, expect="done."):
         """
         @expect is to see if we can find this string in output of caddy starting
         """
 
         configpath = self.replace(configpath)
-
-        self.install()
 
         if not j.sal.fs.exists(configpath, followlinks=True):
             raise RuntimeError(
@@ -205,9 +201,12 @@ class PrefabCaddy(app):
 
         self.prefab.processmanager.stop("caddy")  # will also kill
 
+
         cmd = self.prefab.bash.cmdGetPath("caddy")
         if agree:
             agree = " -agree"
+
+        print (cmd)
 
         # self.prefab.processmanager.ensure(
         #     "caddy", 'ulimit -n 8192; %s -conf=%s -email=%s %s' % (cmd, args["CONFIGPATH"], args["EMAIL"], agree), wait=1)
