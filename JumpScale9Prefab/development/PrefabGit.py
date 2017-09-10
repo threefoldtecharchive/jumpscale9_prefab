@@ -31,7 +31,7 @@ class PrefabGit(base):
                  ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh="first"):
 
         if dest is None:
-            base, provider, account, repo, dest, url = j.clients.git.getGitRepoArgs(
+            base, provider, account, repo, dest, url, port = j.clients.git.getGitRepoArgs(
                 url, dest, login, passwd, reset=reset, ssh=ssh, codeDir=self.prefab.core.dir_paths["CODEDIR"])
             # we need to work in remote linux so we only support /opt/code
         else:

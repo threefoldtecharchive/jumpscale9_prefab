@@ -97,10 +97,10 @@ class PrefabNodeJS(app):
         cdest = self.prefab.core.file_download(
             url, expand=True, overwrite=False, to="$TMPDIR")
 
-        self.core.run("mv %s /opt/node"%(cdest))
-        self.core.run("ln -s /opt/node/bin/node /usr/local/bin/node")
-        self.core.run("ln -s /opt/node/bin/npm /usr/local/bin/npm")
-        self.core.run("ln -s /opt/node/bin/npx /usr/local/bin/npx")
+        self.core.run("rm -rf /opt/node;mv %s /opt/node"%(cdest))
+        self.core.run("rm /usr/local/bin/node;ln -s /opt/node/bin/node /usr/local/bin/node")
+        self.core.run("rm /usr/local/bin/npm;ln -s /opt/node/bin/npm /usr/local/bin/npm")
+        self.core.run("rm /usr/local/bin/npx;ln -s /opt/node/bin/npx /usr/local/bin/npx")
 
         self.prefab.bash.profileDefault.envSet("NODE_PATH", self.NODE_PATH)
         self.prefab.bash.profileDefault.addPath(

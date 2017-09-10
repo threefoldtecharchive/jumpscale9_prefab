@@ -62,7 +62,20 @@ class PrefabPostgresql(app):
         if start:
             self.start()
 
+    def configure(self,passwd,dbdir=None):
+        """
+        #TODO
+        if dbdir none then $vardir/postgresqldb/
+        """
+        pass
+
+
     def start(self):
+        """
+        TODO: describe which login/passwd & tell when started
+        root is always postgres
+        TODO: startin tmux
+        """
         cmd = """
         chown postgres $JSAPPSDIR/pgsql/log/
         sudo -u postgres $BINDIR/pg_ctl -D $JSAPPSDIR/pgsql/data -l $JSAPPSDIR/pgsql/log/logfile start

@@ -61,6 +61,17 @@ class PrefabCaddy(app):
         ./caddyman.sh install git
         ./caddyman.sh install iyo
         ./caddyman.sh install iyofilemanager
+        ./caddyman.sh install jwt
+        ./caddyman.sh install login
+        ./caddyman.sh install webdav
+        ./caddyman.sh install restic
+        ./caddyman.sh install hugo
+        ./caddyman.sh install minify
+        ./caddyman.sh install search
+        ./caddyman.sh install filter
+        ./caddyman.sh install cgi
+        ./caddyman.sh install ratelimit
+        ./caddyman.sh install search
 
         # plugins checkout
         pushd $GOPATH/src/github.com/itsyouonline/filemanager
