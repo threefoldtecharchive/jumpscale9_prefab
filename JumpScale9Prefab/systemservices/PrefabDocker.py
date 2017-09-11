@@ -33,7 +33,7 @@ class PrefabDocker(app):
                         if self.prefab.process.find('fuser /var/lib/dpkg/lock'):
                             time.sleep(2)
                         else:
-                            self.prefab.core.run(C, die=die)
+                            self.prefab.core.run(C)
                             break
                     else:
                         raise TimeoutError('resource dpkg is busy')
