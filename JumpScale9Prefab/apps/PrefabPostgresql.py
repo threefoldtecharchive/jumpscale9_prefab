@@ -8,6 +8,8 @@ class PrefabPostgresql(app):
 
     def _init(self):
         self.BUILD_DIR = '$TMPDIR/postgresql'
+        self.passwd = "postgres"
+        self.dbdir = "$VARDIR/postgresqldb"
 
     def build(self, beta=False):
         """
@@ -46,7 +48,7 @@ class PrefabPostgresql(app):
         cd {build_dir}
         make install with-pgport={port}
         """.format(build_dir=self.BUILD_DIR, port=port)
-
+        self.prefab.core.dir_ensure(self.dbdir)
         self.prefab.core.execute_bash(cmd, profile=True)
         if not self._group_exists("postgres"):
             self.prefab.core.run('adduser --system --quiet --home $LIBDIR/postgres --no-create-home \
@@ -55,9 +57,13 @@ class PrefabPostgresql(app):
         cd $JSAPPSDIR/pgsql
         mkdir data
         mkdir log
-        chown  -R postgres $JSAPPSDIR/pgsql/
-        sudo -u postgres $BINDIR/initdb -D $JSAPPSDIR/pgsql/data --no-locale
-        """
+        chown -R postgres $JSAPPSDIR/pgsql/
+        chown -R postgres {postgresdbdir}
+        sudo -u postgres $BINDIR/initdb -D {postgresdbdir} --no-locale
+        echo "\nlocal   all             postgres                                md5\n" >> {postgresdbdir}/pg_hba.conf
+        """.format(postgresdbdir=self.dbdir)
+
+        # NOTE pg_hba.conf uses the default trust configurations.
         self.prefab.core.execute_bash(c, profile=True)
         if start:
             self.start()
@@ -67,23 +73,32 @@ class PrefabPostgresql(app):
         #TODO
         if dbdir none then $vardir/postgresqldb/
         """
-        pass
+        if dbdir is not None:
+            self.dbdir = dbdir
+        self.passwd = passwd
 
 
     def start(self):
         """
-        TODO: describe which login/passwd & tell when started
-        root is always postgres
-        TODO: startin tmux
+        Starts postgresql database server and changes the postgres user's password to password set in configure method or using the default `postgres` password
         """
         cmd = """
         chown postgres $JSAPPSDIR/pgsql/log/
-        sudo -u postgres $BINDIR/pg_ctl -D $JSAPPSDIR/pgsql/data -l $JSAPPSDIR/pgsql/log/logfile start
         """
+
         self.prefab.core.execute_bash(cmd, profile=True)
 
-    def stop(self):
+        cmdpostgres = "sudo -u postgres $BINDIR/postgres -D {postgresdbdir}".format(postgresdbdir=self.dbdir)
+        self.prefab.processmanager.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
+
+        # change password
         cmd = """
-        sudo -u postgres $BINDIR/pg_ctl -D $JSAPPSDIR/pgsql/data -l $JSAPPSDIR/pgsql/log/logfile stop
-        """
+        sudo -u postgres $BINDIR/psql -c "ALTER USER postgres WITH PASSWORD '{passwd}'"; 
+        """.format(passwd=self.passwd)
         self.prefab.core.execute_bash(cmd, profile=True)
+        print("user: {}, password: {}".format("postgres", self.passwd))
+
+
+
+    def stop(self):
+        self.prefab.process.kill("postgres")
