@@ -2,18 +2,15 @@ from js9 import j
 
 
 app = j.tools.prefab._getBaseAppClass()
-import pystache
 
-#TODO: *1 plugins are not implemented, should do so
 
 class PrefabCaddy(app):
-
     NAME = "caddy"
-    defaultplugins = ['http.filemanager', 'http.cors']
+    default_plugins = ['git', 'jwt', 'login', 'webdav', 'restic', 'cgi',
+                       'hugo', 'minify', 'search', 'filter', 'ratelimit']
 
     def _init(self):
         self.BUILDDIR_ = self.replace("$BUILDDIR/caddy")
-        self.CODEDIR_ = self.replace("$CODEDIR/github/mholt/caddy")
 
     def reset(self):
         self.stop()
@@ -22,18 +19,13 @@ class PrefabCaddy(app):
         self.prefab.core.dir_remove(self.BUILDDIR_)
         self.prefab.core.dir_remove("$BINDIR/caddy")
 
-    def build(
-            self,
-            reset=False,
-            plugins=defaultplugins):
+    def build(self, reset=False, plugins=None):
         """
         Get/Build the binaries of caddy itself.
-        :param plugins: is used to specify the required plugins in the installation. Currently the default installation
-        will add the following plugins: filemanager, cors
+        :param reset: boolean to reset the build process
+        :param plugins: list of plugins names to be installed
+        :return:
         """
-
-        # j.tools.prefab.local.apps.caddy.build()
-
         if not self.core.isUbuntu:
             raise j.exceptions.RuntimeError("only ubuntu supported")
 
@@ -41,68 +33,19 @@ class PrefabCaddy(app):
             return
 
         self.prefab.systemservices.base.install()
-        self.prefab.development.golang.install()
+        golang = self.prefab.development.golang
+        golang.install()
 
-        C = """
-        set -e
-
-        cd /tmp
-
-        go get -v github.com/gohugoio/hugo
-        go get -u -v github.com/gohugoio/hugo
-
-        go get -u -v github.com/mholt/caddy
-        go get -v github.com/caddyserver/buildworker/cmd/buildworker
-
-        git clone https://github.com/itsyouonline/caddyman
-        cd caddyman
-        chmod u+x caddyman.sh
-
-        ./caddyman.sh install git
-        ./caddyman.sh install iyo
-        ./caddyman.sh install iyofilemanager
-        ./caddyman.sh install jwt
-        ./caddyman.sh install login
-        ./caddyman.sh install webdav
-        ./caddyman.sh install restic
-        ./caddyman.sh install hugo
-        ./caddyman.sh install minify
-        ./caddyman.sh install search
-        ./caddyman.sh install filter
-        ./caddyman.sh install cgi
-        ./caddyman.sh install ratelimit
-        ./caddyman.sh install search
-
-        # plugins checkout
-        pushd $GOPATH/src/github.com/itsyouonline/filemanager
-        git fetch origin master-iyo-auth:master-iyo-auth
-        git checkout master-iyo-auth
-        popd
-
-        pushd $GOPATH/src/github.com/mholt/caddy/caddy
-        go run build.go
-        cp -v caddy $GOPATH/bin/
-        popd
-
-        """
-        C=j.data.text.strip(C)
-
-        self.prefab.core.execute_bash(C, die=True, profile=True, tmux=False, replace=True, showout=True)
-
-        # self.core.run(C)
-
-        # plugins = ",".join(plugins)
-        # if self.core.isMac:
-        #     caddy_url = 'https://caddyserver.com/download/darwin/amd64?plugins=%s' % plugins
-        #     dest = '$TMPDIR/caddy_darwin_amd64_custom.zip'
-        # else:
-        #     caddy_url = 'https://caddyserver.com/download/linux/amd64?plugins=%s' % plugins
-        #     dest = '$TMPDIR/caddy_linux_amd64_custom.tar.gz'
-        # self.prefab.core.file_download(caddy_url, dest)
-        # self.prefab.core.run('cd $TMPDIR && tar xvf %s' % dest)
+        # build caddy from source using our caddyman
+        self.prefab.development.git.pullRepo("https://github.com/itsyouonline/caddyman", dest="/tmp/caddyman")
+        self.prefab.core.execute_bash("cd /tmp/caddyman && chmod u+x caddyman.sh")
+        if not plugins:
+            plugins = self.default_plugins
+        cmd = "/tmp/caddyman/caddyman.sh install {plugins}".format(plugins=" ".join(plugins))
+        self.prefab.core.execute_bash(cmd)
         self.doneSet('build')
 
-    def install(self, plugins=defaultplugins, reset=False, configpath="{{CFGDIR}}/caddy.cfg"):
+    def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/caddy.cfg"):
         """
         will build if required & then install binary on right location
         """
@@ -113,11 +56,8 @@ class PrefabCaddy(app):
         if self.doneGet('install') and reset is False and self.isInstalled():
             return
 
-        self.prefab.core.file_copy(
-            '/opt/go_proj/bin/caddy', '$BINDIR/caddy')
-
-        self.prefab.bash.profileDefault.addPath(
-            self.prefab.core.dir_paths['BINDIR'])
+        self.prefab.core.file_copy('/opt/go_proj/bin/caddy', '$BINDIR/caddy')
+        self.prefab.bash.profileDefault.addPath(self.prefab.core.dir_paths['BINDIR'])
         self.prefab.bash.profileDefault.save()
 
         configpath = self.replace(configpath)
@@ -149,7 +89,7 @@ class PrefabCaddy(app):
                 return True
         return False
 
-    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{HOSTCFGDIR}}/caddy.cfg",
+    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{CFGDIR}}/caddy.cfg",
                   logdir="{{LOGDIR}}/caddy/log", email='info@greenitglobe.com', port=8000):
         """
         @param caddyconfigfile
@@ -162,7 +102,7 @@ class PrefabCaddy(app):
         gzip
         log {{LOGDIR}}/access.log
         errors {
-            log {{LOGDIR}}/errors.log
+            * {{LOGDIR}}/errors.log
         }
         root {{WWWROOTDIR}}
         """
@@ -192,7 +132,7 @@ class PrefabCaddy(app):
         raise RuntimeError(
             "Can not find tcpport arg in config file, needs to be '#tcpport:'")
 
-    def start(self, configpath="{{HOSTCFGDIR}}/caddy.cfg", agree=True, expect="done."):
+    def start(self, configpath="{{CFGDIR}}/caddy.cfg", agree=True, expect="done."):
         """
         @expect is to see if we can find this string in output of caddy starting
         """
