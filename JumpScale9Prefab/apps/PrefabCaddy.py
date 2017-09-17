@@ -37,7 +37,7 @@ class PrefabCaddy(app):
         golang.install()
 
         # build caddy from source using our caddyman
-        self.prefab.development.git.pullRepo("https://github.com/itsyouonline/caddyman", dest="/tmp/caddyman")
+        self.prefab.development.git.pullRepo("https://github.com/incubaid/caddyman", dest="/tmp/caddyman")
         self.prefab.core.execute_bash("cd /tmp/caddyman && chmod u+x caddyman.sh")
         if not plugins:
             plugins = self.default_plugins
