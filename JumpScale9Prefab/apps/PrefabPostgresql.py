@@ -91,6 +91,17 @@ class PrefabPostgresql(app):
         cmdpostgres = "sudo -u postgres $BINDIR/postgres -D {postgresdbdir}".format(postgresdbdir=self.dbdir)
         self.prefab.processmanager.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
 
+        # make sure postgres is ready
+        import time
+        timeout = time.time() + 10
+        while True:
+            rc, out, err = self.prefab.core.run("pg_isready", die=False)
+            if time.time() > timeout:
+                raise j.exceptions.Timeout("Postgres isn't ready")
+            if rc == 0:
+                break
+            time.sleep(2)
+
         # change password
         cmd = """
         sudo -u postgres $BINDIR/psql -c "ALTER USER postgres WITH PASSWORD '{passwd}'"; 
