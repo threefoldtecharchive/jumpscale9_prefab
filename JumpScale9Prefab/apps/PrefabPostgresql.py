@@ -95,7 +95,7 @@ class PrefabPostgresql(app):
         import time
         timeout = time.time() + 10
         while True:
-            rc, out, err = self.prefab.core.run("pg_isready", die=False)
+            rc, out, err = self.prefab.core.run("sudo -H -u postgres $BINDIR/pg_isready", die=False)
             if time.time() > timeout:
                 raise j.exceptions.Timeout("Postgres isn't ready")
             if rc == 0:

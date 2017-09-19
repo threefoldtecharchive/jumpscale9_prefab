@@ -32,36 +32,37 @@ class PrefabCrm(app):
 
         self.doneSet('build')
 
-    def install(self, reset=False, start=False, host="localhost", db_name="crm", demo=False):
+    def install(self, reset=False, start=False, caddy_port=80, crm_port=5000, db_name="crm", demo=False):
         if reset is False and self.isInstalled():
             return
         if not self.doneGet('build'):
             self.build()
 
         if not self.doneGet('configure'):
-            self.configure(host=host, db_name=db_name, demo=demo)
+            self.configure(caddy_port=caddy_port, crm_port=crm_port, db_name=db_name, demo=demo)
 
         if start:
             self.start()
 
-    def configure(self, host, db_name, demo):
+    def configure(self, caddy_port, crm_port, db_name, demo):
         """
         Configure
         """
 
         # Configure Caddy
         caddy_cfg = """
-        #tcpport:80
-        {{HOST}}:80
+        #tcpport:{{PORT}}
+        :{{PORT}}
         gzip
         log {{LOGDIR}}/access.log
-        proxy / localhost:5000
+        proxy / localhost:{{CRM_PORT}}
         errors {
             * {{LOGDIR}}/errors.log
         }
         """
         cfg_params = {
-            'HOST': host,
+            'PORT': caddy_port,
+            'CRM_PORT': crm_port,
             'LOGDIR': self.replace("{{LOGDIR}}/caddy/log")
         }
         self.prefab.core.dir_ensure(cfg_params["LOGDIR"])
@@ -90,7 +91,7 @@ SQLALCHEMY_DATABASE_URI="postgresql://postgres:postgres@localhost:5432/{db_name}
 
         self.doneSet('configure')
 
-    def start(self):
+    def start(self, crm_port=5000):
         """
         Start postgres, caddy, crm
         """
@@ -100,10 +101,8 @@ SQLALCHEMY_DATABASE_URI="postgresql://postgres:postgres@localhost:5432/{db_name}
         if not self.prefab.apps.caddy.isStarted():
             self.prefab.apps.caddy.start()
 
-        cmd = """
-        cd {src_dir}/flaskcrm
-        export EXTRA_CONFIG='extra.cfg'
-        python3 manage.py startapp 
-        """.format(src_dir=self.crm_dir)
-        self.prefab.core.execute_script(cmd, profile=True)
+        cmd = "cd {src_dir}/flaskcrm;export EXTRA_CONFIG=extra.cfg;"
+        cmd += "python3 manage.py startapp --host 0.0.0.0 --port {crm_port}"
+        cmd = cmd.format(src_dir=self.crm_dir, crm_port=crm_port)
+        self.prefab.processmanager.ensure(name="crm", cmd=cmd, autostart=True)
 
