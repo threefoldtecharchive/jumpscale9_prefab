@@ -262,7 +262,7 @@ class PrefabPackage(base):
             C = """
             apt-get clean
             rm -rf /bd_build
-            rm -rf /tmp/* /var/tmp/*
+            rm -rf /var/tmp/*
             rm -f /etc/dpkg/dpkg.cfg.d/02apt-speedup
 
             find -regex '.*__pycache__.*' -delete
