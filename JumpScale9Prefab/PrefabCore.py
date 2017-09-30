@@ -736,13 +736,14 @@ class PrefabCore(base):
         @param append if append then will add to file
         """
         path = self.replace(location)
-        self.executor.file_write(path=path, content=content, mode=mode, owner=owner, group=group, append=append)
 
         if strip:
             content = j.data.text.strip(content)
 
         if replaceInContent:
             content = self.replace(content)
+
+        self.executor.file_write(path=path, content=content, mode=mode, owner=owner, group=group, append=append)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -1190,7 +1191,7 @@ class PrefabCore(base):
     def pwd(self):
         return self._cd
 
-    def execute_script(self, content, die=True, profile=False, interpreter="bash", tmux=True,
+    def execute_script(self, content, die=True, profile=False, interpreter="bash", tmux=False,
                        replace=True, showout=True):
         """
         generic exection of script, default interpreter is bash
