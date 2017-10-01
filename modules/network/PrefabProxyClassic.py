@@ -200,7 +200,7 @@ class PrefabProxyClassic(base):
         cachedir = "%s/polipo_cache" % storagemntpoint
 
         if btrfs:
-            self.prefab.btrfs.subvolumeCreate(cachedir)
+            self.prefab.storage.btrfs.subvolumeCreate(cachedir)
         else:
             self.prefab.core.dir_ensure(cachedir)
 

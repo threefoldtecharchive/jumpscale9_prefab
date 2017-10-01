@@ -26,8 +26,8 @@ class PrefabPython(base):
             self.pipAll()
             return
 
-        self.prefab.development.openssl.build()
-        self.prefab.development.libffi.build()
+        self.prefab.lib.openssl.build()
+        self.prefab.lib.libffi.build()
         self.prefab.system.package.install('zlib1g-dev')
         if self.prefab.core.isMac:
             if not self.doneGet("xcode_install"):
@@ -67,8 +67,8 @@ class PrefabPython(base):
 
                 """
 
-                C = C.replace("$openssldir", self.prefab.development.openssl.BUILDDIRL)
-                C = C.replace("$libffidir", self.prefab.development.libffi.BUILDDIRL)
+                C = C.replace("$openssldir", self.prefab.lib.openssl.BUILDDIRL)
+                C = C.replace("$libffidir", self.prefab.lib.libffi.BUILDDIRL)
                 C = self.replace(C)
 
                 self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, C)
@@ -80,7 +80,7 @@ class PrefabPython(base):
                     _socket socketmodule.c
                     SSL={openssldir}
                     _ssl _ssl.c -DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl -L$(SSL)/lib -lssl -lcrypto
-                    """.format(openssldir=self.prefab.development.openssl.BUILDDIRL)
+                    """.format(openssldir=self.prefab.lib.openssl.BUILDDIRL)
 
                 self.prefab.core.file_write(location=setup_path, content=content, append=True)
 
@@ -94,7 +94,7 @@ class PrefabPython(base):
                 make clean
                 make -j4
                 make install
-                """.format(builddir=self.BUILDDIRL, codedir=self.CODEDIRL, openssldir=self.prefab.development.openssl.BUILDDIRL)
+                """.format(builddir=self.BUILDDIRL, codedir=self.CODEDIRL, openssldir=self.prefab.lib.openssl.BUILDDIRL)
 
             self.logger.info("compile python3")
             self.logger.info(C)
@@ -142,7 +142,7 @@ class PrefabPython(base):
                                    recursive=True, rsyncdelete=False, createdir=True)
 
         # now copy openssl parts in
-        self.prefab.core.copyTree(source=self.prefab.development.openssl.BUILDDIRL, dest=self.BUILDDIRL,
+        self.prefab.core.copyTree(source=self.prefab.lib.openssl.BUILDDIRL, dest=self.BUILDDIRL,
                                    keepsymlinks=True, deletefirst=False,
                                    overwriteFiles=True, ignoredir=ignoredir,
                                    recursive=True, rsyncdelete=False, createdir=True)

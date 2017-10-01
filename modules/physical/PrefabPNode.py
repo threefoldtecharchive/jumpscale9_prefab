@@ -193,7 +193,7 @@ class PrefabPNode(base):
 
         else:
             # check if no mounted btrfs partition yet and create if required
-            self.prefab.btrfs.subvolumeCreate(mountpoint)
+            self.prefab.storage.btrfs.subvolumeCreate(mountpoint)
 
     def buildG8OSImage(self):
         """

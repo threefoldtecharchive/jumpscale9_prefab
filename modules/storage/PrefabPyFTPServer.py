@@ -63,7 +63,7 @@ class PrefabPyFTPServer(base):
             # TODO install btrfs for mac
             pass
 
-        self.prefab.btrfs.subvolumeCreate(root)
+        self.prefab.storage.btrfs.subvolumeCreate(root)
 
         if config == "":
             authorizer = "    from pyftpdlib.authorizers import UnixAuthorizer"
@@ -71,7 +71,7 @@ class PrefabPyFTPServer(base):
             authorizer = ""
             configmodel = j.data.serializer.yaml.loads(config)
             for key, obj in configmodel.items():
-                self.prefab.btrfs.subvolumeCreate(j.sal.fs.joinPaths(root, key))
+                self.prefab.storage.btrfs.subvolumeCreate(j.sal.fs.joinPaths(root, key))
                 for user, obj2 in obj.items():
                     if user.lower() == "anonymous":
                         authorizer += "    authorizer.add_anonymous('%s')\n" % j.sal.fs.joinPaths(root, key)

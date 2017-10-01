@@ -3,7 +3,7 @@ from js9 import j
 base = j.tools.prefab._getBaseClass()
 
 
-class PrefabJS8(base):
+class Prefabjs8Core(base):
 
     def install(self, reset=False, deps=True, branch='8.2.0', keep=False):
 
@@ -55,8 +55,8 @@ class PrefabJS8(base):
     #     self.prefab.runtimes.python.install()
     #     self.prefab.development.pip.ensure()
     #     self.prefab.apps.redis.install()
-    #     self.prefab.apps.brotli.build()
-    #     self.prefab.apps.brotli.install()
+    #     self.prefab.lib.brotli.build()
+    #     self.prefab.lib.brotli.install()
     #
     #     self.prefab.development.pip.install('pytoml')
     #     self.prefab.development.pip.install('pygo')

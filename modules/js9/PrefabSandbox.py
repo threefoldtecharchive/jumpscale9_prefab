@@ -19,8 +19,8 @@ class PrefabSandbox(base):
 
         sandbox_script = """
         prefab = j.tools.prefab.local
-        prefab.apps.brotli.build()
-        prefab.apps.brotli.install()
+        prefab.lib.brotli.build()
+        prefab.lib.brotli.install()
         paths = []
         paths.append("/usr/lib/python3/dist-packages")
         paths.append("/usr/lib/python3.5/")
