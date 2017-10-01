@@ -19,8 +19,8 @@ class PrefabVolumeDriver(app):
                                      'deb http://apt.openvstorage.org unstable main')
         self.prefab.core.run(
             'echo "deb http://us.archive.ubuntu.com/ubuntu xenial main universe" >> /etc/apt/sources.list')
-        self.prefab.package.update()
-        self.prefab.package.upgrade(distupgrade=True)
+        self.prefab.system.package.update()
+        self.prefab.system.package.upgrade(distupgrade=True)
 
         apt_deps = """
         gcc g++ clang-3.8 valgrind \
@@ -43,7 +43,7 @@ class PrefabVolumeDriver(app):
         supervisor rpcbind \
         libxio0 libxio-dev libev4
         """
-        self.prefab.package.multiInstall(apt_deps, allow_unauthenticated=True)
+        self.prefab.system.package.multiInstall(apt_deps, allow_unauthenticated=True)
 
     def _build(self, version='6.0.0'):
         workspace = self.replace("$TMPDIR/volumedriver-workspace")
@@ -54,9 +54,9 @@ class PrefabVolumeDriver(app):
             'version': version,
         }
 
-        str_repl['volumedriver'] = self.prefab.development.git.pullRepo(
+        str_repl['volumedriver'] = self.prefab.tools.git.pullRepo(
             'https://github.com/openvstorage/volumedriver', depth=None)
-        str_repl['buildtools'] = self.prefab.development.git.pullRepo(
+        str_repl['buildtools'] = self.prefab.tools.git.pullRepo(
             'https://github.com/openvstorage/volumedriver-buildtools', depth=None)
         self.prefab.core.run('cd %(volumedriver)s;git checkout tags/%(version)s' % str_repl)
 

@@ -24,11 +24,11 @@ class PrefabLibffi(base):
         if self.doneGet("build") and not reset:
             return
 
-        self.prefab.package.mdupdate()
+        self.prefab.system.package.mdupdate()
         self.prefab.core.dir_ensure(self.BUILDDIRL)
-        self.prefab.package.multiInstall(['build-essential', 'dh-autoreconf'])
+        self.prefab.system.package.multiInstall(['build-essential', 'dh-autoreconf'])
         url = "https://github.com/libffi/libffi.git"
-        cpath = self.prefab.development.git.pullRepo(url, reset=reset, ssh=False)
+        cpath = self.prefab.tools.git.pullRepo(url, reset=reset, ssh=False)
 
         assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
 

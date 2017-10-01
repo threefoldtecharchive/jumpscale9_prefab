@@ -27,11 +27,11 @@ class PrefabZerotier(base):
                 self.prefab.core.run("xcode-select --install", die=False, showout=True)
                 self.doneSet("xcode_install")
         elif self.prefab.core.isUbuntu:
-            self.prefab.package.ensure("gcc")
-            self.prefab.package.ensure("g++")
-            self.prefab.package.ensure('make')
+            self.prefab.system.package.ensure("gcc")
+            self.prefab.system.package.ensure("g++")
+            self.prefab.system.package.ensure('make')
 
-        codedir = self.prefab.development.git.pullRepo(
+        codedir = self.prefab.tools.git.pullRepo(
             "https://github.com/zerotier/ZeroTierOne", reset=reset, depth=1, branch='1.1.14')
 
         cmd = "cd {code} && DESTDIR={build} make one".format(code=codedir, build=self.BUILDDIRL)
@@ -53,10 +53,10 @@ class PrefabZerotier(base):
     def start(self):
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
-        self.prefab.processmanager.ensure('zerotier-one', 'zerotier-one')
+        self.prefab.system.processManager.ensure('zerotier-one', 'zerotier-one')
 
     def stop(self):
-        self.prefab.processmanager.stop('zerotier-one')
+        self.prefab.system.processManager.stop('zerotier-one')
 
     def join_network(self, network_id):
         """

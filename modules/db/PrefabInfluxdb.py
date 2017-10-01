@@ -12,12 +12,12 @@ class PrefabInfluxdb(app):
             return
 
         if dependencies:
-            self.prefab.package.mdupdate()
+            self.prefab.system.package.mdupdate()
 
         self.prefab.core.dir_ensure('$BINDIR')
 
         if self.prefab.core.isMac:
-            self.prefab.package.install('influxdb')
+            self.prefab.system.package.install('influxdb')
             self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg/influxdb")
             self.prefab.core.file_copy("/usr/local/etc/influxdb.conf", "$TEMPLATEDIR/cfg/influxdb/influxdb.conf")
 
@@ -60,5 +60,5 @@ class PrefabInfluxdb(app):
     def start(self):
         binPath = self.prefab.bash.cmdGetPath('influxd')
         cmd = "%s -config $JSCFGDIR/influxdb/influxdb.conf" % (binPath)
-        self.prefab.process.kill("influxdb")
-        self.prefab.processmanager.ensure("influxdb", cmd=cmd, env={}, path="")
+        self.prefab.system.process.kill("influxdb")
+        self.prefab.system.processManager.ensure("influxdb", cmd=cmd, env={}, path="")

@@ -29,7 +29,7 @@ class PrefabNet(base):
             # TODO: check if the rule exists
             self.prefab.core.run('iptables -t nat -A POSTROUTING -s {ipaddr}/{cidr} ! -d \
                               {ipaddr}/{cidr} -j MASQUERADE'.format(ipaddr=ipaddr, cidr=cidr))
-            self.prefab.package.install('iptables-persistent')
+            self.prefab.system.package.install('iptables-persistent')
             self.prefab.core.run('iptables-save > /etc/iptables/rules.v4')
             self.prefab.core.run('ip6tables-save > /etc/iptables/rules.v6')
 
@@ -104,7 +104,7 @@ class PrefabNet(base):
                     "nmap %s -n -sP | grep report | awk '{print $5}'" % range, showout=False)
             except Exception as e:
                 if str(e).find("command not found") != -1:
-                    self.prefab.package.install("nmap")
+                    self.prefab.system.package.install("nmap")
                     _, out, _ = self.prefab.core.run(
                         "nmap %s -n -sP | grep report | awk '{print $5}'" % range, showout=False)
             for line in out.splitlines():

@@ -18,12 +18,12 @@ class PrefabGeoDns(app):
         if reset is False and self.isInstalled():
             return
         # deps
-        # self.prefab.development.golang.install(force=False)
-        self.prefab.package.mdupdate()
-        self.prefab.package.multiInstall(["libgeoip-dev", 'build-essential', 'pkg-config'])
+        # self.prefab.runtimes.golang.install(force=False)
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.multiInstall(["libgeoip-dev", 'build-essential', 'pkg-config'])
 
         # build
-        self.prefab.development.golang.get("github.com/abh/geodns")
+        self.prefab.runtimes.golang.get("github.com/abh/geodns")
 
         # moving files and creating config
         self.prefab.core.dir_ensure('$BINDIR')
@@ -46,13 +46,13 @@ class PrefabGeoDns(app):
         cmd = "$BINDIR/geodns -interface %s -port %s -config=%s -identifier=%s -cpus=%s" % (
             ip, str(port), config_dir, identifier, str(cpus))
         if tmux:
-            pm = self.prefab.processmanager.get("tmux")
+            pm = self.prefab.system.processManager.get("tmux")
             pm.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")
         else:
-            self.prefab.processmanager.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")
+            self.prefab.system.processManager.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")
 
     def stop(self, name="geodns_main"):
         """
         stop geodns server with @name
         """
-        self.prefab.processmanager.stop(name)
+        self.prefab.system.processManager.stop(name)

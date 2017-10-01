@@ -13,7 +13,7 @@ class PrefabSandbox(base):
 
         """
         self.prefab.development.js8.install()
-        self.prefab.package.mdupdate()
+        self.prefab.system.package.mdupdate()
 
         self.prefab.core.file_copy('/usr/local/bin/jspython', '$BINDIR')
 

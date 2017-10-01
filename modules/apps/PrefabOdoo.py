@@ -10,7 +10,7 @@ class PrefabOdoo(app):
         if self.prefab.core.command_check('pip2'):
             return
         pip_url = 'https://bootstrap.pypa.io/get-pip.py'
-        self.prefab.package.multiInstall(['python2.7', 'python2.7-dev'])
+        self.prefab.system.package.multiInstall(['python2.7', 'python2.7-dev'])
         self.prefab.core.file_download(pip_url, overwrite=False)
         cmd = """
         python2.7 $TMPDIR/get-pip.py
@@ -21,7 +21,7 @@ class PrefabOdoo(app):
         if not self.prefab.apps.postgresql.isInstalled():
             self.prefab.apps.postgresql.install()
         self._install_pip2()
-        self.prefab.package.multiInstall([
+        self.prefab.system.package.multiInstall([
             'python-ldap', 'libldap2-dev', 'libsasl2-dev', 'libssl-dev',
             'libxml2-dev', 'libxslt-dev', 'python-six', 'libpq-dev'
         ])
@@ -29,7 +29,7 @@ class PrefabOdoo(app):
         self.prefab.core.run("npm install -g less less-plugin-clean-css -y", profile=True)
         odoo_git_url = "https://github.com/odoo/odoo.git"
         odoo_dir = '$TMPDIR/odoo'
-        self.prefab.development.git.pullRepo(odoo_git_url, dest=odoo_dir, branch='10.0', depth=1, ssh=False)
+        self.prefab.tools.git.pullRepo(odoo_git_url, dest=odoo_dir, branch='10.0', depth=1, ssh=False)
         cmd = """
         export PATH=$PATH:$BINDIR/postgres/
         cd {} && pip2 install -r requirements.txt

@@ -44,7 +44,7 @@ class PrefabKVM(base):
         """
         if not self.prefab.core.isUbuntu or self.prefab.platformtype.osversion != '16.04':
             raise RuntimeError("only support ubuntu 16.04")
-        self.prefab.package.mdupdate()
+        self.prefab.system.package.mdupdate()
         self.prefab.development.pip.ensure()
         self._libvirt()
 
@@ -52,12 +52,12 @@ class PrefabKVM(base):
         """
         Install required packages for kvm
         """
-        self.prefab.package.multiInstall(self._apt_packages)
+        self.prefab.system.package.multiInstall(self._apt_packages)
         self.prefab.development.pip.multiInstall(self._pip_packages, upgrade=False)
 
     def uninstall(self):
         for package in self._apt_packages:
-            self.prefab.package.remove(package)
+            self.prefab.system.package.remove(package)
         for package in self._pip_packages:
             self.prefab.development.pip.packageRemove(package)
 

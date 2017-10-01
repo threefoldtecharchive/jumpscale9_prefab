@@ -72,7 +72,7 @@ class PrefabSSH(base):
                                                   (range))
             except Exception as e:
                 if str(e).find("command not found") != -1:
-                    self.prefab.package.install("nmap")
+                    self.prefab.system.package.install("nmap")
                     # out=self.prefab.core.run("nmap -p 22 %s | grep for"%range)
                     _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX $TMPDIR/nmap" %
                                                       (range))
@@ -197,8 +197,8 @@ class PrefabSSH(base):
         self.logger.info("backdoor is working (with passwd)")
 
         self.logger.info("make sure some required packages are installed")
-        self.prefab.package.install('openssl')
-        self.prefab.package.install('rsync')
+        self.prefab.system.package.install('openssl')
+        self.prefab.system.package.install('rsync')
 
         self.unauthorizeAll()
 

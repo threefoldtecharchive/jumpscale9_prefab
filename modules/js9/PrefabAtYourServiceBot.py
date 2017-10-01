@@ -31,7 +31,7 @@ class PrefabAtYourServiceBot(app):
 
         self.prefab.bash.fixlocale()
 
-        self.prefab.development.git.pullRepo('https://github.com/Jumpscale/jscockpit.git')
+        self.prefab.tools.git.pullRepo('https://github.com/Jumpscale/jscockpit.git')
         if link:
             self.link_code()
         else:
@@ -57,7 +57,7 @@ class PrefabAtYourServiceBot(app):
         cmd = self.replace(
             'jspython ays-bot.py --config $JSCFGDIR/ays_bot/%s/config.toml' % self._instance)
         cwd = self.replace('$JSAPPSDIR/ays_bot')
-        self.prefab.processmanager.ensure('aysbot__%s' % self._instance, cmd=cmd, path=cwd)
+        self.prefab.system.processManager.ensure('aysbot__%s' % self._instance, cmd=cmd, path=cwd)
 
     def install_deps(self):
         deps = """

@@ -17,7 +17,7 @@ class PrefabGit(base):
         """
         pull repo of git code & build git command line, goal is to have smallest possible git binary
         """
-        self.prefab.package.multiInstall([
+        self.prefab.system.package.multiInstall([
             "tcl",
             "libcurl4-gnutls-dev",
             "gettext",

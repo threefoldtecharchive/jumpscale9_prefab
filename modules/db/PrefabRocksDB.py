@@ -20,13 +20,13 @@ class PrefabRocksDB(base):
         self.prefab.core.dir_ensure(self.BUILDDIRL)
 
         # install deps
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('build-essential')
-        self.prefab.package.install('libsnappy-dev')
-        self.prefab.package.install('zlib1g-dev')
-        self.prefab.package.install('libbz2-dev')
-        self.prefab.package.install('libzstd-dev')
-        self.prefab.package.install('librocksdb-dev')
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install('build-essential')
+        self.prefab.system.package.install('libsnappy-dev')
+        self.prefab.system.package.install('zlib1g-dev')
+        self.prefab.system.package.install('libbz2-dev')
+        self.prefab.system.package.install('libzstd-dev')
+        self.prefab.system.package.install('librocksdb-dev')
 
         # set env variables
         profile = self.prefab.bash.profileDefault
@@ -53,7 +53,7 @@ class PrefabRocksDB(base):
         self.prefab.core.run('cd $TMPDIR/rocksdb-%s && cp -a librocksdb.so* %s' % (self.ROCKSDB_VERSION,
                                                                                     self.BUILDDIRL))
         self.prefab.core.run('cd $TMPDIR/rocksdb-%s && cp -a librocksdb.so* /usr/lib' % self.ROCKSDB_VERSION)
-        # self.prefab.development.golang.get('github.com/tecbot/gorocksdb', tags=['embed'])
+        # self.prefab.runtimes.golang.get('github.com/tecbot/gorocksdb', tags=['embed'])
 
         self.doneSet("build")
 
@@ -62,8 +62,8 @@ class PrefabRocksDB(base):
 
     def install(self):
         # install required packages to run.
-        self.prefab.package.install("libhiredis-dev")
-        self.prefab.package.install("libbz2-dev")
-        self.prefab.package.install('python3-dev')
+        self.prefab.system.package.install("libhiredis-dev")
+        self.prefab.system.package.install("libbz2-dev")
+        self.prefab.system.package.install('python3-dev')
         self.prefab.development.pip.ensure()
         self.prefab.development.pip.multiInstall(['pyrocksdb', 'peewee'])

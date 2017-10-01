@@ -102,21 +102,21 @@ class PrefabPortal(base):
             return
 
         if "darwin" not in self.prefab.platformtype.osname:
-            self.prefab.package.ensure('build-essential')
-            self.prefab.package.ensure('libssl-dev')
-            self.prefab.package.ensure('libffi-dev')
-            self.prefab.package.ensure('python3-dev')
+            self.prefab.system.package.ensure('build-essential')
+            self.prefab.system.package.ensure('libssl-dev')
+            self.prefab.system.package.ensure('libffi-dev')
+            self.prefab.system.package.ensure('python3-dev')
 
         if "darwin" in self.prefab.platformtype.osname:
-            self.prefab.package.multiInstall(['libtiff', 'libjpeg', 'webp', 'little-cms2', 'snappy'])
+            self.prefab.system.package.multiInstall(['libtiff', 'libjpeg', 'webp', 'little-cms2', 'snappy'])
             self.prefab.core.run('CPPFLAGS="-I/usr/local/include -L/usr/local/lib" pip3 install python-snappy')
         else:
-            self.prefab.package.multiInstall(['libjpeg-dev', 'libffi-dev', 'zlib1g-dev'])
+            self.prefab.system.package.multiInstall(['libjpeg-dev', 'libffi-dev', 'zlib1g-dev'])
 
         # snappy install
         if "darwin" not in self.prefab.platformtype.osname:
-            self.prefab.package.ensure('libsnappy-dev')
-            self.prefab.package.ensure('libsnappy1v5')
+            self.prefab.system.package.ensure('libsnappy-dev')
+            self.prefab.system.package.ensure('libsnappy1v5')
             self.prefab.development.pip.install('python-snappy')
 
         cmd = """
@@ -130,7 +130,7 @@ class PrefabPortal(base):
         self.logger.info("Get portal code on branch:'%s'" % branch)
         if branch == "":
             branch = os.environ.get('JSBRANCH')
-        self.prefab.development.git.pullRepo(
+        self.prefab.tools.git.pullRepo(
             "https://github.com/Jumpscale/portal9.git", branch=branch)
 
     def linkCode(self):
@@ -207,13 +207,13 @@ class PrefabPortal(base):
         """
         self.prefab.apps.mongodb.start()
         cmd = "python3 portal_start.py"
-        self.prefab.processmanager.ensure('portal', cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, 'main'))
+        self.prefab.system.processManager.ensure('portal', cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, 'main'))
 
         if passwd is not None:
             self.set_admin_password(passwd)
 
     def stop(self):
-        self.prefab.processmanager.stop('portal')
+        self.prefab.system.processManager.stop('portal')
 
     def set_admin_password(self, passwd):
         # wait for the admin user to be created by portal

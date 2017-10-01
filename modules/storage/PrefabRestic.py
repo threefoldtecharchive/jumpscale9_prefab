@@ -26,11 +26,11 @@ class PrefabRestic(app):
         if reset:
             self.reset()
 
-        self.prefab.development.golang.install()
+        self.prefab.runtimes.golang.install()
 
         # build
         url = "https://github.com/restic/restic/"
-        self.prefab.development.git.pullRepo(url, dest=self.CODEDIR, ssh=False, depth=1)
+        self.prefab.tools.git.pullRepo(url, dest=self.CODEDIR, ssh=False, depth=1)
 
         build_cmd = 'cd {dir}; go run build.go -k -v'.format(dir=self.CODEDIR)
         self.prefab.core.run(build_cmd, profile=True)

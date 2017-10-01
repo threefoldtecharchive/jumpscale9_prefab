@@ -30,7 +30,7 @@ class PrefabDocker(app):
                 timeout = time.time() + 500
                 while True:
                     if time.time() < timeout:
-                        if self.prefab.process.find('fuser /var/lib/dpkg/lock'):
+                        if self.prefab.system.process.find('fuser /var/lib/dpkg/lock'):
                             time.sleep(2)
                         else:
                             self.prefab.core.run(C)
@@ -44,13 +44,13 @@ class PrefabDocker(app):
             #     """
             #     self.prefab.core.run(C)
         if self.prefab.core.isArch:
-            self.prefab.package.install("docker")
-            # self.prefab.package.install("docker-compose")
+            self.prefab.system.package.install("docker")
+            # self.prefab.system.package.install("docker-compose")
         self._init_docker()
 
     def ubuntuBuild(self, push=False):
         self._init_docker()
-        dest = self.prefab.development.git.pullRepo('https://github.com/Jumpscale/dockers.git', ssh=False)
+        dest = self.prefab.tools.git.pullRepo('https://github.com/Jumpscale/dockers.git', ssh=False)
         path = self.prefab.core.joinpaths(dest, 'js8/x86_64/01_ubuntu1604')
 
         C = """

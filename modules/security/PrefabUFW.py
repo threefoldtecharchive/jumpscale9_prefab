@@ -13,13 +13,15 @@ class PrefabUFW(base):
 
     @property
     def ufw_enabled(self):
+        if self.prefab.core.isMac:
+            return  False        
         if not self._ufw_enabled:
             if not self.prefab.core.isMac:
                 if self.prefab.bash.cmdGetPath("nft", die=False) is not False:
                     self._ufw_enabled = False
                     self.logger.info("cannot use ufw, nft installed")
                 if self.prefab.bash.cmdGetPath("ufw", die=False) is False:
-                    self.prefab.package.install("ufw")
+                    self.prefab.system.package.install("ufw")
                     self.prefab.bash.cmdGetPath("ufw")
                 self._ufw_enabled = "inactive" not in self.prefab.core.run("ufw status")[1]
         return self._ufw_enabled
@@ -41,7 +43,7 @@ class PrefabUFW(base):
 
     @property
     def ufw_rules_allow(self):
-        if self.prefab.core.isMac:
+        if self.ufw_enabled == False:
             return {}
         if self._ufw_allow == {}:
             self._ufw_status()
@@ -49,14 +51,13 @@ class PrefabUFW(base):
 
     @property
     def ufw_rules_deny(self):
-        if self.prefab.core.isMac:
+        if self.ufw_enabled == False:
             return {}
         if self._ufw_deny == {}:
             self._ufw_status()
         return self._ufw_deny
 
     def _ufw_status(self):
-        self.ufw_enable()
         _, out, _ = self.prefab.core.run("ufw status")
         for line in out.splitlines():
             if line.find("(v6)") != -1:
@@ -69,19 +70,18 @@ class PrefabUFW(base):
                 self._ufw_deny[ip] = "*"
 
     def allowIncoming(self, port, protocol='tcp'):
-        if self.prefab.core.isMac:
-            return
-        self.ufw_enable()
+        if self.ufw_enabled==False:
+            return 
         self.prefab.core.run("ufw allow %s/%s" % (port, protocol))
 
     def denyIncoming(self, port):
-        if self.prefab.core.isMac:
-            return
-
-        self.ufw_enable()
+        if self.ufw_enabled==False:
+            return 
         self.prefab.core.run("ufw deny %s" % port)
 
     def flush(self):
+        if self.ufw_enabled==False:
+            return          
         C = """
         ufw disable
         iptables --flush
@@ -94,6 +94,8 @@ class PrefabUFW(base):
         self.prefab.core.execute_bash(C)
 
     def show(self):
+        if self.ufw_enabled==False:
+            return                 
         a = self.ufw_rules_allow
         b = self.ufw_rules_deny
         self.logger.info("ALLOW")

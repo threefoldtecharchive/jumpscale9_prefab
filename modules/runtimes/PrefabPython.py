@@ -28,7 +28,7 @@ class PrefabPython(base):
 
         self.prefab.development.openssl.build()
         self.prefab.development.libffi.build()
-        self.prefab.package.install('zlib1g-dev')
+        self.prefab.system.package.install('zlib1g-dev')
         if self.prefab.core.isMac:
             if not self.doneGet("xcode_install"):
                 self.prefab.core.run("xcode-select --install", die=False, showout=True)
@@ -36,11 +36,11 @@ class PrefabPython(base):
                 openssl
                 xz
                 """
-                self.prefab.package.multiInstall(C)
+                self.prefab.system.package.multiInstall(C)
                 self.doneSet("xcode_install")
 
         if not self.doneGet("compile") or reset:
-            cpath = self.prefab.development.git.pullRepo(
+            cpath = self.prefab.tools.git.pullRepo(
                 'https://github.com/python/cpython', branch="3.6", reset=reset)
             assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
             if self.core.isMac:  # TODO: *2 cant we do something similar for linux?
@@ -184,8 +184,8 @@ class PrefabPython(base):
             self.prefab.core.run(self.replace(C))
         self.doneSet("pip3install")
 
-        self.prefab.package.ensure("libssl-dev")
-        self.prefab.package.ensure("libcapnp-dev")
+        self.prefab.system.package.ensure("libssl-dev")
+        self.prefab.system.package.ensure("libcapnp-dev")
         self.pipAll()
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
@@ -276,7 +276,7 @@ class PrefabPython(base):
         uvloop
         gevent
         """
-        self.prefab.package.multiInstall(['libffi-dev', 'libssl-dev'])
+        self.prefab.system.package.multiInstall(['libffi-dev', 'libssl-dev'])
         self.pip(C, reset=reset)
         self.sandbox(deps=False)
 
@@ -319,4 +319,4 @@ class PrefabPython(base):
         libpq-dev
         libsqlite3-dev
         """
-        self.prefab.package.multiInstall(C)
+        self.prefab.system.package.multiInstall(C)

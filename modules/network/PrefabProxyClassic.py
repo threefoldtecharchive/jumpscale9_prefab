@@ -17,7 +17,7 @@ class PrefabProxyClassic(base):
     """
 
     def removeFromSystemD(self):
-        pm = self.prefab.processmanager.get("systemd")
+        pm = self.prefab.system.processManager.get("systemd")
         pm.remove("polipo")
         pm.remove("privoxy")
 
@@ -27,7 +27,7 @@ class PrefabProxyClassic(base):
         """
         self.prefab.ufw.ufw_enable(force=False)
         self.prefab.ufw.allowIncoming(port)
-        self.prefab.package.install("privoxy")
+        self.prefab.system.package.install("privoxy")
 
         CONFIG = """
             #trust-info-url  http://www.example.com/why_we_block.html
@@ -181,7 +181,7 @@ class PrefabProxyClassic(base):
     def start(self):
 
         cmd = "privoxy --no-daemon /etc/privoxy/config"
-        pm = self.prefab.processmanager.get("tmux")
+        pm = self.prefab.system.processManager.get("tmux")
         pm.ensure("privoxy", cmd)  # in tmux will always restart
 
         cmd = "polipo -c /etc/polipo/config"
@@ -204,7 +204,7 @@ class PrefabProxyClassic(base):
         else:
             self.prefab.core.dir_ensure(cachedir)
 
-        self.prefab.package.install("polipo")
+        self.prefab.system.package.install("polipo")
 
         forbiddentunnels = """
             # simple case, exact match of hostnames

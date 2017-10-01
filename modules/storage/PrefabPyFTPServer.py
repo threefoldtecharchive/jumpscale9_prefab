@@ -58,7 +58,7 @@ class PrefabPyFTPServer(base):
         see install docstring for config example
         """
         if self.prefab.platformtype.isLinux:
-            self.prefab.package.ensure('btrfs-tools')
+            self.prefab.system.package.ensure('btrfs-tools')
         elif self.prefab.platformtype.isOSX():
             # TODO install btrfs for mac
             pass
@@ -135,7 +135,7 @@ class PrefabPyFTPServer(base):
         self.prefab.core.file_write("$CFGDIR/ftpserver/start.py", C)
 
     def start(self):
-        self.prefab.processmanager.ensure("pyftpserver", "python3 $CFGDIR/ftpserver/start.py")
+        self.prefab.system.processManager.ensure("pyftpserver", "python3 $CFGDIR/ftpserver/start.py")
 
     def stop(self):
-        self.prefab.processmanager.stop('pyftpserver')
+        self.prefab.system.processManager.stop('pyftpserver')

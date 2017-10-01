@@ -65,8 +65,8 @@ class PrefabCockpit(base):
         self.prefab.apps.portal.stop()
 
     def install_deps(self):
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('libssl-dev')
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install('libssl-dev')
 
         deps = """
         cryptography

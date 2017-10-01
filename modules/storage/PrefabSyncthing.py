@@ -20,13 +20,13 @@ class PrefabSyncthing(app):
         if self.doneGet("build") and not reset:
             return
 
-        self.prefab.development.golang.install()
+        self.prefab.runtimes.golang.install()
 
         # build
         url = "https://github.com/syncthing/syncthing.git"
         if self.prefab.core.file_exists('$GOPATHDIR/src/github.com/syncthing/syncthing'):
             self.prefab.core.dir_remove('$GOPATHDIR/src/github.com/syncthing/syncthing')
-        dest = self.prefab.development.git.pullRepo(url,
+        dest = self.prefab.tools.git.pullRepo(url,
                                                      dest='$GOPATHDIR/src/github.com/syncthing/syncthing',
                                                      ssh=False,
                                                      depth=1)
@@ -86,7 +86,7 @@ class PrefabSyncthing(app):
 
         if self.prefab.core.dir_exists("$CFGDIR/syncthing") == False:
             self.prefab.core.run(cmd="rm -rf $CFGDIR/syncthing;cd $BINDIR;./syncthing -generate  $CFGDIR/syncthing")
-        pm = self.prefab.processmanager.get("tmux")
+        pm = self.prefab.system.processManager.get("tmux")
         pm.ensure(name="syncthing", cmd="./syncthing -home  $CFGDIR/syncthing", path="$BINDIR")
 
     @property
@@ -102,7 +102,7 @@ class PrefabSyncthing(app):
                         return item2.text
 
     def stop(self):
-        pm = self.prefab.processmanager.get("tmux")
+        pm = self.prefab.system.processManager.get("tmux")
         pm.stop("syncthing")
 
     def getApiClient(self):

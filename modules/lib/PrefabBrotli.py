@@ -17,7 +17,7 @@ class PrefabBrotli(app):
         if not cmake.isInstalled():
             cmake.install()
         git_url = "https://github.com/google/brotli.git"
-        self.prefab.development.git.pullRepo(git_url, dest=self.src_dir, branch='master', depth=1, ssh=False)
+        self.prefab.tools.git.pullRepo(git_url, dest=self.src_dir, branch='master', depth=1, ssh=False)
         cmd = """
         cd {}
         mkdir out && cd out

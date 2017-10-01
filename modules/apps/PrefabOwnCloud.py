@@ -20,7 +20,7 @@ class PrefabOwnCloud(app):
         configure
         """
         # SQL client
-        self.prefab.package.install("mysql-client-core-5.7")
+        self.prefab.system.package.install("mysql-client-core-5.7")
         if not self.prefab.apps.apache2.isInstalled():
             self.prefab.apps.apache2.build()
             self.prefab.apps.apache2.install()
@@ -43,9 +43,9 @@ class PrefabOwnCloud(app):
 
         REQUIREMENT: nginx/php/tidb installed before
         """
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('bzip2')
-        self.prefab.package.install("mysql-client-core-5.7")
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install('bzip2')
+        self.prefab.system.package.install("mysql-client-core-5.7")
         C = """
         set -xe
         #TODO: *1 need to use primitives in prefab
@@ -282,7 +282,7 @@ class PrefabOwnCloud(app):
             """
             self.prefab.core.execute_bash(C)
             self.prefab.core.file_write("$CFGDIR/nginx/etc/nginx.conf", content=basicnginxconf)
-            self.prefab.processmanager.stop("nginx")
+            self.prefab.system.processManager.stop("nginx")
             self.prefab.apps.nginx.start()
             self.prefab.development.php.start()
         else:

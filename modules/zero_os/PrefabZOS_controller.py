@@ -22,16 +22,16 @@ class PrefabZOS_controller(app):
         # self.prefab.apps.redis.install()
         # self.prefab.apps.syncthing.build(start=False)
 
-        self.prefab.processmanager.remove("agentcontroller8")
-        pm = self.prefab.processmanager.get("tmux")
+        self.prefab.system.processManager.remove("agentcontroller8")
+        pm = self.prefab.system.processManager.get("tmux")
         pm.stop("syncthing")
 
         self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg/controller", recursive=True)
 
         # get repo
         url = "github.com/g8os/controller"
-        self.prefab.development.golang.clean_src_path()
-        self.prefab.development.golang.godep(url)
+        self.prefab.runtimes.golang.clean_src_path()
+        self.prefab.runtimes.golang.godep(url)
 
         # Do the actual building
         self.prefab.core.run("cd $GOPATHDIR/src/github.com/g8os/controller && go build .", profile=True)
@@ -146,5 +146,5 @@ class PrefabZOS_controller(app):
         env = {}
         env["TMPDIR"] = self.prefab.core.dir_paths["TMPDIR"]
         cmd = "$BINDIR/controller -c $JSCFGDIR/controller/agentcontroller.toml"
-        pm = self.prefab.processmanager.get("tmux")
+        pm = self.prefab.system.processManager.get("tmux")
         pm.ensure("controller", cmd=cmd, path="$JSCFGDIR/controller/", env=env)

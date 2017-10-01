@@ -26,7 +26,7 @@ class PrefabPHP(app):
     def build(self, **config):
 
         pkgs = "libxml2-dev libpng-dev libcurl4-openssl-dev libzip-dev zlibc zlib1g zlib1g-dev libmysqld-dev libmysqlclient-dev re2c bison bzip2 build-essential libaprutil1-dev libapr1-dev openssl pkg-config libssl-dev libsslcommon2-dev file"
-        list(map(self.prefab.package.ensure, pkgs.split(sep=" ")))
+        list(map(self.prefab.system.package.ensure, pkgs.split(sep=" ")))
 
         compileconfig['with_apxs2'] = self.prefab.core.replace("$JSAPPSDIR/apache2/bin/apxs")
         buildconfig = deepcopy(compileconfig)
@@ -116,10 +116,10 @@ class PrefabPHP(app):
 
         phpfpmcmd = "$JSAPPSDIR/php/sbin/php-fpm -F -y $JSAPPSDIR/php/etc/php-fpm.conf.default"  # foreground
         phpfpmcmd = self.replace(phpfpmcmd)
-        self.prefab.processmanager.ensure(name="php-fpm", cmd=phpfpmcmd, path=phpfpmbinpath)
+        self.prefab.system.processManager.ensure(name="php-fpm", cmd=phpfpmcmd, path=phpfpmbinpath)
 
     def stop(self):
-        self.prefab.processmanager.stop("php-fpm")
+        self.prefab.system.processManager.stop("php-fpm")
 
     def test(self):
         # TODO: *2 test php deployed in nginx

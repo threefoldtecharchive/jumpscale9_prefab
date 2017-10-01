@@ -17,7 +17,7 @@ class PrefabEtcd(app):
         """
         if reset is False and self.isInstalled():
             return
-        self.prefab.development.golang.install()
+        self.prefab.runtimes.golang.install()
 
         # FYI, REPO_PATH: github.com/coreos/etcd
         _script = """
@@ -50,12 +50,12 @@ class PrefabEtcd(app):
         raise RuntimeError("stop debug here")
 
     def start(self, host=None, peers=None):
-        self.prefab.process.kill("etcd")
+        self.prefab.system.process.kill("etcd")
         if host and peers:
             cmd = self._etcd_cluster_cmd(host, peers)
         else:
             cmd = '$BINDIR/etcd'
-        self.prefab.processmanager.ensure("etcd", cmd)
+        self.prefab.system.processManager.ensure("etcd", cmd)
 
     def _etcd_cluster_cmd(self, host, peers=[]):
         """

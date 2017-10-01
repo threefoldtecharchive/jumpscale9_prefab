@@ -15,7 +15,7 @@ class PrefabArakoon(base):
                 self.prefab.core.file_copy(cmd, dest)
         else:
             arakoon_url = 'https://github.com/openvstorage/arakoon.git'
-            dest = self.prefab.development.git.pullRepo(arakoon_url)
+            dest = self.prefab.tools.git.pullRepo(arakoon_url)
             self.prefab.core.run('cd %s && git pull && git fetch --tags && git checkout tags/1.9.7' % dest)
 
             cmd = 'cd %s && make' % (dest)
@@ -103,7 +103,7 @@ class PrefabArakoon(base):
             'libev-dev',
             'libev4'
         )
-        self.prefab.package.multiInstall(apt_deps)
+        self.prefab.system.package.multiInstall(apt_deps)
 
     def build(self, start=True):
         self._install_deps()
@@ -116,8 +116,8 @@ class PrefabArakoon(base):
         which = self.prefab.core.command_location("arakoon")
         self.prefab.core.dir_ensure('$VARDIR/data/arakoon')
         cmd = "%s --config $JSCFGDIR/arakoon/arakoon.ini" % which
-        self.prefab.process.kill("arakoon")
-        self.prefab.processmanager.ensure("arakoon", cmd=cmd, env={}, path="")
+        self.prefab.system.process.kill("arakoon")
+        self.prefab.system.processManager.ensure("arakoon", cmd=cmd, env={}, path="")
 
     def create_cluster(self, id):
         return ArakoonCluster(id, self.prefab)

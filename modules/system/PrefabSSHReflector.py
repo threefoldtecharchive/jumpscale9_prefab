@@ -24,7 +24,7 @@ class PrefabSSHReflector(base):
         port = 9222
 
         package = "dropbear"
-        self.prefab.package.install(package)
+        self.prefab.system.package.install(package)
 
         self.prefab.core.run("rm -f /etc/default/dropbear", die=False)
         self.prefab.core.run("killall dropbear", die=False)
@@ -67,19 +67,19 @@ class PrefabSSHReflector(base):
         _, cpath, _ = self.prefab.core.run("which dropbear")
 
         cmd = "%s -R -F -E -p 9222 -w -s -g -K 20 -I 60" % cpath
-        # self.prefab.processmanager.e
-        self.prefab.processmanager.ensure("reflector", cmd, descr='')
+        # self.prefab.system.processManager.e
+        self.prefab.system.processManager.ensure("reflector", cmd, descr='')
 
-        # self.prefab.package.start(package)
+        # self.prefab.system.package.start(package)
 
         self.prefab.ns.hostfile_set_fromlocal()
 
-        if self.prefab.process.tcpport_check(port, "dropbear") is False:
+        if self.prefab.system.process.tcpport_check(port, "dropbear") is False:
             raise j.exceptions.RuntimeError("Could not install dropbear, port %s was not running" % port)
 
     #
     def client_delete(self):
-        self.prefab.processmanager.remove("autossh")  # make sure leftovers are gone
+        self.prefab.system.processManager.remove("autossh")  # make sure leftovers are gone
         self.prefab.core.run("killall autossh", die=False, showout=False)
 
     def client(self, remoteids, reset=True):
@@ -104,7 +104,7 @@ class PrefabSSHReflector(base):
             remoteprefab = j.tools.prefab.get(remoteids)
 
             package = "autossh"
-            self.prefab.package.install(package)
+            self.prefab.system.package.install(package)
 
             lpath = os.environ["HOME"] + "/.ssh/reflector"
 
@@ -183,7 +183,7 @@ class PrefabSSHReflector(base):
             _, cpath, _ = self.prefab.core.run("which autossh")
             cmd = "%s -M 0 -N -o ExitOnForwardFailure=yes -o \"ServerAliveInterval 60\" -o \"ServerAliveCountMax 3\" -R %s:localhost:22 sshreflector@%s -p %s -i /root/.ssh/reflector" % (
                 cpath, newport, rname, reflport)
-            self.prefab.processmanager.ensure("autossh_%s" % rname_short, cmd, descr='')
+            self.prefab.system.processManager.ensure("autossh_%s" % rname_short, cmd, descr='')
 
             self.logger.info("On %s:%s remote SSH port:%s" % (remoteprefab.core.executor.addr, port, newport))
 
@@ -192,7 +192,7 @@ class PrefabSSHReflector(base):
         @param remoteids are the id's of the reflectors e.g. 'ovh3,ovh5:3333'
         """
         self.prefab.core.run("killall autossh", die=False)
-        self.prefab.package.install("autossh")
+        self.prefab.system.package.install("autossh")
 
         if remoteids.find(",") != -1:
             prefab = None

@@ -4,59 +4,29 @@ from js9 import j
 app = j.tools.prefab._getBaseAppClass()
 
 
-class PrefabCaddy(app):
-    NAME = "caddy"
-    default_plugins = ['git', 'jwt', 'login', 'webdav', 'restic', 'cgi',
-                       'hugo', 'minify', 'search', 'filter', 'ratelimit']
+class PrefabTraefix(app):
+    NAME = "traefix"
 
     def _init(self):
-        self.BUILDDIR_ = self.replace("$BUILDDIR/caddy")
+        self.BUILDDIR_ = self.replace("$BUILDDIR/traefix")
 
     def reset(self):
         self.stop()
         app.reset(self)
         self._init()
         self.prefab.core.dir_remove(self.BUILDDIR_)
-        self.prefab.core.dir_remove("$BINDIR/caddy")
+        self.prefab.core.dir_remove("$BINDIR/traefix")
 
-    def build(self, reset=False, plugins=None):
-        """
-        Get/Build the binaries of caddy itself.
-        :param reset: boolean to reset the build process
-        :param plugins: list of plugins names to be installed
-        :return:
-        """
-        if not self.core.isUbuntu:
-            raise j.exceptions.RuntimeError("only ubuntu supported")
-
-        if self.doneGet('build') and reset is False:
-            return
-
-        self.prefab.system.base.install()
-        golang = self.prefab.runtimes.golang
-        golang.install()
-
-        # build caddy from source using our caddyman
-        self.prefab.tools.git.pullRepo("https://github.com/incubaid/caddyman", dest="/tmp/caddyman")
-        self.prefab.core.execute_bash("cd /tmp/caddyman && chmod u+x caddyman.sh")
-        if not plugins:
-            plugins = self.default_plugins
-        cmd = "/tmp/caddyman/caddyman.sh install {plugins}".format(plugins=" ".join(plugins))
-        self.prefab.core.execute_bash(cmd)
-        self.doneSet('build')
-
-    def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/caddy.cfg"):
+    def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/traefix.cfg"):
         """
         will build if required & then install binary on right location
         """
 
-        if not self.doneGet('build'):
-            self.build(plugins=plugins)
+        raise RuntimeError("not implemented yet, now copy from caddy")
 
         if self.doneGet('install') and reset is False and self.isInstalled():
             return
 
-        self.prefab.core.file_copy('/opt/go_proj/bin/caddy', '$BINDIR/caddy')
         self.prefab.bash.profileDefault.addPath(self.prefab.core.dir_paths['BINDIR'])
         self.prefab.bash.profileDefault.save()
 
@@ -66,13 +36,9 @@ class PrefabCaddy(app):
             # default configuration, can overwrite
             self.configure(configpath=configpath)
 
-        fw = not self.prefab.core.run("ufw status 2> /dev/null", die=False)[0]
-
         port = self.getTCPPort(configpath=configpath)
 
-        # Do if not  "ufw status 2> /dev/null" didn't run properly
-        if fw:
-            self.prefab.security.ufw.allowIncoming(port)
+        self.prefab.security.ufw.allowIncoming(port)
 
         if self.prefab.system.process.tcpport_check(port, ""):
             raise RuntimeError(

@@ -24,7 +24,7 @@ class PrefabWeave(app):
         '''.format(binPath=binPath)
         C = self.replace(C)
         self.prefab.systemservices.docker.install()
-        self.prefab.package.ensure('curl')
+        self.prefab.system.package.ensure('curl')
         self.prefab.core.execute_bash(C, profile=True)
         self.prefab.bash.addPath(j.sal.fs.getParent(binPath))
 

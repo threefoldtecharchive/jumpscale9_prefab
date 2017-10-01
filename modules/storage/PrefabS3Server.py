@@ -12,14 +12,14 @@ class PrefabS3Server(app):
         """
         put backing store on /storage/...
         """
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('build-essential')
-        self.prefab.package.install('python2.7')
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install('build-essential')
+        self.prefab.system.package.install('python2.7')
         self.prefab.core.dir_ensure(storageLocation)
         self.prefab.core.dir_ensure(metaLocation)
 
         self.prefab.core.dir_ensure('/opt/code/github/scality')
-        path = self.prefab.development.git.pullRepo('https://github.com/scality/S3.git', ssh=False)
+        path = self.prefab.tools.git.pullRepo('https://github.com/scality/S3.git', ssh=False)
         profile = self.prefab.bash.profileDefault
         profile.addPath(self.prefab.core.dir_paths['BINDIR'])
         profile.save()

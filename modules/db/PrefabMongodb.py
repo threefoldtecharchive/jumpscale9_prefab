@@ -25,7 +25,7 @@ class PrefabMongodb(app):
             url = 'https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1604-3.4.0.tgz'
             dest = "$TMPDIR/mongodb-linux-x86_64-ubuntu1604-3.4.0/bin/"
         elif self.prefab.core.isArch:
-            self.prefab.package.install("mongodb")
+            self.prefab.system.package.install("mongodb")
         elif self.prefab.core.isMac:
             url = 'https://fastdl.mongodb.org/osx/mongodb-osx-ssl-x86_64-3.4.0.tgz'
             dest = "$TMPDIR/mongodb-osx-x86_64-3.4.0/bin/"
@@ -58,8 +58,8 @@ class PrefabMongodb(app):
             return
         self.prefab.core.dir_ensure('$VARDIR/data/mongodb')
         cmd = "$BINDIR/mongod --dbpath '$VARDIR/data/mongodb'"
-        self.prefab.process.kill("mongod")
-        self.prefab.processmanager.ensure(name="mongod", cmd=cmd, env={}, path="", autostart=True)
+        self.prefab.system.process.kill("mongod")
+        self.prefab.system.processManager.ensure(name="mongod", cmd=cmd, env={}, path="", autostart=True)
 
     def stop(self):
-        self.prefab.processmanager.stop("mongod")
+        self.prefab.system.processManager.stop("mongod")

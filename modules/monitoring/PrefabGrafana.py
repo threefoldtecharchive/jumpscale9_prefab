@@ -45,8 +45,8 @@ class PrefabGrafana(app):
         cmd = "$BINDIR/grafana-server --config=$JSCFGDIR/grafana/grafana.ini\n"
         cmd = self.replace(cmd)
         self.prefab.core.file_write("/opt/jumpscale9/bin/start_grafana.sh", cmd, 777, replaceArgs=True)
-        self.prefab.process.kill("grafana-server")
-        self.prefab.processmanager.ensure("grafana-server", cmd=cmd, env={}, path='$JSAPPSDIR/grafana')
+        self.prefab.system.process.kill("grafana-server")
+        self.prefab.system.processManager.ensure("grafana-server", cmd=cmd, env={}, path='$JSAPPSDIR/grafana')
         grafanaclient = j.clients.grafana.get(
             url='http://%s:%d' % (self.prefab.core.executor.addr, port), username='admin', password='admin')
         data = {

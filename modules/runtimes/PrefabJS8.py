@@ -11,7 +11,7 @@ class PrefabJS8(base):
             return
 
         if reset:
-            self.prefab.package.ensure('psmisc')
+            self.prefab.system.package.ensure('psmisc')
             for process in ['mongodb', 'redis', 'redis-server', 'ardb-server', 'tmux']:
                 self.prefab.core.run('killall %s' % process, die=False)
             C = """
@@ -51,8 +51,8 @@ class PrefabJS8(base):
     # should not do this, is otherwise different than the std install
     # def installDeps(self):
     #
-    #     self.prefab.systemservices.base.install()
-    #     self.prefab.development.python.install()
+    #     self.prefab.system.base.install()
+    #     self.prefab.runtimes.python.install()
     #     self.prefab.development.pip.ensure()
     #     self.prefab.apps.redis.install()
     #     self.prefab.apps.brotli.build()
@@ -60,8 +60,8 @@ class PrefabJS8(base):
     #
     #     self.prefab.development.pip.install('pytoml')
     #     self.prefab.development.pip.install('pygo')
-    #     self.prefab.package.ensure('libxml2-dev')
-    #     self.prefab.package.ensure('libxslt1-dev')
+    #     self.prefab.system.package.ensure('libxml2-dev')
+    #     self.prefab.system.package.ensure('libxslt1-dev')
     #
     #     # python etcd
     #     C = """
@@ -157,8 +157,8 @@ class PrefabJS8(base):
     #     self.prefab.development.pip.multiInstall(C, upgrade=True)
     #
     #     # snappy install
-    #     self.prefab.package.ensure('libsnappy-dev')
-    #     self.prefab.package.ensure('libsnappy1v5')
+    #     self.prefab.system.package.ensure('libsnappy-dev')
+    #     self.prefab.system.package.ensure('libsnappy1v5')
     #     self.prefab.development.pip.install('python-snappy')
     #
     #     if self.prefab.platformtype.osname != "debian":

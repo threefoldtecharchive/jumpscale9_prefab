@@ -39,13 +39,13 @@ class PrefabARDB(app):
         if self.doneGet("buildforestdb") and not reset:
             return
 
-        self.prefab.package.multiInstall(["git-core",
+        self.prefab.system.package.multiInstall(["git-core",
                                            "cmake",
                                            "libsnappy-dev",
                                            "g++"])
 
         url = "git@github.com:couchbase/forestdb.git"
-        cpath = self.prefab.development.git.pullRepo(url, tag="v1.2", reset=reset)
+        cpath = self.prefab.tools.git.pullRepo(url, tag="v1.2", reset=reset)
 
         assert cpath.rstrip("/") == self.CODEDIRFDB.rstrip("/")
 
@@ -74,7 +74,7 @@ class PrefabARDB(app):
 
         if self.prefab.platformtype.isMac:
             storageEngine = "rocksdb"
-            # self.prefab.package.install("boost")
+            # self.prefab.system.package.install("boost")
 
         # Default packages needed
         packages = ["wget", "bzip2"]
@@ -89,11 +89,11 @@ class PrefabARDB(app):
         packages += ["unzip"]
 
         # Install dependancies
-        self.prefab.package.multiInstall(packages)
+        self.prefab.system.package.multiInstall(packages)
 
 
         url = "https://github.com/yinqiwen/ardb.git"
-        cpath = self.prefab.development.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
+        cpath = self.prefab.tools.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
         self.logger.info(cpath)
 
         assert cpath.rstrip("/") == self.CODEDIRARDB.rstrip("/")
@@ -151,13 +151,13 @@ class PrefabARDB(app):
 
         cfg_path = "$CFGDIR/ardb/{}/ardb.conf".format(name)
         cmd = "$BINDIR/ardb-server {}".format(cfg_path)
-        self.prefab.processmanager.ensure(name="ardb-server-{}".format(name), cmd=cmd, env={}, path="")
+        self.prefab.system.processManager.ensure(name="ardb-server-{}".format(name), cmd=cmd, env={}, path="")
         # self.test(port=port)
 
         self.doneSet("start-%s" % name)
 
     def stop(self, name='main'):
-        self.prefab.processmanager.stop("ardb-server-{}".format(name))
+        self.prefab.system.processManager.stop("ardb-server-{}".format(name))
 
     def getClient(self):
         pass

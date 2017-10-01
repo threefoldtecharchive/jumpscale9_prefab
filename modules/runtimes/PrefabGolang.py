@@ -132,7 +132,7 @@ class PrefabGolang(app):
 
         pullurl = "git@%s.git" % url.replace('/', ':', 1)
 
-        dest = self.prefab.development.git.pullRepo(pullurl,
+        dest = self.prefab.tools.git.pullRepo(pullurl,
                                                      branch=branch,
                                                      depth=depth,
                                                      dest='%s/src/%s' % (GOPATH, url),

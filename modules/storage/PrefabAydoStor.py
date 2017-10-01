@@ -20,11 +20,11 @@ class PrefabAydoStor(app):
             self.logger.info('Aydostor is already installed, pass reinstall=True parameter to reinstall')
             return
 
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('build-essential')
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install('build-essential')
 
         self.prefab.core.dir_remove("%s/src" % self.prefab.bash.envGet('GOPATH'))
-        self.prefab.development.golang.get("github.com/g8os/stor")
+        self.prefab.runtimes.golang.get("github.com/g8os/stor")
 
         if install:
             self.install(addr, backend, start)
@@ -38,7 +38,7 @@ class PrefabAydoStor(app):
             self.prefab.core.dir_paths['GODIR'], 'bin', 'stor'), '$BINDIR', overwrite=True)
         self.prefab.bash.addPath("$BASEDIR/bin")
 
-        self.prefab.processmanager.stop("stor")  # will also kill
+        self.prefab.system.processManager.stop("stor")  # will also kill
 
         self.prefab.core.dir_ensure("$JSCFGDIR/stor")
         backend = self.replace(backend)
@@ -62,11 +62,11 @@ class PrefabAydoStor(app):
             addr, port = res[0], '8090'
 
             self.prefab.ufw.allowIncoming(port)
-            if self.prefab.process.tcpport_check(port, ""):
+            if self.prefab.system.process.tcpport_check(port, ""):
                 raise RuntimeError(
                     "port %d is occupied, cannot start stor" % port)
 
         self.prefab.core.dir_ensure("$JSCFGDIR/stor/", recursive=True)
         self.prefab.core.file_copy("$TEMPLATEDIR/cfg/stor/config.toml", "$JSCFGDIR/stor/")
         cmd = self.prefab.bash.cmdGetPath("stor")
-        self.prefab.processmanager.ensure("stor", '%s --config $JSCFGDIR/stor/config.toml' % cmd)
+        self.prefab.system.processManager.ensure("stor", '%s --config $JSCFGDIR/stor/config.toml' % cmd)

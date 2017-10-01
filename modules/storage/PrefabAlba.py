@@ -18,8 +18,8 @@ class PrefabAlba(base):
         self._build()
 
     def _install_deps_opam(self):
-        self.prefab.package.update()
-        self.prefab.package.upgrade(distupgrade=True)
+        self.prefab.system.package.update()
+        self.prefab.system.package.upgrade(distupgrade=True)
 
         apt_deps = """
         build-essential m4 apt-utils libffi-dev libssl-dev libbz2-dev libgmp3-dev libev-dev libsnappy-dev \
@@ -27,7 +27,7 @@ class PrefabAlba(base):
         libjerasure-dev yasm automake python-dev python-pip debhelper psmisc strace curl g++ libgflags-dev \
         sudo libtool libboost-all-dev fuse sysstat ncurses-dev librdmacm-dev
         """
-        self.prefab.package.multiInstall(apt_deps, allow_unauthenticated=True)
+        self.prefab.system.package.multiInstall(apt_deps, allow_unauthenticated=True)
 
         # OPAM
         self.opam_root = self.replace('$TMPDIR/OPAM')
@@ -51,7 +51,7 @@ class PrefabAlba(base):
             self.opam_root, self.ocaml_version, self.prefab.bash.profilePath)
         self.prefab.core.run(cmd, profile=True, shell=True)
 
-        janestreet = self.prefab.development.git.pullRepo(
+        janestreet = self.prefab.tools.git.pullRepo(
             'https://github.com/janestreet/opam-repository.git', depth=None, ssh=False)
         self.prefab.core.run(
             'cd %s && git pull && git checkout b98fd1964856f0c0b022a42ec4e6fc6c7bad2e81' % janestreet, shell=True)
@@ -89,7 +89,7 @@ class PrefabAlba(base):
         return
 
     def _install_deps_cpp(self):
-        self.prefab.package.multiInstall("libgtest-dev cmake", allow_unauthenticated=True)
+        self.prefab.system.package.multiInstall("libgtest-dev cmake", allow_unauthenticated=True)
         self.prefab.core.run('cd /usr/src/gtest && cmake . && make && mv libg* /usr/lib/')
 
         """
@@ -103,7 +103,7 @@ class PrefabAlba(base):
         return
 
     def _install_deps_arakoon(self):
-        aradest = self.prefab.development.git.pullRepo(
+        aradest = self.prefab.tools.git.pullRepo(
             'https://github.com/openvstorage/arakoon.git', branch="1.9", depth=None, ssh=False)
         pfx = 'cd %s && source $TMPDIR/opam.env' % aradest
 
@@ -149,7 +149,7 @@ class PrefabAlba(base):
         # install
         #
         commit = '26c45963f1f305825785592efb41b50192a07491'
-        orodest = self.prefab.development.git.pullRepo('https://github.com/domsj/orocksdb.git', depth=None, ssh=False)
+        orodest = self.prefab.tools.git.pullRepo('https://github.com/domsj/orocksdb.git', depth=None, ssh=False)
 
         pfx = 'cd %s && source $TMPDIR/opam.env' % orodest
         self.prefab.core.run('%s && git pull && git checkout %s' % (pfx, commit))
@@ -171,7 +171,7 @@ class PrefabAlba(base):
                                      "deb http://archive.ubuntu.com/ubuntu/ wily universe\n")
         self.prefab.core.file_write('/etc/apt/sources.list.d/ovsaptrepo.list',
                                      "deb http://apt.openvstorage.org unstable main\n")
-        self.prefab.package.update()
+        self.prefab.system.package.update()
 
         apt_deps = """
         librdmacm-dev clang-3.5 liblttng-ust0 librdmacm1 libtokyocabinet9 libstdc++6:amd64 libzmq3 \
@@ -179,7 +179,7 @@ class PrefabAlba(base):
         omniorb-nameserver libunwind8-dev libaio1 libaio1-dbg libaio-dev libz-dev libbz2-dev \
         libgoogle-glog-dev libibverbs-dev"""
 
-        self.prefab.package.multiInstall(apt_deps, allow_unauthenticated=True)
+        self.prefab.system.package.multiInstall(apt_deps, allow_unauthenticated=True)
 
     def _install_deps_ordma(self):
         #
@@ -193,7 +193,7 @@ class PrefabAlba(base):
         # install
         #
         commit = 'tags/0.0.2'
-        ordmadest = self.prefab.development.git.pullRepo(
+        ordmadest = self.prefab.tools.git.pullRepo(
             'https://github.com/toolslive/ordma.git', depth=None, ssh=False)
 
         self.prefab.core.run('cd %s && git pull && git fetch --tags && git checkout %s' % (ordmadest, commit))
@@ -212,7 +212,7 @@ class PrefabAlba(base):
 
     def _install_deps_gobjfs(self):
         commit = '3b591baf7518987ce1b6c828865f0089007281e4'
-        gobjfsdest = self.prefab.development.git.pullRepo(
+        gobjfsdest = self.prefab.tools.git.pullRepo(
             'https://github.com/openvstorage/gobjfs.git', depth=None, ssh=False)
 
         self.prefab.core.run('cd %s && git pull && git fetch --tags && git checkout %s' % (gobjfsdest, commit))
@@ -261,7 +261,7 @@ class PrefabAlba(base):
         self._install_deps_etcd()
 
     def _build(self):
-        repo = self.prefab.development.git.pullRepo('https://github.com/openvstorage/alba', depth=None, ssh=False)
+        repo = self.prefab.tools.git.pullRepo('https://github.com/openvstorage/alba', depth=None, ssh=False)
 
         self.prefab.core.run('cd %s && git checkout %s' % (repo, self.alba_version))
 

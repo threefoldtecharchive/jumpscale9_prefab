@@ -22,8 +22,8 @@ class PrefabCrm(app):
         self.prefab.apps.postgresql.start()
 
         # Clone the repository and install python requirements
-        self.prefab.development.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
-        self.prefab.package.multiInstall(["python3-dev", "libffi-dev"])
+        self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
+        self.prefab.system.package.multiInstall(["python3-dev", "libffi-dev"])
         requirements = j.sal.fs.readFile("{}/requirements.pip".format(self.crm_dir))
         self.prefab.development.pip.multiInstall(requirements)
 
@@ -116,4 +116,4 @@ class PrefabCrm(app):
         cmd += "export POSTGRES_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/{db_name};"
         cmd += "export ENV=prod;flask db upgrade; uwsgi --ini uwsgi.ini"
         cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name)
-        self.prefab.processmanager.ensure(name="crm", cmd=cmd, autostart=True)
+        self.prefab.system.processManager.ensure(name="crm", cmd=cmd, autostart=True)

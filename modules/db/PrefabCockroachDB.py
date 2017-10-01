@@ -50,8 +50,8 @@ class PrefabCockroachDB(app):
         cmd = "%s --port=%s --http-port=%s" % (cmd, port, http_port)
 
         # cmd = "$BINDIR/cockroach start --insecure --host=localhost --background"
-        self.prefab.process.kill("cockroach")
-        self.prefab.processmanager.ensure(name="cockroach", cmd=cmd, env={}, path="", autostart=True)
+        self.prefab.system.process.kill("cockroach")
+        self.prefab.system.processManager.ensure(name="cockroach", cmd=cmd, env={}, path="", autostart=True)
 
     def stop(self):
-        self.prefab.processmanager.stop("cockroach")
+        self.prefab.system.processManager.stop("cockroach")

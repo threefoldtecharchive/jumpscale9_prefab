@@ -48,9 +48,9 @@ class PrefabOpenSSL(base):
 
         if self.doneGet("build") and not reset:
             return
-        self.prefab.package.ensure('build-essential')
+        self.prefab.system.package.ensure('build-essential')
         url = "https://github.com/openssl/openssl.git"
-        cpath = self.prefab.development.git.pullRepo(url, branch="OpenSSL_1_1_0-stable", reset=reset, ssh=False)
+        cpath = self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable", reset=reset, ssh=False)
 
         assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
 

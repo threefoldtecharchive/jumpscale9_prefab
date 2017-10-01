@@ -39,20 +39,20 @@ class PrefabTIDB(app):
 
     def start_pd_server(self):
         data_dir = j.sal.fs.joinPaths(j.dirs.VARDIR, 'pd')
-        self.prefab.processmanager.ensure(
+        self.prefab.system.processManager.ensure(
             'pd-server',
             'pd-server --data-dir={data_dir}'.format(data_dir=data_dir)
         )
 
     def start_tikv(self):
         store_dir = j.sal.fs.joinPaths(j.dirs.VARDIR, 'tikv')
-        self.prefab.processmanager.ensure(
+        self.prefab.system.processManager.ensure(
             "tikv-server",
             "tikv-server --pd='127.0.0.1:2379' --store={store_dir}".format(store_dir=store_dir)
         )
 
     def start_tidb(self):
-        self.prefab.processmanager.ensure(
+        self.prefab.system.processManager.ensure(
             "tidb-server",
             "tidb-server --path='127.0.0.1:2379' --store=TiKV"
         )
@@ -76,9 +76,9 @@ class PrefabTIDB(app):
             raise j.exceptions.RuntimeError("tidb didn't start")
 
     def stop(self):
-        self.prefab.processmanager.stop("tidb-server")
-        self.prefab.processmanager.stop("pd-server")
-        self.prefab.processmanager.stop("tikv-server")
+        self.prefab.system.processManager.stop("tidb-server")
+        self.prefab.system.processManager.stop("pd-server")
+        self.prefab.system.processManager.stop("tikv-server")
 
     def _check_running(self, name, timeout=30):
         """

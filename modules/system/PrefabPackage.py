@@ -205,7 +205,7 @@ class PrefabPackage(base):
 
     def start(self, package):
         if self.prefab.core.isArch or self.prefab.core.isUbuntu or self.prefab.core.isMac:
-            self.prefab.processmanager.ensure(package)
+            self.prefab.system.processManager.ensure(package)
         else:
             raise j.exceptions.RuntimeError("could not install/ensure:%s, platform not supported" % package)
 
@@ -307,6 +307,6 @@ class PrefabPackage(base):
             self.prefab.core.run("brew remove %s" % package)
 
     def __repr__(self):
-        return "prefab.package:%s:%s" % (self.executor.addr, self.executor.port)
+        return "prefab.system.package:%s:%s" % (self.executor.addr, self.executor.port)
 
     __str__ = __repr__

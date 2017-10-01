@@ -13,10 +13,10 @@ class PrefabZOS_fs(app):
         if reset is False and self.isInstalled():
             return
 
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('build-essential')
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install('build-essential')
 
-        self.prefab.development.golang.get("github.com/g8os/fs")
+        self.prefab.runtimes.golang.get("github.com/g8os/fs")
         self.prefab.core.file_copy("$GOPATHDIR/bin/fs", "$BASEDIR/bin/")
 
         if install:
@@ -58,4 +58,4 @@ class PrefabZOS_fs(app):
 
     def start(self):
         self.prefab.core.file_copy("$TEMPLATEDIR/cfg/fs", "$JSCFGDIR", recursive=True)
-        self.prefab.processmanager.ensure('fs', cmd="$BINDIR/fs -c $JSCFGDIR/fs/config.toml")
+        self.prefab.system.processManager.ensure('fs', cmd="$BINDIR/fs -c $JSCFGDIR/fs/config.toml")

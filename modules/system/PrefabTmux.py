@@ -16,7 +16,7 @@ class PrefabTmux(base):
         """
         # if 'ubuntu' in j.core.platformtype.myplatform.platformtypes:
         if not self.prefab.core.command_check("tmux"):
-            self.prefab.package.install("tmux")
+            self.prefab.system.package.install("tmux")
         # else:
         #     from IPython import embed
         #     self.logger.info("DEBUG NOW sdsd")

@@ -21,7 +21,7 @@ class PrefabGogs(app):
 
     @property
     def GOPATH(self):
-        return self.prefab.development.golang.GOPATH
+        return self.prefab.runtimes.golang.GOPATH
 
 
     def build(self, install=True, start=True, reset=False, installDeps=False):
@@ -29,14 +29,14 @@ class PrefabGogs(app):
         if self.doneGet('build') and not reset:
             return
 
-        self.prefab.development.golang.install()
-        self.prefab.development.golang.glide()
+        self.prefab.runtimes.golang.install()
+        self.prefab.runtimes.golang.glide()
 
         self.prefab.bash.envSet('GOGITSDIR', '%s/src/github.com/gogits' % self.GOGSPATH)
         self.prefab.bash.envSet('GOGSDIR', '$GOGITSDIR/gogs')
 
-        self.prefab.development.golang.get('golang.org/x/oauth2')
-        self.prefab.development.golang.get('github.com/gogits/gogs')
+        self.prefab.runtimes.golang.get('golang.org/x/oauth2')
+        self.prefab.runtimes.golang.get('github.com/gogits/gogs')
 
         self.prefab.core.run('cd %s && git remote add gigforks https://github.com/gigforks/gogs' % self.GOGSPATH,
                               profile=True)
@@ -78,13 +78,13 @@ class PrefabGogs(app):
 
     def start(self, name='main'):
         cmd = "{gogspath}/gogs web".format(gogspath=self.GOGSPATH)
-        self.prefab.processmanager.ensure(name='gogs_%s' % name, cmd=cmd)
+        self.prefab.system.processManager.ensure(name='gogs_%s' % name, cmd=cmd)
 
     def stop(self, name='main'):
-        self.prefab.processmanager.stop('gogs_%s' % name)
+        self.prefab.system.processManager.stop('gogs_%s' % name)
 
     def restart(self):
-        self.prefab.processmanager.stop("gogs")
+        self.prefab.system.processManager.stop("gogs")
         self.start()
 
     def reset(self):

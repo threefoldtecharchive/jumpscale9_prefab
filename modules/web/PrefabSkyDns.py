@@ -7,8 +7,8 @@ class PrefabSkyDns(app):
     def build(self, start=True, install=True):
         if self.isInstalled():
             return
-        self.prefab.development.golang.install()
-        self.prefab.development.golang.get("github.com/skynetservices/skydns")
+        self.prefab.runtimes.golang.install()
+        self.prefab.runtimes.golang.get("github.com/skynetservices/skydns")
         if install:
             self.install(start)
 
@@ -24,4 +24,4 @@ class PrefabSkyDns(app):
 
     def start(self):
         cmd = self.prefab.bash.cmdGetPath("skydns")
-        self.prefab.processmanager.ensure("skydns", cmd + " -addr 0.0.0.0:53")
+        self.prefab.system.processManager.ensure("skydns", cmd + " -addr 0.0.0.0:53")

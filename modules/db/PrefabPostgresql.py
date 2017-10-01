@@ -26,7 +26,7 @@ class PrefabPostgresql(app):
         self.prefab.core.dir_ensure("$JSAPPSDIR/pgsql")
         self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.dir_ensure("$LIBDIR/postgres")
-        self.prefab.package.multiInstall(
+        self.prefab.system.package.multiInstall(
             ['build-essential', 'zlib1g-dev', 'libreadline-dev'])
         cmd = """
         cd {}
@@ -89,7 +89,7 @@ class PrefabPostgresql(app):
         self.prefab.core.execute_bash(cmd, profile=True)
 
         cmdpostgres = "sudo -u postgres $BINDIR/postgres -D {postgresdbdir}".format(postgresdbdir=self.dbdir)
-        self.prefab.processmanager.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
+        self.prefab.system.processManager.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
 
         # make sure postgres is ready
         import time
@@ -112,4 +112,4 @@ class PrefabPostgresql(app):
 
 
     def stop(self):
-        self.prefab.process.kill("postgres")
+        self.prefab.system.process.kill("postgres")

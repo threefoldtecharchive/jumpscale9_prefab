@@ -23,8 +23,8 @@ class PrefabLedis(app):
 
             make
             """
-            self.prefab.development.golang.install()
-            self.prefab.development.git.pullRepo("https://github.com/siddontang/ledisdb",
+            self.prefab.runtimes.golang.install()
+            self.prefab.tools.git.pullRepo("https://github.com/siddontang/ledisdb",
                                                   dest="$GOPATHDIR/src/github.com/siddontang/ledisdb")
 
             # set the backend in the server config
@@ -74,5 +74,5 @@ class PrefabLedis(app):
 
     def start(self):
         cmd = "source $TEMPLATEDIR/ledisdev.sh && $BINDIR/ledis-server -config $TEMPLATEDIR/cfg/ledisconfig.toml"
-        pm = self.prefab.processmanager.get("tmux")
+        pm = self.prefab.system.processManager.get("tmux")
         pm.ensure(name='ledis', cmd=cmd)

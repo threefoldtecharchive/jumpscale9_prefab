@@ -1,10 +1,10 @@
 
-from ProcessManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
+from processManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
 from js9 import j
 
 base = j.tools.prefab._getBaseClass()
 
-class PrefabProcessManager(base):
+class PrefabprocessManager(base):
 
     def _init(self):
         self.pms = {}
@@ -13,7 +13,7 @@ class PrefabProcessManager(base):
     @property
     def logger(self):
         if self._logger is None:
-            self._logger = j.logger.get("processmanagerfactory")
+            self._logger = j.logger.get("processManagerfactory")
         return self._logger
 
     def systemdOK(self):
@@ -50,7 +50,7 @@ class PrefabProcessManager(base):
             pm = self.get_prefered()
         else:
             if not self.is_available(pm):
-                return j.errorhandler.raiseCritical('%s processmanager is not available on your system' % (pm))
+                return j.errorhandler.raiseCritical('%s processManager is not available on your system' % (pm))
 
         if pm not in self.pms:
             if pm == "systemd":

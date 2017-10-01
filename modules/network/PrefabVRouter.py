@@ -41,8 +41,8 @@ class PrefabVRouter(base):
         self.proxy()
 
     def prepare(self):
-        self.prefab.package.install('inetutils-ping')
-        self.prefab.package.install('nftables')
+        self.prefab.system.package.install('inetutils-ping')
+        self.prefab.system.package.install('nftables')
         self.check()
         self.prefab.systemservices.fw.flush(permanent=True)
 
@@ -116,7 +116,7 @@ class PrefabVRouter(base):
     def dnsServer(self):
         self.check()
         self.prefab.tmux.createSession("ovsrouter", ["dns"], returnifexists=True, killifexists=False)
-        self.prefab.process.kill("dns-server")
+        self.prefab.system.process.kill("dns-server")
         cmd = "jspython /opt/dnsmasq-alt/dns-server.py"
         self.prefab.tmux.executeInScreen('ovsrouter', 'dns', cmd)
 
@@ -157,7 +157,7 @@ class PrefabVRouter(base):
         if not specified then will look for wireless interface which is used in accesspoint and use that one
         """
         self.check()
-        self.prefab.package.install("isc-dhcp-server")
+        self.prefab.system.package.install("isc-dhcp-server")
         if interfaces == []:
             interfaces = [self.wirelessInterfaceNonDefGW]
         r = self.freeNetworkRangeDMZ
@@ -312,7 +312,7 @@ class PrefabVRouter(base):
     #     [Install]
     #     WantedBy = multi - user.target
     #     """
-    #     pm = self.prefab.processmanager.get("systemd")
+    #     pm = self.prefab.system.processManager.get("systemd")
     #     pm.ensure("ap", cmd2, descr="accesspoint for local admin", systemdunit=START1)
 
     def __str__(self):

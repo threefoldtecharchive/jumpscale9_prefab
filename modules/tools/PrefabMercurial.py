@@ -10,7 +10,7 @@ class PrefabMercurial(base):
     def install(self):
 
         # FIXME: python header files should be included inside /opt as well
-        self.prefab.package.install("python2.7-dev")
+        self.prefab.system.package.install("python2.7-dev")
         self.prefab.core.file_download(
             'https://www.mercurial-scm.org/release/mercurial-4.1.tar.gz',
             '$TMPDIR/mercurial-4.1.tar.gz')

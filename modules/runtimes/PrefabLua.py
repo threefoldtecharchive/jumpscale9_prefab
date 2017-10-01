@@ -9,8 +9,8 @@ class PrefabLua(app):
 
     # def installLua51(self):
     #
-    #     self.prefab.package.install("lua5.1")
-    #     self.prefab.package.install("luarocks")
+    #     self.prefab.system.package.install("lua5.1")
+    #     self.prefab.system.package.install("luarocks")
     #
     #     url = "https://raw.githubusercontent.com/zserge/luash/master/sh.lua"
     #

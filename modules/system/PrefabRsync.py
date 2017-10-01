@@ -24,9 +24,9 @@ class PrefabRsync(base):
 
         self.prefab.core.dir_ensure(self.BUILDDIRL)
 
-        self.prefab.package.ensure("gcc")
-        self.prefab.package.ensure("g++")
-        self.prefab.package.ensure('make')
+        self.prefab.system.package.ensure("gcc")
+        self.prefab.system.package.ensure("g++")
+        self.prefab.system.package.ensure('make')
 
         self.prefab.core.file_download(
             "https://download.samba.org/pub/rsync/src/%s.tar.gz" %

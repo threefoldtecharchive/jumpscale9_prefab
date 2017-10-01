@@ -6,13 +6,13 @@ import re
 base = j.tools.prefab._getBaseClass()
 
 
-class ProcessManagerBase(base):
+class processManagerBase(base):
 
     def __init__(self, executor, prefab):
         self.startupfile = "%s/startup.sh" % j.dirs.VARDIR
         self.executor = executor
         self.prefab = prefab
-        self._logger = j.logger.get('j.prefab.processmanager')
+        self._logger = j.logger.get('j.prefab.system.processManager')
 
     def exists(self, name):
         return name in self.list()
@@ -25,11 +25,11 @@ class ProcessManagerBase(base):
         return self.restart(name)
 
     def get(self, pm=None):
-        from .ProcessManagerFactory import ProcessManagerFactory
-        return ProcessManagerFactory(self.prefab).get(pm)
+        from .processManagerFactory import processManagerFactory
+        return processManagerFactory(self.prefab).get(pm)
 
 
-class PrefabSystemd(ProcessManagerBase):
+class PrefabSystemd(processManagerBase):
 
     def __init__(self, executor, prefab):
         super().__init__(executor, prefab)
@@ -67,7 +67,7 @@ class PrefabSystemd(ProcessManagerBase):
 
         cmd = "systemctl stop %s" % name
         self.prefab.core.run(cmd, showout=False, die=False)
-        self.prefab.process.kill(name, signal=9, exact=False)
+        self.prefab.system.process.kill(name, signal=9, exact=False)
 
     def remove(self, prefix):
         self.stop(prefix)
@@ -156,13 +156,13 @@ WantedBy=multi-user.target
         self.start(name)
 
     def __str__(self):
-        return "prefab:%s:%s:processmanager_systemd" % (
+        return "prefab:%s:%s:processManager_systemd" % (
             getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
 
     __repr__ = __str__
 
 
-class PrefabRunit(ProcessManagerBase):
+class PrefabRunit(processManagerBase):
 
     def __init__(self, executor, prefab):
         super().__init__(executor, prefab)
@@ -251,21 +251,21 @@ class PrefabRunit(ProcessManagerBase):
         """Ensures that the given upstart service is stopped."""
         if self.prefab.core.file_exists("/etc/service/%s/run" % name):
             self.prefab.core.run("sv -w %d stop /etc/service/%s/" % (self.timeout, name), profile=True)
-        self.prefab.process.kill(name, signal=9, exact=False)
+        self.prefab.system.process.kill(name, signal=9, exact=False)
 
     def __str__(self):
-        return "prefab:%s:%s:processmanager_runinit" % (
+        return "prefab:%s:%s:processManager_runinit" % (
             getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
 
     __repr__ = __str__
 
 
-class PrefabTmuxec(ProcessManagerBase):
+class PrefabTmuxec(processManagerBase):
 
     def __init__(self, executor, prefab):
         super().__init__(executor, prefab)
         if not self.prefab.core.command_check("tmux"):
-            self.prefab.package.install('tmux')
+            self.prefab.system.package.install('tmux')
 
     def list(self, prefix=""):
         rc, result, err = self.prefab.core.run("tmux lsw", profile=True, die=False, showout=False)
@@ -322,7 +322,7 @@ class PrefabTmuxec(ProcessManagerBase):
             pid = self.prefab.tmux.getPid('main', name)
             self.prefab.core.run("kill -9 %s" % pid)
             self.prefab.tmux.killWindow("main", name)
-        self.prefab.process.kill(name, signal=9, exact=False)
+        self.prefab.system.process.kill(name, signal=9, exact=False)
         self.logger.info("...ok")
 
     def remove(self, name):
@@ -333,7 +333,7 @@ class PrefabTmuxec(ProcessManagerBase):
             self.prefab.tmux.killWindow("main", name)
 
     def __str__(self):
-        return "prefab:%s:%s:processmanager_tmux" % (
+        return "prefab:%s:%s:processManager_tmux" % (
             getattr(self.executor, 'addr', 'local'), getattr(self.executor, 'port', ''))
 
     __repr__ = __str__

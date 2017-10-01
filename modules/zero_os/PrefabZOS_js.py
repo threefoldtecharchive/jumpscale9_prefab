@@ -112,16 +112,16 @@ class PrefabZOS_js(base):
             out += "mkdir -p %s\n" % item
         self.prefab.core.execute_bash(out)
 
-        self.prefab.package.mdupdate()
+        self.prefab.system.package.mdupdate()
 
         if not self.prefab.core.isMac and not self.prefab.core.isCygwin:
-            self.prefab.package.install("fuse")
+            self.prefab.system.package.install("fuse")
 
         if self.prefab.core.isArch:
-            self.prefab.package.install("wpa_actiond")  # is for wireless auto start capability
-            self.prefab.package.install("redis-server")
+            self.prefab.system.package.install("wpa_actiond")  # is for wireless auto start capability
+            self.prefab.system.package.install("redis-server")
 
-        self.prefab.package.multiInstall(C)
-        self.prefab.package.upgrade()
+        self.prefab.system.package.multiInstall(C)
+        self.prefab.system.package.upgrade()
 
-        self.prefab.package.clean()
+        self.prefab.system.package.clean()

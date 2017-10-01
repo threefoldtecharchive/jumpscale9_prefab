@@ -38,7 +38,7 @@ class PrefabBtrfsProgs(PrefabApp):
         deps = """
         uuid-dev libattr1-dev zlib1g-dev libacl1-dev e2fslibs-dev libblkid-dev liblzo2-dev autoconf
         """
-        self.prefab.package.multiInstall(deps)
+        self.prefab.system.package.multiInstall(deps)
         self._run("cd $TMPDIR; wget -c %s/%s" % (self._host, self._file))
         self._run("cd $TMPDIR; tar -xf %s -C $CODEDIR" % self._file)
         self._run("cd $CODEDIR/btrfs-progs-v4.8; ./autogen.sh")

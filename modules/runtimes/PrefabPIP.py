@@ -15,8 +15,8 @@ class PrefabPIP(base):
             return
 
         # python should already be requirement, do not install !! (despiegk)
-        # self.prefab.package.install('python3.5')
-        # self.prefab.package.install('python3-pip')
+        # self.prefab.system.package.install('python3.5')
+        # self.prefab.system.package.install('python3-pip')
 
         tmpdir = self.replace("$TMPDIR")
         cmd1 = """

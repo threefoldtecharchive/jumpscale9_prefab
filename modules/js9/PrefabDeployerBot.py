@@ -25,7 +25,7 @@ class PrefabDeployerBot(app):
             self.prefab.development.pip.packageUpgrade("pip")
 
         self.install_deps()
-        self.prefab.development.git.pullRepo('https://github.com/Jumpscale/jscockpit.git')
+        self.prefab.tools.git.pullRepo('https://github.com/Jumpscale/jscockpit.git')
         self.link_code()
 
         if start:
@@ -53,7 +53,7 @@ class PrefabDeployerBot(app):
         cmd = self.replace(
             'jspython $JSAPPSDIR/deployer_bot/telegram-bot --config $JSCFGDIR/deployerbot/config.yaml')
         cwd = self.replace('$JSAPPSDIR/deployer_bot')
-        self.prefab.processmanager.ensure('deployerbot', cmd=cmd, path=cwd)
+        self.prefab.system.processManager.ensure('deployerbot', cmd=cmd, path=cwd)
 
     def install_deps(self):
         deps = """

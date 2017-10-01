@@ -13,8 +13,8 @@ class PrefabZOS_core(app):
         neither can be the int zero, can be ommited if start=False
         """
         # deps
-        self.prefab.package.mdupdate()
-        self.prefab.package.install('build-essential')
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install('build-essential')
         # self.prefab.development.js8.installDeps()
         # self.prefab.apps.redis.install(reset=True)
         # self.prefab.apps.redis.start()
@@ -24,13 +24,13 @@ class PrefabZOS_core(app):
 
         self.prefab.tmux.killWindow("main", "agent")
 
-        self.prefab.process.kill("agent")
+        self.prefab.system.process.kill("agent")
 
         self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg/agent", recursive=True)
         self.prefab.core.file_ensure("$TEMPLATEDIR/cfg/agent/.mid")
 
         url = "github.com/g8os/agent"
-        self.prefab.development.golang.godep(url)
+        self.prefab.runtimes.golang.godep(url)
         self.prefab.core.run("cd $GOPATHDIR/src/github.com/g8os/agent && go build -o superagent", profile=True)
 
         if install:
@@ -117,5 +117,5 @@ class PrefabZOS_core(app):
         env["TMPDIR"] = self.prefab.core.dir_paths["TMPDIR"]
         cmd = "$BINDIR/agent -nid %s -gid %s -c $JSCFGDIR/core/g8os.toml" % (
             nid, gid)
-        pm = self.prefab.processmanager.get('tmux')
+        pm = self.prefab.system.processManager.get('tmux')
         pm.ensure("agent", cmd=cmd, path="$JSCFGDIR/agent", env=env)

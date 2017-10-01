@@ -110,8 +110,8 @@ class PrefabNGINX(app):
 
         """
         # Install through ubuntu
-        # self.prefab.package.mdupdate()
-        # self.prefab.package.ensure('nginx')
+        # self.prefab.system.package.mdupdate()
+        # self.prefab.system.package.ensure('nginx')
         # link nginx to binDir and use it from there
 
         # self.prefab.core.dir_ensure("$JSAPPSDIR/nginx/")
@@ -172,8 +172,8 @@ class PrefabNGINX(app):
         os.environ["LANG"] = "C.UTF-8"
 
         if self.prefab.core.isUbuntu:
-            self.prefab.package.update()
-            self.prefab.package.install("build-essential libpcre3-dev libssl-dev")
+            self.prefab.system.package.update()
+            self.prefab.system.package.install("build-essential libpcre3-dev libssl-dev")
 
             self.prefab.core.dir_remove("$TMPDIR/build/nginx")
             self.prefab.core.dir_ensure("$TMPDIR/build/nginx")
@@ -219,13 +219,13 @@ class PrefabNGINX(app):
             nginxcmd = self.replace(nginxcmd)
 
             self.logger.info("cmd: %s" % nginxcmd)
-            self.prefab.processmanager.ensure(name=name, cmd=nginxcmd, path=nginxbinpath)
+            self.prefab.system.processManager.ensure(name=name, cmd=nginxcmd, path=nginxbinpath)
 
         else:
             raise RuntimeError('Failed to start nginx')
 
     def stop(self):
-        self.prefab.processmanager.stop("nginx")
+        self.prefab.system.processManager.stop("nginx")
 
     def test(self):
         # host a file test can be reached
