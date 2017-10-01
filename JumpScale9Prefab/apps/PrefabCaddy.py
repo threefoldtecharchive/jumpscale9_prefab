@@ -152,17 +152,13 @@ class PrefabCaddy(app):
 
         self.prefab.processmanager.stop("caddy")  # will also kill
 
-
         cmd = self.prefab.bash.cmdGetPath("caddy")
         if agree:
             agree = " -agree"
 
-        print (cmd)
-
-        # self.prefab.processmanager.ensure(
-        #     "caddy", 'ulimit -n 8192; %s -conf=%s -email=%s %s' % (cmd, args["CONFIGPATH"], args["EMAIL"], agree), wait=1)
-        self.prefab.processmanager.ensure(
-            "caddy", 'ulimit -n 8192; %s -conf=%s %s' % (cmd, configpath, agree), wait=1, expect=expect)
+        cmd = 'ulimit -n 8192; %s -conf=%s %s' % (cmd, configpath, agree)
+        # wait 10 seconds for caddy to generate ssl certificate before returning error
+        self.prefab.processmanager.ensure("caddy", cmd, wait=10, expect=expect)
 
     def stop(self):
         self.prefab.processmanager.stop("caddy")
