@@ -4,20 +4,20 @@ from js9 import j
 app = j.tools.prefab._getBaseAppClass()
 
 
-class PrefabTraefix(app):
-    NAME = "traefix"
+class PrefabTraefik(app):
+    NAME = "traefik"
 
     def _init(self):
-        self.BUILDDIR_ = self.replace("$BUILDDIR/traefix")
+        self.BUILDDIR_ = self.replace("$BUILDDIR/traefik")
 
     def reset(self):
         self.stop()
         app.reset(self)
         self._init()
         self.prefab.core.dir_remove(self.BUILDDIR_)
-        self.prefab.core.dir_remove("$BINDIR/traefix")
+        self.prefab.core.dir_remove("$BINDIR/traefik")
 
-    def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/traefix.cfg"):
+    def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/traefik.cfg"):
         """
         will build if required & then install binary on right location
         """

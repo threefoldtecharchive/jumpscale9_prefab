@@ -1,10 +1,10 @@
 
-from processManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
+from ProcessManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
 from js9 import j
 
 base = j.tools.prefab._getBaseClass()
 
-class PrefabprocessManager(base):
+class PrefabProcessManager(base):
 
     def _init(self):
         self.pms = {}

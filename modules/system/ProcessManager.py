@@ -6,7 +6,7 @@ import re
 base = j.tools.prefab._getBaseClass()
 
 
-class processManagerBase(base):
+class ProcessManagerBase(base):
 
     def __init__(self, executor, prefab):
         self.startupfile = "%s/startup.sh" % j.dirs.VARDIR
@@ -29,7 +29,7 @@ class processManagerBase(base):
         return processManagerFactory(self.prefab).get(pm)
 
 
-class PrefabSystemd(processManagerBase):
+class PrefabSystemd(ProcessManagerBase):
 
     def __init__(self, executor, prefab):
         super().__init__(executor, prefab)
@@ -162,7 +162,7 @@ WantedBy=multi-user.target
     __repr__ = __str__
 
 
-class PrefabRunit(processManagerBase):
+class PrefabRunit(ProcessManagerBase):
 
     def __init__(self, executor, prefab):
         super().__init__(executor, prefab)
@@ -260,7 +260,7 @@ class PrefabRunit(processManagerBase):
     __repr__ = __str__
 
 
-class PrefabTmuxec(processManagerBase):
+class PrefabTmuxec(ProcessManagerBase):
 
     def __init__(self, executor, prefab):
         super().__init__(executor, prefab)
