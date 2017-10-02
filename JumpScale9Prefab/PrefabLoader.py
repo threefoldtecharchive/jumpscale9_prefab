@@ -152,10 +152,7 @@ class PrefabLoader():
 
     #     j.sal.fs.writeFile(out, content)
 
-
-
-
-    def load(self,executor, prefab, moduleList=None):
+    def load(self, executor, prefab, moduleList=None):
         """
         walk over code files & find locations for jumpscale modules
 
@@ -168,48 +165,44 @@ class PrefabLoader():
         """
 
         path = j.sal.fs.getDirName(inspect.getsourcefile(self.__class__))
-        path=j.sal.fs.joinPaths(j.sal.fs.getParent(path),"modules")
+        path=j.sal.fs.joinPaths(j.sal.fs.getParent(path), "modules")
 
         if moduleList is None:
             moduleList = self.moduleList
 
         self.logger.info("find prefab modules in %s" % path)
 
-
         for cat in j.sal.fs.listDirsInDir(path, recursive=False, dirNameOnly=True, findDirectorySymlinks=True, followSymlinks=True):
-            catpath=j.sal.fs.joinPaths(path,cat)
+            catpath=j.sal.fs.joinPaths(path, cat)
             # print(1)
             # print("prefab.%s = PrefabCat()"%cat)
-            exec("prefab.%s = PrefabCat()"%cat)
+            exec("prefab.%s = PrefabCat()" % cat)
 
             if catpath not in sys.path:
                 sys.path.append(catpath)
 
-            if not j.sal.fs.exists("%s/__init__.py"%catpath):
-                j.sal.fs.writeFile("%s/__init__.py"%catpath,"")
+            if not j.sal.fs.exists("%s/__init__.py" % catpath):
+                j.sal.fs.writeFile("%s/__init__.py" % catpath,"")
 
             # print ("CATPATH:%s"%catpath)
 
             for classfile in j.sal.fs.listFilesInDir(catpath, False, "*.py"):
                 # print(classfile)
                 basename = j.do.getBaseName(classfile)
-                # if basename == 'PrefabSSH.py':
-                #     import ipdb; ipdb.set_trace()
-                basename=basename[:-3]
+                basename = basename[:-3]
 
                 # print ("load prefab module:%s"%classfile)
-
 
                 if not basename.startswith("Prefab"):
                     continue
 
-                exec("from %s import %s"%(basename,basename))
-                prefabObject=eval("%s(executor,prefab)"%basename)
+                exec("from %s import %s" % (basename, basename))
+                prefabObject = eval("%s(executor,prefab)" % basename)
 
-                basenameLower=basename.replace("Prefab","")
-                basenameLower=basenameLower.lower()
+                basenameLower = basename.replace("Prefab", "")
+                basenameLower = basenameLower.lower()
 
-                exec("prefab.%s.%s = prefabObject"%(cat,basenameLower))
+                exec("prefab.%s.%s = prefabObject" % (cat,basenameLower))
 
         #         from IPython import embed;embed(colors='Linux')
         #         j
