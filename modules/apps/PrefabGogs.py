@@ -78,13 +78,16 @@ class PrefabGogs(app):
 
     def start(self, name='main'):
         cmd = "{gogspath}/gogs web".format(gogspath=self.GOGSPATH)
-        self.prefab.system.processManager.ensure(name='gogs_%s' % name, cmd=cmd)
+        pm = self.prefab.system.processManager.get()
+        pm.ensure(name='gogs_%s' % name, cmd=cmd)
 
     def stop(self, name='main'):
-        self.prefab.system.processManager.stop('gogs_%s' % name)
+        pm = self.prefab.system.processManager.get()
+        pm.stop('gogs_%s' % name)
 
     def restart(self):
-        self.prefab.system.processManager.stop("gogs")
+        pm = self.prefab.system.processManager.get()
+        pm.stop("gogs")
         self.start()
 
     def reset(self):

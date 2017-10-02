@@ -16,5 +16,5 @@ class PrefabIssueManager(base):
         self.prefab.core.file_link(source='%s/apps/IssueManager/' % self.code_dir, destination='$JSAPPSDIR/portals/main/base/IssueManager')
 
     def start(self, passwd=None):
-        self.prefab.apps.portal.start(passwd)
+        self.prefab.web.portal.start(passwd)
         self._logger.info("TO CHECK ISSUE MANAGER http://localhost:8200/issuemanager")

@@ -22,7 +22,7 @@ class PrefabZOS_core(app):
 
         # self.prefab.apps.syncthing.build(start=False)
 
-        self.prefab.tmux.killWindow("main", "agent")
+        self.prefab.system.tmux.killWindow("main", "agent")
 
         self.prefab.system.process.kill("agent")
 

@@ -5,7 +5,7 @@ app = j.tools.prefab._getBaseAppClass()
 # TODO: is this still correct, maybe our docker approach better, need to check
 
 
-class PrefabjsAgent(app):
+class PrefabJSAgent(app):
 
     NAME = 'jsagent'
 
@@ -39,4 +39,5 @@ class PrefabjsAgent(app):
         cmd = "jspython jsagent.py --grid-id %d --controller-ip %s --controller-port %d" % (gid, ctrl_addr, ctrl_port)
         if ctrl_passwd is not None and ctrl_passwd != '':
             cmd += ' --controller-password %s' % ctrl_passwd
-        self.prefab.system.processManager.ensure(name="jsagent", cmd=cmd, path='$JSAPPSDIR/jsagent')
+        pm = self.prefab.system.processManager.get()
+        pm.ensure(name="jsagent", cmd=cmd, path='$JSAPPSDIR/jsagent')

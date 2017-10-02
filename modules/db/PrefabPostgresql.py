@@ -89,7 +89,8 @@ class PrefabPostgresql(app):
         self.prefab.core.execute_bash(cmd, profile=True)
 
         cmdpostgres = "sudo -u postgres $BINDIR/postgres -D {postgresdbdir}".format(postgresdbdir=self.dbdir)
-        self.prefab.system.processManager.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
+        pm = self.prefab.system.processManager.get()
+        pm.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
 
         # make sure postgres is ready
         import time
@@ -104,7 +105,7 @@ class PrefabPostgresql(app):
 
         # change password
         cmd = """
-        sudo -u postgres $BINDIR/psql -c "ALTER USER postgres WITH PASSWORD '{passwd}'"; 
+        sudo -u postgres $BINDIR/psql -c "ALTER USER postgres WITH PASSWORD '{passwd}'";
         """.format(passwd=self.passwd)
         self.prefab.core.execute_bash(cmd, profile=True)
         print("user: {}, password: {}".format("postgres", self.passwd))

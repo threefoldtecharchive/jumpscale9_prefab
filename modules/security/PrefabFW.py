@@ -50,7 +50,7 @@ class PrefabFW(base):
         return out
 
     def setRuleset(self, ruleset, pinghost="8.8.8.8"):
-        if not self.prefab.net.ping(pinghost):
+        if not self.prefab.system.net.ping(pinghost):
             raise j.exceptions.Input(
                 message="Cannot set firewall ruleset if we cannot ping to the host we have to check against.",
                 level=1,

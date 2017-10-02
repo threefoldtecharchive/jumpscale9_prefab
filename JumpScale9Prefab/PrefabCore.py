@@ -488,12 +488,12 @@ class PrefabCore(base):
             else:
                 self.prefab.package.install('xz-utils')
             cmd = "tar -C %s -xzf %s" % (destination, path)
-        elif path.endswith("tar.bz2"):      
-            #  cmd = "cd %s;bzip2 -d %s | tar xvf -" % (j.sal.fs.getDirName(path), path)     
+        elif path.endswith("tar.bz2"):
+            #  cmd = "cd %s;bzip2 -d %s | tar xvf -" % (j.sal.fs.getDirName(path), path)
              cmd = "tar -C %s -jxvf %s" % (destination, path)
-            #  tar -jxvf                         
-        elif path.endswith(".bz2"):      
-             cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)      
+            #  tar -jxvf
+        elif path.endswith(".bz2"):
+             cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)
         else:
             raise j.exceptions.RuntimeError("file_expand format not supported yet for %s" % path)
 
@@ -681,7 +681,7 @@ class PrefabCore(base):
             hostfile = "/etc/hosts"
             self.file_write(hostfile, val)
         self.cache.reset()
-        
+
 
     def upload(self, source, dest=""):
         """
@@ -1243,7 +1243,7 @@ class PrefabCore(base):
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
         if tmux:
-            rc, out = self.prefab.tmux.executeInScreen("cmd", "cmd", cmd, wait=True, die=False)
+            rc, out = self.prefab.system.tmux.executeInScreen("cmd", "cmd", cmd, wait=True, die=False)
             if showout:
                 self.logger.info(out)
         else:

@@ -62,7 +62,7 @@ class PrefabPortal(base):
                 self.start()
             return
 
-        self.prefab.apps.mongodb.install()
+        self.prefab.db.mongodb.install()
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
 
@@ -205,15 +205,17 @@ class PrefabPortal(base):
         Start the portal
         passwd : if not None, change the admin password to passwd after start
         """
-        self.prefab.apps.mongodb.start()
+        self.prefab.db.mongodb.start()
         cmd = "python3 portal_start.py"
-        self.prefab.system.processManager.ensure('portal', cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, 'main'))
+        pm = self.prefab.system.processManager.get()
+        pm.ensure('portal', cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, 'main'))
 
         if passwd is not None:
             self.set_admin_password(passwd)
 
     def stop(self):
-        self.prefab.system.processManager.stop('portal')
+        pm = self.prefab.system.processManager.get()
+        pm.stop('portal')
 
     def set_admin_password(self, passwd):
         # wait for the admin user to be created by portal

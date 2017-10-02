@@ -92,14 +92,16 @@ class PrefabRedis(app):
         _, c_path = self._get_paths(name)
 
         cmd = "$BINDIR/redis-server %s" % c_path
-        self.prefab.system.processManager.ensure(name="redis_%s" % name, cmd=cmd, env={}, path='$BINDIR', autostart=True)
+        pm = self.prefab.system.processManager.get()
+        pm.ensure(name="redis_%s" % name, cmd=cmd, env={}, path='$BINDIR', autostart=True)
 
         # Checking if redis is started correctly with port specified
         if not self.is_running(ip_address=ip, port=port, path='$BINDIR', unixsocket=unixsocket):
             raise j.exceptions.RuntimeError('Redis is failed to start correctly')
 
     def stop(self, name='main'):
-        self.prefab.system.processManager.stop(name="redis_%s" % name)
+        pm = self.prefab.system.processManager.get()
+        pm.stop(name="redis_%s" % name)
 
     def is_running(self, ip_address='localhost', port=6379, path='$BINDIR', password=None, unixsocket=None):
         if ip_address != '' and port != 0:

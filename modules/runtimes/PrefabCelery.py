@@ -6,8 +6,8 @@ base = j.tools.prefab._getBaseAppClass()
 class PrefabCelery(base):
 
     def install(self):
-        self.prefab.development.pip.install('celery[redis]')
-        self.prefab.development.pip.install('flower')
+        self.prefab.runtimes.pip.install('celery[redis]')
+        self.prefab.runtimes.pip.install('flower')
         j.clients.redis.start4core()
 
     def start(self, cmd, path="$JSAPPSDIR/celery/tasks.py", broker='redis://localhost:6379', appname='celery'):
@@ -27,4 +27,5 @@ app = Celery('{name}', broker='{back}', backend='{back}')
             self.prefab.core.dir_ensure(parent)
             self.prefab.core.file_write(path, content)
         cmd = 'celery -A {module} {cmd} --broker={broker}'.format(module=module, cmd=cmd, broker=broker)
-        self.prefab.system.processManager.ensure(appname, cmd=cmd, path=parent)
+        pm = self.prefab.system.processManager.get()
+        pm.ensure(appname, cmd=cmd, path=parent)
