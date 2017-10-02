@@ -32,4 +32,4 @@ class PrefabCapnp(app):
         """
         self.prefab.core.run(script)
         # install python pacakge
-        self.prefab.development.pip.multiInstall(['cython', 'setuptools', 'pycapnp'], upgrade=True)
+        self.prefab.runtimes.pip.multiInstall(['cython', 'setuptools', 'pycapnp'], upgrade=True)

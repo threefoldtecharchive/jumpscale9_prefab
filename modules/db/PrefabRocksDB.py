@@ -65,5 +65,5 @@ class PrefabRocksDB(base):
         self.prefab.system.package.install("libhiredis-dev")
         self.prefab.system.package.install("libbz2-dev")
         self.prefab.system.package.install('python3-dev')
-        self.prefab.development.pip.ensure()
-        self.prefab.development.pip.multiInstall(['pyrocksdb', 'peewee'])
+        self.prefab.runtimes.pip.ensure()
+        self.prefab.runtimes.pip.multiInstall(['pyrocksdb', 'peewee'])

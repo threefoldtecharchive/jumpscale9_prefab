@@ -109,7 +109,7 @@ class PrefabLoader():
 
     #     if not j.sal.fs.exists(path, followlinks=True):
     #         raise RuntimeError("Could not find prefab dir:%s"%path)
-                
+
     #     moduleList = self.findModules(path=path,moduleList=self.moduleList)
 
     #     for jlocationRoot, jlocationRootDict in moduleList.items():
@@ -193,7 +193,8 @@ class PrefabLoader():
             for classfile in j.sal.fs.listFilesInDir(catpath, False, "*.py"):
                 # print(classfile)
                 basename = j.do.getBaseName(classfile)
-
+                # if basename == 'PrefabSSH.py':
+                #     import ipdb; ipdb.set_trace()
                 basename=basename[:-3]
 
                 # print ("load prefab module:%s"%classfile)
@@ -202,11 +203,11 @@ class PrefabLoader():
                 if not basename.startswith("Prefab"):
                     continue
 
-                exec("from %s import %s"%(basename,basename)) 
+                exec("from %s import %s"%(basename,basename))
                 prefabObject=eval("%s(executor,prefab)"%basename)
 
                 basenameLower=basename.replace("Prefab","")
-                basenameLower=basenameLower[0].lower()+basenameLower[1:]
+                basenameLower=basenameLower.lower()
 
                 exec("prefab.%s.%s = prefabObject"%(cat,basenameLower))
 
@@ -228,5 +229,3 @@ class PrefabLoader():
         #                     moduleList[locRoot] = {}
         #                 moduleList[locRoot][locSubName]=(classfile,classname,importItems)
         # return moduleList
-
-

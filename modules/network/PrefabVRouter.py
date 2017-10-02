@@ -115,10 +115,10 @@ class PrefabVRouter(base):
 
     def dnsServer(self):
         self.check()
-        self.prefab.tmux.createSession("ovsrouter", ["dns"], returnifexists=True, killifexists=False)
+        self.prefab.system.tmux.createSession("ovsrouter", ["dns"], returnifexists=True, killifexists=False)
         self.prefab.system.process.kill("dns-server")
         cmd = "jspython /opt/dnsmasq-alt/dns-server.py"
-        self.prefab.tmux.executeInScreen('ovsrouter', 'dns', cmd)
+        self.prefab.system.tmux.executeInScreen('ovsrouter', 'dns', cmd)
 
     @property
     def wirelessInterfaceNonDefGW(self):
@@ -183,7 +183,7 @@ class PrefabVRouter(base):
         self.prefab.core.execute_bash(C)
 
         cmd = "dhcpd -f"
-        self.prefab.tmux.executeInScreen('ovsrouter', 'dhcpd', cmd)
+        self.prefab.system.tmux.executeInScreen('ovsrouter', 'dhcpd', cmd)
 
     def hostap(self):
         self.check()
@@ -252,7 +252,7 @@ class PrefabVRouter(base):
         self.prefab.core.file_write(configdest, C)
 
         cmd = "/opt/netpoc/hostapd-2.5/hostapd/hostapd %s" % configdest
-        self.prefab.tmux.executeInScreen('ovsrouter', 'ap', cmd)
+        self.prefab.system.tmux.executeInScreen('ovsrouter', 'ap', cmd)
 
     def firewall(self):
         path = "$CODEDIR/github/jumpscale/smartproxy/nftables.conf"
@@ -269,7 +269,7 @@ class PrefabVRouter(base):
         """
 
         cmd = "python3 mitmproxy_start.py -T -d -d -p 8443 -s /opt/dnsmasq-alt/http-filter.py"
-        self.prefab.tmux.executeInScreen('ovsrouter', 'proxy', cmd)
+        self.prefab.system.tmux.executeInScreen('ovsrouter', 'proxy', cmd)
 
     #
     # def accesspointAllInOne(self, passphrase, name="", dns="8.8.8.8", interface="wlan0"):

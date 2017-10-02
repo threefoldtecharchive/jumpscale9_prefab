@@ -31,10 +31,10 @@ class PrefabAtYourService(base):
         """
         code_dir = self.prefab.core.dir_paths["CODEDIR"]
         if install_portal:
-            self.prefab.apps.portal.install()
+            self.prefab.web.portal.install(reset=True)
         if j.sal.fs.exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
-            self.prefab.apps.portal.addSpace('{}/github/jumpscale/ays9/apps/AYS'.format(code_dir))
-            self.prefab.apps.portal.addActor('{}/github/jumpscale/ays9/apps/ays__tools'.format(code_dir))
+            self.prefab.web.portal.addSpace('{}/github/jumpscale/ays9/apps/AYS'.format(code_dir))
+            self.prefab.web.portal.addActor('{}/github/jumpscale/ays9/apps/ays__tools'.format(code_dir))
 
     def install(self, install_portal=False):
         self.prefab.core.dir_ensure(self.base_dir)
@@ -60,7 +60,9 @@ class PrefabAtYourService(base):
 
     def start(self, host='localhost', port=5000):
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port}'.format(base_dir=self.base_dir, host=host, port=port)
-        self.prefab.system.processManager.ensure(name='atyourservice', cmd=cmd)
+        pm = self.prefab.system.processManager.get()
+        pm.ensure(name='atyourservice', cmd=cmd)
 
     def stop(self):
-        self.prefab.system.processManager.stop(name='atyourservice')
+        pm = self.prefab.system.processManager.get()
+        pm.stop(name='atyourservice')

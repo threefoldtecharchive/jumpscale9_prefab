@@ -2,7 +2,7 @@ from js9 import j
 import time
 import re
 
-# not using prefab.tmux.executeInScreen
+# not using prefab.system.tmux.executeInScreen
 base = j.tools.prefab._getBaseClass()
 
 
@@ -314,23 +314,23 @@ class PrefabTmuxec(ProcessManagerBase):
                 self.prefab.core.file_write(self.startupfile, start_command, append=True)
                 if wait:
                     self.prefab.core.file_write(self.startupfile, 'sleep %s' % wait, append=True)
-        self.prefab.tmux.executeInScreen("main", name, cmd, wait=wait, expect=expect)
+        self.prefab.system.tmux.executeInScreen("main", name, cmd, wait=wait, expect=expect)
 
     def stop(self, name):
         self.logger.info("stop...")
         if name in self.list():
-            pid = self.prefab.tmux.getPid('main', name)
+            pid = self.prefab.system.tmux.getPid('main', name)
             self.prefab.core.run("kill -9 %s" % pid)
-            self.prefab.tmux.killWindow("main", name)
+            self.prefab.system.tmux.killWindow("main", name)
         self.prefab.system.process.kill(name, signal=9, exact=False)
         self.logger.info("...ok")
 
     def remove(self, name):
         """removes service """
         if name in self.list():
-            pid = self.prefab.tmux.getPid('main', name)
+            pid = self.prefab.system.tmux.getPid('main', name)
             self.prefab.core.run("kill -9 %s" % pid)
-            self.prefab.tmux.killWindow("main", name)
+            self.prefab.system.tmux.killWindow("main", name)
 
     def __str__(self):
         return "prefab:%s:%s:processManager_tmux" % (

@@ -18,14 +18,14 @@ class PrefabOdoo(app):
         self.prefab.core.execute_bash(cmd, profile=True)
 
     def build(self):
-        if not self.prefab.apps.postgresql.isInstalled():
-            self.prefab.apps.postgresql.install()
+        if not self.prefab.db.postgresql.isInstalled():
+            self.prefab.db.postgresql.install()
         self._install_pip2()
         self.prefab.system.package.multiInstall([
             'python-ldap', 'libldap2-dev', 'libsasl2-dev', 'libssl-dev',
             'libxml2-dev', 'libxslt-dev', 'python-six', 'libpq-dev'
         ])
-        self.prefab.apps.nodejs.install()
+        self.prefab.runtimes.nodejs.install()
         self.prefab.core.run("npm install -g less less-plugin-clean-css -y", profile=True)
         odoo_git_url = "https://github.com/odoo/odoo.git"
         odoo_dir = '$TMPDIR/odoo'
@@ -41,8 +41,8 @@ class PrefabOdoo(app):
             return
         if not self.doneGet('build'):
             self.build()
-        if not self.prefab.apps.postgresql.isStarted():
-            self.prefab.apps.postgresql.start()
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
         self.prefab.core.run('adduser --system --quiet --shell /bin/bash --group --gecos "Odoo administrator" odoo')
         self.prefab.core.run('sudo -u postgres $BINDIR/createuser -s odoo')
         self.prefab.core.dir_ensure("$JSLIBEXTDIR")
@@ -56,8 +56,8 @@ class PrefabOdoo(app):
         self.doneSet('install')
 
     def start(self):
-        if not self.prefab.apps.postgresql.isStarted():
-            self.prefab.apps.postgresql.start()
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
         cmd = """
              cd $BINDIR
              sudo -H -u odoo \

@@ -39,9 +39,9 @@ class PrefabSSH(base):
             if j.sal.fs.exists(keypath):
                 key = j.sal.fs.fileGetContents(keypath)
                 executor = j.tools.executor.getSSHBased(item, port, login, passwd, checkok=True)
-                executor.prefab.ssh.authorize(user="root", key=key)
+                executor.prefab.system.ssh.authorize(user="root", key=key)
                 if changepasswdto != "":
-                    executor.prefab.user.passwd(login, changepasswdto, encrypted_passwd=False)
+                    executor.prefab.system.user.passwd(login, changepasswdto, encrypted_passwd=False)
             else:
                 raise j.exceptions.RuntimeError("Cannot find key:%s" % keypath)
             done.append(item)
@@ -53,7 +53,7 @@ class PrefabSSH(base):
         if range not specified then will take all ranges of local ip addresses (nics)
         """
         if not range:
-            res = self.prefab.net.get_info()
+            res = self.prefab.system.net.get_info()
             for item in res:
                 cidr = item['cidr']
 
@@ -106,7 +106,7 @@ class PrefabSSH(base):
     def keygen(self, user="root", keytype="rsa", name="default"):
         """Generates a pair of ssh keys in the user's home .ssh directory."""
         user = user.strip()
-        d = self.prefab.user.check(user)
+        d = self.prefab.system.user.check(user)
         assert d, "User does not exist: %s" % (user)
         home = d["home"]
         path = '%s/.ssh/%s' % (home, name)
@@ -130,7 +130,7 @@ class PrefabSSH(base):
         sudomode = self.prefab.core.sudomode
         self.prefab.core.sudomode = True
         user = user.strip()
-        d = self.prefab.user.check(user, need_passwd=False)
+        d = self.prefab.system.user.check(user, need_passwd=False)
         if d is None:
             raise j.exceptions.RuntimeError("did not find user:%s" % user)
         group = d["gid"]
@@ -159,7 +159,7 @@ class PrefabSSH(base):
         """Removes the given key to the remote '.ssh/authorized_keys' for the given
         user."""
         key = key.strip()
-        d = self.prefab.user.check(user, need_passwd=False)
+        d = self.prefab.system.user.check(user, need_passwd=False)
         group = d["gid"]
         keyf = d["home"] + "/.ssh/authorized_keys"
         if self.prefab.core.file_exists(keyf):
@@ -185,10 +185,10 @@ class PrefabSSH(base):
 
         # leave here is to make sure we have a backdoor for when something goes wrong further
         self.logger.info("create backdoor")
-        self.prefab.user.ensure(backdoorlogin, passwd=backdoorpasswd, home=None, uid=None,
+        self.prefab.system.user.ensure(backdoorlogin, passwd=backdoorpasswd, home=None, uid=None,
                                  gid=None, shell=None, fullname=None, encrypted_passwd=True, group="root")
         self.prefab.core.run("rm -fr /home/%s/.ssh/" % backdoorlogin)
-        self.prefab.group.user_add('sudo', '$(system.backdoor.login)')
+        self.prefab.system.group.user_add('sudo', '$(system.backdoor.login)')
 
         self.logger.info("test backdoor")
         j.tools.executor.getSSHBased(addr="$(node.tcp.addr)", port=int("$(ssh.port)"), login="$(system.backdoor.login)",
