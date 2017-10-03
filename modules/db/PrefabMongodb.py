@@ -59,9 +59,9 @@ class PrefabMongodb(app):
         self.prefab.core.dir_ensure('$VARDIR/data/mongodb')
         cmd = "$BINDIR/mongod --dbpath '$VARDIR/data/mongodb'"
         self.prefab.system.process.kill("mongod")
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.ensure(name="mongod", cmd=cmd, env={}, path="", autostart=True)
 
     def stop(self):
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.stop("mongod")

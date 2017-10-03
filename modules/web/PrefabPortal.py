@@ -207,14 +207,14 @@ class PrefabPortal(base):
         """
         self.prefab.db.mongodb.start()
         cmd = "python3 portal_start.py"
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.ensure('portal', cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, 'main'))
 
         if passwd is not None:
             self.set_admin_password(passwd)
 
     def stop(self):
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.stop('portal')
 
     def set_admin_password(self, passwd):

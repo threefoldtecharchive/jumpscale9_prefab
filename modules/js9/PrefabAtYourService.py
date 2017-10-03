@@ -60,9 +60,9 @@ class PrefabAtYourService(base):
 
     def start(self, host='localhost', port=5000):
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port}'.format(base_dir=self.base_dir, host=host, port=port)
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.ensure(name='atyourservice', cmd=cmd)
 
     def stop(self):
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.stop(name='atyourservice')

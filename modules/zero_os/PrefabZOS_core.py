@@ -117,5 +117,5 @@ class PrefabZOS_core(app):
         env["TMPDIR"] = self.prefab.core.dir_paths["TMPDIR"]
         cmd = "$BINDIR/agent -nid %s -gid %s -c $JSCFGDIR/core/g8os.toml" % (
             nid, gid)
-        pm = self.prefab.system.processManager.get('tmux')
+        pm = self.prefab.system.processmanager.get('tmux')
         pm.ensure("agent", cmd=cmd, path="$JSCFGDIR/agent", env=env)

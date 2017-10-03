@@ -205,7 +205,7 @@ class PrefabPackage(base):
 
     def start(self, package):
         if self.prefab.core.isArch or self.prefab.core.isUbuntu or self.prefab.core.isMac:
-            pm = self.prefab.system.processManager.get()
+            pm = self.prefab.system.processmanager.get()
             pm.ensure(package)
         else:
             raise j.exceptions.RuntimeError("could not install/ensure:%s, platform not supported" % package)

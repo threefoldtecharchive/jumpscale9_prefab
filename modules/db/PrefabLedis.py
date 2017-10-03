@@ -74,5 +74,5 @@ class PrefabLedis(app):
 
     def start(self):
         cmd = "source $TEMPLATEDIR/ledisdev.sh && $BINDIR/ledis-server -config $TEMPLATEDIR/cfg/ledisconfig.toml"
-        pm = self.prefab.system.processManager.get("tmux")
+        pm = self.prefab.system.processmanager.get("tmux")
         pm.ensure(name='ledis', cmd=cmd)

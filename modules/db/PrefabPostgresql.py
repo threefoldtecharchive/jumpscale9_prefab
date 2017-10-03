@@ -89,7 +89,7 @@ class PrefabPostgresql(app):
         self.prefab.core.execute_bash(cmd, profile=True)
 
         cmdpostgres = "sudo -u postgres $BINDIR/postgres -D {postgresdbdir}".format(postgresdbdir=self.dbdir)
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
 
         # make sure postgres is ready

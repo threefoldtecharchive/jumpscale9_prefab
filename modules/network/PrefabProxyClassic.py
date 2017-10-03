@@ -17,7 +17,7 @@ class PrefabProxyClassic(base):
     """
 
     def removeFromSystemD(self):
-        pm = self.prefab.system.processManager.get("systemd")
+        pm = self.prefab.system.processmanager.get("systemd")
         pm.remove("polipo")
         pm.remove("privoxy")
 
@@ -181,7 +181,7 @@ class PrefabProxyClassic(base):
     def start(self):
 
         cmd = "privoxy --no-daemon /etc/privoxy/config"
-        pm = self.prefab.system.processManager.get("tmux")
+        pm = self.prefab.system.processmanager.get("tmux")
         pm.ensure("privoxy", cmd)  # in tmux will always restart
 
         cmd = "polipo -c /etc/polipo/config"

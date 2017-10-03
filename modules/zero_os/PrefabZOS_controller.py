@@ -23,7 +23,7 @@ class PrefabZOS_controller(app):
         # self.prefab.apps.syncthing.build(start=False)
 
         self.prefab.system.processManager.remove("agentcontroller8")
-        pm = self.prefab.system.processManager.get("tmux")
+        pm = self.prefab.system.processmanager.get("tmux")
         pm.stop("syncthing")
 
         self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg/controller", recursive=True)
@@ -146,5 +146,5 @@ class PrefabZOS_controller(app):
         env = {}
         env["TMPDIR"] = self.prefab.core.dir_paths["TMPDIR"]
         cmd = "$BINDIR/controller -c $JSCFGDIR/controller/agentcontroller.toml"
-        pm = self.prefab.system.processManager.get("tmux")
+        pm = self.prefab.system.processmanager.get("tmux")
         pm.ensure("controller", cmd=cmd, path="$JSCFGDIR/controller/", env=env)

@@ -86,7 +86,7 @@ class PrefabSyncthing(app):
 
         if self.prefab.core.dir_exists("$CFGDIR/syncthing") == False:
             self.prefab.core.run(cmd="rm -rf $CFGDIR/syncthing;cd $BINDIR;./syncthing -generate  $CFGDIR/syncthing")
-        pm = self.prefab.system.processManager.get("tmux")
+        pm = self.prefab.system.processmanager.get("tmux")
         pm.ensure(name="syncthing", cmd="./syncthing -home  $CFGDIR/syncthing", path="$BINDIR")
 
     @property
@@ -102,7 +102,7 @@ class PrefabSyncthing(app):
                         return item2.text
 
     def stop(self):
-        pm = self.prefab.system.processManager.get("tmux")
+        pm = self.prefab.system.processmanager.get("tmux")
         pm.stop("syncthing")
 
     def getApiClient(self):

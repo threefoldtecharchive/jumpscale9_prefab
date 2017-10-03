@@ -46,7 +46,7 @@ class PrefabGeoDns(app):
         cmd = "$BINDIR/geodns -interface %s -port %s -config=%s -identifier=%s -cpus=%s" % (
             ip, str(port), config_dir, identifier, str(cpus))
         if tmux:
-            pm = self.prefab.system.processManager.get("tmux")
+            pm = self.prefab.system.processmanager.get("tmux")
             pm.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")
         else:
             self.prefab.system.processManager.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")

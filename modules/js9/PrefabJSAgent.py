@@ -39,5 +39,5 @@ class PrefabJSAgent(app):
         cmd = "jspython jsagent.py --grid-id %d --controller-ip %s --controller-port %d" % (gid, ctrl_addr, ctrl_port)
         if ctrl_passwd is not None and ctrl_passwd != '':
             cmd += ' --controller-password %s' % ctrl_passwd
-        pm = self.prefab.system.processManager.get()
+        pm = self.prefab.system.processmanager.get()
         pm.ensure(name="jsagent", cmd=cmd, path='$JSAPPSDIR/jsagent')
