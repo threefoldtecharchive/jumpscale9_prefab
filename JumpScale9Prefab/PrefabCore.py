@@ -404,8 +404,8 @@ class PrefabCore(base):
         # there is a specific need then change the argument only for that 1
         # usecase
 
-        if expand and to != "":
-            destination = to
+        destination = to
+        if expand and to != "":            
             if overwrite:
                 self.dir_remove(destination)
 
