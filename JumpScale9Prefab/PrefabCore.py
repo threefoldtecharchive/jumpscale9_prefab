@@ -148,7 +148,8 @@ def text_ensure_line(text, *lines):
     if res[0] == '' and len(res) == 1:
         res = list()
     for line in lines:
-        assert line.find(eol) == -1, "No EOL allowed in lines parameter: " + repr(line)
+        assert line.find(eol) == - \
+            1, "No EOL allowed in lines parameter: " + repr(line)
         found = False
         for l in res:
             if l == line:
@@ -195,7 +196,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabCore(base):
 
     def _init(self):
-        self.sudomode = False
+        # self.sudomode = False
         self._cd = '/root'
 
     @property
@@ -214,7 +215,6 @@ class PrefabCore(base):
     def dir_paths(self):
         return self.executor.dir_paths
 
-
     # =============================================================================
     #
     # SYSTEM
@@ -227,7 +227,8 @@ class PrefabCore(base):
         """
         text = self.replace(text)
 
-        formatter = pygments.formatters.Terminal256Formatter(style=pygments.styles.get_style_by_name("vim"))
+        formatter = pygments.formatters.Terminal256Formatter(
+            style=pygments.styles.get_style_by_name("vim"))
 
         lexer = pygments.lexers.get_lexer_by_name(lexer)  # , stripall=True)
         colored = pygments.highlight(text, lexer, formatter)
@@ -315,7 +316,8 @@ class PrefabCore(base):
         with mode_sudo():
             old = "127.0.0.1 localhost"
             new = old + " " + self.system_uuid()
-            self.file_update('/etc/hosts', lambda x: text_replace_line(x, old, new)[0])
+            self.file_update(
+                '/etc/hosts', lambda x: text_replace_line(x, old, new)[0])
 
     def system_uuid(self):
         """Gets a machines UUID (Universally Unique Identifier)."""
@@ -334,7 +336,8 @@ class PrefabCore(base):
     def locale_ensure(self, locale):
         if not self.locale_check(locale):
             with fabric.context_managers.settings(warn_only=True):
-                self.sudo("/usr/share/locales/install-language-pack %s" % (locale,))
+                self.sudo(
+                    "/usr/share/locales/install-language-pack %s" % (locale,))
             self.sudo("dpkg-reconfigure locales")
 
     # =============================================================================
@@ -405,7 +408,7 @@ class PrefabCore(base):
         # usecase
 
         destination = to
-        if expand and to != "":            
+        if expand and to != "":
             if overwrite:
                 self.dir_remove(destination)
 
@@ -451,7 +454,8 @@ class PrefabCore(base):
                     raise j.exceptions.RuntimeError(
                         "Could not download:{}.\nFile size too small after download {}kb.\n".format(url, fsize))
                 if rc > 0:
-                    raise j.exceptions.RuntimeError("Could not download:{}.\nErrorcode: {}.\n".format(url, rc))
+                    raise j.exceptions.RuntimeError(
+                        "Could not download:{}.\nErrorcode: {}.\n".format(url, rc))
                 else:
                     self.touch("%s.downloadok" % to)
             else:
@@ -490,12 +494,13 @@ class PrefabCore(base):
             cmd = "tar -C %s -xzf %s" % (destination, path)
         elif path.endswith("tar.bz2"):
             #  cmd = "cd %s;bzip2 -d %s | tar xvf -" % (j.sal.fs.getDirName(path), path)
-             cmd = "tar -C %s -jxvf %s" % (destination, path)
+            cmd = "tar -C %s -jxvf %s" % (destination, path)
             #  tar -jxvf
         elif path.endswith(".bz2"):
-             cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)
+            cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)
         else:
-            raise j.exceptions.RuntimeError("file_expand format not supported yet for %s" % path)
+            raise j.exceptions.RuntimeError(
+                "file_expand format not supported yet for %s" % path)
 
         # print(cmd)
         self.run(cmd)
@@ -520,7 +525,8 @@ class PrefabCore(base):
         default will be returned if the file does not exist."""
         location = self.replace(location)
         if default is None:
-            assert self.file_exists(location), "prefab.file_read: file does not exists {0}".format(location)
+            assert self.file_exists(
+                location), "prefab.file_read: file does not exists {0}".format(location)
         elif not self.file_exists(location):
             return default
         frame = self.file_base64(location)
@@ -530,7 +536,8 @@ class PrefabCore(base):
         if replace:
             location = self.replace(location)
         cmd += ' %s' % location
-        rc, out, err = self.run(cmd, showout=False, die=False, replaceArgs=False)
+        rc, out, err = self.run(
+            cmd, showout=False, die=False, replaceArgs=False)
         return rc == 0
 
     def file_exists(self, location):
@@ -567,9 +574,11 @@ class PrefabCore(base):
         location = location.replace("//", "/")
         if self.file_exists(location):
             if self.isMac:
-                fs_check = self.run('stat -f %s %s' % ('"%a %u %g"', location), showout=False)[1]
+                fs_check = self.run('stat -f %s %s' %
+                                    ('"%a %u %g"', location), showout=False)[1]
             else:
-                fs_check = self.run('stat %s %s' % (location, '--format="%a %U %G"'), showout=False)[1]
+                fs_check = self.run('stat %s %s' % (
+                    location, '--format="%a %U %G"'), showout=False)[1]
             (mode, owner, group) = fs_check.split(' ')
             return {'mode': mode, 'owner': owner, 'group': group}
         else:
@@ -588,18 +597,21 @@ class PrefabCore(base):
     def hostname(self):
         def get():
             if self.isMac or self.isCygwin:
-                hostname = self.run("hostname",replaceArgs=False)[1]
+                hostname = self.run("hostname", replaceArgs=False)[1]
             else:
                 hostfile = "/etc/hostname"
-                rc, out, err = self.run("cat %s" % hostfile, showout=False, replaceArgs=False)
+                rc, out, err = self.run(
+                    "cat %s" % hostfile, showout=False, replaceArgs=False)
                 hostname = out.strip().split(".", 1)[0]
             return hostname
         return self.cache.get("hostname", get)
 
     @hostname.setter
     def hostname(self, val):
-        sudo = self.sudomode = True
-        self.sudomode = True
+        # sudo = self.sudomode = True
+        # self.sudomode = True
+        if val == self.hostname:
+            return
 
         val = val.strip().lower()
         if self.isMac:
@@ -612,7 +624,7 @@ class PrefabCore(base):
         self._hostname = val
         self.ns.hostfile_set(val, '127.0.0.1')
 
-        self.sudomode = sudo
+        # self.sudomode = sudo
 
     @property
     def name(self):
@@ -631,7 +643,7 @@ class PrefabCore(base):
 
     @property
     def ns(self):
-        return self.prefab.ns
+        return self.prefab.system.ns
 
     @property
     def fqn(self):
@@ -646,7 +658,8 @@ class PrefabCore(base):
                     if len(name.split(".")) > 2:
                         fqn = name
                         return fqn
-            raise j.exceptions.RuntimeError("fqn was never set, please use prefab.setIDs()")
+            raise j.exceptions.RuntimeError(
+                "fqn was never set, please use prefab.setIDs()")
         return self.cache.get("fqn", get)
 
     @fqn.setter
@@ -656,7 +669,6 @@ class PrefabCore(base):
         self.ns.hostfile_set_multiple([["127.0.1.1", self.fqn], ["127.0.1.1", self.name], [
                                       "127.0.1.1", self.name + "." + self.grid]], remove=["127.0.1.1"])
         self.cache.reset()
-
 
     def setIDs(self, name, grid, domain="aydo.com"):
         self.fqn = "%s.%s.%s" % (name, grid, domain)
@@ -681,7 +693,6 @@ class PrefabCore(base):
             hostfile = "/etc/hosts"
             self.file_write(hostfile, val)
         self.cache.reset()
-
 
     def upload(self, source, dest=""):
         """
@@ -729,9 +740,8 @@ class PrefabCore(base):
         # self.executor.sshclient.rsync_down(source, dest)
         self.executor.download(source, dest)
 
-
     def file_write(self, location, content, mode=None, owner=None, group=None, check=False,
-                   strip=True, showout=True, append=False,replaceInContent=False):
+                   strip=True, showout=True, append=False, replaceInContent=False):
         """
         @param append if append then will add to file
         """
@@ -743,7 +753,8 @@ class PrefabCore(base):
         if replaceInContent:
             content = self.replace(content)
 
-        self.executor.file_write(path=path, content=content, mode=mode, owner=owner, group=group, append=append)
+        self.executor.file_write(
+            path=path, content=content, mode=mode, owner=owner, group=group, append=append)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -836,11 +847,13 @@ class PrefabCore(base):
         content2 = content.encode('utf-8')
         content_base64 = base64.b64encode(content2).decode()
         if check_exist:
-            command = 'grep -F "$(echo "%s" | openssl base64 -A -d)" %s' % (content_base64, location)
+            command = 'grep -F "$(echo "%s" | openssl base64 -A -d)" %s' % (
+                content_base64, location)
             rc, _, _ = self.run(command, die=False)
             if rc == 0:
                 return False
-        self.run('echo "%s" | openssl base64 -A -d >> %s' % (content_base64, location), showout=False)
+        self.run('echo "%s" | openssl base64 -A -d >> %s' %
+                 (content_base64, location), showout=False)
         self.file_attribs(location, mode=mode, owner=owner, group=group)
 
     def file_unlink(self, path):
@@ -854,15 +867,18 @@ class PrefabCore(base):
         source = self.replace(source)
         destination = self.replace(destination)
         if self.file_exists(destination) and (not self.file_is_link(destination)):
-            raise Exception("Destination already exists and is not a link: %s" % (destination))
+            raise Exception(
+                "Destination already exists and is not a link: %s" % (destination))
         # FIXME: Should resolve the link first before unlinking
         if self.file_is_link(destination):
             self.file_unlink(destination)
         if symbolic:
-            self.run('ln -sf %s %s' % (self.shell_safe(source), self.shell_safe(destination)))
+            self.run('ln -sf %s %s' %
+                     (self.shell_safe(source), self.shell_safe(destination)))
 
         else:
-            self.run('ln -f %s %s' % (self.shell_safe(source), self.shell_safe(destination)))
+            self.run('ln -f %s %s' %
+                     (self.shell_safe(source), self.shell_safe(destination)))
 
         self.file_attribs(destination, mode, owner, group)
 
@@ -929,8 +945,10 @@ class PrefabCore(base):
         # if prefab_env[OPTION_HASH] == "python":
         location = self.replace(location)
         if self.file_exists(location):
-            cmd = "md5sum {0} | cut -f 1 -d ' '".format(self.shell_safe((location)))
-            rc, out, err = self.run(cmd, debug=False, checkok=False, showout=False)
+            cmd = "md5sum {0} | cut -f 1 -d ' '".format(
+                self.shell_safe((location)))
+            rc, out, err = self.run(
+                cmd, debug=False, checkok=False, showout=False)
             return out
         # return self.run('openssl dgst -md5 %s' % (location)).split("\n")[-1].split(")= ",1)[-1].strip()
 
@@ -959,11 +977,14 @@ class PrefabCore(base):
             self.logger.debug('set dir attributes:%s"%location')
         recursive = recursive and "-R " or ""
         if mode:
-            self.run('chmod %s %s %s' % (recursive, mode, location), showout=False)
+            self.run('chmod %s %s %s' %
+                     (recursive, mode, location), showout=False)
         if owner:
-            self.run('chown %s %s %s' % (recursive, owner, location), showout=False)
+            self.run('chown %s %s %s' %
+                     (recursive, owner, location), showout=False)
         if group:
-            self.run('chgrp %s %s %s' % (recursive, group, location), showout=False)
+            self.run('chgrp %s %s %s' %
+                     (recursive, group, location), showout=False)
 
     def dir_exists(self, location):
         """Tells if there is a remote directory at the given location."""
@@ -990,9 +1011,11 @@ class PrefabCore(base):
 
         location = self.replace(location)
         if not self.dir_exists(location):
-            self.run('mkdir %s %s' % (recursive and "-p" or "", location), showout=False)
+            self.run('mkdir %s %s' %
+                     (recursive and "-p" or "", location), showout=False)
         if owner or group or mode:
-            self.dir_attribs(location, owner=owner, group=group, mode=mode, recursive=recursive)
+            self.dir_attribs(location, owner=owner, group=group,
+                             mode=mode, recursive=recursive)
 
         # make sure we redo these actions
 
@@ -1078,24 +1101,23 @@ class PrefabCore(base):
     # CORE
     # -----------------------------------------------------------------------------
 
-    def _clean(self, output):
-        if self.sudomode and hasattr(self.executor, 'login'):
-            dirt = '[sudo] password for %s: ' % self.executor.login
-            if output.find(dirt) != -1:
-                output = output.lstrip(dirt)
-        return output
+    # def _clean(self, output):
+    #     if self.sudomode and hasattr(self.executor, 'login'):
+    #         dirt = '[sudo] password for %s: ' % self.executor.login
+    #         if output.find(dirt) != -1:
+    #             output = output.lstrip(dirt)
+    #     return output
 
-    def set_sudomode(self):
-        self.sudomode = True
+    # def set_sudomode(self):
+    #     self.sudomode = True
 
-    def sudo(self, cmd, die=True, showout=True):
-        sudomode = self.sudomode
-        self.sudomode = True
-        try:
-            return self.run(cmd, die=die, showout=showout)
-        finally:
-            self.sudomode = sudomode
-
+    # def sudo(self, cmd, die=True, showout=True):
+    #     sudomode = self.sudomode
+    #     self.sudomode = True
+    #     try:
+    #         return self.run(cmd, die=die, showout=showout)
+    #     finally:
+    #         self.sudomode = sudomode
 
     def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
             shell=False, env=None, timeout=600):
@@ -1125,13 +1147,10 @@ class PrefabCore(base):
         if shell and '"' in cmd:
             cmd = cmd.replace('"', '\\"')
 
-        if "cygwin" in self.uname:
-            self.sudomode = False
-
-        if self.sudomode:
-            cmd = self.sudo_cmd(cmd, shell=shell)
-        elif shell:  # only when shell is asked for
-            cmd = 'bash -c "%s"' % cmd
+        # if self.sudomode:
+        #     cmd = self.sudo_cmd(cmd, shell=shell)
+        # elif shell:  # only when shell is asked for
+        #     cmd = 'bash -c "%s"' % cmd
 
         # old_path = self.executor.execute("echo $PATH", showout=False)[2]
         # if "/usr/local/bin" not in old_path:
@@ -1140,16 +1159,18 @@ class PrefabCore(base):
         #     path += env.get("PATH", [])
         #     env = {"PATH": ":".join(path)}
 
-        rc, out, err = self.executor.execute(cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout)
+        rc, out, err = self.executor.execute(
+            cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout)
 
-        out = self._clean(out)
+        # out = self._clean(out)
 
         if rc > 0 and "brew unlink" in out and "To install this version" in out:
             from IPython import embed
             self.logger.info("DEBUG NOW brew unlink (run)")
             embed()
             raise RuntimeError("stop debug here")
-            self.executor.execute("brew unlink ", checkok=checkok, die=False, showout=showout, env=env)
+            self.executor.execute(
+                "brew unlink ", checkok=checkok, die=False, showout=showout, env=env)
 
         # If command fails and die is true, raise error
         if rc > 0 and die:
@@ -1162,26 +1183,30 @@ class PrefabCore(base):
 
         return rc, out, err
 
-    def sudo_cmd(self, command, shell=False, force_sudo=False):
-        # TODO: Fix properly. This is just a workaround
-        self.sudomode = False
-        if "darwin" in self.prefab.platformtype.osname:
-            self.sudomode = True
-            return command
-        self.sudomode = True
-        if not force_sudo and getattr(self.executor, 'login', '') == "root":
-            cmd = command
-        passwd = self.executor.passwd if hasattr(self.executor, "passwd") else ''
-        passwd = passwd or "\'\'"
-        if shell:
-            command = 'bash -c "%s"' % command
-        rc, out, err = self.executor.execute("which sudo", die=False, showout=False)
-        if rc or out.strip() == '**OK**':
-            # Install sudo if sudo not installed
-            cmd = 'apt-get install sudo && echo %s | sudo -SE -p \'\' %s' % (passwd, command)
-        else:
-            cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (passwd, command.replace('"', '\\"'))
-        return cmd
+    # def sudo_cmd(self, command, shell=False, force_sudo=False):
+    #     # TODO: Fix properly. This is just a workaround
+    #     self.sudomode = False
+    #     if "darwin" in self.prefab.platformtype.osname:
+    #         self.sudomode = True
+    #         return command
+    #     self.sudomode = True
+    #     if not force_sudo and getattr(self.executor, 'login', '') == "root":
+    #         cmd = command
+    #     passwd = self.executor.passwd if hasattr(
+    #         self.executor, "passwd") else ''
+    #     passwd = passwd or "\'\'"
+    #     if shell:
+    #         command = 'bash -c "%s"' % command
+    #     rc, out, err = self.executor.execute(
+    #         "which sudo", die=False, showout=False)
+    #     if rc or out.strip() == '**OK**':
+    #         # Install sudo if sudo not installed
+    #         cmd = 'apt-get install sudo && echo %s | sudo -SE -p \'\' %s' % (
+    #             passwd, command)
+    #     else:
+    #         cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (
+    #             passwd, command.replace('"', '\\"'))
+    #     return cmd
 
     def cd(self, path):
         """cd to the given path"""
@@ -1227,23 +1252,26 @@ class PrefabCore(base):
         path = self.replace(path)
 
         if self.isMac:
-            self.file_write(location=path, content=content, mode=0o770, showout=False)
+            self.file_write(location=path, content=content,
+                            mode=0o770, showout=False)
         elif self.isCygwin:
             self.file_write(location=path, content=content, showout=False)
         else:
-            self.file_write(location=path, content=content, mode=0o770, owner="root", group="root", showout=False)
+            self.file_write(location=path, content=content, mode=0o770,
+                            owner="root", group="root", showout=False)
 
         if interpreter == 'bash' and die:
             interpreter = 'bash -e'
         cmd = "%s %s" % (interpreter, path)
 
-        if self.sudomode:
-            cmd = self.sudo_cmd(cmd)
+        # if self.sudomode:
+        # cmd = self.sudo_cmd(cmd)
 
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
         if tmux:
-            rc, out = self.prefab.system.tmux.executeInScreen("cmd", "cmd", cmd, wait=True, die=False)
+            rc, out = self.prefab.system.tmux.executeInScreen(
+                "cmd", "cmd", cmd, wait=True, die=False)
             if showout:
                 self.logger.info(out)
         else:
@@ -1251,7 +1279,8 @@ class PrefabCore(base):
             # outfile = self.replace(outfile)
             # cmd = cmd + " 2>&1 || echo **ERROR** | tee %s" % outfile
             cmd = cmd + " 2>&1 || echo **ERROR**"
-            rc, out, err = self.executor.executeRaw(cmd, showout=showout, die=False)
+            rc, out, err = self.executor.executeRaw(
+                cmd, showout=showout, die=False)
             out = out.rstrip().rstrip("\t")
             lastline = out.split("\n")[-1]
             if lastline.find("**ERROR**") != -1:
@@ -1263,7 +1292,7 @@ class PrefabCore(base):
                 self.logger.info(out)
                 raise RuntimeError("wrong output of cmd")
             # out = self.file_read(outfile)
-            out = self._clean(out)
+            # out = self._clean(out)
             # self.file_unlink(outfile)
             out = out.replace("**OK**", "")
             out = out.replace("**ERROR**", "")
@@ -1274,6 +1303,7 @@ class PrefabCore(base):
         if rc > 0:
             msg = "Could not execute script:\n%s\n" % content
             msg += "Out/Err:\n%s\n" % out
+            msg += "\n****ERROR***: could not execute script !!!\n"
             out = msg
 
             if die:
@@ -1311,7 +1341,8 @@ class PrefabCore(base):
     def command_check(self, command):
         """Tests if the given command is available on the system."""
         command = self.replace(command)
-        rc, out, err = self.run("which '%s'" % command, die=False, showout=False, profile=True)
+        rc, out, err = self.run("which '%s'" % command,
+                                die=False, showout=False, profile=True)
         return rc == 0
 
     def command_location(self, command):
@@ -1334,29 +1365,30 @@ class PrefabCore(base):
             "Command was not installed, check for errors: %s" % (command)
 
     # SYSTEM IDENTIFICATION
-    @property
-    def _cgroup(self):
-        def get():
-            if self.isMac:
-                return "none"
-            return self.file_read("/proc/1/cgroup", "none")
-        return self.cache.get("cgroup", get)
+    # @property
+    # def _cgroup(self):
+    #     def get():
+    #         if self.isMac:
+    #             return "none"
+    #         return self.file_read("/proc/1/cgroup", "none")
+    #     return self.cache.get("cgroup", get)
 
-    @property
-    def uname(self):
-        if not hasattr(self, '_uname'):
-            self._uname = self.executor.execute("uname -a", showout=False)[1].lower()
-        return self._uname
+    # @property
+    # def uname(self):
+    #     if not hasattr(self, '_uname'):
+    #         self._uname = self.executor.execute(
+    #             "uname -a", showout=False)[1].lower()
+    #     return self._uname
 
-    @property
-    def isDocker(self):
-        self._isDocker = self._cgroup.find("docker") != -1
-        return self._isDocker
+    # @property
+    # def isDocker(self):
+    #     self._isDocker = self._cgroup.find("docker") != -1
+    #     return self._isDocker
 
-    @property
-    def isLxc(self):
-        self._isLxc = self._cgroup.find("lxc") != -1
-        return self._isLxc
+    # @property
+    # def isLxc(self):
+    #     self._isLxc = self._cgroup.find("lxc") != -1
+    #     return self._isLxc
 
     @property
     def isUbuntu(self):

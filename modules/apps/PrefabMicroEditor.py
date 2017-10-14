@@ -23,7 +23,6 @@ class PrefabMicroEditor(app):
     # def GOPATH(self):
     #     return self.prefab.runtimes.golang.GOPATH
 
-
     # def build(self, install=True, start=True, reset=False, installDeps=False):
 
     #     if self.doneGet('build') and not reset:
@@ -47,16 +46,23 @@ class PrefabMicroEditor(app):
 
     #     self.doneSet('build')
 
-    def install(self):
+    def install(self, reset=False):
         """
-        GOGS has no files to move this method is for standardization of prefab
         """
+
+        if self.doneGet('install') and not reset:
+            return
+
         if self.core.isMac:
-            url = "https://github.com/zyedidia/micro/releases/download/nightly/micro-1.3.4-dev.17-osx.tar.gz"
+            url = "https://github.com/zyedidia/micro/releases/download/v1.3.3/micro-1.3.3-osx.tar.gz"
         elif self.core.isUbuntu:
-            url = "https://github.com/zyedidia/micro/releases/download/nightly/micro-1.3.4-dev.17-linux64.tar.gz"
+            url = "https://github.com/zyedidia/micro/releases/download/v1.3.3/micro-1.3.3-linux64.tar.gz"
         else:
             raise RuntimeError("not implemented for other platforms")
-        
-        dest=j.tools.prefab.local.network.tools.download(url=url, to='$TMPDIR/micro/', overwrite=False, retry=3, expand=True,removeTopDir=True)
-        self.core.file_move("$TMPDIR/micro/micro", "/usr/local/bin/micro", recursive=False)
+
+        dest = self.prefab.network.tools.download(
+            url=url, to='$TMPDIR/micro/', overwrite=False, retry=3, expand=True, removeTopDir=True)
+        self.core.file_move("$TMPDIR/micro/micro",
+                            "/usr/local/bin/micro", recursive=False)
+
+        self.doneSet('install')

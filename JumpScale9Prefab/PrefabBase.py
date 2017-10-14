@@ -2,7 +2,6 @@ from js9 import j
 import inspect
 
 
-
 class PrefabBase:
 
     def __init__(self, executor, prefab):
@@ -10,7 +9,7 @@ class PrefabBase:
         self._cache = None
         self.executor = executor
         self.prefab = prefab
-        self._initenvDone=False
+        self._initenvDone = False
         self._logger = None
 
         if self.classname != 'PrefabCore':
@@ -35,7 +34,7 @@ class PrefabBase:
         return txt
 
     @property
-    def env(self,env=None):
+    def env(self, env=None):
         return self.executor.env
 
     @property
@@ -112,11 +111,13 @@ class PrefabBase:
         if "done" in self.config:
             self.config.pop("done")
         if not self.executor.readonly:
-            self.configSet("done", {})  # this will make sure it gets set remotely
+            # this will make sure it gets set remotely
+            self.configSet("done", {})
 
     def doneSet(self, key):
         if self.executor.readonly:
-            self.logger.debug("info: Canot do doneset:%s because readonly" % key)
+            self.logger.debug(
+                "info: Canot do doneset:%s because readonly" % key)
             return False
         self.done[key] = True
         self.executor._config_changed = True
@@ -125,7 +126,8 @@ class PrefabBase:
 
     def doneDelete(self, key):
         if self.executor.readonly:
-            self.logger.debug("info: Canot do doneDelete:%s because readonly" % key)
+            self.logger.debug(
+                "info: Canot do doneDelete:%s because readonly" % key)
             return False
         self.done[key] = False
         self.executor._config_changed = True
@@ -155,7 +157,8 @@ class PrefabBase:
     @property
     def cache(self):
         if self._cache is None:
-            self._cache = j.data.cache.get("prefab" + self.id + self.classname, reset=True)
+            self._cache = j.data.cache.get(
+                "prefab" + self.id + self.classname, reset=True, expiration=600)  # 10 min
         return self._cache
 
     def __str__(self):
@@ -202,11 +205,14 @@ class PrefabBaseLoader:
         self.prefab = prefab
         myClassName = str(self.__class__).split(".")[-1].split("'")[0]
         localdir = j.sal.fs.getDirName(inspect.getsourcefile(self.__class__))
-        classes = [j.sal.fs.getBaseName(item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
+        classes = [j.sal.fs.getBaseName(
+            item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
         for className in classes:
             # import the class
-            exec("from JumpScale9Prefab.%s.Prefab%s import *" % (myClassName, className))
+            exec("from JumpScale9Prefab.%s.Prefab%s import *" %
+                 (myClassName, className))
             # attach the class to this class
-            do = "self.%s=Prefab%s(self.executor,self.prefab)" % (className.lower(), className)
+            do = "self.%s=Prefab%s(self.executor,self.prefab)" % (
+                className.lower(), className)
             # self.logger.info(do)
             exec(do)

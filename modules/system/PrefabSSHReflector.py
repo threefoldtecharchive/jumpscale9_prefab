@@ -72,7 +72,7 @@ class PrefabSSHReflector(base):
 
         # self.prefab.system.package.start(package)
 
-        self.prefab.ns.hostfile_set_fromlocal()
+        self.prefab.system.ns.hostfile_set_fromlocal()
 
         if self.prefab.system.process.tcpport_check(port, "dropbear") is False:
             raise j.exceptions.RuntimeError("Could not install dropbear, port %s was not running" % port)
@@ -99,7 +99,7 @@ class PrefabSSHReflector(base):
 
             self.client_delete()
 
-            self.prefab.ns.hostfile_set_fromlocal()
+            self.prefab.system.ns.hostfile_set_fromlocal()
 
             remoteprefab = j.tools.prefab.get(remoteids)
 
@@ -141,7 +141,7 @@ class PrefabSSHReflector(base):
             rname = "refl_%s" % remoteprefab.core.executor.addr.replace(".", "_")
             rname_short = remoteprefab.core.executor.addr.replace(".", "_")
 
-            self.prefab.ns.hostfile_set(rname, addr)
+            self.prefab.system.ns.hostfile_set(rname, addr)
 
             if remoteprefab.core.file_exists("/home/sshreflector/reflectorclients") is False:
                 self.logger.info("reflectorclientsfile does not exist")
