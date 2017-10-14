@@ -15,7 +15,9 @@ class PrefabBase(base):
         if self.doneCheck("install", reset):
             return
 
-        self.prefab.bash.fixlocale()
+        if not self.doneCheck("fixlocale", reset):
+            self.prefab.bash.fixlocale()
+            self.doneSet("fixlocale")
 
         out = ""
         # make sure all dirs exist

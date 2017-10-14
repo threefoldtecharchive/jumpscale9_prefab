@@ -849,8 +849,7 @@ class PrefabCore(base):
 
     def file_unlink(self, path):
         path = self.replace(path)
-        if self.file_exists(path):
-            self.run("unlink %s" % (self.shell_safe(path)), showout=False)
+        self.run("rm -f %s" % (self.shell_safe(path)), showout=False)
 
     def file_link(self, source, destination, symbolic=True, mode=None, owner=None, group=None):
         """Creates a (symbolic) link between source and destination on the remote host,
@@ -1127,9 +1126,12 @@ class PrefabCore(base):
             self.executor.debug = debug
 
         if profile:
-            ppath = self.prefab.bash.profileDefault.pathProfile
-            if ppath:
-                cmd = "source %s; %s" % (ppath, cmd)
+            # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            # next will check if profile path exists, if not will put it
+            cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
+                ppath, ppath, ppath, cmd)
+
             if showout:
                 self.logger.info("PROFILECMD:%s" % cmd)
             else:
@@ -1223,9 +1225,11 @@ class PrefabCore(base):
             content += "\n"
 
         if profile:
-            ppath = self.prefab.bash.profilePath
-            if ppath:
-                content = ". %s\n%s\n" % (ppath, content)
+            # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            # next will check if profile path exists, if not will put it
+            content = "[ ! -e \"%s\" ] && touch \"%s\" \n. %s\n%s\n" % (
+                ppath, ppath, ppath, content)
 
         if interpreter == "bash":
             content += "\necho '**OK**'\n"
@@ -1303,6 +1307,7 @@ class PrefabCore(base):
         return rc, out
 
     def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
+        script = script.replace("\\\"", "\"")
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)
 

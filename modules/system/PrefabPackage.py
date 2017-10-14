@@ -4,6 +4,8 @@ import time
 
 base = j.tools.prefab._getBaseClass()
 
+CMD_APT_GET = "DEBIAN_FRONTEND=noninteractive apt-get -q --yes -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' "
+
 
 class PrefabPackage(base):
 
@@ -11,18 +13,29 @@ class PrefabPackage(base):
         self.ensure('python-software-properties')
         self.prefab.core.run("add-apt-repository --yes " + repository)
 
-    # def _apt_get(self, cmd):
-    #     CMD_APT_GET = 'DEBIAN_FRONTEND=noninteractive apt-get -q --yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" '
-    #     cmd = CMD_APT_GET + cmd
-    #     result = self.prefab.core.run(cmd)
-    #     # If the installation process was interrupted, we might get the following message
-    #     # E: dpkg was interrupted, you must manually self.prefab.core.run 'run
-    #     # dpkg --configure -a' to correct the problem.
-    #     if "run dpkg --configure -a" in result:
-    #         self.prefab.core.run(
-    #             "DEBIAN_FRONTEND=noninteractive dpkg --configure -a")
-    #         result = self.prefab.core.run(cmd)
-    #     return result
+    def _apt_wait_free(self):
+        timeout = time.time() + 300
+        while time.time() < timeout:
+            _, out, _ = self.prefab.core.run(
+                'fuser /var/lib/dpkg/lock', showout=False, die=False)
+            if out.strip():
+                time.sleep(1)
+            else:
+                return
+        raise TimeoutError("resource dpkg is busy")
+
+    def _apt_get(self, cmd):
+
+        cmd = CMD_APT_GET + cmd
+        result = self.prefab.core.run(cmd)
+        # If the installation process was interrupted, we might get the following message
+        # E: dpkg was interrupted, you must manually self.prefab.core.run 'run
+        # dpkg --configure -a' to correct the problem.
+        if "run dpkg --configure -a" in result:
+            self.prefab.core.run(
+                "DEBIAN_FRONTEND=noninteractive dpkg --configure -a")
+            result = self.prefab.core.run(cmd)
+        return result
 
     # def upgrade(self, package=None, reset=True):
     #     key = "upgrade_%s" % package
@@ -75,7 +88,7 @@ class PrefabPackage(base):
                 raise NotImplementedError()
                 # return self._apt_get("dist-upgrade")
             else:
-                self.prefab.core.run("apt upgrade -y")
+                self._apt_get("upgrade -y")
         elif self.prefab.core.isArch:
             self.prefab.core.run(
                 "pacman -Syu --noconfirm;pacman -Sc --noconfirm")
@@ -120,7 +133,7 @@ class PrefabPackage(base):
                 # if allow_unauthenticated:
                 #     cmd += ' --allow-unauthenticated '
                 # cmd += package
-                cmd += "apt install %s -y\n" % package
+                cmd += "%s install %s -y\n" % (CMD_APT_GET, package)
 
             elif self.prefab.core.isAlpine:
                 cmd = "apk add %s \n" % package
@@ -192,7 +205,7 @@ class PrefabPackage(base):
 
         for package in packages:
             key += "install_%s," % package
-        self.doneSet(key)
+            self.doneSet(key)
 
     # def multiInstall(self, packagelist, allow_unauthenticated=False, reset=False):
     #     """

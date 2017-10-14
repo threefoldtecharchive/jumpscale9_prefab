@@ -49,27 +49,36 @@ class PrefabPIP(base):
 
         '''
         self.ensure()
-        # self.prefab.core.set_sudomode()
-        if self.prefab.core.isArch:
-            if package in ["credis", "blosc", "psycopg2"]:
-                return
-
-        if self.prefab.core.isCygwin and package in ["psycopg2", "psutil", "zmq"]:
-            return
 
         if "," in package:
             package = [item.strip() for item in package.split(",")]
+        elif "\n" in package:
+            package = [item.strip() for item in package.split("\n")]
+        elif j.data.types.list.check(package) is False:
+            package = [package]
 
-        if j.data.types.list.check(package):
-            for item in package:
-                self.install(package=item, upgrade=upgrade, reset=reset)
-        else:
+        packages = package
+        cmd = ""
+
+        for package in packages:
             if reset or not self.doneGet("pip_%s" % package):
-                cmd = "pip3 install %s" % package
+
+                if self.prefab.core.isArch:
+                    if package in ["credis", "blosc", "psycopg2"]:
+                        continue
+
+                if self.prefab.core.isCygwin and package in ["psycopg2", "psutil", "zmq"]:
+                    continue
+
+                cmd += "pip3 install %s" % package
                 if upgrade:
                     cmd += " --upgrade"
-                self.prefab.core.run(cmd)
-                self.doneSet("pip_%s" % package)
+                cmd += "\n"
+
+        self.prefab.core.run(cmd)
+
+        for package in packages:
+            self.doneSet("pip_%s" % package)
 
     def packageRemove(self, package):
         '''
