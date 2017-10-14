@@ -22,16 +22,18 @@ class PrefabPython(base):
         if reset:
             self.reset()
 
-        if self.doneGet("build") and not reset:
-            self.pipAll()
+        if self.doneCheck("build", reset):
             return
+
+        self.pipAll()
 
         self.prefab.lib.openssl.build()
         self.prefab.lib.libffi.build()
         self.prefab.system.package.install('zlib1g-dev')
         if self.prefab.core.isMac:
             if not self.doneGet("xcode_install"):
-                self.prefab.core.run("xcode-select --install", die=False, showout=True)
+                self.prefab.core.run(
+                    "xcode-select --install", die=False, showout=True)
                 C = """
                 openssl
                 xz
@@ -71,7 +73,8 @@ class PrefabPython(base):
                 C = C.replace("$libffidir", self.prefab.lib.libffi.BUILDDIRL)
                 C = self.replace(C)
 
-                self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, C)
+                self.prefab.core.file_write(
+                    "%s/mycompile_all.sh" % self.CODEDIRL, C)
             else:  # TODO: *1 not working compile, see if we can do in line with osx, something wrong with openssl
                 # configure custom location for openssl
                 setup_path = '{}/Modules/Setup'.format(self.CODEDIRL)
@@ -82,7 +85,8 @@ class PrefabPython(base):
                     _ssl _ssl.c -DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl -L$(SSL)/lib -lssl -lcrypto
                     """.format(openssldir=self.prefab.lib.openssl.BUILDDIRL)
 
-                self.prefab.core.file_write(location=setup_path, content=content, append=True)
+                self.prefab.core.file_write(
+                    location=setup_path, content=content, append=True)
 
                 C = """
                 set -ex
@@ -108,7 +112,7 @@ class PrefabPython(base):
             "ls %s/build" % self.CODEDIRL)[1].split("\n") if item.startswith("lib")][0]
         lpath = j.sal.fs.joinPaths(self.CODEDIRL, "build", libBuildName)
         self.prefab.core.copyTree(source=lpath, dest=self.BUILDDIRL, keepsymlinks=True, deletefirst=False,
-                                   overwriteFiles=True, recursive=True, rsyncdelete=False, createdir=True)
+                                  overwriteFiles=True, recursive=True, rsyncdelete=False, createdir=True)
 
         # copy python libs (non compiled)
         ignoredir = ["tkinter", "turtledemo",
@@ -116,14 +120,16 @@ class PrefabPython(base):
         lpath = self.replace("$CODEDIRL/Lib")
         ldest = self.replace("$BUILDDIRL/plib")
         self.prefab.core.copyTree(source=lpath, dest=ldest, keepsymlinks=True, deletefirst=False,
-                                   overwriteFiles=True, ignoredir=ignoredir,
-                                   recursive=True, rsyncdelete=True, createdir=True)
+                                  overwriteFiles=True, ignoredir=ignoredir,
+                                  recursive=True, rsyncdelete=True, createdir=True)
 
         self.prefab.core.file_unlink("%s/python3" % self.BUILDDIRL)
         if self.core.isMac:
-            self.prefab.core.file_copy("%s/python.exe" % self.CODEDIRL, "%s/python3" % self.BUILDDIRL)
+            self.prefab.core.file_copy(
+                "%s/python.exe" % self.CODEDIRL, "%s/python3" % self.BUILDDIRL)
         else:
-            self.prefab.core.file_copy("%s/python" % self.CODEDIRL, "%s/python3" % self.BUILDDIRL)
+            self.prefab.core.file_copy(
+                "%s/python" % self.CODEDIRL, "%s/python3" % self.BUILDDIRL)
 
         C = """
             cd $BUILDDIRL
@@ -138,16 +144,17 @@ class PrefabPython(base):
         lpath = j.sal.fs.joinPaths(self.CODEDIRL, "Include",)
         ldest = j.sal.fs.joinPaths(self.BUILDDIRL, "include/python")
         self.prefab.core.copyTree(source=lpath, dest=ldest, keepsymlinks=True, deletefirst=False,
-                                   overwriteFiles=True, ignoredir=ignoredir,
-                                   recursive=True, rsyncdelete=False, createdir=True)
+                                  overwriteFiles=True, ignoredir=ignoredir,
+                                  recursive=True, rsyncdelete=False, createdir=True)
 
         # now copy openssl parts in
         self.prefab.core.copyTree(source=self.prefab.lib.openssl.BUILDDIRL, dest=self.BUILDDIRL,
-                                   keepsymlinks=True, deletefirst=False,
-                                   overwriteFiles=True, ignoredir=ignoredir,
-                                   recursive=True, rsyncdelete=False, createdir=True)
+                                  keepsymlinks=True, deletefirst=False,
+                                  overwriteFiles=True, ignoredir=ignoredir,
+                                  recursive=True, rsyncdelete=False, createdir=True)
 
-        self.prefab.core.file_copy("%s/pyconfig.h" % self.CODEDIRL, "%s/include/python/pyconfig.h" % self.BUILDDIRL)
+        self.prefab.core.file_copy(
+            "%s/pyconfig.h" % self.CODEDIRL, "%s/include/python/pyconfig.h" % self.BUILDDIRL)
         C = """
 
         export JSBASE=`pwd`
@@ -170,7 +177,8 @@ class PrefabPython(base):
         fi
         """.format(JSBASE=j.dirs.JSBASEDIR)
 
-        self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C, replaceArgs=True)
+        self.prefab.core.file_write("%s/env.sh" %
+                                    self.BUILDDIRL, C, replaceArgs=True)
 
         if not self.doneGet("pip3install") or reset:
             C = """
@@ -196,7 +204,7 @@ class PrefabPython(base):
     def sandbox(self, reset=False, deps=True):
         if deps:
             self.build(reset=reset)
-        if self.doneGet("sandbox") and not reset:
+        if self.doneCheck("sandbox", reset):
             return
 
         C = """
@@ -248,6 +256,8 @@ class PrefabPython(base):
 
     def pipAll(self, reset=False):
         # needs at least items from /JS8/code/github/jumpscale/jumpscale_core9/install/dependencies.py
+        if self.doneCheck("pipall", reset):
+            return
         C = """
         uvloop
         redis
@@ -279,6 +289,7 @@ class PrefabPython(base):
         self.prefab.system.package.multiInstall(['libffi-dev', 'libssl-dev'])
         self.pip(C, reset=reset)
         self.sandbox(deps=False)
+        self.doneSet("pipall")
 
     def pip(self, pips, reset=False):
         for item in pips.split("\n"):
@@ -292,8 +303,9 @@ class PrefabPython(base):
                 self.doneSet("pip3_%s" % item)
 
     def install(self):
-        if not self.doneGet("build"):
-            self.build()
+        if self.doneCheck("install", reset):
+            return
+        self.build()
         self.prefab.core.dir_ensure(j.dirs.JSBASEDIR)
         self.prefab.core.dir_ensure(j.dirs.JSBASEDIR + "/bin")
         self.prefab.core.dir_ensure(j.dirs.JSBASEDIR + "/lib")

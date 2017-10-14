@@ -11,19 +11,20 @@ class PrefabCockroachDB(app):
         """
         download, install, move files to appropriate places, and create relavent configs
         """
-        if (not reset and self.doneGet("install")) or self.isInstalled():
+        if self.doneCheck("install", reset):
             return
 
         appbase = "%s/" % self.prefab.core.dir_paths["BINDIR"]
         self.prefab.core.dir_ensure(appbase)
 
-
         url = 'https://binaries.cockroachdb.com/cockroach-latest.linux-amd64.tgz'
         dest = "$TMPDIR/cockroach-latest.linux-amd64"
 
         self.logger.info('Downloading CockroachDB.')
-        self.prefab.core.file_download(url, to="$TMPDIR", overwrite=False, expand=True)
-        tarpaths = self.prefab.core.find("$TMPDIR", recursive=False, pattern="*cockroach*.tgz", type='f')
+        self.prefab.core.file_download(
+            url, to="$TMPDIR", overwrite=False, expand=True)
+        tarpaths = self.prefab.core.find(
+            "$TMPDIR", recursive=False, pattern="*cockroach*.tgz", type='f')
         if len(tarpaths) == 0:
             raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (
                 url, self.replace("$TMPDIR")), level=1, source="", tags="", msgpub="")
@@ -51,7 +52,8 @@ class PrefabCockroachDB(app):
 
         # cmd = "$BINDIR/cockroach start --insecure --host=localhost --background"
         self.prefab.system.process.kill("cockroach")
-        self.prefab.system.processManager.ensure(name="cockroach", cmd=cmd, env={}, path="", autostart=True)
+        self.prefab.system.processManager.ensure(
+            name="cockroach", cmd=cmd, env={}, path="", autostart=True)
 
     def stop(self):
         self.prefab.system.processManager.stop("cockroach")

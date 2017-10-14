@@ -12,8 +12,9 @@ class PrefabMongodb(app):
         """
         download, install, move files to appropriate places, and create relavent configs
         """
-        if (not reset and self.doneGet("install")) or self.isInstalled():
+        if self.doneCheck("install", reset):
             return
+
         if self.prefab.core.isMac:
             self.prefab.core.run("brew uninstall mongodb", die=False)
 
@@ -34,8 +35,10 @@ class PrefabMongodb(app):
 
         if url:
             self.logger.info('Downloading mongodb.')
-            self.prefab.core.file_download(url, to="$TMPDIR", overwrite=False, expand=True)
-            tarpaths = self.prefab.core.find("$TMPDIR", recursive=False, pattern="*mongodb*.tgz", type='f')
+            self.prefab.core.file_download(
+                url, to="$TMPDIR", overwrite=False, expand=True)
+            tarpaths = self.prefab.core.find(
+                "$TMPDIR", recursive=False, pattern="*mongodb*.tgz", type='f')
             if len(tarpaths) == 0:
                 raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (
                     url, self.replace("$TMPDIR")), level=1, source="", tags="", msgpub="")

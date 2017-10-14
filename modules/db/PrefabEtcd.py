@@ -15,8 +15,9 @@ class PrefabEtcd(app):
         @host, string. host of this node in the cluster e.g: http://etcd1.com
         @peer, list of string, list of all node in the cluster. [http://etcd1.com, http://etcd2.com, http://etcd3.com]
         """
-        if reset is False and self.isInstalled():
+        if self.doneCheck("build", reset):
             return
+
         self.prefab.runtimes.golang.install()
 
         # FYI, REPO_PATH: github.com/coreos/etcd
@@ -42,10 +43,14 @@ class PrefabEtcd(app):
         self.prefab.core.run(script, profile=True)
         self.prefab.bash.addPath("$BASEDIR/bin")
 
+        self.doneSet("build")
+
     def install(self):
+        if self.doneCheck("install", reset):
+            return
         url = "https://github.com/coreos/etcd/releases/download/v3.2.4/etcd-v3.2.4-linux-amd64.tar.gz"
         from IPython import embed
-        print("DEBUG NOW ")
+        print("DEBUG NOW install etcd")
         embed()
         raise RuntimeError("stop debug here")
 

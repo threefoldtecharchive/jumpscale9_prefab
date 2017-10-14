@@ -15,8 +15,9 @@ class PrefabPostgresql(app):
         """
         beta is 2 for 10 release
         """
-        if self.doneGet('build') or self.isInstalled():
+        if self.doneCheck("build", reset):
             return
+
         if beta:
             postgres_url = 'https://ftp.postgresql.org/pub/source/v10beta2/postgresql-10beta3.tar.bz2'
         else:
@@ -40,10 +41,9 @@ class PrefabPostgresql(app):
         return groupname in open("/etc/group").read()
 
     def install(self, reset=False, start=False, port=5432, beta=False):
-        if reset is False and self.isInstalled():
+        if self.doneCheck("install", reset):
             return
-        if not self.doneGet('build'):
-            self.build(beta=beta)
+        self.build(beta=beta)
         cmd = """
         cd {build_dir}
         make install with-pgport={port}
@@ -68,7 +68,7 @@ class PrefabPostgresql(app):
         if start:
             self.start()
 
-    def configure(self,passwd,dbdir=None):
+    def configure(self, passwd, dbdir=None):
         """
         #TODO
         if dbdir none then $vardir/postgresqldb/
@@ -76,7 +76,6 @@ class PrefabPostgresql(app):
         if dbdir is not None:
             self.dbdir = dbdir
         self.passwd = passwd
-
 
     def start(self):
         """
@@ -88,15 +87,18 @@ class PrefabPostgresql(app):
 
         self.prefab.core.execute_bash(cmd, profile=True)
 
-        cmdpostgres = "sudo -u postgres $BINDIR/postgres -D {postgresdbdir}".format(postgresdbdir=self.dbdir)
+        cmdpostgres = "sudo -u postgres $BINDIR/postgres -D {postgresdbdir}".format(
+            postgresdbdir=self.dbdir)
         pm = self.prefab.system.processmanager.get()
-        pm.ensure(name="postgres", cmd=cmdpostgres, env={}, path="", autostart=True)
+        pm.ensure(name="postgres", cmd=cmdpostgres,
+                  env={}, path="", autostart=True)
 
         # make sure postgres is ready
         import time
         timeout = time.time() + 10
         while True:
-            rc, out, err = self.prefab.core.run("sudo -H -u postgres $BINDIR/pg_isready", die=False)
+            rc, out, err = self.prefab.core.run(
+                "sudo -H -u postgres $BINDIR/pg_isready", die=False)
             if time.time() > timeout:
                 raise j.exceptions.Timeout("Postgres isn't ready")
             if rc == 0:
@@ -109,8 +111,6 @@ class PrefabPostgresql(app):
         """.format(passwd=self.passwd)
         self.prefab.core.execute_bash(cmd, profile=True)
         print("user: {}, password: {}".format("postgres", self.passwd))
-
-
 
     def stop(self):
         self.prefab.system.process.kill("postgres")

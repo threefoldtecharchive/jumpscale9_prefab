@@ -20,7 +20,7 @@ class PrefabARDB(app):
         """
         @param destpath, if '' then will be $TMPDIR/build/openssl
         """
-        if self.doneGet("build") and not reset:
+        if self.doneCheck("build", reset):
             return
 
         if self.prefab.bash.cmdGetPath('ardb-server', die=False) and not reset:
@@ -36,13 +36,14 @@ class PrefabARDB(app):
         self.doneSet("build")
 
     def buildForestDB(self, reset=False):
-        if self.doneGet("buildforestdb") and not reset:
+
+        if self.doneCheck("buildforestdb", reset):
             return
 
         self.prefab.system.package.multiInstall(["git-core",
-                                           "cmake",
-                                           "libsnappy-dev",
-                                           "g++"])
+                                                 "cmake",
+                                                 "libsnappy-dev",
+                                                 "g++"])
 
         url = "git@github.com:couchbase/forestdb.git"
         cpath = self.prefab.tools.git.pullRepo(url, tag="v1.2", reset=reset)
@@ -69,7 +70,7 @@ class PrefabARDB(app):
         """
         @param storageEngine rocksdb or forestdb
         """
-        if self.doneGet("buildardb") and not reset:
+        if self.doneCheck("buildardb", reset):
             return
 
         if self.prefab.platformtype.isMac:
@@ -91,9 +92,9 @@ class PrefabARDB(app):
         # Install dependancies
         self.prefab.system.package.multiInstall(packages)
 
-
         url = "https://github.com/yinqiwen/ardb.git"
-        cpath = self.prefab.tools.git.pullRepo(url, tag="v0.9.3", reset=reset, ssh=False)
+        cpath = self.prefab.tools.git.pullRepo(
+            url, tag="v0.9.3", reset=reset, ssh=False)
         self.logger.info(cpath)
 
         assert cpath.rstrip("/") == self.CODEDIRARDB.rstrip("/")
@@ -117,13 +118,14 @@ class PrefabARDB(app):
         """
         as backend use ForestDB
         """
-        if self.doneGet("install-%s" % name) and not reset:
+        if self.doneCheck("install-%s" % name, reset):
             return
         self.buildARDB()
         self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.dir_ensure("$CFGDIR")
         if not self.prefab.core.file_exists('$BINDIR/ardb-server'):
-            self.core.file_copy("$BUILDDIR/ardb/ardb-server", "$BINDIR/ardb-server")
+            self.core.file_copy("$BUILDDIR/ardb/ardb-server",
+                                "$BINDIR/ardb-server")
 
         self.prefab.bash.profileDefault.addPath('$BINDIR')
 
@@ -135,7 +137,8 @@ class PrefabARDB(app):
         # config = config.replace("redis-compatible-version  2.8.0", "redis-compatible-version  3.5.2")
         config = self.core.file_read("$BUILDDIR/ardb/ardb.conf")
         config = config.replace("${ARDB_HOME}", datadir)
-        config = config.replace("0.0.0.0:16379", '{host}:{port}'.format(host=host, port=port))
+        config = config.replace(
+            "0.0.0.0:16379", '{host}:{port}'.format(host=host, port=port))
 
         cfg_path = "$CFGDIR/ardb/{}/ardb.conf".format(name)
         self.core.file_write(cfg_path, config)
@@ -151,7 +154,8 @@ class PrefabARDB(app):
 
         cfg_path = "$CFGDIR/ardb/{}/ardb.conf".format(name)
         cmd = "$BINDIR/ardb-server {}".format(cfg_path)
-        self.prefab.system.processManager.ensure(name="ardb-server-{}".format(name), cmd=cmd, env={}, path="")
+        self.prefab.system.processManager.ensure(
+            name="ardb-server-{}".format(name), cmd=cmd, env={}, path="")
         # self.test(port=port)
 
         self.doneSet("start-%s" % name)

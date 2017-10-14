@@ -11,8 +11,7 @@ class PrefabXRDP(app):
         """
         builds a full xrdp, this can take a while
         """
-
-        if reset is False and self.isInstalled():
+        if self.doneCheck("build", reset):
             return
 
         C = """
@@ -30,3 +29,5 @@ class PrefabXRDP(app):
         chmod +x /bin/rdp.sh
         """
         self.prefab.core.run(C)
+
+        self.doneSet("build")

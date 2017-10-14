@@ -31,16 +31,17 @@ class PrefabGolang(app):
         self.prefab.bash.profileDefault.save()
         self.prefab.bash.profileJS.save()
 
-        app.reset(self)
+        self.doneReset()
         self._init()
 
     def _init(self):
-        self.GOROOTDIR = self.prefab.core.dir_paths['BASEDIR']+"/go"
-        self.GOPATHDIR = self.prefab.core.dir_paths['BASEDIR']+"/go_proj"
-        self.GOPATH=self.GOPATHDIR #backwards compatibility
-        
+        self.GOROOTDIR = self.prefab.core.dir_paths['BASEDIR'] + "/go"
+        self.GOPATHDIR = self.prefab.core.dir_paths['BASEDIR'] + "/go_proj"
+        self.GOPATH = self.GOPATHDIR  # backwards compatibility
+
     def isInstalled(self):
-        rc, out, err = self.prefab.core.run("go version", die=False, showout=False, profile=True)
+        rc, out, err = self.prefab.core.run(
+            "go version", die=False, showout=False, profile=True)
         if rc > 0 or "1.8" not in out:
             return False
         if self.doneGet("install") == False:
@@ -68,7 +69,7 @@ class PrefabGolang(app):
         profile.save()
 
         self.prefab.core.file_download(downl, self.GOROOTDIR, overwrite=False, retry=3,
-                                        timeout=0, expand=True, removeTopDir=True)
+                                       timeout=0, expand=True, removeTopDir=True)
 
         self.prefab.core.dir_ensure("%s/src" % self.GOPATHDIR)
         self.prefab.core.dir_ensure("%s/pkg" % self.GOPATHDIR)
@@ -108,7 +109,8 @@ class PrefabGolang(app):
         """
         if self.doneGet('glide'):
             return
-        self.prefab.core.file_download('https://glide.sh/get', '$TMPDIR/installglide.sh', minsizekb=4)
+        self.prefab.core.file_download(
+            'https://glide.sh/get', '$TMPDIR/installglide.sh', minsizekb=4)
         self.prefab.core.run('. $TMPDIR/installglide.sh', profile=True)
         self.doneSet('glide')
 
@@ -133,8 +135,8 @@ class PrefabGolang(app):
         pullurl = "git@%s.git" % url.replace('/', ':', 1)
 
         dest = self.prefab.tools.git.pullRepo(pullurl,
-                                                     branch=branch,
-                                                     depth=depth,
-                                                     dest='%s/src/%s' % (GOPATH, url),
-                                                     ssh=False)
+                                              branch=branch,
+                                              depth=depth,
+                                              dest='%s/src/%s' % (GOPATH, url),
+                                              ssh=False)
         self.prefab.core.run('cd %s && godep restore' % dest, profile=True)

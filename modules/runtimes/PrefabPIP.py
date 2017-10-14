@@ -11,12 +11,13 @@ class PrefabPIP(base):
     # -----------------------------------------------------------------------------
 
     def ensure(self, reset=False):
-        if self.prefab.core.isMac:
-            return
 
         # python should already be requirement, do not install !! (despiegk)
         # self.prefab.system.package.install('python3.5')
         # self.prefab.system.package.install('python3-pip')
+
+        if self.doneCheck("ensure", reset):
+            return
 
         tmpdir = self.replace("$TMPDIR")
         cmd1 = """
@@ -31,6 +32,8 @@ class PrefabPIP(base):
         cmd3 = "python3 %s/get-pip.py" % tmpdir
         self.prefab.core.run(cmd3)
 
+        self.doneSet("ensure")
+
     def packageUpgrade(self, package):
         '''
         The "package" argument, defines the name of the package that will be upgraded.
@@ -41,7 +44,11 @@ class PrefabPIP(base):
     def install(self, package=None, upgrade=True, reset=False):
         '''
         The "package" argument, defines the name of the package that will be installed.
+
+        package can be list or comma separated list of packages as well
+
         '''
+        self.ensure()
         # self.prefab.core.set_sudomode()
         if self.prefab.core.isArch:
             if package in ["credis", "blosc", "psycopg2"]:
@@ -50,12 +57,19 @@ class PrefabPIP(base):
         if self.prefab.core.isCygwin and package in ["psycopg2", "psutil", "zmq"]:
             return
 
-        if reset or not self.doneGet("pip_%s" % package):
-            cmd = "pip3 install %s" % package
-            if upgrade:
-                cmd += " --upgrade"
-            self.prefab.core.run(cmd)
-            self.doneSet("pip_%s" % package)
+        if "," in package:
+            package = [item.strip() for item in package.split(",")]
+
+        if j.data.types.list.check(package):
+            for item in package:
+                self.install(package=item, upgrade=upgrade, reset=reset)
+        else:
+            if reset or not self.doneGet("pip_%s" % package):
+                cmd = "pip3 install %s" % package
+                if upgrade:
+                    cmd += " --upgrade"
+                self.prefab.core.run(cmd)
+                self.doneSet("pip_%s" % package)
 
     def packageRemove(self, package):
         '''
@@ -94,7 +108,8 @@ class PrefabPIP(base):
         elif j.data.types.list.check(packagelist):
             packages = packagelist
         else:
-            raise j.exceptions.Input('packagelist should be string or a list. received a %s' % type(packagelist))
+            raise j.exceptions.Input(
+                'packagelist should be string or a list. received a %s' % type(packagelist))
 
         to_install = []
         for dep in packages:

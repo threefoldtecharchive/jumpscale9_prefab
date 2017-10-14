@@ -8,6 +8,8 @@ class PrefabMariadb(app):
     NAME = 'mariadb'
 
     def install(self, start=False):
+        if self.doneCheck("install", reset):
+            return
         self.prefab.system.package.install("mariadb-server")
         self.prefab.core.dir_ensure("/data/db")
         self.prefab.core.dir_ensure("/var/run/mysqld")
@@ -17,6 +19,9 @@ class PrefabMariadb(app):
         mysql_install_db --basedir=/usr --datadir=/data/db
         """
         self.prefab.core.run(script)
+
+        self.doneSet("install")
+
         if start:
             self.start()
 

@@ -14,7 +14,7 @@ class PrefabRocksDB(base):
 
     def build(self, reset=True, install=True):
         # Get binaries and build rocksdb.
-        if self.doneGet("build") and not reset:
+        if self.doneCheck("build", reset):
             return
 
         self.prefab.core.dir_ensure(self.BUILDDIRL)
@@ -33,26 +33,30 @@ class PrefabRocksDB(base):
         profile.envSet("ROCKSDB_VERSION", self.ROCKSDB_VERSION)
         profile.envSet("ROCKSDB_LINK", self.ROCKSDB_LINK)
         profile.envSet("ROCKSDB_CHECKSUM", "b682f574363edfea0e2f7dbf01fc0e5b")
-        profile.envSet("CGO_CFLAGS", "-I%s/rocksdb-%s/include" % (self.BUILDDIRL, self.ROCKSDB_VERSION))
+        profile.envSet("CGO_CFLAGS", "-I%s/rocksdb-%s/include" %
+                       (self.BUILDDIRL, self.ROCKSDB_VERSION))
         profile.envSet("CGO_LDFLAGS",
                        "-L%s/rocksdb-%s -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4" % (self.BUILDDIRL,
                                                                                             self.ROCKSDB_VERSION))
         profile.save()
 
         # download gorocksdb
-        self.prefab.core.file_download('%s' % self.ROCKSDB_LINK, '$TMPDIR/rocksdb-%s.tar.gz' % self.ROCKSDB_VERSION)
+        self.prefab.core.file_download(
+            '%s' % self.ROCKSDB_LINK, '$TMPDIR/rocksdb-%s.tar.gz' % self.ROCKSDB_VERSION)
 
         # extract rocksdb
         if not self.prefab.core.file_exists('$TMPDIR/rocksdb-%s.tar.gz' % self.ROCKSDB_VERSION):
             raise RuntimeError('could not find tar of rocksdb')
-        self.prefab.core.run('cd $TMPDIR && tar -xf rocksdb-%s.tar.gz -C .' % self.ROCKSDB_VERSION)
+        self.prefab.core.run(
+            'cd $TMPDIR && tar -xf rocksdb-%s.tar.gz -C .' % self.ROCKSDB_VERSION)
 
         # compile and install
         self.prefab.core.run('cd $TMPDIR/rocksdb-%s && PORTABLE=1 make shared_lib' % self.ROCKSDB_VERSION,
-                              profile=True)
+                             profile=True)
         self.prefab.core.run('cd $TMPDIR/rocksdb-%s && cp -a librocksdb.so* %s' % (self.ROCKSDB_VERSION,
-                                                                                    self.BUILDDIRL))
-        self.prefab.core.run('cd $TMPDIR/rocksdb-%s && cp -a librocksdb.so* /usr/lib' % self.ROCKSDB_VERSION)
+                                                                                   self.BUILDDIRL))
+        self.prefab.core.run(
+            'cd $TMPDIR/rocksdb-%s && cp -a librocksdb.so* /usr/lib' % self.ROCKSDB_VERSION)
         # self.prefab.runtimes.golang.get('github.com/tecbot/gorocksdb', tags=['embed'])
 
         self.doneSet("build")
@@ -62,8 +66,12 @@ class PrefabRocksDB(base):
 
     def install(self):
         # install required packages to run.
+        if self.doneCheck("install", reset):
+            return
         self.prefab.system.package.install("libhiredis-dev")
         self.prefab.system.package.install("libbz2-dev")
         self.prefab.system.package.install('python3-dev')
         self.prefab.runtimes.pip.ensure()
         self.prefab.runtimes.pip.multiInstall(['pyrocksdb', 'peewee'])
+
+        self.doneSet("install")

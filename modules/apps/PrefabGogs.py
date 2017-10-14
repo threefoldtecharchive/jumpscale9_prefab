@@ -23,36 +23,36 @@ class PrefabGogs(app):
     def GOPATH(self):
         return self.prefab.runtimes.golang.GOPATH
 
+    def build(self, reset=False):
 
-    def build(self, install=True, start=True, reset=False, installDeps=False):
-
-        if self.doneGet('build') and not reset:
+        if self.doneCheck("build", reset):
             return
 
         self.prefab.runtimes.golang.install()
         self.prefab.runtimes.golang.glide()
 
-        self.prefab.bash.envSet('GOGITSDIR', '%s/src/github.com/gogits' % self.GOGSPATH)
+        self.prefab.bash.envSet(
+            'GOGITSDIR', '%s/src/github.com/gogits' % self.GOGSPATH)
         self.prefab.bash.envSet('GOGSDIR', '$GOGITSDIR/gogs')
 
         self.prefab.runtimes.golang.get('golang.org/x/oauth2')
         self.prefab.runtimes.golang.get('github.com/gogits/gogs')
 
         self.prefab.core.run('cd %s && git remote add gigforks https://github.com/gigforks/gogs' % self.GOGSPATH,
-                              profile=True)
+                             profile=True)
         self.prefab.core.run('cd %s && git fetch gigforks && git checkout gigforks/itsyouimpl' % self.GOGSPATH,
-                              profile=True, timeout=1200)
+                             profile=True, timeout=1200)
         self.prefab.core.run('cd %s && glide install && go build -tags "sqlite cert"' % self.GOGSPATH, profile=True,
-                              timeout=1200)
+                             timeout=1200)
 
         self.doneSet('build')
 
-    def install(self):
+    def install(self, reset=False):
         """
         GOGS has no files to move this method is for standardization of prefab
         """
         # TODO: *1 this cannot be right, files should be moved
-        pass
+        return self.build(reset=reset)
 
     def write_itsyouonlineconfig(self):
         # ADD EXTRA CUSTOM INFO FOR ITS YOU ONLINE.
@@ -72,8 +72,8 @@ class PrefabGogs(app):
         itsyouonlinesection = textwrap.dedent(itsyouonlinesection)
         if self.prefab.core.file_exists(self.INIPATH):
             self.prefab.core.file_write(location=self.INIPATH,
-                                         content=itsyouonlinesection,
-                                         append=True)
+                                        content=itsyouonlinesection,
+                                        append=True)
         self.doneSet('config')
 
     def start(self, name='main'):

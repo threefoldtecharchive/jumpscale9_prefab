@@ -12,12 +12,15 @@ class PrefabRedis(app):
         self._init()
 
     def build(self, reset=False, start=False):
+        if self.doneCheck("build", reset):
+            return
         os.environ["LC_ALL"] = "C.UTF-8"
         os.environ["LANG"] = "C.UTF-8"
 
         """Building and installing redis"""
         if reset is False and self.isInstalled():
-            self.logger.info('Redis is already installed, pass reset=True to reinstall.')
+            self.logger.info(
+                'Redis is already installed, pass reset=True to reinstall.')
             return
 
         if self.prefab.core.isUbuntu:
@@ -59,6 +62,8 @@ class PrefabRedis(app):
             raise j.exceptions.NotImplemented(
                 message="only ubuntu supported for building redis", level=1, source="", tags="", msgpub="")
 
+        self.doneSet("build")
+
         if start is True:
             self.start()
 
@@ -93,11 +98,13 @@ class PrefabRedis(app):
 
         cmd = "$BINDIR/redis-server %s" % c_path
         pm = self.prefab.system.processmanager.get()
-        pm.ensure(name="redis_%s" % name, cmd=cmd, env={}, path='$BINDIR', autostart=True)
+        pm.ensure(name="redis_%s" % name, cmd=cmd,
+                  env={}, path='$BINDIR', autostart=True)
 
         # Checking if redis is started correctly with port specified
         if not self.is_running(ip_address=ip, port=port, path='$BINDIR', unixsocket=unixsocket):
-            raise j.exceptions.RuntimeError('Redis is failed to start correctly')
+            raise j.exceptions.RuntimeError(
+                'Redis is failed to start correctly')
 
     def stop(self, name='main'):
         pm = self.prefab.system.processmanager.get()
@@ -117,7 +124,8 @@ class PrefabRedis(app):
         return not rc and out == 'PONG'
 
     def _get_paths(self, name):
-        d_path = j.sal.fs.joinPaths(self.prefab.core.dir_paths["VARDIR"], 'redis', name)
+        d_path = j.sal.fs.joinPaths(
+            self.prefab.core.dir_paths["VARDIR"], 'redis', name)
         c_path = j.sal.fs.joinPaths(d_path, "redis.conf")
         return d_path, c_path
 
@@ -1190,15 +1198,19 @@ class PrefabRedis(app):
         """
 
         if unixsocket is not None and unixsocket != '':
-            config = config.replace("# unixsocket /tmp/redis.sock", "unixsocket %s" % unixsocket)
-            config = config.replace("# unixsocketperm 700", "unixsocketperm 770")
+            config = config.replace(
+                "# unixsocket /tmp/redis.sock", "unixsocket %s" % unixsocket)
+            config = config.replace(
+                "# unixsocketperm 700", "unixsocketperm 770")
 
         config = config.replace("$name", name)
         config = config.replace("$maxram", str(max_ram))
         config = config.replace("$port", str(port))
-        config = config.replace("$VARDIR", self.prefab.core.dir_paths["VARDIR"])
+        config = config.replace(
+            "$VARDIR", self.prefab.core.dir_paths["VARDIR"])
 
-        base_dir = self.prefab.core.replace('$VARDIR/data/redis/redis_%s' % name)
+        base_dir = self.prefab.core.replace(
+            '$VARDIR/data/redis/redis_%s' % name)
         self.prefab.core.dir_ensure(base_dir)
         config = config.replace("$dir", base_dir)
 
@@ -1234,7 +1246,8 @@ class PrefabRedis(app):
             config = config.replace("$password", "")
 
         if is_master:
-            config = config.replace("#appendfsync always", "appendfsync always")
+            config = config.replace(
+                "#appendfsync always", "appendfsync always")
 
         d_path, c_path = self._get_paths(name)
         db_path = j.sal.fs.joinPaths(d_path, "db")

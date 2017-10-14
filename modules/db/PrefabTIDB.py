@@ -14,23 +14,23 @@ class PrefabTIDB(app):
         self.BUILDDIR = self.replace("$BUILDDIR/tidb/")
 
     def build(self, install=True, reset=False):
-        if self.doneGet('build') and reset is False:
+        if self.doneCheck("build", reset):
             return
         self.prefab.core.dir_ensure(self.BUILDDIR)
         tidb_url = 'http://download.pingcap.org/tidb-latest-linux-amd64.tar.gz'
-        self.prefab.core.file_download(tidb_url, overwrite=False, to=self.BUILDDIR, expand=True, removeTopDir=True)
+        self.prefab.core.file_download(
+            tidb_url, overwrite=False, to=self.BUILDDIR, expand=True, removeTopDir=True)
         self.doneSet('build')
 
         if install:
             self.install(False)
 
-    def install(self, start=True):
+    def install(self, start=True, reset=False):
         """
         install, move files to appropriate places, and create relavent configs
         """
-        if self.doneGet('install'):
+        if self.doneCheck("install", reset):
             return
-
         self.prefab.core.run("cp $BUILDDIR/tidb/bin/* $BINDIR/")
         self.doneSet('install')
 
@@ -50,7 +50,8 @@ class PrefabTIDB(app):
         pm = self.prefab.system.processmanager.get()
         pm.ensure(
             "tikv-server",
-            "tikv-server --pd='127.0.0.1:2379' --store={store_dir}".format(store_dir=store_dir)
+            "tikv-server --pd='127.0.0.1:2379' --store={store_dir}".format(
+                store_dir=store_dir)
         )
 
     def start_tidb(self):

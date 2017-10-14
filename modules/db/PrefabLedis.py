@@ -8,7 +8,7 @@ class PrefabLedis(app):
     NAME = "ledis-server"
 
     def build(self, backend="leveldb", install=True, start=True, reset=False):
-        if reset is False and self.isInstalled():
+        if self.doneCheck("build", reset):
             return
 
         if self.prefab.core.isUbuntu:
@@ -25,13 +25,16 @@ class PrefabLedis(app):
             """
             self.prefab.runtimes.golang.install()
             self.prefab.tools.git.pullRepo("https://github.com/siddontang/ledisdb",
-                                                  dest="$GOPATHDIR/src/github.com/siddontang/ledisdb")
+                                           dest="$GOPATHDIR/src/github.com/siddontang/ledisdb")
 
             # set the backend in the server config
-            ledisdir = self.replace("$GOPATHDIR/src/github.com/siddontang/ledisdb")
+            ledisdir = self.replace(
+                "$GOPATHDIR/src/github.com/siddontang/ledisdb")
 
-            configcontent = self.prefab.core.file_read(os.path.join(ledisdir, "config", "config.toml"))
-            ledisdir = self.replace("$GOPATHDIR/src/github.com/siddontang/ledisdb")
+            configcontent = self.prefab.core.file_read(
+                os.path.join(ledisdir, "config", "config.toml"))
+            ledisdir = self.replace(
+                "$GOPATHDIR/src/github.com/siddontang/ledisdb")
 
             if backend == "rocksdb":
                 self._preparerocksdb()
@@ -39,7 +42,8 @@ class PrefabLedis(app):
                 rc, out, err = self._prepareleveldb()
             else:
                 raise NotImplementedError
-            configcontent.replace('db_name = "leveldb"', 'db_name = "%s"' % backend)
+            configcontent.replace('db_name = "leveldb"',
+                                  'db_name = "%s"' % backend)
 
             self.prefab.core.file_write("/tmp/ledisconfig.toml", configcontent)
 
@@ -49,25 +53,36 @@ class PrefabLedis(app):
             if install:
                 self.install(start=True)
 
+            self.doneSet("build")
+
     def _prepareleveldb(self):
         # execute the build script in tools/build_leveldb.sh
         # it will install snappy/leveldb in /usr/local{snappy/leveldb} directories
         ledisdir = self.replace("$GOPATHDIR/src/github.com/siddontang/ledisdb")
         # leveldb_build file : ledisdir/tools/build_leveldb.sh
-        rc, out, err = self.prefab.core.run("bash {ledisdir}/tools/build_leveldb.sh".format(ledisdir=ledisdir))
+        rc, out, err = self.prefab.core.run(
+            "bash {ledisdir}/tools/build_leveldb.sh".format(ledisdir=ledisdir))
         return rc, out, err
 
     def _preparerocksdb(self):
         raise NotImplementedError
 
     def install(self, start=True):
+        if self.doneCheck("install", reset):
+            return
+
         ledisdir = self.replace("$GOPATHDIR/src/github.com/siddontang/ledisdb")
 
         #rc, out, err = self.prefab.core.run("cd {ledisdir} && source dev.sh && make install".format(ledisdir=ledisdir), profile=True)
         self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg")
-        self.prefab.core.file_copy("/tmp/ledisconfig.toml", dest="$TEMPLATEDIR/cfg/ledisconfig.toml")
-        self.prefab.core.file_copy("{ledisdir}/bin/*".format(ledisdir=ledisdir), dest="$BINDIR")
-        self.prefab.core.file_copy("{ledisdir}/dev.sh".format(ledisdir=ledisdir), dest="$TEMPLATEDIR/ledisdev.sh")
+        self.prefab.core.file_copy(
+            "/tmp/ledisconfig.toml", dest="$TEMPLATEDIR/cfg/ledisconfig.toml")
+        self.prefab.core.file_copy(
+            "{ledisdir}/bin/*".format(ledisdir=ledisdir), dest="$BINDIR")
+        self.prefab.core.file_copy(
+            "{ledisdir}/dev.sh".format(ledisdir=ledisdir), dest="$TEMPLATEDIR/ledisdev.sh")
+
+        self.doneSet("install")
 
         if start:
             self.start()

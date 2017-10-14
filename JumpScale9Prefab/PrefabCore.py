@@ -595,16 +595,7 @@ class PrefabCore(base):
 
     @property
     def hostname(self):
-        def get():
-            if self.isMac or self.isCygwin:
-                hostname = self.run("hostname", replaceArgs=False)[1]
-            else:
-                hostfile = "/etc/hostname"
-                rc, out, err = self.run(
-                    "cat %s" % hostfile, showout=False, replaceArgs=False)
-                hostname = out.strip().split(".", 1)[0]
-            return hostname
-        return self.cache.get("hostname", get)
+        return self.executor.stateOnSystem["hostname"]
 
     @hostname.setter
     def hostname(self, val):
