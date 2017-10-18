@@ -27,7 +27,7 @@ class PrefabVRouter(base):
     @property
     def defgwInterface(self):
         if self._defgwInterface is None:
-            self._defgwInterface = self.prefab.net.defaultgwInterface
+            self._defgwInterface = self.prefab.system.net.defaultgwInterface
         return self._defgwInterface
 
     def runSolution(self):
@@ -75,7 +75,7 @@ class PrefabVRouter(base):
         ipaddr = "%s.254" % self.freeNetworkRangeDMZ
 
         try:
-            if ipaddr in self.prefab.net.getInfo("br0")["ip"]:
+            if ipaddr in self.prefab.system.net.getInfo("br0")["ip"]:
                 return
         except BaseException:
             pass
@@ -107,9 +107,9 @@ class PrefabVRouter(base):
                 continue
             OUT += "%s\n" % l
         OUT += C
-        self.prefab.net.setInterfaceFile(OUT)
+        self.prefab.system.net.setInterfaceFile(OUT)
 
-        if ipaddr not in self.prefab.net.getInfo("br0")["ip"]:
+        if ipaddr not in self.prefab.system.net.getInfo("br0")["ip"]:
             raise j.exceptions.RuntimeError(
                 "could not set bridge, something went wrong, could not find ip addr:%s" % ipaddr)
 
@@ -126,7 +126,7 @@ class PrefabVRouter(base):
         find wireless interface which is not the def gw
         needs to be 1
         """
-        interfaces = [item for item in self.prefab.net.wirelessLanInterfaces if item != self.defgwInterface]
+        interfaces = [item for item in self.prefab.system.net.wirelessLanInterfaces if item != self.defgwInterface]
         if len(interfaces) != 1:
             raise j.exceptions.Input(
                 message="Can only create access point if 1 wireless interface found which is not the default gw.",
@@ -146,7 +146,7 @@ class PrefabVRouter(base):
         return ("192.168.86")
         # for i in range(100, 150):
         #     iprange = "192.168.%s" % i
-        #     for item in self.prefab.net.ips:
+        #     for item in self.prefab.system.net.ips:
         #         if not item.startswith(iprange):
         #             return iprange
         # raise j.exceptions.Input(message="Cannot find free dmz iprange", level=1, source="", tags="", msgpub="")

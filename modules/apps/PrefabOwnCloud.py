@@ -245,7 +245,7 @@ class PrefabOwnCloud(app):
         if localinstall:
             privateIp = dbhost
         else:
-            privateIp = self.prefab.net.getInfo(self.prefab.net.nics[0])['ip'][0]
+            privateIp = self.prefab.system.net.getInfo(self.prefab.system.net.nics[0])['ip'][0]
 
         C = r"""\
         mysql -h {dbhost} -u {dbuser} {dbpass} --port 3306 --execute "CREATE DATABASE owncloud"
