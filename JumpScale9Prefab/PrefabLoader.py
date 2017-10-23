@@ -94,7 +94,7 @@ class PrefabLoader():
                 basename = j.do.getBaseName(classfile)
                 basename = basename[:-3]
 
-                # print ("load prefab module:%s"%classfile)
+                # print("load prefab module:%s" % classfile)
 
                 if not basename.startswith("Prefab"):
                     continue
