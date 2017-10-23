@@ -488,9 +488,9 @@ class PrefabCore(base):
             cmd = "tar -C %s -xzf %s" % (destination, path)
         elif path.endswith(".xz"):
             if self.isMac:
-                self.prefab.package.install('xz')
+                self.prefab.system.package.install('xz')
             else:
-                self.prefab.package.install('xz-utils')
+                self.prefab.system.package.install('xz-utils')
             cmd = "tar -C %s -xzf %s" % (destination, path)
         elif path.endswith("tar.bz2"):
             #  cmd = "cd %s;bzip2 -d %s | tar xvf -" % (j.sal.fs.getDirName(path), path)
@@ -1356,7 +1356,7 @@ class PrefabCore(base):
         if package is None:
             package = command
         if not self.command_check(command):
-            self.prefab.package.install(package)
+            self.prefab.system.package.install(package)
         assert self.command_check(command), \
             "Command was not installed, check for errors: %s" % (command)
 

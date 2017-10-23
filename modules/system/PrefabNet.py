@@ -86,7 +86,7 @@ class PrefabNet(base):
 
         """
         if range is None:
-            res = self.prefab.net.getInfo()
+            res = self.prefab.system.net.getInfo()
             for item in res:
                 cidr = item['cidr']
 
