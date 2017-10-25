@@ -58,8 +58,11 @@ class PrefabAtYourService(base):
         )
         self.load_ays_space(install_portal)
 
-    def start(self, host='localhost', port=5000):
-        cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port}'.format(base_dir=self.base_dir, host=host, port=port)
+    def start(self, host='localhost', port=5000, log='info', dev=False):
+        cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
+                                                                                      host=host, port=port, log=log)
+        if dev:
+            cmd += " --dev "
         self.prefab.processmanager.ensure(name='atyourservice', cmd=cmd)
 
     def stop(self):
