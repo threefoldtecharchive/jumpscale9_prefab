@@ -25,6 +25,14 @@ class PrefabAtYourService(base):
         j.application.config['ays'] = ays_config
         j.core.state.configSave()
 
+    def get_code(self):
+        """
+        Pull the ays repo if doesnt exist
+        """
+        branch = self.prefab.bash.env.get('JS9BRANCH', 'master')
+        self.logger.info("Get ays code on branch:'%s'" % branch)
+        self.prefab.development.git.pullRepo("https://github.com/Jumpscale/ays9.git", branch=branch)
+
     def load_ays_space(self, install_portal=False):
         """
         add ays space to portal
@@ -41,6 +49,7 @@ class PrefabAtYourService(base):
         server_dir = j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/')
         self.prefab.core.dir_ensure(server_dir)
         code_dir = self.prefab.core.dir_paths["CODEDIR"]
+        self.get_code()
         # link apidocs and index.html
         self.prefab.core.file_link(
             j.sal.fs.joinPaths(code_dir, 'github/jumpscale/ays9/JumpScale9AYS/ays/server/apidocs'),
