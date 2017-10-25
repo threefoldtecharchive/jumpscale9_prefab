@@ -196,7 +196,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabCore(base):
 
     def _init(self):
-        # self.sudomode = False
+        self.sudomode = False
         self._cd = '/root'
 
     @property
@@ -599,8 +599,8 @@ class PrefabCore(base):
 
     @hostname.setter
     def hostname(self, val):
-        # sudo = self.sudomode = True
-        # self.sudomode = True
+        sudo = self.sudomode
+        self.sudomode = True
         if val == self.hostname:
             return
 
@@ -615,7 +615,7 @@ class PrefabCore(base):
         self._hostname = val
         self.ns.hostfile_set(val, '127.0.0.1')
 
-        # self.sudomode = sudo
+        self.sudomode = sudo
 
     @property
     def name(self):
@@ -1098,16 +1098,16 @@ class PrefabCore(base):
     #             output = output.lstrip(dirt)
     #     return output
 
-    # def set_sudomode(self):
-    #     self.sudomode = True
+    def set_sudomode(self):
+        self.sudomode = True
 
-    # def sudo(self, cmd, die=True, showout=True):
-    #     sudomode = self.sudomode
-    #     self.sudomode = True
-    #     try:
-    #         return self.run(cmd, die=die, showout=showout)
-    #     finally:
-    #         self.sudomode = sudomode
+    def sudo(self, cmd, die=True, showout=True):
+        sudomode = self.sudomode
+        self.sudomode = True
+        try:
+            return self.run(cmd, die=die, showout=showout)
+        finally:
+            self.sudomode = sudomode
 
     def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
             shell=False, env=None, timeout=600):
@@ -1140,10 +1140,10 @@ class PrefabCore(base):
         if shell and '"' in cmd:
             cmd = cmd.replace('"', '\\"')
 
-        # if self.sudomode:
-        #     cmd = self.sudo_cmd(cmd, shell=shell)
-        # elif shell:  # only when shell is asked for
-        #     cmd = 'bash -c "%s"' % cmd
+        if self.sudomode:
+            cmd = self.sudo_cmd(cmd, shell=shell)
+        elif shell:  # only when shell is asked for
+            cmd = 'bash -c "%s"' % cmd
 
         # old_path = self.executor.execute("echo $PATH", showout=False)[2]
         # if "/usr/local/bin" not in old_path:
@@ -1176,30 +1176,30 @@ class PrefabCore(base):
 
         return rc, out, err
 
-    # def sudo_cmd(self, command, shell=False, force_sudo=False):
-    #     # TODO: Fix properly. This is just a workaround
-    #     self.sudomode = False
-    #     if "darwin" in self.prefab.platformtype.osname:
-    #         self.sudomode = True
-    #         return command
-    #     self.sudomode = True
-    #     if not force_sudo and getattr(self.executor, 'login', '') == "root":
-    #         cmd = command
-    #     passwd = self.executor.passwd if hasattr(
-    #         self.executor, "passwd") else ''
-    #     passwd = passwd or "\'\'"
-    #     if shell:
-    #         command = 'bash -c "%s"' % command
-    #     rc, out, err = self.executor.execute(
-    #         "which sudo", die=False, showout=False)
-    #     if rc or out.strip() == '**OK**':
-    #         # Install sudo if sudo not installed
-    #         cmd = 'apt-get install sudo && echo %s | sudo -SE -p \'\' %s' % (
-    #             passwd, command)
-    #     else:
-    #         cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (
-    #             passwd, command.replace('"', '\\"'))
-    #     return cmd
+    def sudo_cmd(self, command, shell=False, force_sudo=False):
+        # TODO: Fix properly. This is just a workaround
+        self.sudomode = False
+        if "darwin" in self.prefab.platformtype.osname:
+            self.sudomode = True
+            return command
+        self.sudomode = True
+        if not force_sudo and getattr(self.executor, 'login', '') == "root":
+            cmd = command
+        passwd = self.executor.passwd if hasattr(
+            self.executor, "passwd") else ''
+        passwd = passwd or "\'\'"
+        if shell:
+            command = 'bash -c "%s"' % command
+        rc, out, err = self.executor.execute(
+            "which sudo", die=False, showout=False)
+        if rc or out.strip() == '**OK**':
+            # Install sudo if sudo not installed
+            cmd = 'apt-get install sudo && echo %s | sudo -SE -p \'\' %s' % (
+                passwd, command)
+        else:
+            cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (
+                passwd, command.replace('"', '\\"'))
+        return cmd
 
     def cd(self, path):
         """cd to the given path"""
@@ -1259,8 +1259,8 @@ class PrefabCore(base):
             interpreter = 'bash -e'
         cmd = "%s %s" % (interpreter, path)
 
-        # if self.sudomode:
-        # cmd = self.sudo_cmd(cmd)
+        if self.sudomode:
+            cmd = self.sudo_cmd(cmd)
 
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
