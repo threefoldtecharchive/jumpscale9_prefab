@@ -9,6 +9,7 @@ class PrefabAtYourService(base):
             self.prefab.core.dir_paths["JSAPPSDIR"],
             "atyourservice"
         )
+        self.repoDir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["CODEDIR"], 'github/jumpscale/ays9/')
 
     def configure(self, production=False, client_secret='', client_id='', organization='', redirect_address='locahost:5000'):
         jwt_key = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n27MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny66+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv"
@@ -25,11 +26,12 @@ class PrefabAtYourService(base):
         j.application.config['ays'] = ays_config
         j.core.state.configSave()
 
-    def get_code(self):
+    def get_code(self, branch):
         """
         Pull the ays repo if doesnt exist
         """
-        branch = self.prefab.bash.env.get('JS9BRANCH', 'master')
+        if not branch:
+            branch = self.prefab.bash.env.get('JS9BRANCH', 'master')
         self.logger.info("Get ays code on branch:'%s'" % branch)
         self.prefab.development.git.pullRepo("https://github.com/Jumpscale/ays9.git", branch=branch)
 
@@ -37,32 +39,38 @@ class PrefabAtYourService(base):
         """
         add ays space to portal
         """
-        code_dir = self.prefab.core.dir_paths["CODEDIR"]
         if install_portal:
             self.prefab.apps.portal.install()
         if j.sal.fs.exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
-            self.prefab.apps.portal.addSpace('{}/github/jumpscale/ays9/apps/AYS'.format(code_dir))
-            self.prefab.apps.portal.addActor('{}/github/jumpscale/ays9/apps/ays__tools'.format(code_dir))
+            self.prefab.apps.portal.addSpace('{}apps/AYS'.format(self.repoDir))
+            self.prefab.apps.portal.addActor('{}apps/ays__tools'.format(self.repoDir))
 
-    def install(self, install_portal=False):
+    def install_pip_package(self):
+        """
+        install the pip packages for ays
+        """
+        self.repoDir
+        cmd = 'cd %s && pip3 install -e .' % self.repoDir
+        self.prefab.core.run(cmd)
+
+    def install(self, install_portal=False, branch=None):
         self.prefab.core.dir_ensure(self.base_dir)
         server_dir = j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/')
         self.prefab.core.dir_ensure(server_dir)
-        code_dir = self.prefab.core.dir_paths["CODEDIR"]
-        self.get_code()
+        self.get_code(branch)
         # link apidocs and index.html
         self.prefab.core.file_link(
-            j.sal.fs.joinPaths(code_dir, 'github/jumpscale/ays9/JumpScale9AYS/ays/server/apidocs'),
+            j.sal.fs.joinPaths(self.repoDir, 'JumpScale9AYS/ays/server/apidocs'),
             j.sal.fs.joinPaths(server_dir, 'apidocs')
         )
 
         self.prefab.core.file_link(
-            j.sal.fs.joinPaths(code_dir, 'github/jumpscale/ays9/JumpScale9AYS/ays/server/index.html'),
+            j.sal.fs.joinPaths(self.repoDir, 'JumpScale9AYS/ays/server/index.html'),
             j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/index.html')
         )
 
         self.prefab.core.file_link(
-            j.sal.fs.joinPaths(code_dir, 'github/jumpscale/ays9/main.py'),
+            j.sal.fs.joinPaths(self.repoDir, 'main.py'),
             j.sal.fs.joinPaths(self.base_dir, 'main.py')
         )
         self.load_ays_space(install_portal)
