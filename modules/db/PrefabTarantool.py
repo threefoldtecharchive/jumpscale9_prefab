@@ -9,8 +9,8 @@ class PrefabTarantool(app):
 
     def install(self, reset=False):
 
-        if self.doneCheck("install", reset):
-            return
+        # if self.doneCheck("install", reset):
+        #     return
 
         if self.core.isMac:
             # cmd="brew install tarantool"
@@ -45,12 +45,13 @@ class PrefabTarantool(app):
             sudo tarantoolctl rocks install connpool
             sudo tarantoolctl rocks install http
 
-            sudo luarocks install luatweetnacl
+            # sudo luarocks install luatweetnacl
 
             # sudo luarocks install lua-cjson
 
             popd
             """
+            self.core.run(C)
         else:
             raise RuntimeError("implement")
             # see https://github.com/Incubaid/playenv/blob/master/tarantool/install.sh
