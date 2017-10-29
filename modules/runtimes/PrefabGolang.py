@@ -128,12 +128,15 @@ class PrefabGolang(app):
         srcpath = self.prefab.core.joinpaths(self.GOPATHDIR, 'src')
         self.prefab.core.dir_remove(srcpath)
 
-    def get(self, url):
+    def get(self, url, install=True):
         """
         e.g. url=github.com/tools/godep
         """
         self.clean_src_path()
-        self.prefab.core.run('go get -v -u %s' % url, profile=True)
+        download = ''
+        if not install:
+            download = '-d'
+        self.prefab.core.run('go get %s -v -u %s' % (download, url), profile=True)
 
     def godep(self, url, branch=None, depth=1):
         """

@@ -24,7 +24,6 @@ class PrefabKubernetes(app):
 
         @param nodes are list of prefab clients which will be used to deploy kubernetes
 
-        am sure other params are required
 
         this installer will
         - use first node as master
@@ -36,11 +35,27 @@ class PrefabKubernetes(app):
         """
         pass
 
+    def install_dependencies(self, reset=False):
+        """
+        @param reset ,,if True will resintall even if the code has been run before.
+        use the go get command to get dependencies and install
+        """
+        if self.doneCheck("install_dependencies", reset):
+            return
+
+        golang = self.prefab.runtimes.golang
+        golang.install()
+        golang.get('k8s.io/kubernetes', install=False)
+
+        self.doneSet("install_dependencies")
+
     def build(self, reset=False):
 
         if self.doneCheck("build", reset):
             return
 
-        # TODO
+        self.install_dependencies(reset)
+        self.prefab.core.run('cd $GOPATH/src/k8s.io/kubernetes && make', profile=True)
+
 
         self.doneSet("build")
