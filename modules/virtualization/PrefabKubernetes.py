@@ -45,7 +45,8 @@ class PrefabKubernetes(app):
 
         golang = self.prefab.runtimes.golang
         golang.install()
-        golang.get('k8s.io/kubernetes', install=False)
+        self.prefab.docker.install()
+        golang.get('k8s.io/kubernetes/cmd/kubectl', install=False, update=False)
 
         self.doneSet("install_dependencies")
 
@@ -55,7 +56,8 @@ class PrefabKubernetes(app):
             return
 
         self.install_dependencies(reset)
-        self.prefab.core.run('cd $GOPATH/src/k8s.io/kubernetes && make', profile=True)
+        self.prefab.core.run('cd %s/src/k8s.io/kubernetes && make release' % self.prefab.runtimes.golang.GOPATH,
+                             profile=True)
 
 
         self.doneSet("build")
