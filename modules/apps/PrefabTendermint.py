@@ -10,12 +10,10 @@ class PrefabTendermint(app):
 
     def _init(self):
         self.BUILDDIR = self.replace("$BUILDDIR/tendermint")
-        self.TENDERMINTPATH = "{}/src/github.com/tendermint/tendermint".format(
-            self.GOPATH)
 
     @property
-    def GOPATH(self):
-        return self.prefab.runtimes.golang.GOPATH
+    def TENDERMINTPATH(self):
+        return "{}/src/github.com/tendermint/tendermint".format(self.prefab.runtimes.golang.GOPATH)
 
     def build(self, reset=False):
         """
