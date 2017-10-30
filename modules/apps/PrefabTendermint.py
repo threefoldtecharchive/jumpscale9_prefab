@@ -96,5 +96,5 @@ class PrefabTendermint(app):
         self.build()
         self.install()
         self.start('test')
-        self.stop_all()
+        self.stop('test')
         self.start('test')
