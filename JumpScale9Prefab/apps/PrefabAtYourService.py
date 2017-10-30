@@ -58,6 +58,7 @@ class PrefabAtYourService(base):
         server_dir = j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/')
         self.prefab.core.dir_ensure(server_dir)
         self.get_code(branch)
+        self.install_pip_package()
         # link apidocs and index.html
         self.prefab.core.file_link(
             j.sal.fs.joinPaths(self.repoDir, 'JumpScale9AYS/ays/server/apidocs'),
