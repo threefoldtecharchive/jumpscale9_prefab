@@ -43,10 +43,12 @@ class PrefabKubernetes(app):
         if self.doneCheck("install_dependencies", reset):
             return
 
+        self.prefab.system.package.install('mercurial')
         golang = self.prefab.runtimes.golang
         golang.install()
-        self.prefab.docker.install()
-        golang.get('k8s.io/kubernetes/cmd/kubectl', install=False, update=False)
+        self.prefab.virtualization.docker.install()
+        golang.get('k8s.io/kubernetes/...', install=False, update=False)
+        self.prefab.core('cd %s/src/k8s.io/kubernetes && bash hack/install-etcd.sh' % self.prefab.runtimes.golang.GOPATH)
 
         self.doneSet("install_dependencies")
 
@@ -56,8 +58,7 @@ class PrefabKubernetes(app):
             return
 
         self.install_dependencies(reset)
-        self.prefab.core.run('cd %s/src/k8s.io/kubernetes && make release' % self.prefab.runtimes.golang.GOPATH,
-                             profile=True)
+        self.prefab.core.run('cd %s/src/k8s.io/kubernetes && make' % self.prefab.runtimes.golang.GOPATH)
 
 
         self.doneSet("build")
