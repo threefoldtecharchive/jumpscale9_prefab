@@ -14,7 +14,7 @@ class PrefabKubernetes(app):
         install full minikube, only support ubuntu 16.04+ (check this)
         """
 
-        if self.doneCheck("minikube_install", reset):
+    if self.doneCheck("minikube_install", reset):
             return
 
         self.doneSet("minikube_install")
@@ -62,3 +62,9 @@ class PrefabKubernetes(app):
 
 
         self.doneSet("build")
+
+    def install(self, reset=False):
+        if self.doneCheck("install", reset):
+            return
+        self.build(reset)
+        self.doneSet("install")
