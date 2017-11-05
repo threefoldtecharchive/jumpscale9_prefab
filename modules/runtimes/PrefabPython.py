@@ -118,7 +118,7 @@ class PrefabPython(base):
         """
         self.prefab.core.run(self.replace(C))
 
-        print(56789)
+        print("FINISH THE PREFAB PYTHON BUILDER")
         from IPython import embed;embed(colors='Linux')
 
 

@@ -54,67 +54,92 @@ class PrefabTarantool(app):
             """
             self.core.run(C)
         elif self.core.isUbuntu:
-            # self.prefab.system.package.install(
-            #     "lua,tarantool,luajit,cmake,msgpuck")
 
-            #NEED TO INSTALL RIGHT TARANTOOL
+            if not self.doneCheck("apt_config", reset):
+                #WRITE TARANTOOL APT CONFIG
+                self.core.run("rm -f /etc/apt/sources.list.d/*tarantool*.list")
+                rc,release,err=self.core.run("lsb_release -c -s")
+                CONFIG="""
+                deb http://download.tarantool.org/tarantool/1.7/ubuntu/ $release main
+                deb-src http://download.tarantool.org/tarantool/1.7/ubuntu/ $release main
+                """
+                CONFIG=self.replace(CONFIG.replace("$release",release))
+                self.core.file_write("/etc/apt/sources.list.d/tarantool_1_7.list",CONFIG)
+                self.doneSet("apt_config")
 
-            C = """
-            set -ex
+            if not self.doneCheck("apt_parts", reset):
+                self.core.run("curl http://download.tarantool.org/tarantool/1.7/gpgkey | sudo apt-key add -")
+                self.prefab.system.package.mdupdate(reset=True)
+                self.prefab.system.package.install("apt-transport-https,tarantool")
+                self.doneSet("apt_parts")
+
+            if not self.doneCheck("luajit", reset):
+                C = """
+                set -ex
+                pushd /tmp
+                rm -rf luajit-2.0
+                git clone http://luajit.org/git/luajit-2.0.git
+                cd luajit-2.0/
+                git checkout v2.1
+                make && sudo make install
+                ln -sf /usr/local/bin/luajit-2.1.0-beta3 /usr/local/bin/luajit
+                popd
+                """
+                self.core.run(C)  
+                self.doneSet("luajit")
+
+            if not self.doneCheck("tdb", reset):
+                C = """
+                set -ex
+                pushd /tmp
+                rm -rf tdb
+                git clone --recursive https://github.com/Sulverus/tdb
+                cd tdb
+                make
+                make install
+                popd
+                """
+                self.core.run(C)  
+                self.doneSet("tdb")
+
+            self.prefab.system.package.install("luarocks,libsodium-dev,libb2-dev,libmsgpuck-dev")
+
+            if not self.doneCheck("rocks1", reset):
+                C = """
+                set -ex
+                pushd /tmp
+                tarantoolctl rocks install shard
+                tarantoolctl rocks install document
+                tarantoolctl rocks install prometheus
+                tarantoolctl rocks install queue
+                tarantoolctl rocks install expirationd
+                tarantoolctl rocks install connpool
+                tarantoolctl rocks install http
+                popd
+                """
+                self.core.run(C)  
+                self.doneSet("rocks1")    
 
 
-            curl http://download.tarantool.org/tarantool/1.7/gpgkey | sudo apt-key add -
-            release=`lsb_release -c -s`
-
-            # install https download transport for APT
-            apt-get -y install apt-transport-https
-
-            # append two lines to a list of source repositories
-            rm -f /etc/apt/sources.list.d/*tarantool*.list
-            tee /etc/apt/sources.list.d/tarantool_1_7.list <<- EOF
-            deb http://download.tarantool.org/tarantool/1.7/ubuntu/ $release main
-            deb-src http://download.tarantool.org/tarantool/1.7/ubuntu/ $release main
-            EOF
-
-            # install
-            apt-get update
-            apt-get -y install tarantool
-
-            pushd $TMPDIR
-            git clone http://luajit.org/git/luajit-2.0.git
-            cd luajit-2.0/
-            git checkout v2.1
-            make && sudo make install
-            ln -sf /usr/local/bin/luajit-2.1.0-beta3 /usr/local/bin/luajit
-            popd
-
-            pushd $TMPDIR
-            git clone --recursive https://github.com/Sulverus/tdb
-            cd tdb
-            make
-            make install prefix=/usr/lib/tarantool/
-
-            tarantoolctl rocks install shard
-            tarantoolctl rocks install document
-            tarantoolctl rocks install prometheus
-            tarantoolctl rocks install queue
-            tarantoolctl rocks install expirationd
-            tarantoolctl rocks install connpool
-            tarantoolctl rocks install http
-
-            luarocks install redis-lua
-            luarocks install yaml
-            luarocks install penlight
-            luarocks install luasec OPENSSL_DIR=/usr//local/opt/openssl@1.1
-            luarocks install luatweetnacl
-            luarocks install lua-cjson
-
-            #NEED TARANTOOL INSTALL
-
-            popd
-            """
-            self.core.run(C)            
-            raise RuntimeError("implement")
+            if not self.doneCheck("rocks2", reset):
+                C = """
+                set -ex
+                pushd /tmp
+                luarocks install lua-capnproto
+                luarocks install redis-lua
+                luarocks install yaml
+                luarocks install penlight
+                luarocks install luasec
+                luarocks install luatweetnacl
+                luarocks install lua-cjson
+                luarocks install luafilesystem
+                luarocks install siphash --from=http://mah0x211.github.io/rocks/
+                luarocks install --from=http://mah0x211.github.io/rocks/ blake2
+                luarocks install symmetric
+                popd
+                """
+                self.core.run(C)  
+                self.doneSet("rocks2")                                      
 
         self.doneSet("install")
 
