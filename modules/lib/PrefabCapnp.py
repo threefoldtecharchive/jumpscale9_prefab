@@ -16,7 +16,7 @@ class PrefabCapnp(app):
             return
 
         self.prefab.system.package.mdupdate()
-        self.prefab.system.package.multiInstall(['curl', 'make', 'g++', 'python-dev'])
+        self.prefab.system.package.install(['curl', 'make', 'g++', 'python-dev'])
 
         #@TODO: *2 use git checkout on tag like we do for ARDB
 

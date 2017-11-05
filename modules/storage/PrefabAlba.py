@@ -27,7 +27,7 @@ class PrefabAlba(base):
         libjerasure-dev yasm automake python-dev python-pip debhelper psmisc strace curl g++ libgflags-dev \
         sudo libtool libboost-all-dev fuse sysstat ncurses-dev librdmacm-dev
         """
-        self.prefab.system.package.multiInstall(apt_deps, allow_unauthenticated=True)
+        self.prefab.system.package.install(apt_deps, allow_unauthenticated=True)
 
         # OPAM
         self.opam_root = self.replace('$TMPDIR/OPAM')
@@ -89,7 +89,7 @@ class PrefabAlba(base):
         return
 
     def _install_deps_cpp(self):
-        self.prefab.system.package.multiInstall("libgtest-dev cmake", allow_unauthenticated=True)
+        self.prefab.system.package.install("libgtest-dev cmake", allow_unauthenticated=True)
         self.prefab.core.run('cd /usr/src/gtest && cmake . && make && mv libg* /usr/lib/')
 
         """
@@ -179,7 +179,7 @@ class PrefabAlba(base):
         omniorb-nameserver libunwind8-dev libaio1 libaio1-dbg libaio-dev libz-dev libbz2-dev \
         libgoogle-glog-dev libibverbs-dev"""
 
-        self.prefab.system.package.multiInstall(apt_deps, allow_unauthenticated=True)
+        self.prefab.system.package.install(apt_deps, allow_unauthenticated=True)
 
     def _install_deps_ordma(self):
         #

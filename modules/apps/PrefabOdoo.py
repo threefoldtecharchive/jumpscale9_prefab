@@ -10,7 +10,7 @@ class PrefabOdoo(app):
         if self.prefab.core.command_check('pip2'):
             return
         pip_url = 'https://bootstrap.pypa.io/get-pip.py'
-        self.prefab.system.package.multiInstall(['python2.7', 'python2.7-dev'])
+        self.prefab.system.package.install(['python2.7', 'python2.7-dev'])
         self.prefab.core.file_download(pip_url, overwrite=False)
         cmd = """
         python2.7 $TMPDIR/get-pip.py
@@ -21,7 +21,7 @@ class PrefabOdoo(app):
         if not self.prefab.db.postgresql.isInstalled():
             self.prefab.db.postgresql.install()
         self._install_pip2()
-        self.prefab.system.package.multiInstall([
+        self.prefab.system.package.install([
             'python-ldap', 'libldap2-dev', 'libsasl2-dev', 'libssl-dev',
             'libxml2-dev', 'libxslt-dev', 'python-six', 'libpq-dev'
         ])

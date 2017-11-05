@@ -40,7 +40,7 @@ class PrefabARDB(app):
         if self.doneCheck("buildforestdb", reset):
             return
 
-        self.prefab.system.package.multiInstall(["git-core",
+        self.prefab.system.package.install(["git-core",
                                                  "cmake",
                                                  "libsnappy-dev",
                                                  "g++"])
@@ -90,7 +90,7 @@ class PrefabARDB(app):
         packages += ["unzip"]
 
         # Install dependancies
-        self.prefab.system.package.multiInstall(packages)
+        self.prefab.system.package.install(packages)
 
         url = "https://github.com/yinqiwen/ardb.git"
         cpath = self.prefab.tools.git.pullRepo(

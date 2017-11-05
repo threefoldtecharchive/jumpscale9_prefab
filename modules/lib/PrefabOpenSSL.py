@@ -13,6 +13,11 @@ sudo mv -f /usr/local/opt/openssl /usr/local/opt/openssl_
 sudo mv -f /usr/local/ssl /usr/local/ssl_
 sudo mv -f /usr/local/bin/openssl /usr/local/bin/openssl_
 sudo mv -f /usr/bin/openssl /usr/bin/openssl_
+
+
+ find /usr -name "*openssl*"  -exec rm -rf {} \;
+
+
 """
 
 # UNHIDE OPENSSL
@@ -43,10 +48,8 @@ class PrefabOpenSSL(base):
         """
         @param destpath, if '' then will be $TMPDIR/build/openssl
         """
-        if reset:
-            self.reset()
 
-        if self.doneGet("build") and not reset:
+        if self.doneCheck("build") and not reset:
             return
         self.prefab.system.package.ensure('build-essential')
         url = "https://github.com/openssl/openssl.git"

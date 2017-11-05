@@ -11,7 +11,7 @@ class PrefabApache2(app):
     def build(self, reset=True):
 
         pkgs = "wget curl gcc libssl-dev zlib1g-dev libaprutil1-dev libapr1-dev libpcre3-dev libxml2-dev build-essential unzip".split()
-        self.prefab.system.package.multiInstall(pkgs)
+        self.prefab.system.package.install(pkgs)
 
         httpdir = "/optvar/build/httpd"
 

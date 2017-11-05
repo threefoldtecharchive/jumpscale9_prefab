@@ -23,7 +23,7 @@ class PrefabCrm(app):
 
         # Clone the repository and install python requirements
         self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
-        self.prefab.system.package.multiInstall(["python3-dev", "libffi-dev"])
+        self.prefab.system.package.install(["python3-dev", "libffi-dev"])
         requirements = j.sal.fs.readFile("{}/requirements.pip".format(self.crm_dir))
         self.prefab.development.pip.multiInstall(requirements)
 

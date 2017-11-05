@@ -108,10 +108,10 @@ class PrefabPortal(base):
             self.prefab.system.package.ensure('python3-dev')
 
         if "darwin" in self.prefab.platformtype.osname:
-            self.prefab.system.package.multiInstall(['libtiff', 'libjpeg', 'webp', 'little-cms2', 'snappy'])
+            self.prefab.system.package.install(['libtiff', 'libjpeg', 'webp', 'little-cms2', 'snappy'])
             self.prefab.core.run('CPPFLAGS="-I/usr/local/include -L/usr/local/lib" pip3 install python-snappy')
         else:
-            self.prefab.system.package.multiInstall(['libjpeg-dev', 'libffi-dev', 'zlib1g-dev'])
+            self.prefab.system.package.install(['libjpeg-dev', 'libffi-dev', 'zlib1g-dev'])
 
         # snappy install
         if "darwin" not in self.prefab.platformtype.osname:

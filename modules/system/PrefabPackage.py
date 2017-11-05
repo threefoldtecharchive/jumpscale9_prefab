@@ -109,9 +109,9 @@ class PrefabPackage(base):
         """
 
         # bring to list of packages
-        if package.find(",") != -1:
+        if j.data.types.list.check(package) == False and package.find(",") != -1:
             package = [item.strip() for item in package.split(",")]
-        elif package.find("\n") != -1:
+        elif j.data.types.list.check(package) == False and  package.find("\n") != -1:
             package = [item.strip() for item in package.split("\n")]
         elif not j.data.types.list.check(package):
             package = [package]

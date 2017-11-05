@@ -103,7 +103,7 @@ class PrefabArakoon(base):
             'libev-dev',
             'libev4'
         )
-        self.prefab.system.package.multiInstall(apt_deps)
+        self.prefab.system.package.install(apt_deps)
 
     def build(self, start=True):
         self._install_deps()

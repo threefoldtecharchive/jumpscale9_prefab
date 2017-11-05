@@ -15,7 +15,7 @@ class PrefabProtobuf(app):
             return
 
         self.prefab.system.package.mdupdate()
-        self.prefab.system.package.multiInstall(['protobuf'])
+        self.prefab.system.package.install(['protobuf'])
         self.prefab.runtimes.pip.install(
             "protobuf3", upgrade=True)  # why not protobuf?
 

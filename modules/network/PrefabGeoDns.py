@@ -20,7 +20,7 @@ class PrefabGeoDns(app):
         # deps
         # self.prefab.runtimes.golang.install(force=False)
         self.prefab.system.package.mdupdate()
-        self.prefab.system.package.multiInstall(["libgeoip-dev", 'build-essential', 'pkg-config'])
+        self.prefab.system.package.install(["libgeoip-dev", 'build-essential', 'pkg-config'])
 
         # build
         self.prefab.runtimes.golang.get("github.com/abh/geodns")

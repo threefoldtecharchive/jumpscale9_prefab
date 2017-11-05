@@ -26,7 +26,7 @@ class PrefabLibffi(base):
 
         self.prefab.system.package.mdupdate()
         self.prefab.core.dir_ensure(self.BUILDDIRL)
-        self.prefab.system.package.multiInstall(['build-essential', 'dh-autoreconf'])
+        self.prefab.system.package.install(['build-essential', 'dh-autoreconf'])
         url = "https://github.com/libffi/libffi.git"
         cpath = self.prefab.tools.git.pullRepo(url, reset=reset, ssh=False)
 

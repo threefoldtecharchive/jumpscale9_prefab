@@ -8,7 +8,7 @@ class PrefabFuse(app):
     NAME = "fuse"
 
     def install(self):
-        self.prefab.system.package.multiInstall([
+        self.prefab.system.package.install([
             "python3.5",
             "python3-pkgconfig",
             "pkg-config",

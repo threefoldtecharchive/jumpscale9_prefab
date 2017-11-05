@@ -25,35 +25,37 @@ class PrefabPython(base):
         if self.doneCheck("build", reset):
             return
 
-        self.pipAll()
+        # self.pipAll()  #NO IDEA WHY THIS WAS HERE, SHOULD NOT BE THERE
 
-        self.prefab.lib.openssl.build()
-        self.prefab.lib.libffi.build()
-        self.prefab.system.package.install('zlib1g-dev')
-        if self.prefab.core.isMac:
-            if not self.doneGet("xcode_install"):
-                self.prefab.core.run(
-                    "xcode-select --install", die=False, showout=True)
-                C = """
-                openssl
-                xz
-                """
-                self.prefab.system.package.multiInstall(C)
-                self.doneSet("xcode_install")
-
-        if not self.doneGet("compile") or reset:
+        if True or not self.doneGet("compile") or reset:
             cpath = self.prefab.tools.git.pullRepo(
                 'https://github.com/python/cpython', branch="3.6", reset=reset)
             assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
-            if self.core.isMac:  # TODO: *2 cant we do something similar for linux?
+
+            #GET THIS TO WORK ON LINUX & OSX
+            if self.core.isMac:  
+
+                self.prefab.lib.openssl.build()
+                self.prefab.lib.libffi.build()
+
+                if not self.doneGet("xcode_install"):
+                    self.prefab.core.run(
+                        "xcode-select --install", die=False, showout=True)
+                    C = """
+                    openssl
+                    xz
+                    """
+                    self.prefab.system.package.install(C)
+                    self.doneSet("xcode_install")
 
                 C = """
                 set -ex
                 cd $CODEDIRL
 
-                export LIBRARY_PATH="$openssldir/lib:$libffidir/lib"
-                export CPPPATH="$openssldir/include"
-                export CPATH="$openssldir/include"
+                export LIBRARY_PATH="$openssldir/lib:$libffidir/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib"
+                export LD_LIBRARY_PATH="$openssldir/lib:$libffidir/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib"
+                export CPPPATH="$openssldir/include:/usr/include"
+                export CPATH="$openssldir/include:/usr/include"
                 export PATH=$openssldir/lib:/$openssldir/bin:/usr/local/bin:/usr/bin:/bin
 
                 export CFLAGS="-I$CPATH/"
@@ -63,7 +65,7 @@ class PrefabPython(base):
                 echo $CFLAGS
                 echo $LDFLAGS
 
-                ./configure
+                ./configure --enable-optimizations
                 make -s -j4
 
 
@@ -73,55 +75,86 @@ class PrefabPython(base):
                 C = C.replace("$libffidir", self.prefab.lib.libffi.BUILDDIRL)
                 C = self.replace(C)
 
-                self.prefab.core.file_write(
-                    "%s/mycompile_all.sh" % self.CODEDIRL, C)
-            else:  # TODO: *1 not working compile, see if we can do in line with osx, something wrong with openssl
-                # configure custom location for openssl
-                setup_path = '{}/Modules/Setup'.format(self.CODEDIRL)
-                self.prefab.core.file_copy(setup_path + ".dist", setup_path)
-                content = """
-                    _socket socketmodule.c
-                    SSL={openssldir}
-                    _ssl _ssl.c -DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl -L$(SSL)/lib -lssl -lcrypto
-                    """.format(openssldir=self.prefab.lib.openssl.BUILDDIRL)
+            else: 
 
-                self.prefab.core.file_write(
-                    location=setup_path, content=content, append=True)
+                #on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
+                self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev')
 
                 C = """
+
+                apt install wget gcc make -y
+
                 set -ex
                 cd {codedir}
 
-                ./configure --prefix={builddir}
+                ./configure --prefix={builddir} --enable-optimizations
 
-                export LD_LIBRARY_PATH={openssldir}/lib
                 make clean
-                make -j4
-                make install
+                # make -j4
+                make -j8 EXTRATESTOPTS=--list-tests install
+                # make install
                 """.format(builddir=self.BUILDDIRL, codedir=self.CODEDIRL, openssldir=self.prefab.lib.openssl.BUILDDIRL)
+
+            self.prefab.core.file_write(
+                    "%s/mycompile_all.sh" % self.CODEDIRL, C)
 
             self.logger.info("compile python3")
             self.logger.info(C)
             self.prefab.core.run(C)
 
-        self.doneSet("compile")
+            self.doneSet("compile")
 
         # find buildpath for lib (depending source it can be other destination)
         # is the core python binaries
+
+        self.prefab.core.dir_remove(self.BUILDDIRL)
+
+        C="""
+        cd $CODEDIRL
+        # mv python.exe python > /dev/null 2>&1 #so we don't see the garbage if this was already done
+        rm -rf get-pip.py
+        curl https://bootstrap.pypa.io/get-pip.py > get-pip.py
+        python.exe get-pip.py
+        """
+        self.prefab.core.run(self.replace(C))
+
+        print(56789)
+        from IPython import embed;embed(colors='Linux')
+
+
         libBuildName = [item for item in self.prefab.core.run(
             "ls %s/build" % self.CODEDIRL)[1].split("\n") if item.startswith("lib")][0]
-        lpath = j.sal.fs.joinPaths(self.CODEDIRL, "build", libBuildName)
-        self.prefab.core.copyTree(source=lpath, dest=self.BUILDDIRL, keepsymlinks=True, deletefirst=False,
-                                  overwriteFiles=True, recursive=True, rsyncdelete=False, createdir=True)
+        libpath = j.sal.fs.joinPaths(self.CODEDIRL, "build", libBuildName)
+
+        ignorefiles=['.egg-info',"*test*","*audio*"]
+        bindest = self.replace("$BUILDDIRL/bin")
+        self.prefab.core.copyTree(source=libpath, dest=bindest, keepsymlinks=True, deletefirst=False,
+                                  overwriteFiles=True, recursive=True, rsyncdelete=False, createdir=True,ignorefiles=ignorefiles)
 
         # copy python libs (non compiled)
         ignoredir = ["tkinter", "turtledemo",
-                     "msilib", "pydoc*", "lib2to3", "idlelib"]
+                     "msilib", "pydoc*", "lib2to3", "xml","xmlrpc","idlelib","test*","unittest"]
         lpath = self.replace("$CODEDIRL/Lib")
-        ldest = self.replace("$BUILDDIRL/plib")
+        ldest = self.replace("$BUILDDIRL/lib")
+
         self.prefab.core.copyTree(source=lpath, dest=ldest, keepsymlinks=True, deletefirst=False,
                                   overwriteFiles=True, ignoredir=ignoredir,
                                   recursive=True, rsyncdelete=True, createdir=True)
+
+        C="""
+        #export BUILDDIRL=/host/var/build/python3
+        export PBASE=`pwd`
+        # cd $BUILDDIRL
+        export PATH=$PBASE/bin:$PATH
+        export PYTHONPATH=$PBASE/lib.zip:$PBASE/lib/:$PBASE/bin
+        export PYTHONHOME=$PBASE
+        #python -s -S $@
+        """
+        self.prefab.core.file_write("%s/env.sh" %  self.BUILDDIRL, C)   
+
+        print(9)
+        from IPython import embed;embed(colors='Linux')    
+        s 
 
         self.prefab.core.file_unlink("%s/python3" % self.BUILDDIRL)
         if self.core.isMac:
@@ -254,42 +287,42 @@ class PrefabPython(base):
 
         # self.doneSet("sandbox")
 
-    def pipAll(self, reset=False):
-        # needs at least items from /JS8/code/github/jumpscale/jumpscale_core9/install/dependencies.py
-        if self.doneCheck("pipall", reset):
-            return
-        C = """
-        uvloop
-        redis
-        paramiko
-        watchdog
-        gitpython
-        click
-        pymux
-        pyyaml
-        ipdb
-        requests
-        netaddr
-        ipython
-        cython
-        pycapnp
-        path.py
-        colored-traceback
-        pudb
-        colorlog
-        msgpack-python
-        pyblake2
-        brotli
-        pysodium
-        ipfsapi
-        curio
-        uvloop
-        gevent
-        """
-        self.prefab.system.package.multiInstall(['libffi-dev', 'libssl-dev'])
-        self.pip(C, reset=reset)
-        self.sandbox(deps=False)
-        self.doneSet("pipall")
+    # def pipAll(self, reset=False):
+    #     # needs at least items from /JS8/code/github/jumpscale/jumpscale_core9/install/dependencies.py
+    #     if self.doneCheck("pipall", reset):
+    #         return
+    #     C = """
+    #     uvloop
+    #     redis
+    #     paramiko
+    #     watchdog
+    #     gitpython
+    #     click
+    #     pymux
+    #     pyyaml
+    #     ipdb
+    #     requests
+    #     netaddr
+    #     ipython
+    #     cython
+    #     pycapnp
+    #     path.py
+    #     colored-traceback
+    #     pudb
+    #     colorlog
+    #     msgpack-python
+    #     pyblake2
+    #     brotli
+    #     pysodium
+    #     ipfsapi
+    #     curio
+    #     uvloop
+    #     gevent
+    #     """
+    #     self.prefab.system.package.install(['libffi-dev', 'libssl-dev'])
+    #     self.pip(C, reset=reset)
+    #     self.sandbox(deps=False)
+    #     self.doneSet("pipall")
 
     def pip(self, pips, reset=False):
         for item in pips.split("\n"):
@@ -331,4 +364,4 @@ class PrefabPython(base):
         libpq-dev
         libsqlite3-dev
         """
-        self.prefab.system.package.multiInstall(C)
+        self.prefab.system.package.install(C)

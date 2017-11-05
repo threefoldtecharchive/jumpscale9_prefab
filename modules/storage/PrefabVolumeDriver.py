@@ -43,7 +43,7 @@ class PrefabVolumeDriver(app):
         supervisor rpcbind \
         libxio0 libxio-dev libev4
         """
-        self.prefab.system.package.multiInstall(apt_deps, allow_unauthenticated=True)
+        self.prefab.system.package.install(apt_deps, allow_unauthenticated=True)
 
     def _build(self, version='6.0.0'):
         workspace = self.replace("$TMPDIR/volumedriver-workspace")

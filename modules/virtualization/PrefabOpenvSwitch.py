@@ -53,7 +53,7 @@ class PrefabOpenvSwitch(app):
         if self.isInstalled():
             return
         if self.prefab.core.isUbuntu:
-            self.prefab.system.package.multiInstall(self._apt_packages)
+            self.prefab.system.package.install(self._apt_packages)
         else:
             raise RuntimeError("only support ubuntu")
         # do checks if openvswitch installed & configured properly if not

@@ -121,7 +121,7 @@ class PrefabZOS_js(base):
             self.prefab.system.package.install("wpa_actiond")  # is for wireless auto start capability
             self.prefab.system.package.install("redis-server")
 
-        self.prefab.system.package.multiInstall(C)
+        self.prefab.system.package.install(C)
         self.prefab.system.package.upgrade()
 
         self.prefab.system.package.clean()

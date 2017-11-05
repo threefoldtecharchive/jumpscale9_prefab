@@ -27,7 +27,7 @@ class PrefabPostgresql(app):
         self.prefab.core.dir_ensure("$JSAPPSDIR/pgsql")
         self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.dir_ensure("$LIBDIR/postgres")
-        self.prefab.system.package.multiInstall(
+        self.prefab.system.package.install(
             ['build-essential', 'zlib1g-dev', 'libreadline-dev'])
         cmd = """
         cd {}

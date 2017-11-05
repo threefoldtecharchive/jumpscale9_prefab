@@ -52,7 +52,7 @@ class PrefabKVM(base):
         """
         Install required packages for kvm
         """
-        self.prefab.system.package.multiInstall(self._apt_packages)
+        self.prefab.system.package.install(self._apt_packages)
         self.prefab.development.pip.multiInstall(self._pip_packages, upgrade=False)
 
     def uninstall(self):
