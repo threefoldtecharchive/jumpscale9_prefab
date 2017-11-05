@@ -167,11 +167,4 @@ class PrefabTarantool(app):
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name="tarantool", cmd=cmd, env={}, path="")
 
-        # prefab.system.tmux.createWindow("tarantool", "tarantool")
-
-        # prefab.system.tmux.executeInScreen(
-        #     "tarantool",
-        #     "tarantool",
-        #     "cd $TMPDIR;rm -rf tarantool;mkdir tarantool;cd tarantool;tarantool %s" %
-        #     luapath,
-        #     replaceArgs=True)
+        #RESULT IS RUNNING TARANTOOL IN TMUX
