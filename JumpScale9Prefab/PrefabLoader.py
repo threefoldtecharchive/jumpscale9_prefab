@@ -24,7 +24,7 @@ class {{jname}}:
     {{#locationsubs}}
     @property
     def {{name}}(self):
-        if self._{{name}} == None:
+        if self._{{name}}is None:
             # print("PROP:{{name}}")
             from {{importlocation}} import {{classname}} as {{classname}}
             self._{{name}} = {{classname}}()
