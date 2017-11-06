@@ -91,7 +91,7 @@ class PrefabLoader():
 
             for classfile in j.sal.fs.listFilesInDir(catpath, False, "*.py"):
                 # print(classfile)
-                basename = j.do.getBaseName(classfile)
+                basename = j.sal.fs.getBaseName(classfile)
                 basename = basename[:-3]
 
                 # print("load prefab module:%s" % classfile)

@@ -257,7 +257,7 @@ class PrefabVRouter(base):
     def firewall(self):
         path = "$CODEDIR/github/jumpscale/smartproxy/nftables.conf"
         # needs to be from local file
-        C = j.sal.fs.readFile(j.dirs.replaceTxtDirVars(path))
+        C = j.sal.fs.readFile(j.dirs.replace_txt_dir_vars(path))
         C = C.replace("$waniface", self.defgwInterface)
         C = C.replace("$range", self.freeNetworkRangeDMZ)
         self.prefab.systemservices.fw.setRuleset(C)
