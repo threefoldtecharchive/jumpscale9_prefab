@@ -471,14 +471,18 @@ class PrefabCore(base):
         base = j.sal.fs.getBaseName(path)
         if base.endswith(".tgz"):
             base = base[:-4]
-        if base.endswith(".gz"):
+        elif base.endswith(".gz"):
             base = base[:-3]
-        if base.endswith(".bz2"):
+        elif base.endswith(".bz2"):
             base = base[:-4]
-        if base.endswith(".xz"):
+        elif base.endswith(".xz"):
             base = base[:-3]
-        if base.endswith(".tar"):
+        elif base.endswith(".tar"):
             base = base[:-4]
+        elif base.endswith(".zip"):
+            base = base[:-4]
+        else:
+            raise RuntimeError("Cannot file expand, not supported")
         if destination == "":
             destination = self.joinpaths("$TMPDIR", base)
         path = self.replace(path)
@@ -498,6 +502,8 @@ class PrefabCore(base):
             #  tar -jxvf
         elif path.endswith(".bz2"):
             cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)
+        elif path.endswith(".zip"):
+            cmd = "cd %s;rm -rf %s;mkdir -p %s;cd %s;unzip %s" % (j.sal.fs.getDirName(path),base,base,base, path)
         else:
             raise j.exceptions.RuntimeError(
                 "file_expand format not supported yet for %s" % path)

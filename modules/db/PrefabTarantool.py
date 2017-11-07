@@ -102,7 +102,7 @@ class PrefabTarantool(app):
                 self.core.run(C)  
                 self.doneSet("tdb")
 
-            self.prefab.system.package.install("luarocks,libsodium-dev,libb2-dev,libmsgpuck-dev")
+            self.prefab.system.package.install("luarocks,libsodium-dev,libb2-dev,libmsgpuck-dev,capnproto")
 
             if not self.doneCheck("rocks1", reset):
                 C = """
@@ -136,6 +136,8 @@ class PrefabTarantool(app):
                 luarocks install siphash --from=http://mah0x211.github.io/rocks/
                 luarocks install --from=http://mah0x211.github.io/rocks/ blake2
                 luarocks install symmetric
+                # luarocks install lua-avro
+                apt install tarantool-avro-schema
                 popd
                 """
                 self.core.run(C)  
