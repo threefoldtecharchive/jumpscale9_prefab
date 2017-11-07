@@ -5,9 +5,11 @@ app = j.tools.prefab._getBaseAppClass()
 
 class PrefabTarantool(app):
 
-    NAME = "install"
+    def _init(self):
+        self.git_url = "https://github.com/tarantool/tarantool.git"
+        self.tarantool_dir = self.replace("$CODEDIR/github/tarantool/tarantool")
 
-    def install(self, reset=False):
+    def install(self, reset=False, branch="1.7"):
 
         # if self.doneCheck("install", reset):
         #     return
@@ -54,24 +56,33 @@ class PrefabTarantool(app):
             """
             self.core.run(C)
         elif self.core.isUbuntu:
+            if not self.doneCheck("dependencies", reset):
+                self.prefab.system.package.install("build-essential,cmake,coreutils,sed,libreadline-dev,"
+                                                   "libncurses5-dev,libyaml-dev,libssl-dev,libcurl4-openssl-dev,"
+                                                   "libunwind-dev,python,python-pip,python-setuptools,python-dev,"
+                                                   "python-msgpack,python-yaml,python-argparse,"
+                                                   "python-six,python-gevent,libicu-dev")
+                requirments = 'https://raw.githubusercontent.com/tarantool/test-run/master/requirements.txt'
+                download_to = "/tmp/tarantool_requirments.txt"
+                self.prefab.core.file_download(requirments, to=download_to, minsizekb=1)
+                cmd = "pip install -r %s" % download_to
+                self.prefab.core.run(cmd, profile=True)
+                self.doneSet("dependencies")
 
-            if not self.doneCheck("apt_config", reset):
-                #WRITE TARANTOOL APT CONFIG
-                self.core.run("rm -f /etc/apt/sources.list.d/*tarantool*.list")
-                rc,release,err=self.core.run("lsb_release -c -s")
-                CONFIG="""
-                deb http://download.tarantool.org/tarantool/1.7/ubuntu/ $release main
-                deb-src http://download.tarantool.org/tarantool/1.7/ubuntu/ $release main
-                """
-                CONFIG=self.replace(CONFIG.replace("$release",release))
-                self.core.file_write("/etc/apt/sources.list.d/tarantool_1_7.list",CONFIG)
-                self.doneSet("apt_config")
-
-            if not self.doneCheck("apt_parts", reset):
-                self.core.run("curl http://download.tarantool.org/tarantool/1.7/gpgkey | sudo apt-key add -")
-                self.prefab.system.package.mdupdate(reset=True)
-                self.prefab.system.package.install("apt-transport-https,tarantool")
-                self.doneSet("apt_parts")
+            if not self.doneCheck("tarantool", reset):
+                self.prefab.tools.git.pullRepo(self.git_url, dest=self.tarantool_dir, branch=branch)
+                cmd = "git submodule update --init --recursive"
+                self.prefab.core.run(cmd, profile=True)
+                cmd = """
+                cd %s
+                make clean
+                rm CMakeCache.txt
+                cmake -DENABLE_DIST=ON .
+                make
+                make install
+                """ % self.tarantool_dir
+                self.prefab.core.run(cmd, profile=True)
+                self.doneSet("tarantool")
 
             if not self.doneCheck("luajit", reset):
                 C = """
@@ -102,7 +113,22 @@ class PrefabTarantool(app):
                 self.core.run(C)  
                 self.doneSet("tdb")
 
-            self.prefab.system.package.install("luarocks,libsodium-dev,libb2-dev,libmsgpuck-dev,capnproto")
+            if not self.doneCheck("msgpuck", reset):
+                C = """
+                set -ex
+                pushd /tmp
+                rm -rf msgpuck
+                git clone https://github.com/rtsisyk/msgpuck.git
+                cd msgpuck
+                cmake .
+                make
+                make install
+                popd
+                """
+                self.core.run(C)
+                self.doneSet("msgpuck")
+
+            self.prefab.system.package.install("luarocks,libsodium-dev,libb2-dev,capnproto")
 
             if not self.doneCheck("rocks1", reset):
                 C = """
@@ -118,8 +144,7 @@ class PrefabTarantool(app):
                 popd
                 """
                 self.core.run(C)  
-                self.doneSet("rocks1")    
-
+                self.doneSet("rocks1")
 
             if not self.doneCheck("rocks2", reset):
                 C = """
@@ -137,11 +162,25 @@ class PrefabTarantool(app):
                 luarocks install --from=http://mah0x211.github.io/rocks/ blake2
                 luarocks install symmetric
                 # luarocks install lua-avro
-                apt install tarantool-avro-schema
                 popd
                 """
                 self.core.run(C)  
-                self.doneSet("rocks2")                                      
+                self.doneSet("rocks2")
+
+            if not self.doneCheck("avro", reset):
+                C = """
+                set -ex
+                pushd /tmp
+                rm -rf avro-schema
+                git clone https://github.com/tarantool/avro-schema
+                cd avro-schema
+                cmake .
+                make
+                make install
+                popd
+                """
+                self.core.run(C)
+                self.doneSet("avro")
 
         self.doneSet("install")
 
