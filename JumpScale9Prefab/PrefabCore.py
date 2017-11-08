@@ -360,7 +360,6 @@ class PrefabCore(base):
         @param deletefirst: bool (Set to True if you want to erase destination first, be carefull, this can erase directories)
         @param overwriteFiles: if True will overwrite files, otherwise will not overwrite when destination exists
         """
-        print("STARTING COPYTREE >>>>>>>>>>>>>>>>>>>> [{},{} ] ".format(source, dest))
         source = self.replace(source)
         dest = self.replace(dest)
         if not ssh and not self.exists(source):
@@ -443,7 +442,6 @@ class PrefabCore(base):
                             pass
                             # TODO: very ugly change
                     elif self.file_is_dir(srcname):
-                        print("**************** ROOT OF EVIL FOR SRCNAME", srcname)
                         self.copyTree(
                             srcname,
                             dstname,
