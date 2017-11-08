@@ -6,13 +6,17 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabTarantool(app):
 
     def _init(self):
-        self.git_url = "https://github.com/tarantool/tarantool.git"
-        self.tarantool_dir = self.replace("$CODEDIR/github/tarantool/tarantool")
+        self.git_url = 'https://github.com/tarantool/tarantool.git'
 
-    def install(self, reset=False, branch="1.7"):
-
-        # if self.doneCheck("install", reset):
-        #     return
+    def install(self, reset=False, branch='1.7'):
+        """
+        Install tarantool
+        :param reset: reinstall if reset is True
+        :param branch: the branch to install from
+        :return:
+        """
+        if self.doneCheck("install", reset):
+            return
 
         if self.core.isMac:
             # cmd="brew install tarantool"
@@ -56,136 +60,87 @@ class PrefabTarantool(app):
             """
             self.core.run(C)
         elif self.core.isUbuntu:
-            if not self.doneCheck("dependencies", reset):
-                self.prefab.system.package.install("build-essential,cmake,coreutils,sed,libreadline-dev,"
-                                                   "libncurses5-dev,libyaml-dev,libssl-dev,libcurl4-openssl-dev,"
-                                                   "libunwind-dev,python,python-pip,python-setuptools,python-dev,"
-                                                   "python-msgpack,python-yaml,python-argparse,"
-                                                   "python-six,python-gevent,libicu-dev")
+            if not self.doneCheck('dependencies', reset):
+                self.prefab.system.package.install('build-essential,cmake,coreutils,sed,libreadline-dev,'
+                                                   'libncurses5-dev,libyaml-dev,libssl-dev,libcurl4-openssl-dev,'
+                                                   'libunwind-dev,python,python-pip,python-setuptools,python-dev,'
+                                                   'python-msgpack,python-yaml,python-argparse,'
+                                                   'python-six,python-gevent,luarocks')
                 requirments = 'https://raw.githubusercontent.com/tarantool/test-run/master/requirements.txt'
-                download_to = "/tmp/tarantool_requirments.txt"
+                download_to = '/tmp/tarantool_requirments.txt'
                 self.prefab.core.file_download(requirments, to=download_to, minsizekb=1)
-                cmd = "pip install -r %s" % download_to
+                cmd = 'pip install -r %s' % download_to
                 self.prefab.core.run(cmd, profile=True)
-                self.doneSet("dependencies")
+                self.doneSet('dependencies')
 
-            if not self.doneCheck("tarantool", reset):
-                self.prefab.tools.git.pullRepo(self.git_url, dest=self.tarantool_dir, branch=branch)
-                cmd = "git submodule update --init --recursive"
-                self.prefab.core.run(cmd, profile=True)
-                cmd = """
-                cd %s
-                make clean
-                rm CMakeCache.txt
-                cmake -DENABLE_DIST=ON .
-                make
-                make install
-                """ % self.tarantool_dir
-                self.prefab.core.run(cmd, profile=True)
-                self.doneSet("tarantool")
+            tarantool = 'tarantool'
+            if not self.doneCheck(tarantool, reset):
+                self.prefab.runtimes.build.build(tarantool, self.git_url, branch=branch,
+                                                 pre_build=['git submodule update --init --recursive'],
+                                                 cmake=True, cmake_args=['-DENABLE_DIST=ON'], make=True,
+                                                 make_install=True)
+                self.doneSet(tarantool)
 
-            if not self.doneCheck("luajit", reset):
-                C = """
-                set -ex
-                pushd /tmp
-                rm -rf luajit-2.0
-                git clone http://luajit.org/git/luajit-2.0.git
-                cd luajit-2.0/
-                git checkout v2.1
-                make && sudo make install
-                ln -sf /usr/local/bin/luajit-2.1.0-beta3 /usr/local/bin/luajit
-                popd
-                """
-                self.core.run(C)  
-                self.doneSet("luajit")
+            luajit = 'luajit'
+            if not self.doneCheck(luajit, reset):
+                repo = 'http://luajit.org/git/luajit-2.0.git'
+                post_build = ['ln -sf /usr/local/bin/luajit-2.1.0-beta3 /usr/local/bin/luajit']
+                self.prefab.runtimes.build.build(luajit, repo, branch='v2.1', make=True, make_install=True,
+                                                 post_build=post_build)
+                self.doneSet(luajit)
 
-            if not self.doneCheck("tdb", reset):
-                C = """
-                set -ex
-                pushd /tmp
-                rm -rf tdb
-                git clone --recursive https://github.com/Sulverus/tdb
-                cd tdb
-                make
-                make install
-                popd
-                """
-                self.core.run(C)  
-                self.doneSet("tdb")
+            tdb = 'tdb'
+            if not self.doneCheck(tdb, reset):
+                repo = 'https://github.com/Sulverus/tdb'
+                self.prefab.runtimes.build.build(tdb, repo,
+                                                 pre_build=['git submodule update --init --recursive'], make=True,
+                                                 make_install=True)
+                self.doneSet(tdb)
 
-            if not self.doneCheck("msgpuck", reset):
-                C = """
-                set -ex
-                pushd /tmp
-                rm -rf msgpuck
-                git clone https://github.com/rtsisyk/msgpuck.git
-                cd msgpuck
-                cmake .
-                make
-                make install
-                popd
-                """
-                self.core.run(C)
-                self.doneSet("msgpuck")
+            msgpuck = 'msgpuck'
+            if not self.doneCheck(msgpuck, reset):
+                repo = 'https://github.com/rtsisyk/msgpuck.git'
+                self.prefab.runtimes.build.build(msgpuck, repo, cmake=True, make=True, make_install=True)
+                self.doneSet('msgpuck')
 
-            self.prefab.system.package.install("luarocks,libsodium-dev,libb2-dev,capnproto")
+            self.doneSet('install')
 
-            if not self.doneCheck("rocks1", reset):
-                C = """
-                set -ex
-                pushd /tmp
-                tarantoolctl rocks install shard
-                tarantoolctl rocks install document
-                tarantoolctl rocks install prometheus
-                tarantoolctl rocks install queue
-                tarantoolctl rocks install expirationd
-                tarantoolctl rocks install connpool
-                tarantoolctl rocks install http
-                popd
-                """
-                self.core.run(C)  
-                self.doneSet("rocks1")
-
-            if not self.doneCheck("rocks2", reset):
-                C = """
-                set -ex
-                pushd /tmp
-                luarocks install lua-capnproto
-                luarocks install redis-lua
-                luarocks install yaml
-                luarocks install penlight
-                luarocks install luasec
-                luarocks install luatweetnacl
-                luarocks install lua-cjson
-                luarocks install luafilesystem
-                luarocks install siphash --from=http://mah0x211.github.io/rocks/
-                luarocks install --from=http://mah0x211.github.io/rocks/ blake2
-                luarocks install symmetric
-                # luarocks install lua-avro
-                popd
-                """
-                self.core.run(C)  
-                self.doneSet("rocks2")
-
-            if not self.doneCheck("avro", reset):
-                C = """
-                set -ex
-                pushd /tmp
-                rm -rf avro-schema
-                git clone https://github.com/tarantool/avro-schema
-                cd avro-schema
-                cmake .
-                make
-                make install
-                popd
-                """
-                self.core.run(C)
-                self.doneSet("avro")
-
-        self.doneSet("install")
-
-    def start(self, port=3301, passwd="admin007"):
+    def install_luarocks_rock(self, name):
         """
+        Installs a luarocks rock
+        :param name: name of the rock to install
+        :return:
+        """
+        if not self.doneCheck('install'):
+            raise Exception('Tarantool is not installed')
+
+        command = """
+            set -ex
+            pushd /tmp
+            luarocks install {name}
+            popd
+            """.format(name=name)
+        self.core.run(command)
+
+    def install_tarantool_rock(self, name):
+        """
+        Installs a tarantool rock
+        :param name: name of the rock to install
+        :return:
+        """
+        if not self.doneCheck('install'):
+            raise Exception('Tarantool is not installed')
+        command = """
+        set -ex
+        pushd /tmp
+        tarantoolctl rocks install {name}
+        popd
+        """.format(name=name)
+        self.core.run(command)
+
+    def start(self, port=3301, passwd='admin007'):
+        """
+        Start tarantool in a tmux
         """
         prefab = self.prefab
 
@@ -195,17 +150,17 @@ class PrefabTarantool(app):
         box.schema.user.passwd('admin','$passwd')
         require('console').start()
         """
-        LUA = LUA.replace("$passwd", passwd)
-        LUA = LUA.replace("$port", str(port))
+        LUA = LUA.replace('$passwd', passwd)
+        LUA = LUA.replace('$port', str(port))
 
-        luapath = prefab.core.replace("$TMPDIR/tarantool.lua")
+        luapath = prefab.core.replace('$TMPDIR/tarantool.lua')
 
-        print("write lua startup to:%s" % luapath)
+        print('write lua startup to:%s' % luapath)
 
         prefab.core.file_write(luapath, LUA)
 
-        cmd = "cd $TMPDIR;rm -rf tarantool;mkdir tarantool;cd tarantool;tarantool %s" % luapath
+        cmd = 'cd $TMPDIR;rm -rf tarantool;mkdir tarantool;cd tarantool;tarantool %s' % luapath
         pm = self.prefab.system.processmanager.get()
-        pm.ensure(name="tarantool", cmd=cmd, env={}, path="")
+        pm.ensure(name='tarantool', cmd=cmd, env={}, path='')
 
-        #RESULT IS RUNNING TARANTOOL IN TMUX
+        # RESULT IS RUNNING TARANTOOL IN TMUX
