@@ -348,16 +348,123 @@ class PrefabCore(base):
 
     def copyTree(self, source, dest, keepsymlinks=False, deletefirst=False,
                  overwriteFiles=True, ignoredir=[".egg-info", ".dist-info"], ignorefiles=[".egg-info"],
-                 recursive=True, rsyncdelete=False, createdir=False):
+                 recursive=True, rsyncdelete=False, createdir=False, ssh=False, sshport=22):
         """
         std excludes are done like "__pycache__" no matter what you specify
+        Recursively copy an entire directory tree rooted at src.
+        The dest directory may already exist; if not,
+        it will be created as well as missing parent directories
+        @param source: string (source of directory tree to be copied)
+        @param dest: string (path directory to be copied to...should not already exist)
+        @param keepsymlinks: bool (True keeps symlinks instead of copying the content of the file)
+        @param deletefirst: bool (Set to True if you want to erase destination first, be carefull, this can erase directories)
+        @param overwriteFiles: if True will overwrite files, otherwise will not overwrite when destination exists
         """
-
         source = self.replace(source)
         dest = self.replace(dest)
-        return j.do.copyTree(source=source, dest=dest, keepsymlinks=keepsymlinks, deletefirst=deletefirst,
-                             overwriteFiles=overwriteFiles, ignoredir=ignoredir, ignorefiles=ignorefiles,
-                             recursive=recursive, rsyncdelete=rsyncdelete, createdir=createdir, executor=self.executor)
+        if not ssh and not self.exists(source):
+            raise RuntimeError("copytree:Cannot find source:%s" % source)
+
+        if ssh:
+            excl = ""
+            for item in ignoredir:
+                excl += "--exclude '%s/' " % item
+            for item in ignorefiles:
+                excl += "--exclude '%s' " % item
+            excl += "--exclude '*.pyc' "
+            excl += "--exclude '*.bak' "
+            excl += "--exclude '*__pycache__*' "
+
+            pre = ""
+            if self.executor.type == 'local':
+                dest = dest.split(':')[1] if ':' in dest else dest
+            if 'darwin' not in self.prefab.platformtype.osname:
+                self.prefab.system.package.ensure('rsync')
+            if self.file_is_dir(source):
+                if dest[-1] != "/":
+                    dest += "/"
+                if source[-1] != "/":
+                    source += "/"
+
+            dest = dest.replace("//", "/")
+            source = source.replace("//", "/")
+
+            if deletefirst:
+                pre = "set -ex;rm -rf %s;mkdir -p %s;" % (dest, dest)
+            elif createdir:
+                pre = "set -ex;mkdir -p %s;" % dest
+
+            cmd = "%srsync " % pre
+            if keepsymlinks:
+                #-l is keep symlinks, -L follow
+                cmd += " -rlptgo --partial %s" % excl
+            else:
+                cmd += " -rLptgo --partial %s" % excl
+            if not recursive:
+                cmd += " --exclude \"*/\""
+            if rsyncdelete:
+                cmd += " --delete"
+            if ssh:
+                cmd += " -e 'ssh -o StrictHostKeyChecking=no -p %s' " % sshport
+            cmd += " '%s' '%s'" % (source, dest)
+
+            self.run(cmd, showout=False)
+            return
+        else:
+            self.logger.info('Copy directory tree from %s to %s' % (source, dest))
+            if ((source is None) or (dest is None)):
+                raise TypeError(
+                    'Not enough parameters passed in system.fs.copyTree to copy directory from %s to %s ' %
+                    (source, dest))
+            if self.file_is_dir(source):
+                _, names, _ = self.run('ls %s' % source)
+                names = names.split('\n')
+                if not self.exists(dest):
+                    self.createDir(dest)
+
+                for name in names:
+                    if not name.strip():
+                        continue
+                    print("NAME: ", name)
+                    srcname = j.sal.fs.joinPaths(source, name)
+                    dstname = j.sal.fs.joinPaths(dest, name)
+                    if deletefirst and self.exists(dstname):
+                        if self.file_is_dir(dstname):
+                            self.dir_remove(dstname)
+                        if self.file_is_link(dstname):
+                            self.file_unlink(dstname)
+
+                    if keepsymlinks and self.file_is_link(srcname):
+                        _, linkto, _ = self.run("readlink %s " % srcname)
+                        try:
+                            self.file_link(linkto, dstname)
+                        except BaseException:
+                            pass
+                            # TODO: very ugly change
+                    elif self.file_is_dir(srcname):
+                        self.copyTree(
+                            srcname,
+                            dstname,
+                            keepsymlinks,
+                            deletefirst,
+                            overwriteFiles=overwriteFiles,
+                            ignoredir=ignoredir)
+                    else:
+                        extt = j.sal.fs.getFileExtension(srcname)
+                        if extt == "pyc" or extt == "egg-info":
+                            continue
+                        is_ignored = False
+                        for item in ignorefiles:
+                            if srcname.find(item) != -1:
+                                is_ignored = True
+                                break
+                        if is_ignored:
+                            continue
+                        self.file_copy(srcname, dstname, overwrite=overwriteFiles)
+            else:
+                raise RuntimeError(
+                    'Source path %s in system.fs.copyTree is not a directory' %
+                    source)
 
     def file_backup(self, location, suffix=".orig", once=False):
         """Backups the file at the given location in the same directory, appending

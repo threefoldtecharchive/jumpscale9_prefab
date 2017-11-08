@@ -117,7 +117,7 @@ class PrefabPortal(base):
         if "darwin" not in self.prefab.platformtype.osname:
             self.prefab.system.package.ensure('libsnappy-dev')
             self.prefab.system.package.ensure('libsnappy1v5')
-            self.prefab.development.pip.install('python-snappy')
+            self.prefab.runtimes.pip.install('python-snappy')
 
         cmd = """
             cd {CODEDIR}/github/jumpscale/portal9
