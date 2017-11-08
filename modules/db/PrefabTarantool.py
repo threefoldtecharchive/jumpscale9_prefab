@@ -155,7 +155,7 @@ class PrefabTarantool(app):
 
         luapath = prefab.core.replace('$TMPDIR/tarantool.lua')
 
-        print('write lua startup to:%s' % luapath)
+        self.logger.info('write lua startup to:%s' % luapath)
 
         prefab.core.file_write(luapath, LUA)
 
