@@ -39,9 +39,8 @@ class PrefabBase:
     def config(self):
         """
         """
-        if self.classname not in self.executor.config:
-            self.executor.config[self.classname] = {}
-        return self.executor.config[self.classname]
+        return self.executor.state.stateGet(self.classname, {}, set=True)
+
 
     # def configLocalGet(self, key, defval=None):
     #     """

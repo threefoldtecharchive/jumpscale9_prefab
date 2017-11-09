@@ -22,8 +22,7 @@ class PrefabAtYourService(base):
                 'organization': organization
             }
         }
-        j.application.config['ays'] = ays_config
-        j.core.state.configSave()
+        self.executor.state.configSet('ays', ays_config, save=True)
 
     def load_ays_space(self, install_portal=False):
         """

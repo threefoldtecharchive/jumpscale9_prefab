@@ -40,12 +40,8 @@ class PrefabPortal(base):
         # cfg['param.cfg.appdir'] = j.sal.fs.joinPaths(self.portal_dir, 'portalbase')
 
         cfg['mongoengine.connection'] = {'host': mongodbip, 'port': mongoport}
-        self.prefab.core.file_write(self.configPath, j.data.serializer.yaml.dumps(cfg))
+        self.executor.state.configSet('portal', cfg, save=True)
 
-    @property
-    def configPath(self):
-        return j.sal.fs.joinPaths(self.prefab.core.dir_paths['CFGDIR'],
-                                  "portals", "main", "config.yaml")
 
     def install(self, start=True, branch='master', reset=False):
         """
