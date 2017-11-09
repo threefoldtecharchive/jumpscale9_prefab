@@ -1061,6 +1061,29 @@ class PrefabCore(base):
             return out
         # return self.run('openssl dgst -md5 %s' % (location)).split("\n")[-1].split(")= ",1)[-1].strip()
 
+
+    # =============================================================================
+    #
+    # Network OPERATIONS
+    #
+    # =============================================================================
+
+    def getNetworkInfoGenrator(self):
+        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
+        exitcode, output, err = self.run("ip a", showout=False)
+        for m in IPBLOCKS.finditer(output):
+            block = m.group('block')
+            yield parseBlock(block)
+
+    @property
+    def networking_info(self):
+        if not self._networking_info:
+            all_info = list()
+            for device in getNetworkInfo():
+                all_info.append(device)
+        return all_info
+
+
     # =============================================================================
     #
     # DIRECTORY OPERATIONS

@@ -130,6 +130,9 @@ class PrefabGolang(app):
 
     def get(self, url, install=True, update=True):
         """
+        @param url ,, str url to run the go get command on.
+        @param install ,, bool will default build and install the repo if false will only get the repo.
+        @param update ,, bool will if True will update requirements if they exist.
         e.g. url=github.com/tools/godep
         """
         self.clean_src_path()
@@ -144,6 +147,9 @@ class PrefabGolang(app):
 
     def godep(self, url, branch=None, depth=1):
         """
+        @param url ,, str url to run the godep command on.
+        @param branch ,,str branch to use on the specified repo
+        @param depth ,,int depth of repo pull defines how shallow the git clone is
         e.g. url=github.com/tools/godep
         """
         self.clean_src_path()
