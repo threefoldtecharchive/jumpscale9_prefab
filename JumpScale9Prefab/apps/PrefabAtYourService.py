@@ -26,6 +26,17 @@ class PrefabAtYourService(base):
         j.application.config['ays'] = ays_config
         j.core.state.configSave()
 
+    def configure_portal(self, host, port, portal="main"):
+        if not host.startswith('http'):
+            host = "http://%s" % host
+        config = {"ays_uri": "%s:%s" % (host, port)}
+        self.prefab.apps.portal.add_configuration(config)
+        nav_path = "$JSAPPSDIR/portals/{portal}/base/AYS/.space/nav.wiki".format(portal=portal)
+        nav = self.prefab.core.file_read(nav_path).format(ays_uri="%s:%s" % (host, port))
+        self.prefab.core.file_write(nav_path, nav)
+        self.prefab.apps.portal.stop()
+        self.prefab.apps.portal.start()
+
     def get_code(self, branch):
         """
         Pull the ays repo if doesnt exist

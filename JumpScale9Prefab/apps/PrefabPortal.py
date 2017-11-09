@@ -42,6 +42,18 @@ class PrefabPortal(base):
         cfg['mongoengine.connection'] = {'host': mongodbip, 'port': mongoport}
         self.prefab.core.file_write(self.configPath, j.data.serializer.yaml.dumps(cfg))
 
+    def add_configuration(self, config_dict):
+        """
+        use this method when ever u want to add some config to portal
+        usually when u add a new space
+        """
+        content = self.prefab.core.file_read('$TEMPLATEDIR/cfg/portal/config.yaml')
+        cfg = j.data.serializer.yaml.loads(content)
+        for key, value in config_dict.items():
+            cfg[key] = value
+        self.prefab.core.file_write(self.configPath, j.data.serializer.yaml.dumps(cfg))
+
+
     @property
     def configPath(self):
         return j.sal.fs.joinPaths(self.prefab.core.dir_paths['CFGDIR'],
