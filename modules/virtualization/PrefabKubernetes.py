@@ -47,13 +47,12 @@ class PrefabKubernetes(app):
             return
 
         # install requirement for the running kubernetes basics
-        self.prefab.system.package.install('mercurial')
-        self.prefab.system.package.install('conntrack')
+        self.prefab.system.package.install('mercurial,conntrack')
         self.prefab.runtimes.golang.install()
-        self.prefab.virtualization.docker.install(branch='1.13')
+        self.prefab.virtualization.docker.install(branch='1.12')
 
         # required for bridge manipulation in ubuntu
-        if self.prefab.local.core.isUbuntu:
+        if self.prefab.core.isUbuntu:
             self.prefab.system.package.install('bridge-utils')
 
         self.doneSet("install_dependencies")
@@ -72,21 +71,25 @@ class PrefabKubernetes(app):
 
         # get and expand tar
         self.prefab.core.file_download(
-            'https://github.com/kubernetes/kubernetes/releases/download/v1.7.10/kubernetes.tar.gz', to=j.dirs.TMPDIR)
+            'https://github.com/kubernetes/kubernetes/releases/download/v1.7.10/kubernetes.tar.gz',
+            to='%s/kubernetes.tar.gz' % j.dirs.TMPDIR)
         self.prefab.core.file_expand(
             '%s/kubernetes.tar.gz' % j.dirs.TMPDIR, j.dirs.TMPDIR)
 
         # get binaries
+        self.prefab.bash.envSet('KUBERNETES_SKIP_CONFIRM', 'true')
         self.prefab.core.run(
-            'cd %s/clusters && bash get-kube-binaries.sh' % path)
+            'cd %s/cluster && bash get-kube-binaries.sh' % path)
         self.prefab.core.run(
             'cd %s/server && tar xf kubernetes-server*' % path)
-        self.prefab.core.run('cp %s/server/kubernetes/server/bin/!(*.*) %s' % (path, j.dirs.BINDIR))
 
+        kube_binary_path = '%s/server/kubernetes/server/bin' % path
+
+        for bin_path in self.prefab.core.find(kube_binary_path, False, executable=True):
+            self.prefab.core.file_copy(bin_path, j.dirs.BINDIR)
 
         # build  kube-apiserver, kube-controller-manager, kube-scheduler docker images
-        kube_binary_path = '%s/server/kubernetes/server/bin' % path
-        for image_path in j.tools.prefab.local.core.find(kube_binary_path, False, pattern='*.tar'):
+        for image_path in self.prefab.core.find(kube_binary_path, False, pattern='*.tar'):
             self.prefab.core.run('docker load -i %s' % image_path)
 
 

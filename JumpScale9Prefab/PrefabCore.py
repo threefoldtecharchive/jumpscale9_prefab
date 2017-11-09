@@ -1165,7 +1165,8 @@ class PrefabCore(base):
 
     createDir = dir_ensure
 
-    def find(self, path, recursive=True, pattern="", findstatement="", type="", contentsearch="", extendinfo=False):
+    def find(self, path, recursive=True, pattern="", findstatement="", type="", contentsearch="",
+             executable=False, extendinfo=False):
         """
 
         @param findstatement can be used if you want to use your own find arguments
@@ -1184,8 +1185,12 @@ class PrefabCore(base):
             f    regular file
             l    symbolic link
 
+
         @param contentsearch
             looks for this content inside the files
+
+        @param executable
+            looks for executable files only
 
         @param extendinfo: this will return [[$path, $sizeinkb, $epochmod]]
         """
@@ -1202,6 +1207,9 @@ class PrefabCore(base):
 
         if type != "":
             cmd += " -type %s" % type
+
+        if executable:
+            cmd += " -executable"
 
         if extendinfo:
             cmd += " -printf '%p||%k||%T@\n'"
