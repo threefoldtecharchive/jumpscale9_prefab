@@ -75,10 +75,9 @@ class PrefabKubernetes(app):
         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
         cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
         deb http://apt.kubernetes.io/ kubernetes-xenial main
-        EOF
         """
         self.prefab.core.run(script_content)
-        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.mdupdate(reset=True)
         self.prefab.system.package.install('kubelet,kubeadm,kubectl')
 
 
@@ -104,7 +103,7 @@ class PrefabKubernetes(app):
                 break
 
         self.prefab.core.run(
-            'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
+            'kubectl --kubeconfig=/etc/kubernetes/admin.config apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
 
         log_message = """
         please wait until kube-dns deplyments are deployed before joining new nodes to the cluster.
