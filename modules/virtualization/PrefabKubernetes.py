@@ -79,7 +79,7 @@ class PrefabKubernetes(app):
         """
         self.prefab.core.run(script_content)
         self.prefab.system.package.mdupdate()
-        self.prefab.system.packages.install('kubelet,kubeadm,kubectl')
+        self.prefab.system.package.install('kubelet,kubeadm,kubectl')
 
 
         # build
