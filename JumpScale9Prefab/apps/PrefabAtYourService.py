@@ -26,7 +26,7 @@ class PrefabAtYourService(base):
         j.application.config['ays'] = ays_config
         j.core.state.configSave()
 
-    def configure_portal(self, host, port, portal="main"):
+    def configure_portal(self, host="http://localhost", port="5000", portal="main"):
         if not host.startswith('http'):
             host = "http://%s" % host
         config = {"ays_uri": "%s:%s" % (host, port)}
