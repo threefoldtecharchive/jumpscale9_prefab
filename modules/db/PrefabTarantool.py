@@ -68,7 +68,7 @@ class PrefabTarantool(app):
                                                    'python-six,python-gevent,luarocks')
                 requirments = 'https://raw.githubusercontent.com/tarantool/test-run/master/requirements.txt'
                 download_to = '/tmp/tarantool_requirments.txt'
-                self.prefab.core.file_download(requirments, to=download_to, minsizekb=1)
+                self.prefab.core.file_download(requirments, to=download_to, minsizekb=0)
                 cmd = 'pip install -r %s' % download_to
                 self.prefab.core.run(cmd, profile=True)
                 self.doneSet('dependencies')
