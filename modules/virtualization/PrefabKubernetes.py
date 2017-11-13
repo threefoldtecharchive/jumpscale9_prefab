@@ -23,19 +23,37 @@ class PrefabKubernetes(app):
 
     def multihost_install(self, nodes=[], reset=False):
         """
-
-        @param nodes are list of prefab clients which will be used to deploy kubernetes
-
-
-        this installer will
+        Importan !! only supports centos, fedora and ubuntu 1604
+        Use a list of prefab connections where all nodes need to be reachable from all other nodes or at least from the master node.
+        this installer will:
         - use first node as master
         - deploy/generate required secrets/keys to allow user to access this kubernetes
         - make sure that dashboard is installed as well on kubernetes
         - use /storage inside the node (make sure is btrfs partition?) as the backend for kubernetes
         - deploy zerotier network (optional) into the node which connects to the kubernetes (as pub network?)
 
+        @param nodes ,,  are list of prefab clients which will be used to deploy kubernetes
+        @param reset ,, rerun the code even if it has been run again. this may not be safe (used for development only)
+        @return dict() ,, return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
+
         """
-        pass
+        if self.doneCheck("multihost_install", reset):
+            return
+        master = nodes.pop(0)
+        external_ips = []
+
+        if master.executor.type == 'local':
+            external_ips = []
+        elif master.executor.type == 'ssh':
+            external_ips = [master.executor.sshclient.addr]
+
+        join_line = master.virtualization.kubernetes.install_master(external_ips)
+        for node in nodes:
+            node.virtualization.kubernetes.install_minion(join_line)
+        conf_text = self.prefab.core.read_file('/etc/kubernetes/kubelet.conf')
+        self.doneSet("multihost_install")
+
+        return j.data.serializer.yaml.loads(conf_text)
 
     def install_dependencies(self, reset=False):
         """
@@ -47,8 +65,9 @@ class PrefabKubernetes(app):
             return
 
         # install requirement for the running kubernetes basics
+        self.prefab.system.package.mdupdate(reset=True)
         self.prefab.system.package.install('mercurial,conntrack,ntp')
-        self.prefab.runtimes.golang.install()
+        # self.prefab.runtimes.golang.install()
         self.prefab.virtualization.docker.install(branch='1.12')
 
         # required for bridge manipulation in ubuntu
@@ -67,7 +86,8 @@ class PrefabKubernetes(app):
             return
 
         if not self.prefab.core.isUbuntu:
-            raise RuntimeError('Only ubuntu systems are supported at the moment.')
+            raise RuntimeError(
+                'Only ubuntu systems are supported at the moment.')
 
         self.install_dependencies()
         script_content = """
@@ -80,12 +100,10 @@ class PrefabKubernetes(app):
         self.prefab.system.package.mdupdate(reset=True)
         self.prefab.system.package.install('kubelet,kubeadm,kubectl')
 
-
         # build
         self.doneSet("install_base")
 
-
-    def  install_master(self, reset=False, kube_cidr='10.0.0.0/16', flannel=True):
+    def install_master(self, reset=False, kube_cidr='10.0.0.0/16', flannel=True, dashboard=False, external_ips=[]):
         if self.doneCheck("install_master", reset):
             return
 
@@ -94,7 +112,11 @@ class PrefabKubernetes(app):
 
         self.install_base()
 
-        rc, out, err = self.prefab.core.run('kubeadm init --pod-network-cidr=%s' % kube_cidr)
+        cmd = 'kubeadm init --pod-network-cidr=%s' % (kube_cidr)
+        if external_ips:
+            cmd += ' --apiserver-cert-extra-sans=%s' %  ','.join(external_ips)
+
+        rc, out, err = self.prefab.core.run(cmd)
         if rc != 0:
             raise RuntimeError(err)
         for line in reversed(out.splitlines()):
@@ -102,8 +124,14 @@ class PrefabKubernetes(app):
                 join_line = line
                 break
 
-        self.prefab.core.run(
-            'kubectl --kubeconfig=/etc/kubernetes/admin.config apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
+        if flannel:
+            self.prefab.core.run(
+                'kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
+
+        if dashboard:
+            self.prefab.core.run(
+                'kubectl --kubeconfig=/etc/kubernetes/admin.config apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml')
+
 
         log_message = """
         please wait until kube-dns deplyments are deployed before joining new nodes to the cluster.
@@ -114,12 +142,10 @@ class PrefabKubernetes(app):
 
         return join_line
 
-
         # build
         self.doneSet("install_master")
 
-
-    def  install_minion(self, join_line, reset=False):
+    def install_minion(self, join_line, reset=False):
         if self.doneCheck("install_minion", reset):
             return
 

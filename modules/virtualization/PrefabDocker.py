@@ -48,7 +48,7 @@ class PrefabDocker(app):
                 'apt-transport-https,linux-image-extra-$(uname -r),linux-image-extra-virtual,software-properties-common')
             self.prefab.core.run("curl -fsSL 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add -")
             self.prefab.core.run('add-apt-repository "deb https://packages.docker.com/%s/apt/repo/ ubuntu-$(lsb_release -cs) main"' % branch)
-            self.prefab.system.package.mdupdate()
+            self.prefab.system.package.mdupdate(reset=True)
             self.prefab.system.package.install('docker-engine')
 
         if self.prefab.core.isArch:
