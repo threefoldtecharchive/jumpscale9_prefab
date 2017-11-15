@@ -35,8 +35,6 @@ class PrefabPortal(base):
             oauth_cfg['default_groups'] = ['admin', 'user']
             oauth_cfg['organization'] = organization
             oauth_cfg['redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
-        # ITS ALREADY THE DEFAULT IN THE CONFIG DIR
-        # cfg['param.cfg.appdir'] = j.sal.fs.joinPaths(self.portal_dir, 'portalbase')
 
         cfg['main']['mongo'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
@@ -155,18 +153,7 @@ class PrefabPortal(base):
 
         self.prefab.core.dir_ensure('%s/base/' % self.main_portal_dir)
 
-        self.prefab.core.dir_ensure('$TEMPLATEDIR/cfg/portal')
-        self.prefab.core.file_copy(
-            j.sal.fs.joinPaths(
-                CODE_DIR,
-                'github/jumpscale/portal9/apps/portalbase/config.yaml'),
-            '$TEMPLATEDIR/cfg/portal/config.yaml')
         self.prefab.core.dir_ensure("$CFGDIR/portals/main/")
-        self.prefab.core.file_copy(
-            j.sal.fs.joinPaths(
-                CODE_DIR,
-                'github/jumpscale/portal9/apps/portalbase/config.yaml'),
-            "$CFGDIR/portals/main/config.yaml")
         # copy portal_start.py
         self.prefab.core.file_copy(
             j.sal.fs.joinPaths(
