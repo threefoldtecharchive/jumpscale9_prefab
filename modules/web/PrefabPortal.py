@@ -36,7 +36,7 @@ class PrefabPortal(base):
             oauth_cfg['organization'] = organization
             oauth_cfg['redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
 
-        cfg['main']['mongo'] = {'host': mongodbip, 'port': mongoport}
+        cfg['main']['mongoengine'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
 
 

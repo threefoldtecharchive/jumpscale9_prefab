@@ -6,7 +6,7 @@ app = j.tools.prefab._getBaseAppClass()
 class Prefabjs9Core(app):
     NAME = 'js9'
 
-    def install(self, reset=False, branch='9.3.0'):
+    def install(self, reset=False, branch='master'):
         """
         j.tools.prefab.local.js9.js9Core.install()
 
