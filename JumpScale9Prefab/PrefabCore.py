@@ -803,7 +803,7 @@ class PrefabCore(base):
         @param source is on local (where we run the prefab)
         @param dest is on remote host (on the ssh node)
 
-        will replace $VARDIR, $CODEDIR, ... in source using j.dirs.replaceTxtDirVars (is for local prefab)
+        will replace $VARDIR, $CODEDIR, ... in source using j.dirs.replace_txt_dir_vars (is for local prefab)
         will also replace in dest but then using prefab.core.replace(dest) (so for prefab host)
 
         @param dest, if empty then will be same as source very usefull when using e.g. $CODEDIR
@@ -813,7 +813,7 @@ class PrefabCore(base):
         """
         if dest == "":
             dest = source
-        source = j.dirs.replaceTxtDirVars(source)
+        source = j.dirs.replace_txt_dir_vars(source)
         dest = self.replace(dest)
         self.logger.info("upload local:%s to remote:%s" % (source, dest))
         # if self.prefab.id == 'localhost':
@@ -828,14 +828,14 @@ class PrefabCore(base):
         @param dest is on local (where we run the prefab)
         will replace $VARDIR, $CODEDIR, ...
         - in source but then using prefab.core.replace(dest) (so for prefab host)
-        - in dest using j.dirs.replaceTxtDirVars (is for local prefab)
+        - in dest using j.dirs.replace_txt_dir_vars (is for local prefab)
 
         @param dest, if empty then will be same as source very usefull when using e.g. $CODEDIR
 
         """
         if dest == "":
             dest = source
-        dest = j.dirs.replaceTxtDirVars(dest)
+        dest = j.dirs.replace_txt_dir_vars(dest)
         source = self.replace(source)
         self.logger.info("download remote:%s to local:%s" % (source, dest))
         # if self.prefab.id == 'localhost':
