@@ -41,54 +41,17 @@ class PrefabBase:
         """
         return self.executor.state.stateGet(self.classname, {}, set=True)
 
-
-    # def configLocalGet(self, key, defval=None):
-    #     """
-    #     """
-    #     if key in self.config:
-    #         return self.config[key]
-    #     else:
-    #         if defval is not None:
-    #             self.configSet(key, defval)
-    #             return defval
-    #         else:
-    #             raise j.exceptions.Input(message="could not find config key:%s in prefab:%s" %
-    #                                      (key, self.classname), level=1, source="", tags="", msgpub="")
-
-    # def configLocalSet(self, key, val):
-    #     """
-    #     @return True if changed
-    #     """
-    #     if key in self.config:
-    #         val2 = self.config[key]
-    #     else:
-    #         val2 = None
-    #     if val != val2:
-    #         self.executor.config[self.classname][key] = val
-    #         self.logger.debug("config set: %s:%s" % (key, val))
-    #         self.executor.configSave()
-    #         return True
-    #     else:
-    #         self.logger.debug("config not set(was same): %s:%s" % (key, val))
-    #         return False
-
-    # def configLocalReset(self):
-    #     """
-    #     resets config & done memory on node as well as in memory
-    #     """
-    #     if self.classname in self.executor.config:
-    #         self.executor.config.pop(self.classname)
-    #     self.executor.configSave()
+    def configSave(self):
+        self.executor.state.stateSet(self.classname, self.config)
 
     def cacheReset(self):
-        self.executor.cacheReset()
+        self.executor.cache.reset()
         j.data.cache.reset(self.id)
 
     def reset(self):
-        self.executor.config[self.classname] = {}
+        self.executor.state.stateSet(self.classname, {})
         self.cacheReset()
         self._init()
-        self.executor.configSave()
 
     @property
     def done(self):
@@ -124,7 +87,7 @@ class PrefabBase:
                 continue
             self.done[item] = True
         self.executor._config_changed = True
-        self.executor.configSave()
+        self.configSave()
         return True
 
     def doneDelete(self, key):
@@ -134,7 +97,7 @@ class PrefabBase:
             return False
         self.done[key] = False
         self.executor._config_changed = True
-        self.executor.configSave()
+        self.configSave()
         return True
 
     def doneGet(self, key):

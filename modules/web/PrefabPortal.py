@@ -1,6 +1,7 @@
 from js9 import j
 import time
 import os
+import pytoml
 
 
 base = j.tools.prefab._getBaseClass()
@@ -22,24 +23,20 @@ class PrefabPortal(base):
             organization='',
             redirect_address=''):
 
-        # go from template dir which go the file above
-        content = self.prefab.core.file_read('$TEMPLATEDIR/cfg/portal/config.yaml')
-
-        cfg = j.data.serializer.yaml.loads(content)
-        cfg['production'] = production
+        cfg = self.prefab.executor.state.configGet('portal')
+        cfg['main']['production'] = production
 
         if production:
-            cfg['oauth.client_id'] = client_id
-            cfg['oauth.client_scope'] = 'user:email:main,user:memberof:%s' % client_id
-            cfg['oauth.client_secret'] = client_secret
-            cfg['force_oauth_instance'] = 'itsyou.online'
-            cfg['oauth.default_groups'] = ['admin', 'user']
-            cfg['oauth.organization'] = organization
-            cfg['oauth.redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
-        # ITS ALREADY THE DEFAULT IN THE CONFIG DIR
-        # cfg['param.cfg.appdir'] = j.sal.fs.joinPaths(self.portal_dir, 'portalbase')
+            oauth_cfg = cfg['main']['oauth']
+            oauth_cfg['client_id'] = client_id
+            oauth_cfg['client_scope'] = 'user:email:main,user:memberof:%s' % client_id
+            oauth_cfg['client_secret'] = client_secret
+            oauth_cfg['force_oauth_instance'] = 'itsyou.online'
+            oauth_cfg['default_groups'] = ['admin', 'user']
+            oauth_cfg['organization'] = organization
+            oauth_cfg['redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
 
-        cfg['mongoengine.connection'] = {'host': mongodbip, 'port': mongoport}
+        cfg['main']['mongoengine'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
 
 
@@ -68,6 +65,10 @@ class PrefabPortal(base):
 
         # pull repo with required branch ; then link dirs and files in required places
         self.linkCode()
+        portal_config_path = '%s/github/jumpscale/portal9/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
+        portal_config_data = self.prefab.core.file_read(portal_config_path)
+        portal_config = pytoml.loads(portal_config_data)
+        self.prefab.executor.state.configSet('portal', portal_config['portal'])
 
         if start:
             self.start()
@@ -125,7 +126,7 @@ class PrefabPortal(base):
     def getcode(self, branch='master'):
         self.logger.info("Get portal code on branch:'%s'" % branch)
         if branch == "":
-            branch = os.environ.get('JSBRANCH')
+            branch = os.environ.get('JS9BRANCH')
         self.prefab.tools.git.pullRepo(
             "https://github.com/Jumpscale/portal9.git", branch=branch)
 
@@ -152,18 +153,7 @@ class PrefabPortal(base):
 
         self.prefab.core.dir_ensure('%s/base/' % self.main_portal_dir)
 
-        self.prefab.core.dir_ensure('$TEMPLATEDIR/cfg/portal')
-        self.prefab.core.file_copy(
-            j.sal.fs.joinPaths(
-                CODE_DIR,
-                'github/jumpscale/portal9/apps/portalbase/config.yaml'),
-            '$TEMPLATEDIR/cfg/portal/config.yaml')
         self.prefab.core.dir_ensure("$CFGDIR/portals/main/")
-        self.prefab.core.file_copy(
-            j.sal.fs.joinPaths(
-                CODE_DIR,
-                'github/jumpscale/portal9/apps/portalbase/config.yaml'),
-            "$CFGDIR/portals/main/config.yaml")
         # copy portal_start.py
         self.prefab.core.file_copy(
             j.sal.fs.joinPaths(
