@@ -109,10 +109,10 @@ class PrefabKubernetes(app):
         Used to install the basic componenets of kubernetes on a master node configuring the flannel module and creating the certs
         will also optionally install dashboard
 
-        @param kube_cidr
-        @param flannel
-        @param dashboard
-        @param external_ips
+        @param kube_cidr,,str Depending on what third-party provider you choose, you might have to set the --pod-network-cidr to something provider-specific.
+        @param flannel,,bool  if true install and configure flannel
+        @param dashboard,,bool install and configure dashboard(could not expose on OVC)
+        @param external_ips,,list(str) list of extra ips to add to certs
         """
         if self.doneCheck("install_master", reset):
             return
