@@ -317,12 +317,11 @@ class PrefabTmuxec(ProcessManagerBase):
         self.prefab.system.tmux.executeInScreen("main", name, cmd, wait=wait, expect=expect)
 
     def stop(self, name):
-        self.logger.info("stop...")
         if name in self.list():
             pid = self.prefab.system.tmux.getPid('main', name)
             # make sure to get all child processes of the pane and kill them first.
             # FIXES: https://github.com/Jumpscale/prefab9/issues/61
-            rc, out, err = self.prefab.core.run("pgrep -P {pid}".format(pid=pid))
+            rc, out, err = self.prefab.core.run("pgrep -P {pid}".format(pid=pid), die=False)
             if rc == 0 and out:
                 pidstokill = [l.strip() for l in out.splitlines()]
                 for child_pid in pidstokill:
