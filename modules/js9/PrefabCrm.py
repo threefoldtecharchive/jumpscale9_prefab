@@ -34,7 +34,7 @@ class PrefabCrm(app):
         self.doneSet('build')
 
     def install(self, reset=False, start=False, domain="localhost", caddy_port=80, db_name="crm", demo=False,
-                client_id=None, client_secret=None):
+                client_id=None, client_secret=None, tls="off"):
         if reset is False and self.isInstalled():
             return
         if not self.doneGet('build'):
@@ -42,21 +42,29 @@ class PrefabCrm(app):
 
         if not self.doneGet('configure'):
             self.configure(domain=domain, caddy_port=caddy_port, db_name=db_name,
-                           demo=demo, client_id=client_id, client_secret=client_secret)
+                           demo=demo, client_id=client_id, client_secret=client_secret, tls=tls)
 
         if start:
             self.start()
 
-    def configure(self, caddy_port, db_name, demo, client_id, client_secret, domain):
+    def configure(self, caddy_port, db_name, demo, client_id, client_secret, domain, tls):
         """
         Configure
         """
 
         # Configure Caddy
         log_dir = self.replace("{{LOGDIR}}/caddy/log")
+
+        if caddy_port == 443:
+            listen = domain
+            scheme = "https"
+        else:
+            listen = "{}:{}".format(domain, caddy_port)
+            scheme = "http"
+
         caddy_cfg = """
         #tcpport:{PORT}
-        :{PORT}
+        {LISTEN}
         gzip
         log {LOGDIR}/access.log
         proxy / localhost:5000 {{
@@ -65,20 +73,21 @@ class PrefabCrm(app):
         errors {{
             * {LOGDIR}/errors.log
         }}
-        """.format(PORT=caddy_port, LOGDIR=log_dir, DOMAIN=domain)
+        tls {TLS}
+        """.format(LISTEN=listen, PORT=caddy_port, LOGDIR=log_dir, DOMAIN=domain, TLS=tls)
 
         if client_id and client_secret:
             caddy_cfg += """
             oauth {{
                 client_id                       {CLIENT_ID}
                 client_secret                   {CLIENT_SECRET}
-                redirect_url                    http://{DOMAIN}/iyo_callback
+                redirect_url                    {SCHEME}://{LISTEN}/iyo_callback
                 extra_scopes                    user:address,user:email,user:phone
                 allow_extension                 api
                 allow_extension                 graphql
                 authentication_required         /
             }}
-            """.format(CLIENT_ID=client_id, CLIENT_SECRET=client_secret, DOMAIN=domain)
+            """.format(CLIENT_ID=client_id, CLIENT_SECRET=client_secret, SCHEME=scheme, DOMAIN=domain, LISTEN=listen)
         self.prefab.core.dir_ensure(log_dir)
         self.prefab.core.file_write(self.replace("$CFGDIR/caddy.cfg"), caddy_cfg)
 
@@ -92,7 +101,6 @@ class PrefabCrm(app):
         export ENV=prod
         export FLASK_APP=app.py
         flask createdb
-        flask db migrate
         flask db upgrade
         """
         if demo:
@@ -114,6 +122,6 @@ class PrefabCrm(app):
 
         cmd = "cd {src_dir};"
         cmd += "export POSTGRES_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/{db_name};"
-        cmd += "export ENV=prod;flask db upgrade; uwsgi --ini uwsgi.ini"
+        cmd += "export ENV=prod;export FLASK_APP=app.py;flask db upgrade; uwsgi --ini uwsgi.ini"
         cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name)
         self.prefab.system.processManager.ensure(name="crm", cmd=cmd, autostart=True)
