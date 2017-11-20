@@ -150,7 +150,7 @@ class PrefabCaddy(app):
         #     self.logger.info("caddy already started, will reload")
         #     return
 
-        self.prefab.system.processManager.stop("caddy")  # will also kill
+        self.prefab.system.processmanager.stop("caddy")  # will also kill
 
         cmd = self.prefab.bash.cmdGetPath("caddy")
         if agree:
@@ -161,4 +161,4 @@ class PrefabCaddy(app):
         self.prefab.system.processmanager.ensure("caddy", cmd, wait=10, expect=expect)
 
     def stop(self):
-        self.prefab.system.processManager.stop("caddy")
+        self.prefab.system.processmanager.stop("caddy")
