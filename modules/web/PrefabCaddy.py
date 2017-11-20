@@ -158,7 +158,7 @@ class PrefabCaddy(app):
 
         cmd = 'ulimit -n 8192; %s -conf=%s %s' % (cmd, configpath, agree)
         # wait 10 seconds for caddy to generate ssl certificate before returning error
-        self.prefab.processmanager.ensure("caddy", cmd, wait=10, expect=expect)
+        self.prefab.system.processmanager.ensure("caddy", cmd, wait=10, expect=expect)
 
     def stop(self):
         self.prefab.system.processManager.stop("caddy")
