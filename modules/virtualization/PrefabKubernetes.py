@@ -23,7 +23,7 @@ class PrefabKubernetes(app):
 
     def multihost_install(self, nodes=[], reset=False):
         """
-        Importan !! only supports centos, fedora and ubuntu 1604
+        Important !! only supports centos, fedora and ubuntu 1604
         Use a list of prefab connections where all nodes need to be reachable from all other nodes or at least from the master node.
         this installer will:
         - use first node as master
@@ -34,7 +34,7 @@ class PrefabKubernetes(app):
 
         @param nodes ,,  are list of prefab clients which will be used to deploy kubernetes
         @param reset ,, rerun the code even if it has been run again. this may not be safe (used for development only)
-        @return dict() ,, return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
+        @return (dict(), str) ,, return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
 
         """
         if self.doneCheck("multihost_install", reset):
@@ -47,13 +47,14 @@ class PrefabKubernetes(app):
         elif master.executor.type == 'ssh':
             external_ips = [master.executor.sshclient.addr]
 
-        join_line = master.virtualization.kubernetes.install_master(external_ips)
+        join_line = master.virtualization.kubernetes.install_master(
+            external_ips)
         for node in nodes:
             node.virtualization.kubernetes.install_minion(join_line)
-        conf_text = self.prefab.core.read_file('/etc/kubernetes/kubelet.conf')
+        conf_text = master.core.file_read('/etc/kubernetes/kubelet.conf')
         self.doneSet("multihost_install")
 
-        return j.data.serializer.yaml.loads(conf_text)
+        return j.data.serializer.yaml.loads(conf_text), join_line
 
     def install_dependencies(self, reset=False):
         """
@@ -104,6 +105,15 @@ class PrefabKubernetes(app):
         self.doneSet("install_base")
 
     def install_master(self, reset=False, kube_cidr='10.0.0.0/16', flannel=True, dashboard=False, external_ips=[]):
+        """
+        Used to install the basic componenets of kubernetes on a master node configuring the flannel module and creating the certs
+        will also optionally install dashboard
+
+        @param kube_cidr
+        @param flannel
+        @param dashboard
+        @param external_ips
+        """
         if self.doneCheck("install_master", reset):
             return
 
@@ -114,7 +124,7 @@ class PrefabKubernetes(app):
 
         cmd = 'kubeadm init --pod-network-cidr=%s' % (kube_cidr)
         if external_ips:
-            cmd += ' --apiserver-cert-extra-sans=%s' %  ','.join(external_ips)
+            cmd += ' --apiserver-cert-extra-sans=%s' % ','.join(external_ips)
 
         rc, out, err = self.prefab.core.run(cmd)
         if rc != 0:
@@ -132,7 +142,6 @@ class PrefabKubernetes(app):
             self.prefab.core.run(
                 'kubectl --kubeconfig=/etc/kubernetes/admin.config apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml')
 
-
         log_message = """
         please wait until kube-dns deplyments are deployed before joining new nodes to the cluster.
         to check use this use 'kubectl get pods --all-namepspaces'
@@ -146,6 +155,13 @@ class PrefabKubernetes(app):
         self.doneSet("install_master")
 
     def install_minion(self, join_line, reset=False):
+        """
+        Used to install the basic componenets of kubernetes on a minion node and make that node join the cluster
+        specified in the join line param.
+
+        @param join_line ,,str an output line produced when deploying a master node this is the return from install_master method.
+        @param reset ,,bool bool will default to false, if ture  will rebuild even if the code has been run before.
+        """
         if self.doneCheck("install_minion", reset):
             return
 
