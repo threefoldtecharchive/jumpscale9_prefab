@@ -1,6 +1,6 @@
-# prefab.tmux
+# prefab.system.tmux
 
-The `prefab.tmux` module is a client for tmux.
+The `prefab.system.tmux` module is a client for tmux.
 
 Examples of methods inside tmux:
 
@@ -20,7 +20,7 @@ Examples of methods inside tmux:
 Example:
 
 ```python
-tmux = j.tools.prefab.local.tmux
+tmux = j.tools.prefab.local.system.tmux
 tmux.createSession('s1', ['w1', 'w2'])
 tmux.executeInScreen('s1', 'w1', 'ping 8.8.8.8')
 tmux.executeInScreen('s1', 'w2', 'python3 -m http.server')

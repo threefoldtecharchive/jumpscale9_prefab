@@ -2,16 +2,17 @@ from js9 import j
 import inspect
 
 
-
 class PrefabBase:
 
     def __init__(self, executor, prefab):
         self._classname = ""
         self._cache = None
         self.executor = executor
+        self.executor.dir_paths
         self.prefab = prefab
-        self._initenvDone=False
+        self._initenvDone = False
         self._logger = None
+        self.env = self.executor.env
 
         if self.classname != 'PrefabCore':
             self.core = prefab.core
@@ -35,67 +36,20 @@ class PrefabBase:
         return txt
 
     @property
-    def env(self,env=None):
-        return self.executor.env
-
-    @property
-    def dir_paths(self):
-        return self.executor.dir_paths
-
-    @property
     def config(self):
         """
-        is dict which is stored on node itself in msgpack format in /etc/jsexecutor.msgpack
-        organized per prefab module
         """
-        if self.classname not in self.executor.config:
-            self.executor.config[self.classname] = {}
-        return self.executor.config[self.classname]
+        return self.executor.state.stateGet(self.classname, {}, set=True)
 
-    def configLocalGet(self, key, defval=None):
-        """
-        """
-        if key in self.config:
-            return self.config[key]
-        else:
-            if defval is not None:
-                self.configSet(key, defval)
-                return defval
-            else:
-                raise j.exceptions.Input(message="could not find config key:%s in prefab:%s" %
-                                         (key, self.classname), level=1, source="", tags="", msgpub="")
-
-    def configLocalSet(self, key, val):
-        """
-        @return True if changed
-        """
-        if key in self.config:
-            val2 = self.config[key]
-        else:
-            val2 = None
-        if val != val2:
-            self.executor.config[self.classname][key] = val
-            self.logger.debug("config set: %s:%s" % (key, val))
-            self.executor.configSave()
-            return True
-        else:
-            self.logger.debug("config not set(was same): %s:%s" % (key, val))
-            return False
-
-    def configLocalReset(self):
-        """
-        resets config & done memory on node as well as in memory
-        """
-        if self.classname in self.executor.config:
-            self.executor.config.pop(self.classname)
-        self.executor.configSave()
+    def configSave(self):
+        self.executor.state.stateSet(self.classname, self.config)
 
     def cacheReset(self):
-        self.executor.cacheReset()
+        self.executor.cache.reset()
         j.data.cache.reset(self.id)
 
     def reset(self):
-        self.configReset()
+        self.executor.state.stateSet(self.classname, {})
         self.cacheReset()
         self._init()
 
@@ -109,27 +63,41 @@ class PrefabBase:
         """
         resets the remembered items which are done
         """
-        if "done" in self.config:
-            self.config.pop("done")
-        if not self.executor.readonly:
-            self.configSet("done", {})  # this will make sure it gets set remotely
+        self.reset()
+        # if "done" in self.config:
+        #     self.config.pop("done")
+        # if not self.executor.readonly:
+        #     # this will make sure it gets set remotely
+        #     self.configSet("done", {})
 
     def doneSet(self, key):
         if self.executor.readonly:
-            self.logger.debug("info: Canot do doneset:%s because readonly" % key)
+            self.logger.debug(
+                "info: Canot do doneset:%s because readonly" % key)
             return False
-        self.done[key] = True
+        # bring to list of keys
+        if key.find(",") != -1:
+            key = [item.strip() for item in key.split(",")]
+        elif key.find("\n") != -1:
+            key = [item.strip() for item in key.split("\n")]
+        elif not j.data.types.list.check(key):
+            key = [key]
+        for item in key:
+            if item.strip() == "":
+                continue
+            self.done[item] = True
         self.executor._config_changed = True
-        self.executor.configSave()
+        self.configSave()
         return True
 
     def doneDelete(self, key):
         if self.executor.readonly:
-            self.logger.debug("info: Canot do doneDelete:%s because readonly" % key)
+            self.logger.debug(
+                "info: Canot do doneDelete:%s because readonly" % key)
             return False
         self.done[key] = False
         self.executor._config_changed = True
-        self.executor.configSave()
+        self.configSave()
         return True
 
     def doneGet(self, key):
@@ -141,6 +109,22 @@ class PrefabBase:
         else:
             self.logger.debug("donecheck, not set:%s:False" % (key))
             return False
+
+    def doneCheck(self, cat, reset=False):
+        """
+        specify category to test against
+        if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
+
+        will call doneGet and take reset into account
+
+        reset can be 1, "1", True, ...
+
+        if done will return : True
+        """
+        reset = j.data.serializer.fixType(reset, False)
+        if reset is False and self.doneGet(cat):
+            return True
+        return False
 
     @property
     def classname(self):
@@ -155,7 +139,8 @@ class PrefabBase:
     @property
     def cache(self):
         if self._cache is None:
-            self._cache = j.data.cache.get("prefab" + self.id + self.classname, reset=True)
+            self._cache = j.data.cache.get(
+                "prefab" + self.id + self.classname, reset=True, expiration=600)  # 10 min
         return self._cache
 
     def __str__(self):
@@ -167,14 +152,26 @@ class PrefabBase:
 class PrefabApp(PrefabBase):
 
     NAME = None
-    VERSION = None
 
-    def __init__(self, executor, prefab):
-        super().__init__(executor=executor, prefab=prefab)
-        bin_dir = self.prefab.core.replace("$BINDIR")
-        if bin_dir not in self.prefab.bash.profileDefault.paths:
-            self.prefab.bash.profileDefault.addPath()
-            self.prefab.bash.profileDefault.save()
+    # def __init__(self, executor, prefab):
+    #     super().__init__(executor=executor, prefab=prefab)
+
+    # NOT GOING TO USE THE COMMAND CHECK, NOT REALLY NEEDED
+    # def doneCheck(self, cat, reset=False):
+    #     """
+    #     specify category to test against
+    #     if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
+
+    #     will call doneGet and take reset into account
+
+    #     reset can be 1, "1", True, ...
+
+    #     if done will return : True
+    #     """
+    #     reset = j.data.serializer.fixType(reset, False)
+    #     if reset is False and self.isInstalled() and self.doneGet(cat):
+    #         return True
+    #     return False
 
     def isInstalled(self):
         """
@@ -202,11 +199,14 @@ class PrefabBaseLoader:
         self.prefab = prefab
         myClassName = str(self.__class__).split(".")[-1].split("'")[0]
         localdir = j.sal.fs.getDirName(inspect.getsourcefile(self.__class__))
-        classes = [j.sal.fs.getBaseName(item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
+        classes = [j.sal.fs.getBaseName(
+            item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
         for className in classes:
             # import the class
-            exec("from JumpScale9Prefab.%s.Prefab%s import *" % (myClassName, className))
+            exec("from JumpScale9Prefab.%s.Prefab%s import *" %
+                 (myClassName, className))
             # attach the class to this class
-            do = "self.%s=Prefab%s(self.executor,self.prefab)" % (className.lower(), className)
+            do = "self.%s=Prefab%s(self.executor,self.prefab)" % (
+                className.lower(), className)
             # self.logger.info(do)
             exec(do)
