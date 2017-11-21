@@ -717,7 +717,7 @@ class PrefabCore(base):
         if val == self.hostname:
             return
 
-        val = val.strip().lower()
+        val = val.strip()
         if self.isMac:
             hostfile = "/private/etc/hostname"
             self.file_write(hostfile, val, sudo=True)
