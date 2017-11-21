@@ -53,7 +53,8 @@ class PrefabDeployerBot(app):
         cmd = self.replace(
             'jspython $JSAPPSDIR/deployer_bot/telegram-bot --config $JSCFGDIR/deployerbot/config.yaml')
         cwd = self.replace('$JSAPPSDIR/deployer_bot')
-        self.prefab.system.processManager.ensure('deployerbot', cmd=cmd, path=cwd)
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure('deployerbot', cmd=cmd, path=cwd)
 
     def install_deps(self):
         deps = """

@@ -55,7 +55,8 @@ class PrefabIPFS(app):
         if not readonly:
             cmd += '  --writable'
 
-        self.prefab.system.processManager.ensure(
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure(
             name='ipfs_{}'.format(name),
             cmd=cmd,
             path=cfg_dir,
@@ -63,4 +64,5 @@ class PrefabIPFS(app):
         )
 
     def stop(self, name='main'):
-        self.prefab.system.processManager.stop(name='ipfs_{}'.format(name))
+        pm = self.prefab.system.processmanager.get()
+        pm.stop(name='ipfs_{}'.format(name))

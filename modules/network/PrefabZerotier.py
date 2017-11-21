@@ -53,10 +53,12 @@ class PrefabZerotier(base):
     def start(self):
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
-        self.prefab.system.processManager.ensure('zerotier-one', 'zerotier-one')
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure('zerotier-one', cmd='zerotier-one')
 
     def stop(self):
-        self.prefab.system.processManager.stop('zerotier-one')
+        pm = self.prefab.system.processmanager.get()
+        pm.stop('zerotier-one')
 
     def join_network(self, network_id):
         """

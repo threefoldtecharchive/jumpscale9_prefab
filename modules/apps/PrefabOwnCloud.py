@@ -282,7 +282,8 @@ class PrefabOwnCloud(app):
             """
             self.prefab.core.execute_bash(C)
             self.prefab.core.file_write("$CFGDIR/nginx/etc/nginx.conf", content=basicnginxconf)
-            self.prefab.system.processManager.stop("nginx")
+            pm = self.prefab.system.processmanager.get()
+            pm.stop("nginx")
             self.prefab.apps.nginx.start()
             self.prefab.development.php.start()
         else:

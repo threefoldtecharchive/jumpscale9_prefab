@@ -99,7 +99,9 @@ class PrefabAtYourService(base):
                                                                                       host=host, port=port, log=log)
         if dev:
             cmd += " --dev "
-        self.prefab.system.processmanager.ensure(name='atyourservice', cmd=cmd)
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure('atyourservice', cmd=cmd)
 
     def stop(self):
-        self.prefab.system.processmanager.stop(name='atyourservice')
+        pm = self.prefab.system.processmanager.get()
+        pm.stop(name='atyourservice')

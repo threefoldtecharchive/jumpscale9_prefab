@@ -115,9 +115,8 @@ class PrefabTraefik(app):
         # if self.reload(configpath=configpath) == True:
         #     self.logger.info("caddy already started, will reload")
         #     return
-
-        self.prefab.system.processManager.stop("caddy")  # will also kill
-
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("caddy")  # will also kill
 
         cmd = self.prefab.bash.cmdGetPath("caddy")
         if agree:
@@ -125,10 +124,11 @@ class PrefabTraefik(app):
 
         print (cmd)
 
-        # self.prefab.system.processManager.ensure(
+        # self.prefab.system.processmanager.ensure(
         #     "caddy", 'ulimit -n 8192; %s -conf=%s -email=%s %s' % (cmd, args["CONFIGPATH"], args["EMAIL"], agree), wait=1)
-        self.prefab.system.processManager.ensure(
+        pm.ensure(
             "caddy", 'ulimit -n 8192; %s -conf=%s %s' % (cmd, configpath, agree), wait=1, expect=expect)
 
     def stop(self):
-        self.prefab.system.processManager.stop("caddy")
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("caddy")

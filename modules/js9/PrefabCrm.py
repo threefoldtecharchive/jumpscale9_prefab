@@ -124,4 +124,5 @@ class PrefabCrm(app):
         cmd += "export POSTGRES_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/{db_name};"
         cmd += "export ENV=prod;export FLASK_APP=app.py;flask db upgrade; uwsgi --ini uwsgi.ini"
         cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name)
-        self.prefab.system.processManager.ensure(name="crm", cmd=cmd, autostart=True)
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure(name="crm", cmd=cmd, autostart=True)

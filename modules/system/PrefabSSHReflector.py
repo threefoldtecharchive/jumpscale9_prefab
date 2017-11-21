@@ -67,8 +67,9 @@ class PrefabSSHReflector(base):
         _, cpath, _ = self.prefab.core.run("which dropbear")
 
         cmd = "%s -R -F -E -p 9222 -w -s -g -K 20 -I 60" % cpath
-        # self.prefab.system.processManager.e
-        self.prefab.system.processManager.ensure("reflector", cmd, descr='')
+        # self.prefab.system.processmanager.e
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure("reflector", cmd)
 
         # self.prefab.system.package.start(package)
 
@@ -79,7 +80,7 @@ class PrefabSSHReflector(base):
 
     #
     def client_delete(self):
-        self.prefab.system.processManager.remove("autossh")  # make sure leftovers are gone
+        self.prefab.system.processmanager.remove("autossh")  # make sure leftovers are gone
         self.prefab.core.run("killall autossh", die=False, showout=False)
 
     def client(self, remoteids, reset=True):
@@ -183,7 +184,9 @@ class PrefabSSHReflector(base):
             _, cpath, _ = self.prefab.core.run("which autossh")
             cmd = "%s -M 0 -N -o ExitOnForwardFailure=yes -o \"ServerAliveInterval 60\" -o \"ServerAliveCountMax 3\" -R %s:localhost:22 sshreflector@%s -p %s -i /root/.ssh/reflector" % (
                 cpath, newport, rname, reflport)
-            self.prefab.system.processManager.ensure("autossh_%s" % rname_short, cmd, descr='')
+            
+            pm = self.prefab.system.processmanager.get()
+            pm.ensure("autossh_%s" % rname_short, cmd, descr='')
 
             self.logger.info("On %s:%s remote SSH port:%s" % (remoteprefab.core.executor.addr, port, newport))
 

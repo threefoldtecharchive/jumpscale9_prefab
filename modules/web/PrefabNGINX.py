@@ -219,13 +219,15 @@ class PrefabNGINX(app):
             nginxcmd = self.replace(nginxcmd)
 
             self.logger.info("cmd: %s" % nginxcmd)
-            self.prefab.system.processManager.ensure(name=name, cmd=nginxcmd, path=nginxbinpath)
+            pm = self.prefab.system.processmanager.get()
+            pm.ensure(name=name, cmd=nginxcmd, path=nginxbinpath)
 
         else:
             raise RuntimeError('Failed to start nginx')
 
     def stop(self):
-        self.prefab.system.processManager.stop("nginx")
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("nginx")
 
     def test(self):
         # host a file test can be reached

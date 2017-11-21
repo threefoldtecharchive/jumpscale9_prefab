@@ -135,7 +135,9 @@ class PrefabPyFTPServer(base):
         self.prefab.core.file_write("$CFGDIR/ftpserver/start.py", C)
 
     def start(self):
-        self.prefab.system.processManager.ensure("pyftpserver", "python3 $CFGDIR/ftpserver/start.py")
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure("pyftpserver", "python3 $CFGDIR/ftpserver/start.py")
 
     def stop(self):
-        self.prefab.system.processManager.stop('pyftpserver')
+        pm = self.prefab.system.processmanager.get()
+        pm.stop('pyftpserver')

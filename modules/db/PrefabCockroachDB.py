@@ -52,8 +52,9 @@ class PrefabCockroachDB(app):
 
         # cmd = "$BINDIR/cockroach start --insecure --host=localhost --background"
         self.prefab.system.process.kill("cockroach")
-        self.prefab.system.processManager.ensure(
-            name="cockroach", cmd=cmd, env={}, path="", autostart=True)
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure(name="cockroach", cmd=cmd, env={}, path="", autostart=True)
 
     def stop(self):
-        self.prefab.system.processManager.stop("cockroach")
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("cockroach")

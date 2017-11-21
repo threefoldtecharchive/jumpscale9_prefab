@@ -154,14 +154,15 @@ class PrefabARDB(app):
 
         cfg_path = "$CFGDIR/ardb/{}/ardb.conf".format(name)
         cmd = "$BINDIR/ardb-server {}".format(cfg_path)
-        self.prefab.system.processManager.ensure(
-            name="ardb-server-{}".format(name), cmd=cmd, env={}, path="")
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure(name="ardb-server-{}".format(name), cmd=cmd, env={}, path="")
         # self.test(port=port)
 
         self.doneSet("start-%s" % name)
 
     def stop(self, name='main'):
-        self.prefab.system.processManager.stop("ardb-server-{}".format(name))
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("ardb-server-{}".format(name))
 
     def getClient(self):
         pass

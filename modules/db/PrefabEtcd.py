@@ -46,7 +46,7 @@ class PrefabEtcd(app):
         self.doneSet("build")
 
     def install(self):
-        if self.doneCheck("install", reset):
+        if self.doneCheck("install"):
             return
         url = "https://github.com/coreos/etcd/releases/download/v3.2.4/etcd-v3.2.4-linux-amd64.tar.gz"
         from IPython import embed
@@ -60,7 +60,8 @@ class PrefabEtcd(app):
             cmd = self._etcd_cluster_cmd(host, peers)
         else:
             cmd = '$BINDIR/etcd'
-        self.prefab.system.processManager.ensure("etcd", cmd)
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure("etcd", cmd)
 
     def _etcd_cluster_cmd(self, host, peers=[]):
         """

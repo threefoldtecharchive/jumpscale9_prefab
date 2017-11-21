@@ -24,4 +24,5 @@ class PrefabSkyDns(app):
 
     def start(self):
         cmd = self.prefab.bash.cmdGetPath("skydns")
-        self.prefab.system.processManager.ensure("skydns", cmd + " -addr 0.0.0.0:53")
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure("skydns", cmd + " -addr 0.0.0.0:53")

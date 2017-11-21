@@ -27,7 +27,8 @@ class PrefabGowncloud(app):
             # db_port='5432',
             db_port='26257',
             sslmode='disable'):
-        self.prefab.system.processManager.ensure("gowncloud", "$BINDIR/gowncloud -c {client_id} -s {client_secret} --db {db_driver}://{db_user}@{db_url}:{db_port}?sslmode={sslmode}".format(
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure("gowncloud", "$BINDIR/gowncloud -c {client_id} -s {client_secret} --db {db_driver}://{db_user}@{db_url}:{db_port}?sslmode={sslmode}".format(
             client_id=client_id,
             client_secret=client_secret,
             db_driver=db_driver,
@@ -37,5 +38,6 @@ class PrefabGowncloud(app):
             sslmode=sslmode))
 
     def stop(self):
-        self.prefab.system.processManager.stop("gowncloud")
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("gowncloud")
 

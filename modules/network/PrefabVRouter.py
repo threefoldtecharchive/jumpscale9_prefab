@@ -312,7 +312,7 @@ class PrefabVRouter(base):
     #     [Install]
     #     WantedBy = multi - user.target
     #     """
-    #     pm = self.prefab.system.processManager.get("systemd")
+    #     pm = self.prefab.system.processmanager.get("systemd")
     #     pm.ensure("ap", cmd2, descr="accesspoint for local admin", systemdunit=START1)
 
     def __str__(self):

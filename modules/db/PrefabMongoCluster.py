@@ -97,7 +97,8 @@ class MongoInstance(Startable):
     def _start(self):
         super()._start()
         self.logger.info("starting: ", self._gen_service_name(), self._gen_service_cmd())
-        a = self.prefab.system.processManager.ensure(self._gen_service_name(), self._gen_service_cmd())
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure(self._gen_service_name(), self._gen_service_cmd())
         return a
 
     @Startable.ensure_started

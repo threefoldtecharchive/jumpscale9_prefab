@@ -58,4 +58,5 @@ class PrefabZOS_fs(app):
 
     def start(self):
         self.prefab.core.file_copy("$TEMPLATEDIR/cfg/fs", "$JSCFGDIR", recursive=True)
-        self.prefab.system.processManager.ensure('fs', cmd="$BINDIR/fs -c $JSCFGDIR/fs/config.toml")
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure('fs', cmd="$BINDIR/fs -c $JSCFGDIR/fs/config.toml")

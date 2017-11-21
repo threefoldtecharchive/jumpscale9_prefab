@@ -65,5 +65,6 @@ class PrefabInfluxdb(app):
         binPath = self.prefab.bash.cmdGetPath('influxd')
         cmd = "%s -config $JSCFGDIR/influxdb/influxdb.conf" % (binPath)
         self.prefab.system.process.kill("influxdb")
-        self.prefab.system.processManager.ensure(
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure(
             "influxdb", cmd=cmd, env={}, path="")

@@ -38,7 +38,8 @@ class PrefabAydoStor(app):
             self.prefab.core.dir_paths['GODIR'], 'bin', 'stor'), '$BINDIR', overwrite=True)
         self.prefab.bash.addPath("$BASEDIR/bin")
 
-        self.prefab.system.processManager.stop("stor")  # will also kill
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("stor")  # will also kill
 
         self.prefab.core.dir_ensure("$JSCFGDIR/stor")
         backend = self.replace(backend)
@@ -69,4 +70,5 @@ class PrefabAydoStor(app):
         self.prefab.core.dir_ensure("$JSCFGDIR/stor/", recursive=True)
         self.prefab.core.file_copy("$TEMPLATEDIR/cfg/stor/config.toml", "$JSCFGDIR/stor/")
         cmd = self.prefab.bash.cmdGetPath("stor")
-        self.prefab.system.processManager.ensure("stor", '%s --config $JSCFGDIR/stor/config.toml' % cmd)
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure("stor", '%s --config $JSCFGDIR/stor/config.toml' % cmd)

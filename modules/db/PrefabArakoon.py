@@ -117,7 +117,8 @@ class PrefabArakoon(base):
         self.prefab.core.dir_ensure('$VARDIR/data/arakoon')
         cmd = "%s --config $JSCFGDIR/arakoon/arakoon.ini" % which
         self.prefab.system.process.kill("arakoon")
-        self.prefab.system.processManager.ensure("arakoon", cmd=cmd, env={}, path="")
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure("arakoon", cmd=cmd, env={}, path="")
 
     def create_cluster(self, id):
         return ArakoonCluster(id, self.prefab)

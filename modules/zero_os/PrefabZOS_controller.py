@@ -22,7 +22,7 @@ class PrefabZOS_controller(app):
         # self.prefab.apps.redis.install()
         # self.prefab.apps.syncthing.build(start=False)
 
-        self.prefab.system.processManager.remove("agentcontroller8")
+        self.prefab.system.processmanager.remove("agentcontroller8")
         pm = self.prefab.system.processmanager.get("tmux")
         pm.stop("syncthing")
 

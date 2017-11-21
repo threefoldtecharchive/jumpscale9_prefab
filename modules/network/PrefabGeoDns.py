@@ -49,10 +49,12 @@ class PrefabGeoDns(app):
             pm = self.prefab.system.processmanager.get("tmux")
             pm.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")
         else:
-            self.prefab.system.processManager.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")
+            pm = self.prefab.system.processmanager.get()
+            pm.ensure(name=identifier, cmd=cmd, env={}, path="$BINDIR")
 
     def stop(self, name="geodns_main"):
         """
         stop geodns server with @name
         """
-        self.prefab.system.processManager.stop(name)
+        pm = self.prefab.system.processmanager.get()
+        pm.stop(name)

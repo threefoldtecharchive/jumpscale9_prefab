@@ -116,10 +116,12 @@ class PrefabPHP(app):
 
         phpfpmcmd = "$JSAPPSDIR/php/sbin/php-fpm -F -y $JSAPPSDIR/php/etc/php-fpm.conf.default"  # foreground
         phpfpmcmd = self.replace(phpfpmcmd)
-        self.prefab.system.processManager.ensure(name="php-fpm", cmd=phpfpmcmd, path=phpfpmbinpath)
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure(name="php-fpm", cmd=phpfpmcmd, path=phpfpmbinpath)
 
     def stop(self):
-        self.prefab.system.processManager.stop("php-fpm")
+        pm = self.prefab.system.processmanager.get()
+        pm.stop("php-fpm")
 
     def test(self):
         # TODO: *2 test php deployed in nginx
