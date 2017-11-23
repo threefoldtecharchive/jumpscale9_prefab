@@ -1,6 +1,10 @@
 from multiprocessing import Process
 from js9 import j
+import logging
 
+
+# set the logger level
+j.logger.set_level(logging.INFO)
 
 def prefab_module(module, name):
     print ('** starting test', name)
