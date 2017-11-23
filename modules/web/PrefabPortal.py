@@ -11,7 +11,6 @@ class PrefabPortal(base):
 
     def _init(self):
         self.portal_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["JSAPPSDIR"], "portals/")
-        self.main_portal_dir = j.sal.fs.joinPaths(self.portal_dir, 'main')
 
     def configure(
             self,
@@ -21,13 +20,15 @@ class PrefabPortal(base):
             client_id='',
             client_secret='',
             organization='',
-            redirect_address=''):
+            redirect_address='',
+            name='main'):
 
+        self.portal_name = name
         cfg = self.prefab.executor.state.configGet('portal')
-        cfg['main']['production'] = production
+        cfg[self.portal_name]['production'] = production
 
         if production:
-            oauth_cfg = cfg['main']['oauth']
+            oauth_cfg = cfg[self.portal_name]['oauth']
             oauth_cfg['client_id'] = client_id
             oauth_cfg['client_scope'] = 'user:email:main,user:memberof:%s' % client_id
             oauth_cfg['client_secret'] = client_secret
@@ -36,50 +37,39 @@ class PrefabPortal(base):
             oauth_cfg['organization'] = organization
             oauth_cfg['redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
 
-        cfg['main']['mongoengine'] = {'host': mongodbip, 'port': mongoport}
+        cfg[self.portal_name]['mongoengine'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
 
-    def add_configuration(self, config_dict):
+    def add_configuration(self, config_dict, name="main"):
         """
         use this method when ever u want to add some config to portal
         usually when u add a new space
         """
-        content = self.prefab.core.file_read('$TEMPLATEDIR/cfg/portal/config.yaml')
-        cfg = j.data.serializer.yaml.loads(content)
+        self.portal_name = name
+        cfg = self.prefab.executor.state.configGet('portal')
         for key, value in config_dict.items():
-            cfg[key] = value
-        self.prefab.core.file_write(self.configPath, j.data.serializer.yaml.dumps(cfg))
-
-    def add_configuration(self, config_dict):
-        """
-        use this method when ever u want to add some config to portal
-        usually when u add a new space
-        """
-        content = self.prefab.core.file_read('$TEMPLATEDIR/cfg/portal/config.yaml')
-        cfg = j.data.serializer.yaml.loads(content)
-        for key, value in config_dict.items():
-            cfg[key] = value
-        self.prefab.core.file_write(self.configPath, j.data.serializer.yaml.dumps(cfg))
-
+            cfg[self.portal_name][key] = value
+        self.prefab.executor.state.configSet('portal',cfg)
 
     @property
     def configPath(self):
         return j.sal.fs.joinPaths(self.prefab.core.dir_paths['CFGDIR'],
-                                  "portals", "main", "config.yaml")
+                                  "portals", self.portal_name, "config.yaml")
 
-    def install(self, start=True, branch='master', reset=False):
+    def install(self, start=True, branch='master', reset=False, name="main", port='8200', ip='127.0.0.1'):
         """
         grafanaip and port should be the external ip of the machine
         Portal install will only install the portal and libs. No spaces but the system ones will be add by default.
         To add spaces and actors, please use addSpace and addactor
         """
+        self.portal_name = name
         self.logger.info("Install prefab portal on branch:'%s'" % branch)
-        self.prefab.core.dir_ensure(self.main_portal_dir)
+        self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
         self.prefab.bash.fixlocale()
-        if not reset and self.doneGet("install"):
+        if not reset and self.doneGet("install-"+self.portal_name):
             self.linkCode()
             if start:
-                self.start()
+                self.start(name=name)
             return
 
         self.prefab.db.mongodb.install()
@@ -94,13 +84,17 @@ class PrefabPortal(base):
         self.linkCode()
         portal_config_path = '%s/github/jumpscale/portal9/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
         portal_config_data = self.prefab.core.file_read(portal_config_path)
+        portal_config_data = portal_config_data.format(name=name, port=port, ip=ip)
         portal_config = pytoml.loads(portal_config_data)
-        self.prefab.executor.state.configSet('portal', portal_config['portal'])
+
+        cvg = self.prefab.executor.state.configGet('portal')
+        cvg[name] = portal_config['portal'][name]
+        self.prefab.executor.state.configSet('portal', cvg)
 
         if start:
-            self.start()
+            self.start(name=name)
 
-        self.doneSet("install")
+        self.doneSet("install-"+self.portal_name)
 
     def installNodeJSLibs(self):
         self.prefab.apps.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
@@ -122,7 +116,7 @@ class PrefabPortal(base):
         """
         make sure new env arguments are understood on platform
         """
-        if not reset and self.doneGet("installdeps"):
+        if not reset and self.doneGet("installdeps"+self.portal_name):
             return
 
         if "darwin" not in self.prefab.platformtype.osname:
@@ -148,14 +142,14 @@ class PrefabPortal(base):
             pip3 install -e .
             """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
         self.prefab.core.execute_bash(cmd)
-        self.doneSet("installdeps")
+        self.doneSet("installdeps"+self.portal_name)
 
     def getcode(self, branch='master'):
         self.logger.info("Get portal code on branch:'%s'" % branch)
         if branch == "":
             branch = os.environ.get('JS9BRANCH')
         self.prefab.tools.git.pullRepo(
-            "https://github.com/Jumpscale/portal9.git", branch=branch)
+            "https://github.com/Jumpscale/portal9.git", branch=branch, ignorelocalchanges=False)
 
     def linkCode(self):
 
@@ -176,17 +170,17 @@ class PrefabPortal(base):
         self.prefab.core.file_link("%s/github/jumpscale/portal9/apps/portalbase/templates" %
                                     CODE_DIR, '%s/portalbase/templates' % self.portal_dir)
 
-        self.prefab.core.dir_ensure(self.main_portal_dir)
+        self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
 
-        self.prefab.core.dir_ensure('%s/base/' % self.main_portal_dir)
+        self.prefab.core.dir_ensure('%s/base/' % j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
 
-        self.prefab.core.dir_ensure("$CFGDIR/portals/main/")
+        self.prefab.core.dir_ensure("$CFGDIR/portals/"+self.portal_name+"/")
         # copy portal_start.py
         self.prefab.core.file_copy(
             j.sal.fs.joinPaths(
                 CODE_DIR,
                 'github/jumpscale/portal9/apps/portalbase/portal_start.py'),
-            self.main_portal_dir)
+            j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
         self.prefab.core.file_copy("%s/jslib/old/images" % self.portal_dir,
                                     "%s/jslib/old/elfinder" % self.portal_dir, recursive=True)
         # link spaces
@@ -199,36 +193,36 @@ class PrefabPortal(base):
         for space in to_link:
             space_name = j.sal.fs.getBaseName(space)
             if space_name not in ['home', 'TestWebsite', 'TestSpace']:
-                self.prefab.core.file_link(source=space, destination='$JSAPPSDIR/portals/main/base/%s' % space_name)
+                self.prefab.core.file_link(source=space, destination='$JSAPPSDIR/portals/'+self.portal_name+'/base/%s' % space_name)
 
-    def addSpace(self, spacepath):
+    def addSpace(self, spacepath, name='main'):
         spacename = j.sal.fs.getBaseName(spacepath)
         dest_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths[
-            'JSAPPSDIR'], 'portals', 'main', 'base', spacename)
+            'JSAPPSDIR'], 'portals', name, 'base', spacename)
         self.prefab.core.file_link(spacepath, dest_dir)
 
-    def addActor(self, actorpath):
+    def addActor(self, actorpath, name='main'):
         actorname = j.sal.fs.getBaseName(actorpath)
         dest_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths[
-            'JSAPPSDIR'], 'portals', 'main', 'base', actorname)
+            'JSAPPSDIR'], 'portals', name, 'base', actorname)
         self.prefab.core.file_link(actorpath, dest_dir)
 
-    def start(self, passwd=None):
+    def start(self, passwd=None, name='main'):
         """
         Start the portal
         passwd : if not None, change the admin password to passwd after start
         """
         self.prefab.db.mongodb.start()
-        cmd = "python3 portal_start.py"
+        cmd = "python3 portal_start.py --instance "+name
         pm = self.prefab.system.processmanager.get()
-        pm.ensure('portal', cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, 'main'))
+        pm.ensure('portal-'+name, cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, name))
 
         if passwd is not None:
             self.set_admin_password(passwd)
 
-    def stop(self):
+    def stop(self, name='main'):
         pm = self.prefab.system.processmanager.get()
-        pm.stop('portal')
+        pm.stop('portal-'+name)
 
     def set_admin_password(self, passwd):
         # wait for the admin user to be created by portal
