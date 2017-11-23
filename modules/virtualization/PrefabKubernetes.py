@@ -47,8 +47,7 @@ class PrefabKubernetes(app):
         elif master.executor.type == 'ssh':
             external_ips = [master.executor.sshclient.addr]
 
-        join_line = master.virtualization.kubernetes.install_master(
-            external_ips)
+        join_line = master.virtualization.kubernetes.install_master(external_ips=external_ips)
         for node in nodes:
             node.virtualization.kubernetes.install_minion(join_line)
         conf_text = master.core.file_read('/etc/kubernetes/kubelet.conf')
@@ -125,7 +124,6 @@ class PrefabKubernetes(app):
         cmd = 'kubeadm init --pod-network-cidr=%s' % (kube_cidr)
         if external_ips:
             cmd += ' --apiserver-cert-extra-sans=%s' % ','.join(external_ips)
-
         rc, out, err = self.prefab.core.run(cmd)
         if rc != 0:
             raise RuntimeError(err)
