@@ -77,11 +77,14 @@ def run_in_parallel(fns):
             p[0].terminate()
 
     # collect errors
+    errors = []
     for p in proc:
         if p[0].exception:
-            print('Errors while running {}()'.format(p[2]))
-            print(p[0].exception)
-            print()
+            errors.append('Errors while running {}()'.format(p[2]))
+            errors.append(p[0].exception)
+            errors.append('\n')
+    if errors:
+        raise RuntimeError('Errors: {}'.format('\n'.join(errors)))
         
         
 def main():
