@@ -23,12 +23,11 @@ class PrefabPortal(base):
             redirect_address='',
             name='main'):
 
-        self.portal_name = name
         cfg = self.prefab.executor.state.configGet('portal')
-        cfg[self.portal_name]['production'] = production
+        cfg[name]['production'] = production
 
         if production:
-            oauth_cfg = cfg[self.portal_name]['oauth']
+            oauth_cfg = cfg[name]['oauth']
             oauth_cfg['client_id'] = client_id
             oauth_cfg['client_scope'] = 'user:email:main,user:memberof:%s' % client_id
             oauth_cfg['client_secret'] = client_secret
@@ -37,7 +36,7 @@ class PrefabPortal(base):
             oauth_cfg['organization'] = organization
             oauth_cfg['redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
 
-        cfg[self.portal_name]['mongoengine'] = {'host': mongodbip, 'port': mongoport}
+        cfg[name]['mongoengine'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
 
     def add_configuration(self, config_dict, name="main"):
@@ -45,16 +44,10 @@ class PrefabPortal(base):
         use this method when ever u want to add some config to portal
         usually when u add a new space
         """
-        self.portal_name = name
         cfg = self.prefab.executor.state.configGet('portal')
         for key, value in config_dict.items():
-            cfg[self.portal_name][key] = value
+            cfg[name][key] = value
         self.prefab.executor.state.configSet('portal',cfg)
-
-    @property
-    def configPath(self):
-        return j.sal.fs.joinPaths(self.prefab.core.dir_paths['CFGDIR'],
-                                  "portals", self.portal_name, "config.yaml")
 
     def install(self, start=True, branch='master', reset=False, name="main", port='8200', ip='127.0.0.1'):
         """
@@ -62,12 +55,11 @@ class PrefabPortal(base):
         Portal install will only install the portal and libs. No spaces but the system ones will be add by default.
         To add spaces and actors, please use addSpace and addactor
         """
-        self.portal_name = name
         self.logger.info("Install prefab portal on branch:'%s'" % branch)
-        self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
+        self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, name))
         self.prefab.bash.fixlocale()
-        if not reset and self.doneGet("install-"+self.portal_name):
-            self.linkCode()
+        if not reset and self.doneGet("install-"+name):
+            self.linkCode(name=name)
             if start:
                 self.start(name=name)
             return
@@ -78,10 +70,10 @@ class PrefabPortal(base):
 
         # install the dependencies if required
         self.getcode(branch=branch)
-        self.installDeps(reset=reset)
+        self.installDeps(reset=reset, name=name)
 
         # pull repo with required branch ; then link dirs and files in required places
-        self.linkCode()
+        self.linkCode(name=name)
         portal_config_path = '%s/github/jumpscale/portal9/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
         portal_config_data = self.prefab.core.file_read(portal_config_path)
         portal_config_data = portal_config_data.format(name=name, port=port, ip=ip)
@@ -94,7 +86,7 @@ class PrefabPortal(base):
         if start:
             self.start(name=name)
 
-        self.doneSet("install-"+self.portal_name)
+        self.doneSet("install-"+name)
 
     def installNodeJSLibs(self):
         self.prefab.apps.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
@@ -112,11 +104,11 @@ class PrefabPortal(base):
                                                "jqwidgets",
                                                "d3"])  # , "angular-latest"])
 
-    def installDeps(self, reset=False):
+    def installDeps(self, reset=False, name="main"):
         """
         make sure new env arguments are understood on platform
         """
-        if not reset and self.doneGet("installdeps"+self.portal_name):
+        if not reset and self.doneGet("installdeps"+name):
             return
 
         if "darwin" not in self.prefab.platformtype.osname:
@@ -142,7 +134,7 @@ class PrefabPortal(base):
             pip3 install -e .
             """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
         self.prefab.core.execute_bash(cmd)
-        self.doneSet("installdeps"+self.portal_name)
+        self.doneSet("installdeps"+name)
 
     def getcode(self, branch='master'):
         self.logger.info("Get portal code on branch:'%s'" % branch)
@@ -151,7 +143,7 @@ class PrefabPortal(base):
         self.prefab.tools.git.pullRepo(
             "https://github.com/Jumpscale/portal9.git", branch=branch, ignorelocalchanges=False)
 
-    def linkCode(self):
+    def linkCode(self, name="main"):
 
         if not self.portal_dir.endswith("/"):
             self.portal_dir += '/'
@@ -170,17 +162,17 @@ class PrefabPortal(base):
         self.prefab.core.file_link("%s/github/jumpscale/portal9/apps/portalbase/templates" %
                                     CODE_DIR, '%s/portalbase/templates' % self.portal_dir)
 
-        self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
+        self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, name))
 
-        self.prefab.core.dir_ensure('%s/base/' % j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
+        self.prefab.core.dir_ensure('%s/base/' % j.sal.fs.joinPaths(self.portal_dir, name))
 
-        self.prefab.core.dir_ensure("$CFGDIR/portals/"+self.portal_name+"/")
+        self.prefab.core.dir_ensure("$CFGDIR/portals/"+name+"/")
         # copy portal_start.py
         self.prefab.core.file_copy(
             j.sal.fs.joinPaths(
                 CODE_DIR,
                 'github/jumpscale/portal9/apps/portalbase/portal_start.py'),
-            j.sal.fs.joinPaths(self.portal_dir, self.portal_name))
+            j.sal.fs.joinPaths(self.portal_dir, name))
         self.prefab.core.file_copy("%s/jslib/old/images" % self.portal_dir,
                                     "%s/jslib/old/elfinder" % self.portal_dir, recursive=True)
         # link spaces
@@ -193,7 +185,7 @@ class PrefabPortal(base):
         for space in to_link:
             space_name = j.sal.fs.getBaseName(space)
             if space_name not in ['home', 'TestWebsite', 'TestSpace']:
-                self.prefab.core.file_link(source=space, destination='$JSAPPSDIR/portals/'+self.portal_name+'/base/%s' % space_name)
+                self.prefab.core.file_link(source=space, destination='$JSAPPSDIR/portals/'+name+'/base/%s' % space_name)
 
     def addSpace(self, spacepath, name='main'):
         spacename = j.sal.fs.getBaseName(spacepath)
