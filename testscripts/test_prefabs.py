@@ -85,7 +85,18 @@ def run_in_parallel(fns):
             errors.append('\n')
     if errors:
         raise RuntimeError('Errors: {}'.format('\n'.join(errors)))
-        
+
+def run(fns):
+    errors = []
+    for fn in fns:
+        try:
+            fn[0](*fn[1:])
+        except Exception:
+            errors.append('Errors while running {}()'.format(fn[2]))
+            errors.append(traceback.format_exc())
+            errors.append('\n')
+    if errors:
+        raise RuntimeError('Errors: {}'.format('\n'.join(errors)))
         
 def main():
     to_run = list()
@@ -97,7 +108,9 @@ def main():
             mod = getattr(cat, module)
             module_name = '{}.{}'.format(cat_name, module)
             to_run.append((prefab_module, mod, module_name))
-    run_in_parallel(to_run)
+
+    # run_in_parallel(to_run)
+    run(to_run)
 
 if __name__ == '__main__':
     main()
