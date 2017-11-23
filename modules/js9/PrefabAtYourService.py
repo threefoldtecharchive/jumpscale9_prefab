@@ -23,8 +23,7 @@ class PrefabAtYourService(base):
                 'organization': organization
             }
         }
-        j.application.config['ays'] = ays_config
-        j.core.state.configSave()
+        self.executor.state.configSet('ays', ays_config, save=True)
 
     def configure_portal(self, host="http://localhost", port="5000", portal="main"):
         if not host.startswith('http'):
