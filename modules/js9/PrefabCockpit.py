@@ -28,7 +28,7 @@ class PrefabCockpit(base):
             production=production,
             client_id=client_id,
             client_secret=portal_secret,
-            organization=organization,
+            scope_organization=organization,
             redirect_address='%s:8200' %
             ip)
 
