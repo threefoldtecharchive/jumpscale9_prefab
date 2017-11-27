@@ -578,6 +578,8 @@ class PrefabCore(base):
         base = j.sal.fs.getBaseName(path)
         if base.endswith(".tgz"):
             base = base[:-4]
+        if base.endswith(".tar.gz"):
+            base = base[:-7]
         elif base.endswith(".gz"):
             base = base[:-3]
         elif base.endswith(".bz2"):
@@ -610,7 +612,7 @@ class PrefabCore(base):
         elif path.endswith(".bz2"):
             cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)
         elif path.endswith(".zip"):
-            cmd = "cd %s;rm -rf %s;mkdir -p %s;cd %s;unzip %s" % (j.sal.fs.getDirName(path),base,base,base, path)
+            cmd = "cd %s;rm -rf %s;mkdir -p %s;cd %s;unzip %s" % (j.sal.fs.getDirName(path), base, base, base, path)
         else:
             raise j.exceptions.RuntimeError(
                 "file_expand format not supported yet for %s" % path)
