@@ -45,6 +45,8 @@ class PrefabZerotier(base):
             self.install()
 
     def install(self):
+        if not self.doneGet("build"):
+            self.build(install=False)
         bindir = self.prefab.core.dir_paths['BINDIR']
         self.prefab.core.dir_ensure(bindir)
         for item in self.prefab.core.find(j.sal.fs.joinPaths(self.BUILDDIRL, 'usr/sbin')):
