@@ -1064,14 +1064,26 @@ class PrefabCore(base):
     # =============================================================================
 
     def joinpaths(self, *args):
-        path = ""
-        seperator = "\\"
+        if len(args) <= 0:
+            return None
+
+        if len(args) == 1:
+            return args[0]
+
+        path = args[0]
+        sep = "\\"
         if self.isMac or self.isUbuntu or self.isArch:
-            seperator = "/"
-        for arg in args:
-            path += "%s%s" % (seperator, arg)
-        path = self.replace(path)
-        return path
+            sep = "/"
+
+        for b in args[1:]:
+            if b.startswith(sep):
+                path = b
+            elif not path or path.endswith(sep):
+                path += b
+            else:
+                path += sep + b
+
+        return self.replace(path)
 
     def dir_attribs(self, location, mode=None, owner=None, group=None, recursive=False, showout=False):
         """Updates the mode / owner / group for the given remote directory."""
