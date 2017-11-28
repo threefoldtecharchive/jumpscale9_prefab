@@ -53,7 +53,7 @@ class PrefabKubernetes(app):
         conf_text = master.core.file_read('/etc/kubernetes/kubelet.conf')
         self.doneSet("multihost_install")
 
-        return j.data.serializer.yaml.loads(conf_text), join_line
+        return conf_text, join_line
 
     def install_dependencies(self, reset=False):
         """
