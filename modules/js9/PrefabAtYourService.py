@@ -1,4 +1,5 @@
 from js9 import j
+import re
 
 base = j.tools.prefab._getBaseClass()
 
@@ -36,10 +37,29 @@ class PrefabAtYourService(base):
         self.prefab.web.portal.stop()
         self.prefab.web.portal.start()
 
+    def configure_api_console(self, host="localhost", port=5000):
+        """Configure AYS API Console
+
+         Allows the user to configure AYS API Console with desired host and port
+
+        Keyword Arguments:
+            host {string} -- desired ays console api host (default: {"localhost"})
+            port {int} -- desired ays console api port (default: {5000})
+        """
+
+        raml_path = "$JSAPPSDIR/atyourservice/JumpScale9AYS/ays/server/apidocs/api.raml"
+        raml = self.prefab.core.file_read(raml_path)
+
+        host = host.replace('http://', '').replace('https://', '')
+        newBaseUri = 'http://%s:%s' % (host, port) if port else 'http://%s' % host
+        raml = re.sub(
+            r'baseUri: http://.*',
+            r'baseUri: %s' % newBaseUri,
+            raml
+            )
+        self.prefab.core.file_write(raml_path, raml)
+
     def get_code(self, branch):
-        """
-        Pull the ays repo if doesnt exist
-        """
         if not branch:
             branch = self.prefab.bash.env.get('JS9BRANCH', 'master')
         self.logger.info("Get ays code on branch:'%s'" % branch)
@@ -93,7 +113,7 @@ class PrefabAtYourService(base):
         if not j.sal.fs.exists(j.sal.fs.joinPaths(self.base_dir, 'main.py')):
             self.logger.warning('AYS is not installed. Installing it...')
             self.install()
-            
+
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
                                                                                       host=host, port=port, log=log)
         if dev:
