@@ -704,7 +704,9 @@ class PrefabCore(base):
         return in kb
         """
 
-        out = self.run("du -Lck %s" % path, showout=False)[1]
+        rc, out, err = self.run("du -Lck %s" % path, showout=False)
+        if rc != 0 or err:
+            raise j.exceptions.RuntimeError('Failed to get % size: %s' % (path, err))
         res = out.split("\n")[-1].split("\t")[0].split(" ")[0]
         return int(res)
 
