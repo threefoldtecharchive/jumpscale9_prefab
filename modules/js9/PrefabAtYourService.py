@@ -68,7 +68,7 @@ class PrefabAtYourService(base):
         """
         if install_portal:
             self.prefab.web.portal.install()
-        if j.sal.fs.exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
+        if self.core.file_exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
             self.prefab.web.portal.addSpace('{}apps/AYS'.format(self.repo_dir))
             self.prefab.web.portal.addActor('{}apps/ays__tools'.format(self.repo_dir))
 
