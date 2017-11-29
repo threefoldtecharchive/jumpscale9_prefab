@@ -578,7 +578,7 @@ class PrefabCore(base):
         base = j.sal.fs.getBaseName(path)
         if base.endswith(".tgz"):
             base = base[:-4]
-        if base.endswith(".tar.gz"):
+        elif base.endswith(".tar.gz"):
             base = base[:-7]
         elif base.endswith(".gz"):
             base = base[:-3]
