@@ -39,7 +39,7 @@ class PrefabPortal(base):
 
         if production:
             if not (client_id and client_secret and scope_organization and redirect_address):
-                raise j.exceptions.Input('client_id, client_secret, scope_organization are mandatory for production')
+                raise j.exceptions.Input('client_id, client_secret, scope_organization, redirect_address are mandatory for production')
 
             oauth_cfg = cfg[name]['oauth']
             oauth_cfg['client_id'] = client_id
