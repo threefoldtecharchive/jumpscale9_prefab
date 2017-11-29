@@ -30,7 +30,7 @@ class PrefabPortal(base):
         :param client_id: itsyou.online client_id/organization
         :param client_secret: itsyou.online client_secret
         :param scope_organization: itsyou.online organization that the user should be member of
-        :param redirect_address: url to which itsyou.online should be redirected
+        :param redirect_address: url to which itsyou.online should be redirected; example 'http://172.0.0.1:5000'
         :param name: name of the portal; default -> "main"
         """
 
@@ -47,7 +47,7 @@ class PrefabPortal(base):
             oauth_cfg['client_secret'] = client_secret
             oauth_cfg['force_oauth_instance'] = 'itsyou.online'
             oauth_cfg['default_groups'] = ['admin', 'user']
-            oauth_cfg['redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
+            oauth_cfg['redirect_url'] = '%s/restmachine/system/oauth/authorize' % redirect_address
 
         cfg[name]['mongoengine'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
