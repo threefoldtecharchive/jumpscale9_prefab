@@ -37,24 +37,21 @@ class PrefabAtYourService(base):
         self.prefab.web.portal.stop()
         self.prefab.web.portal.start()
 
-    def configure_api_console(self, host="localhost", port=5000):
+    def configure_api_console(self, url="http://localhost:5000"):
         """Configure AYS API Console
 
          Allows the user to configure AYS API Console with desired host and port
 
         Keyword Arguments:
-            host {string} -- desired ays console api host (default: {"localhost"})
-            port {int} -- desired ays console api port (default: {5000})
+            url {string} -- desired ays console api binding (default: {"http://localhost:5000"})
         """
 
         raml_path = "$JSAPPSDIR/atyourservice/JumpScale9AYS/ays/server/apidocs/api.raml"
         raml = self.prefab.core.file_read(raml_path)
 
-        host = host.replace('http://', '').replace('https://', '')
-        newBaseUri = 'http://%s:%s' % (host, port) if port else 'http://%s' % host
         raml = re.sub(
-            r'baseUri: http://.*',
-            r'baseUri: %s' % newBaseUri,
+            r'baseUri: .*',
+            r'baseUri: %s' % url,
             raml
             )
         self.prefab.core.file_write(raml_path, raml)
@@ -71,7 +68,7 @@ class PrefabAtYourService(base):
         """
         if install_portal:
             self.prefab.web.portal.install()
-        if j.sal.fs.exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
+        if self.core.file_exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
             self.prefab.web.portal.addSpace('{}apps/AYS'.format(self.repo_dir))
             self.prefab.web.portal.addActor('{}apps/ays__tools'.format(self.repo_dir))
 
