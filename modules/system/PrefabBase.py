@@ -50,6 +50,7 @@ class PrefabBase(base):
         git
         mc
         tmux
+        rsync
         """
         self.prefab.system.package.install(C)
 
@@ -60,6 +61,29 @@ class PrefabBase(base):
         self.upgrade(reset=reset, update=False)
 
         self.doneSet("install")
+
+    def development(self,reset=False):
+        """
+        install all components required for building (compiling)
+        """
+        C = """
+        autoconf
+        libffi-dev
+        gcc
+        make
+        build-essential
+        autoconf
+        libtool
+        pkg-config
+        libpq-dev
+        libsqlite3-dev
+        python3-dev
+        """
+        self.install()
+        if self.doneCheck("development", reset):
+            return        
+        self.prefab.system.package.install(C)   
+        self.doneSet("development")     
 
     def upgrade(self, reset=False, update=True):
         if self.doneCheck("upgrade", reset):

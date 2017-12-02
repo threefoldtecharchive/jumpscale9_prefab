@@ -69,6 +69,45 @@ class PrefabNodeJS(app):
 
         self.doneSet("phantomjs")
 
+    def npm_install(self, name,global_=True,reset=False):
+        """
+        @PARAM cmdname is the optional cmd name which will be used to put in path of the env (as alias to the name)
+        """
+        self.logger.info("npm install:%s"%name)
+        key="npm_%s"%name
+        if self.doneGet(key) and not reset:
+            return
+
+        if global_:
+            if self.prefab.core.isMac:
+                sudo="sudo "
+            else:
+                sudo=""
+            cmd = "cd /tmp;%snpm install -g %s --unsafe-perm=true --allow-root"%(sudo,name)
+        else:
+            cmd = "cd %s;npm i %s" % (self.NODE_PATH, name)
+        
+        self.prefab.core.run(cmd)
+
+        # cmdpath = "%s/nodejs_modules/node_modules/%s/bin/%s" % (
+        #     j.dirs.VARDIR, name, name)
+
+        # from IPython import embed
+        # embed(colors='Linux')
+
+        # if j.sal.fs.exists(srcCmd):
+        #     j.sal.fs.chmod(srcCmd, 0o770)
+        #     j.sal.fs.symlink(srcCmd, "/usr/local/bin/%s" %
+        #                      name, overwriteTarget=True)
+        #     j.sal.fs.chmod(srcCmd, 0o770)
+
+        # if j.sal.fs.exists(cmdpath):
+        #     j.sal.fs.symlink(cmdpath, "/usr/local/bin/%s" %
+        #                      name, overwriteTarget=True)
+
+        self.doneSet(key)
+                             
+
     def install(self, reset=False):
         """
         """
@@ -98,10 +137,10 @@ class PrefabNodeJS(app):
             url, expand=True, overwrite=False, to="$TMPDIR/node")
 
         self.core.run("rm -rf /opt/node;mv %s /opt/node" % (cdest))
-        self.core.run('mv /opt/node/%s/* /opt/node' % j.sal.fs.getBaseName(url.strip('.tar.gz')))
-        self.core.run("rm /usr/local/bin/node;ln -s /opt/node/bin/node /usr/local/bin/node")
-        self.core.run("rm /usr/local/bin/npm;ln -s /opt/node/bin/npm /usr/local/bin/npm")
-        self.core.run("rm /usr/local/bin/npx;ln -s /opt/node/bin/npx /usr/local/bin/npx")
+
+        if self.prefab.core.isMac:
+            self.core.run('mv /opt/node/%s/* /opt/node' %
+                          j.sal.fs.getBaseName(url.strip('.tar.gz')))
 
         self.prefab.bash.profileDefault.envSet("NODE_PATH", self.NODE_PATH)
         self.prefab.bash.profileDefault.addPath(

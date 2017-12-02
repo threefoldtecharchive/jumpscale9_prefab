@@ -348,7 +348,7 @@ class PrefabCore(base):
 
     def copyTree(self, source, dest, keepsymlinks=False, deletefirst=False,
                  overwriteFiles=True, ignoredir=[".egg-info", ".dist-info"], ignorefiles=[".egg-info"],
-                 recursive=True, rsyncdelete=False, createdir=False, ssh=False, sshport=22):
+                 recursive=True, rsyncdelete=False, createdir=False):
         """
         std excludes are done like "__pycache__" no matter what you specify
         Recursively copy an entire directory tree rooted at src.
@@ -362,109 +362,109 @@ class PrefabCore(base):
         """
         source = self.replace(source)
         dest = self.replace(dest)
-        if not ssh and not self.exists(source):
-            raise RuntimeError("copytree:Cannot find source:%s" % source)
 
-        if ssh:
-            excl = ""
-            for item in ignoredir:
-                excl += "--exclude '%s/' " % item
-            for item in ignorefiles:
-                excl += "--exclude '%s' " % item
-            excl += "--exclude '*.pyc' "
-            excl += "--exclude '*.bak' "
-            excl += "--exclude '*__pycache__*' "
+        # if ssh:
+        excl = ""
+        for item in ignoredir:
+            excl += "--exclude '%s/' " % item
+        for item in ignorefiles:
+            excl += "--exclude '%s' " % item
+        excl += "--exclude '*.pyc' "
+        excl += "--exclude '*.bak' "
+        excl += "--exclude '*__pycache__*' "
 
-            pre = ""
-            if self.executor.type == 'local':
-                dest = dest.split(':')[1] if ':' in dest else dest
-            if 'darwin' not in self.prefab.platformtype.osname:
-                self.prefab.system.package.ensure('rsync')
-            if self.file_is_dir(source):
-                if dest[-1] != "/":
-                    dest += "/"
-                if source[-1] != "/":
-                    source += "/"
+        pre = ""
+        if self.executor.type == 'local':
+            dest = dest.split(':')[1] if ':' in dest else dest
+        # if 'darwin' not in self.prefab.platformtype.osname:
+        #     self.prefab.system.package.ensure('rsync')
+        if self.file_is_dir(source):
+            if dest[-1] != "/":
+                dest += "/"
+            if source[-1] != "/":
+                source += "/"
 
-            dest = dest.replace("//", "/")
-            source = source.replace("//", "/")
+        dest = dest.replace("//", "/")
+        source = source.replace("//", "/")
 
-            if deletefirst:
-                pre = "set -ex;rm -rf %s;mkdir -p %s;" % (dest, dest)
-            elif createdir:
-                pre = "set -ex;mkdir -p %s;" % dest
+        if deletefirst:
+            pre = "set -ex;rm -rf %s;mkdir -p %s;" % (dest, dest)
+        elif createdir:
+            pre = "set -ex;mkdir -p %s;" % dest
 
-            cmd = "%srsync " % pre
-            if keepsymlinks:
-                #-l is keep symlinks, -L follow
-                cmd += " -rlptgo --partial %s" % excl
-            else:
-                cmd += " -rLptgo --partial %s" % excl
-            if not recursive:
-                cmd += " --exclude \"*/\""
-            if rsyncdelete:
-                cmd += " --delete"
-            if ssh:
-                cmd += " -e 'ssh -o StrictHostKeyChecking=no -p %s' " % sshport
-            cmd += " '%s' '%s'" % (source, dest)
-
-            self.run(cmd, showout=False)
-            return
+        cmd = "%srsync " % pre
+        if keepsymlinks:
+            #-l is keep symlinks, -L follow
+            cmd += " -rlptgo --partial %s" % excl
         else:
-            self.logger.info('Copy directory tree from %s to %s' % (source, dest))
-            if ((source is None) or (dest is None)):
-                raise TypeError(
-                    'Not enough parameters passed in system.fs.copyTree to copy directory from %s to %s ' %
-                    (source, dest))
-            if self.file_is_dir(source):
-                _, names, _ = self.run('ls %s' % source)
-                names = names.split('\n')
-                if not self.exists(dest):
-                    self.createDir(dest)
+            cmd += " -rLptgo --partial %s" % excl
+        if not recursive:
+            cmd += " --exclude \"*/\""
+        if rsyncdelete:
+            cmd += " --delete"
+        # if ssh:
+        #     cmd += " -e 'ssh -o StrictHostKeyChecking=no -p %s' " % sshport
+        cmd += " '%s' '%s'" % (source, dest)
 
-                for name in names:
-                    if not name.strip():
-                        continue
-                    print("NAME: ", name)
-                    srcname = j.sal.fs.joinPaths(source, name)
-                    dstname = j.sal.fs.joinPaths(dest, name)
-                    if deletefirst and self.exists(dstname):
-                        if self.file_is_dir(dstname):
-                            self.dir_remove(dstname)
-                        if self.file_is_link(dstname):
-                            self.file_unlink(dstname)
+        self.run(cmd, showout=False)
+        return
+        # else:
+        #     self.logger.info('Copy directory tree from %s to %s' %
+        #                      (source, dest))
+        #     if ((source is None) or (dest is None)):
+        #         raise TypeError(
+        #             'Not enough parameters passed in system.fs.copyTree to copy directory from %s to %s ' %
+        #             (source, dest))
+        #     if self.file_is_dir(source):
+        #         _, names, _ = self.run('ls %s' % source)
+        #         names = names.split('\n')
+        #         if not self.exists(dest):
+        #             self.createDir(dest)
 
-                    if keepsymlinks and self.file_is_link(srcname):
-                        _, linkto, _ = self.run("readlink %s " % srcname)
-                        try:
-                            self.file_link(linkto, dstname)
-                        except BaseException:
-                            pass
-                            # TODO: very ugly change
-                    elif self.file_is_dir(srcname):
-                        self.copyTree(
-                            srcname,
-                            dstname,
-                            keepsymlinks,
-                            deletefirst,
-                            overwriteFiles=overwriteFiles,
-                            ignoredir=ignoredir)
-                    else:
-                        extt = j.sal.fs.getFileExtension(srcname)
-                        if extt == "pyc" or extt == "egg-info":
-                            continue
-                        is_ignored = False
-                        for item in ignorefiles:
-                            if srcname.find(item) != -1:
-                                is_ignored = True
-                                break
-                        if is_ignored:
-                            continue
-                        self.file_copy(srcname, dstname, overwrite=overwriteFiles)
-            else:
-                raise RuntimeError(
-                    'Source path %s in system.fs.copyTree is not a directory' %
-                    source)
+        #         for name in names:
+        #             if not name.strip():
+        #                 continue
+        #             print("NAME: ", name)
+        #             srcname = j.sal.fs.joinPaths(source, name)
+        #             dstname = j.sal.fs.joinPaths(dest, name)
+        #             if deletefirst and self.exists(dstname):
+        #                 if self.file_is_dir(dstname):
+        #                     self.dir_remove(dstname)
+        #                 if self.file_is_link(dstname):
+        #                     self.file_unlink(dstname)
+
+        #             if keepsymlinks and self.file_is_link(srcname):
+        #                 _, linkto, _ = self.run("readlink %s " % srcname)
+        #                 try:
+        #                     self.file_link(linkto, dstname)
+        #                 except BaseException:
+        #                     pass
+        #                     # TODO: very ugly change
+        #             elif self.file_is_dir(srcname):
+        #                 self.copyTree(
+        #                     srcname,
+        #                     dstname,
+        #                     keepsymlinks,
+        #                     deletefirst,
+        #                     overwriteFiles=overwriteFiles,
+        #                     ignoredir=ignoredir)
+        #             else:
+        #                 extt = j.sal.fs.getFileExtension(srcname)
+        #                 if extt == "pyc" or extt == "egg-info":
+        #                     continue
+        #                 is_ignored = False
+        #                 for item in ignorefiles:
+        #                     if srcname.find(item) != -1:
+        #                         is_ignored = True
+        #                         break
+        #                 if is_ignored:
+        #                     continue
+        #                 self.file_copy(srcname, dstname,
+        #                                overwrite=overwriteFiles)
+        #     else:
+        #         raise RuntimeError(
+        #             'Source path %s in system.fs.copyTree is not a directory' %
+        #             source)
 
     def file_backup(self, location, suffix=".orig", once=False):
         """Backups the file at the given location in the same directory, appending
@@ -574,6 +574,7 @@ class PrefabCore(base):
         return to
 
     def file_expand(self, path, destination="", removeTopDir=False):
+        self.logger.info("file_expand:%s" % path)
         path = self.replace(path)
         base = j.sal.fs.getBaseName(path)
         if base.endswith(".tgz"):
@@ -612,7 +613,8 @@ class PrefabCore(base):
         elif path.endswith(".bz2"):
             cmd = "cd %s;bzip2 -d %s" % (j.sal.fs.getDirName(path), path)
         elif path.endswith(".zip"):
-            cmd = "cd %s;rm -rf %s;mkdir -p %s;cd %s;unzip %s" % (j.sal.fs.getDirName(path), base, base, base, path)
+            cmd = "cd %s;rm -rf %s;mkdir -p %s;cd %s;unzip %s" % (
+                j.sal.fs.getDirName(path), base, base, base, path)
         else:
             raise j.exceptions.RuntimeError(
                 "file_expand format not supported yet for %s" % path)
@@ -1256,13 +1258,14 @@ class PrefabCore(base):
             # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
             # next will check if profile path exists, if not will put it
+            cmd0=cmd
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
                 ppath, ppath, ppath, cmd)
 
             if showout:
-                self.logger.info("PROFILECMD:%s" % cmd)
+                self.logger.info("RUN:%s" % cmd0)
             else:
-                self.logger.debug("PROFILECMD:%s" % cmd)
+                self.logger.debug("RUN:%s" % cmd0)
             shell = True
         if shell and '"' in cmd:
             cmd = cmd.replace('"', '\\"')
