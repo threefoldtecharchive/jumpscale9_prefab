@@ -21,15 +21,15 @@ class PrefabApache2(app):
         self.prefab.core.dir_ensure("/optvar/build")
 
         # DOWNLOAD LINK
-        DOWNLOADLINK = 'https://www.apache.org/dist/httpd/httpd-2.4.25.tar.bz2'
-        dest = j.sal.fs.joinPaths("/optvar", 'httpd-2.4.25.tar.bz2')
+        DOWNLOADLINK = 'www-eu.apache.org/dist//httpd/httpd-2.4.29.tar.bz2'
+        dest = j.sal.fs.joinPaths("/optvar", 'httpd-2.4.29.tar.bz2')
 
         if not self.prefab.core.file_exists(dest):
             self.prefab.core.file_download(DOWNLOADLINK, dest)
 
         # EXTRACT SROURCE CODE
         self.prefab.core.run(
-            "cd /optvar/build && tar xjf {dest} && cp -r /optvar/build/httpd-2.4.25 /optvar/build/httpd".format(**locals()))
+            "cd /optvar/build && tar xjf {dest} && cp -r /optvar/build/httpd-2.4.29 /optvar/build/httpd".format(**locals()))
         self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/bin")
         self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/lib")
 

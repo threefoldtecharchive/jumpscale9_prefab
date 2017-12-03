@@ -460,7 +460,7 @@ class PrefabCore(base):
                                 break
                         if is_ignored:
                             continue
-                        self.file_copy(srcname, dstname, overwrite=overwriteFiles)
+                        self.file_copy(srcname, dstname, overwrite=overwriteFiles, recursive=recursive)
             else:
                 raise RuntimeError(
                     'Source path %s in system.fs.copyTree is not a directory' %
@@ -986,6 +986,9 @@ class PrefabCore(base):
         self.file_attribs(destination, mode, owner, group)
 
     def file_copy(self, source, dest, recursive=False, overwrite=True):
+        source = source.replace(" ", "\ ")
+        dest = dest.replace(" ", "\ ")
+
         source = self.replace(source)
         dest = self.replace(dest)
         cmd = "cp -v "
@@ -996,6 +999,8 @@ class PrefabCore(base):
                 cmd += " -n "
             else:
                 cmd += " --no-clobber "
+
+
 
         if self.isMac:
             cmd += '%s %s' % (source.rstrip("/"), dest)

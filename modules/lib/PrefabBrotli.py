@@ -13,7 +13,7 @@ class PrefabBrotli(app):
     def build(self, reset=False):
         if reset is False and (self.isInstalled() or self.doneGet('build')):
             return
-        cmake = self.prefab.development.cmake
+        cmake = self.prefab.lib.cmake
         if not cmake.isInstalled():
             cmake.install()
         git_url = "https://github.com/google/brotli.git"
