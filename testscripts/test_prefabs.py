@@ -75,6 +75,7 @@ def run_in_parallel(fns):
         # if process is still alive after the timeout, we terminate and set the exception as timeout exception
         if p[0].is_alive():
             p[0].terminate()
+            p[0].exception = 'Job timed out after {} seconds'.format(PROCESS_TIMEOUT)
 
     # collect errors
     errors = []
@@ -89,14 +90,20 @@ def run_in_parallel(fns):
 def run(fns):
     errors = []
     for fn in fns:
-        try:
-            fn[0](*fn[1:])
-        except Exception:
-            errors.append('Errors while running {}()'.format(fn[2]))
-            errors.append(traceback.format_exc())
+        p = Process(target=fn[0], args=fn[1:])
+        p.start()
+        p.join(PROCESS_TIMEOUT)
+        # if process is still alive after the timeout, we terminate and set the exception as timeout exception
+        if p.is_alive():
+            p.terminate()
+            p.exception = 'Job timed out after {} seconds'.format(PROCESS_TIMEOUT)
+        if p.exception:
+            errors.append('Errors while running {}()'.format(p[2]))
+            errors.append(p.exception)
             errors.append('\n')
     if errors:
         raise RuntimeError('Errors: {}'.format('\n'.join(errors)))
+
         
 def main():
     to_run = list()
