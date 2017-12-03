@@ -1,4 +1,5 @@
 from js9 import j
+import re
 
 base = j.tools.prefab._getBaseClass()
 
@@ -36,10 +37,26 @@ class PrefabAtYourService(base):
         self.prefab.web.portal.stop()
         self.prefab.web.portal.start()
 
+    def configure_api_console(self, url="http://localhost:5000"):
+        """Configure AYS API Console
+
+         Allows the user to configure AYS API Console with desired host and port
+
+        Keyword Arguments:
+            url {string} -- desired ays console api binding (default: {"http://localhost:5000"})
+        """
+
+        raml_path = "$JSAPPSDIR/atyourservice/JumpScale9AYS/ays/server/apidocs/api.raml"
+        raml = self.prefab.core.file_read(raml_path)
+
+        raml = re.sub(
+            r'baseUri: .*',
+            r'baseUri: %s' % url,
+            raml
+            )
+        self.prefab.core.file_write(raml_path, raml)
+
     def get_code(self, branch):
-        """
-        Pull the ays repo if doesnt exist
-        """
         if not branch:
             branch = self.prefab.bash.env.get('JS9BRANCH', 'master')
         self.logger.info("Get ays code on branch:'%s'" % branch)
@@ -51,7 +68,7 @@ class PrefabAtYourService(base):
         """
         if install_portal:
             self.prefab.web.portal.install()
-        if j.sal.fs.exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
+        if self.core.file_exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
             self.prefab.web.portal.addSpace('{}apps/AYS'.format(self.repo_dir))
             self.prefab.web.portal.addActor('{}apps/ays__tools'.format(self.repo_dir))
 
@@ -93,7 +110,7 @@ class PrefabAtYourService(base):
         if not j.sal.fs.exists(j.sal.fs.joinPaths(self.base_dir, 'main.py')):
             self.logger.warning('AYS is not installed. Installing it...')
             self.install()
-            
+
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
                                                                                       host=host, port=port, log=log)
         if dev:

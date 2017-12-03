@@ -19,22 +19,35 @@ class PrefabPortal(base):
             production=True,
             client_id='',
             client_secret='',
-            organization='',
+            scope_organization='',
             redirect_address='',
             name='main'):
+        """
+        Configure portal
+        :param mongodbip: mongodb ip to which portal will connect ; default -> "127.0.0.1"
+        :param mongoport: mongodb port to which portal will connect ; default -> 27017
+        :param production: production flag; default -> True
+        :param client_id: itsyou.online client_id/organization
+        :param client_secret: itsyou.online client_secret
+        :param scope_organization: itsyou.online organization that the user should be member of
+        :param redirect_address: url to which itsyou.online should be redirected; example 'http://172.0.0.1:5000'
+        :param name: name of the portal; default -> "main"
+        """
 
         cfg = self.prefab.executor.state.configGet('portal')
         cfg[name]['production'] = production
 
         if production:
+            if not (client_id and client_secret and scope_organization and redirect_address):
+                raise j.exceptions.Input('client_id, client_secret, scope_organization, redirect_address are mandatory for production')
+
             oauth_cfg = cfg[name]['oauth']
             oauth_cfg['client_id'] = client_id
-            oauth_cfg['client_scope'] = 'user:email:main,user:memberof:%s' % client_id
+            oauth_cfg['client_scope'] = 'user:email:main,user:memberof:%s' % scope_organization
             oauth_cfg['client_secret'] = client_secret
             oauth_cfg['force_oauth_instance'] = 'itsyou.online'
             oauth_cfg['default_groups'] = ['admin', 'user']
-            oauth_cfg['organization'] = organization
-            oauth_cfg['redirect_url'] = 'http://%s/restmachine/system/oauth/authorize' % redirect_address
+            oauth_cfg['redirect_url'] = '%s/restmachine/system/oauth/authorize' % redirect_address
 
         cfg[name]['mongoengine'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
@@ -79,9 +92,9 @@ class PrefabPortal(base):
         portal_config_data = portal_config_data.format(name=name, port=port, ip=ip)
         portal_config = pytoml.loads(portal_config_data)
 
-        cvg = self.prefab.executor.state.configGet('portal')
-        cvg[name] = portal_config['portal'][name]
-        self.prefab.executor.state.configSet('portal', cvg)
+        cfg = self.prefab.executor.state.configGet('portal', defval=portal_config['portal'], set=True)
+        cfg[name] = portal_config['portal'][name]
+        self.prefab.executor.state.configSet('portal', cfg)
 
         if start:
             self.start(name=name)
