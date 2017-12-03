@@ -98,7 +98,7 @@ def run(fns):
             p.terminate()
             p.exception = 'Job timed out after {} seconds'.format(PROCESS_TIMEOUT)
         if p.exception:
-            errors.append('Errors while running {}()'.format(p[2]))
+            errors.append('Errors while running {}()'.format(fn[2]))
             errors.append(p.exception)
             errors.append('\n')
     if errors:
