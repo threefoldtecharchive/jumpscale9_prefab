@@ -11,7 +11,7 @@ class PrefabPostgresql(app):
         self.passwd = "postgres"
         self.dbdir = "$VARDIR/postgresqldb"
 
-    def build(self, beta=False):
+    def build(self, beta=False, reset=False):
         """
         beta is 2 for 10 release
         """
@@ -43,7 +43,7 @@ class PrefabPostgresql(app):
     def install(self, reset=False, start=False, port=5432, beta=False):
         if self.doneCheck("install", reset):
             return
-        self.build(beta=beta)
+        self.build(beta=beta, reset=reset)
         cmd = """
         cd {build_dir}
         make install with-pgport={port}
