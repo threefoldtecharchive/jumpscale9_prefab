@@ -7,13 +7,16 @@ class Prefabjs9Core(app):
     NAME = 'js9'
 
     def install(self, reset=False, branch='master'):
-        """
-        j.tools.prefab.local.js9.js9Core.install()
+        """Install js9 core
+        Keyword Arguments:
+            reset {bool} -- force install if js9core was already installed (default: {False})
+            branch {string} -- branch from which js9core will be installed (default: {'master'})
+        Example:
+            j.tools.prefab.local.js9.js9Core.install()
 
-        or from bash
+            or from bash
 
-        js9_prefab local 'js9.js9core.install(reset=1)'
-
+            js9_prefab local 'js9.js9core.install(reset=True)'
         """
         if self.doneCheck("install", reset):
             return
@@ -41,7 +44,7 @@ class Prefabjs9Core(app):
 
         S = """
         echo "INSTALL BASHTOOLS"
-        curl https://raw.githubusercontent.com/Jumpscale/bash/master/install.sh?$RANDOM > /tmp/install.sh        
+        curl https://raw.githubusercontent.com/Jumpscale/bash/master/install.sh?$RANDOM > /tmp/install.sh
         bash /tmp/install.sh
         """
 
