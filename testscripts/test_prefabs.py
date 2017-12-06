@@ -43,13 +43,13 @@ class Process(mp.Process):
         except Exception:
             tb = traceback.format_exc()
             self._cconn.send(tb)
-    
+
     @property
     def exception(self):
         if self._pconn.poll():
             self._exception = self._pconn.recv()
         return self._exception
-    
+
     @exception.setter
     def exception(self, value):
         self._exception = value
@@ -60,7 +60,12 @@ def prefab_module(module, name):
     for method in ['build', 'install', 'start', 'stop']:
         if hasattr(module, method):
             print("\t", method, name)
-            getattr(module, method)()
+            name = '{}.{}()'.format(name, method)
+            try:
+                getattr(module, method)()
+            except Exception as _:
+                raise RuntimeError('Error while running {}'.format(name))
+
 
 
 def run_in_parallel(fns):
@@ -69,7 +74,7 @@ def run_in_parallel(fns):
         p = Process(target=fn[0], args=fn[1:])
         p.start()
         proc.append((p, fn[1], fn[2]))
-    
+
     for p in proc:
         p[0].join(PROCESS_TIMEOUT)
         # if process is still alive after the timeout, we terminate and set the exception as timeout exception
@@ -104,7 +109,7 @@ def run(fns):
     if errors:
         raise RuntimeError('Errors: {}'.format('\n'.join(errors)))
 
-        
+
 def main():
     to_run = list()
     name = 'j.tools.prefab.local'
