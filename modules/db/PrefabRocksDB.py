@@ -62,9 +62,9 @@ class PrefabRocksDB(base):
         self.doneSet("build")
 
         if install:
-            self.install()
+            self.install(reset)
 
-    def install(self):
+    def install(self, reset=False):
         # install required packages to run.
         if self.doneCheck("install", reset):
             return
