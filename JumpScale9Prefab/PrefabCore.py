@@ -1000,8 +1000,6 @@ class PrefabCore(base):
             else:
                 cmd += " --no-clobber "
 
-
-
         if self.isMac:
             cmd += '%s %s' % (source.rstrip("/"), dest)
         else:
