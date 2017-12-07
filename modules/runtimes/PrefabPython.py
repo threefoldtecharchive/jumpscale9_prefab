@@ -25,9 +25,11 @@ class PrefabPython(base):
         if self.doneCheck("build", reset):
             return
 
+        self.prefab.system.base.development() #make sure all required components are there
+
         # self.pipAll()  #NO IDEA WHY THIS WAS HERE, SHOULD NOT BE THERE
 
-        if True or not self.doneGet("compile") or reset:
+        if not self.doneGet("compile") or reset:
             cpath = self.prefab.tools.git.pullRepo(
                 'https://github.com/python/cpython', branch="3.6", reset=reset)
             assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
@@ -336,6 +338,9 @@ class PrefabPython(base):
                 self.doneSet("pip3_%s" % item)
 
     def install(self):
+        """
+        will not use the platform python, will be build from scratch
+        """
         if self.doneCheck("install", reset):
             return
         self.build()
@@ -352,16 +357,5 @@ class PrefabPython(base):
         """.format(python_build=self.BUILDDIRL, JSBASE=j.dirs.JSBASEDIR)
 
         self.prefab.core.run(command)
-        C = """
-        autoconf
-        libffi-dev
-        gcc
-        make
-        build-essential
-        autoconf
-        libtool
-        pkg-config
-        libpq-dev
-        libsqlite3-dev
-        """
-        self.prefab.system.package.install(C)
+
+
