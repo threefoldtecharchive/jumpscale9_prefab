@@ -11,6 +11,7 @@ class PrefabCaddy(app):
 
     def _init(self):
         self.BUILDDIR_ = self.replace("$BUILDDIR/caddy")
+        self._pm = self.prefab.system.processmanager.get()
 
     def reset(self):
         self.stop()
@@ -150,7 +151,7 @@ class PrefabCaddy(app):
         #     self.logger.info("caddy already started, will reload")
         #     return
 
-        self.prefab.system.processmanager.stop("caddy")  # will also kill
+        self._pm.stop("caddy")  # will also kill
 
         cmd = self.prefab.bash.cmdGetPath("caddy")
         if agree:
@@ -158,7 +159,7 @@ class PrefabCaddy(app):
 
         cmd = 'ulimit -n 8192; %s -conf=%s %s' % (cmd, configpath, agree)
         # wait 10 seconds for caddy to generate ssl certificate before returning error
-        self.prefab.system.processmanager.ensure("caddy", cmd, wait=10, expect=expect)
+        self._pm.ensure("caddy", cmd, wait=10, expect=expect)
 
     def stop(self):
-        self.prefab.system.processmanager.stop("caddy")
+        self._pm.stop("caddy")
