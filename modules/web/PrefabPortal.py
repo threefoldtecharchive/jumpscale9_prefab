@@ -208,9 +208,7 @@ class PrefabPortal(base):
         cmd = "python3 portal_start.py --instance "+name
         pm = self.prefab.system.processmanager.get()
         pm.ensure('portal-'+name, cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, name))
-
-        import ipdb; ipdb.set_trace()
-
+        
         if passwd is not None:
             self.set_admin_password(j.sal.unix.crypt(passwd))
 
@@ -219,6 +217,7 @@ class PrefabPortal(base):
         pm.stop('portal-'+name)
 
     def set_admin_password(self, passwd):
+        # wait for the admin user to be created by portal
         timeout = 60
         start = time.time()
         admin = j.portal.tools.models.system.User.find({"name": "admin"})
@@ -233,25 +232,7 @@ class PrefabPortal(base):
             self._createUser("admin", passwd, "admin@mail.com", "admin")
         else:
             admin.update(passwd = passwd)
-
-    # def set_admin_password(self, passwd):
-    #     # wait for the admin user to be created by portal
-    #     timeout = 60
-    #     start = time.time()
-    #     resp = self.prefab.core.run('jsuser list', showout=False)[1]
-    #     while resp.find('admin') == -1 and start + timeout > time.time():
-    #         try:
-    #             time.sleep(2)
-    #             resp = self.prefab.core.run('jsuser list', showout=False)[1]
-    #         except BaseException:
-    #             continue
-    #
-    #     if resp.find('admin') == -1:
-    #         self.prefab.core.run('jsuser add --data admin:%s:admin:admin@mail.com:cockpit' % passwd)
-    #     else:
-    #         self.prefab.core.run('jsuser passwd -ul admin -up %s' % passwd)
-
-
+            
     def _createUser(self, username, password, email, groups, authkey=None):
         """
         Creates a new user and returns the result of the creation.
