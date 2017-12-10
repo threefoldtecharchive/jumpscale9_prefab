@@ -208,7 +208,7 @@ class PrefabPortal(base):
         cmd = "python3 portal_start.py --instance "+name
         pm = self.prefab.system.processmanager.get()
         pm.ensure('portal-'+name, cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, name))
-        
+
         if passwd is not None:
             self.set_admin_password(j.sal.unix.crypt(passwd))
 
