@@ -21,7 +21,7 @@ class Prefabjs9Core(app):
         if self.doneCheck("install", reset):
             return
 
-        self.prefab.system.base.install()
+        self.prefab.system.base.development()
 
         self.bashtools()
 
