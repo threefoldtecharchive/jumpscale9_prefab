@@ -323,7 +323,7 @@ class PrefabKubernetes(app):
         """
         print(log_message)
 
-        remove node constriction for APISERVER
+        # remove node constriction for APISERVER
         init_node.core.run('systemctl stop kubelet docker')
         time.sleep(5)
         init_node.core.run('sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
@@ -365,7 +365,6 @@ class PrefabKubernetes(app):
             init_node.core.file_write('/master.yaml', j.data.serializer.yaml.dumps(node_json))
 
         for master in nodes[1:]:
-            from pprint import pprint ; from IPython import embed ; import ipdb ; ipdb.set_trace()
             # send certs from init node to the rest of the master nodes
             init_node.core.execute_bash(send_cmd.format(master=master.executor.sshclient.addr))
             # adjust the configs in the new nodes with the relative ip and hostname
@@ -373,7 +372,7 @@ class PrefabKubernetes(app):
                                                      my_hostname=init_node.core.hostname,
                                                      init_ip=init_node.executor.sshclient.addr))
             # giving time for the nodes to be registered
-            time.sleep(10)
+            time.sleep(30)
             if not unsafe:
                 # else setting the nodes as master
                 register_cmd = 'kubectl --kubeconfig=/etc/kubernetes/admin.conf patch node %s -p "$(cat /master.yaml)"' % (
