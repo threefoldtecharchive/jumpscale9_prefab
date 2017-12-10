@@ -359,7 +359,7 @@ class PrefabKubernetes(app):
 
         if unsafe:
             # if unsafe  comppletly remove role master from the cluster
-            init_node.core.run('kubectl taint nodes --all node-role.kubernetes.io/master-')
+            init_node.core.run('kubectl --kubeconfig=/etc/kubernetes/admin.config taint nodes --all node-role.kubernetes.io/master-')
         else:
             # write patch file used later on to register the nodes as masters
             init_node.core.file_write('/master.yaml', j.data.serializer.yaml.dumps(node_json))
