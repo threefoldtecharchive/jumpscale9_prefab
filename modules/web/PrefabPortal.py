@@ -209,8 +209,6 @@ class PrefabPortal(base):
         pm = self.prefab.system.processmanager.get()
         pm.ensure('portal-'+name, cmd=cmd, path=j.sal.fs.joinPaths(self.portal_dir, name))
 
-        import ipdb; ipdb.set_trace()
-
         if passwd is not None:
             self.set_admin_password(j.sal.unix.crypt(passwd))
 
@@ -219,79 +217,9 @@ class PrefabPortal(base):
         pm.stop('portal-'+name)
 
     def set_admin_password(self, passwd):
-        timeout = 60
-        start = time.time()
-        admin = j.portal.tools.models.system.User.find({"name": "admin"})
-        while not admin and start + timeout > time.time():
-            try:
-                time.sleep(2)
-                admin = j.portal.tools.models.system.User.find({"name": "admin"})
-            except BaseException:
-                continue
+        admin = j.portal.tools.usermanager.getUser("admin")
 
         if not admin:
-            self._createUser("admin", passwd, "admin@mail.com", "admin")
+            j.portal.tools.usermanager.createUser("admin", passwd, "admin@mail.com", "admin")
         else:
             admin.update(passwd = passwd)
-
-    # def set_admin_password(self, passwd):
-    #     # wait for the admin user to be created by portal
-    #     timeout = 60
-    #     start = time.time()
-    #     resp = self.prefab.core.run('jsuser list', showout=False)[1]
-    #     while resp.find('admin') == -1 and start + timeout > time.time():
-    #         try:
-    #             time.sleep(2)
-    #             resp = self.prefab.core.run('jsuser list', showout=False)[1]
-    #         except BaseException:
-    #             continue
-    #
-    #     if resp.find('admin') == -1:
-    #         self.prefab.core.run('jsuser add --data admin:%s:admin:admin@mail.com:cockpit' % passwd)
-    #     else:
-    #         self.prefab.core.run('jsuser passwd -ul admin -up %s' % passwd)
-
-
-    def _createUser(self, username, password, email, groups, authkey=None):
-        """
-        Creates a new user and returns the result of the creation.
-        :param username: user's name
-        :param password: user's password
-        :param email: user's email
-        :param groups: list of groups the user belongs
-        :param authkey: user's auth key
-        :return: mongodb WriteResult object
-        """
-        if self.userExists(username):
-            raise exceptions.Conflict("Username with name {} already exists".format(username))
-        if isinstance(email, str):
-            email = [email]
-        if self.emailExists(email):
-            raise exceptions.Conflict("User with email {} already exists".format(" or ".join(email)))
-        user = j.portal.tools.models.system.User()
-        user.name = username
-        if isinstance(groups, str):
-            groups = [groups]
-        user.groups = groups
-        for group in user.groups:
-            g = j.portal.tools.models.system.Group.find({'name': group})
-            if g:
-                continue
-            g = j.portal.tools.models.system.Group()
-            g.name = group
-            g.save()
-        if authkey:
-            user.authkey = authkey
-        user.emails = email
-        user.passwd = password
-        return user.save()
-
-    def emailExists(self, emails):
-        user = j.portal.tools.models.system.User.find({"emails": {"$in": emails}})
-        if user:
-            return True
-
-    def userExists(self, user):
-        user = j.portal.tools.models.system.User.find({"name": user})
-        if user:
-            return True
