@@ -103,6 +103,10 @@ class PrefabSSH(base):
             #         ips.append(ip)
             return ips
 
+    def define_host(self, addr, user='root'):
+        self.prefab.core.execute_bash('ssh-keyscan -t rsa %s >> /%s/.ssh/known_hosts' % (addr, user))
+
+
     def keygen(self, user="root", keytype="rsa", name="default"):
         """Generates a pair of ssh keys in the user's home .ssh directory."""
         user = user.strip()
