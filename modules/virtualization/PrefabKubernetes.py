@@ -314,7 +314,7 @@ class PrefabKubernetes(app):
 
         if dashboard:
             init_node.core.run(
-                'kubectl --kubeconfig=/etc/kubernetes/admin.config apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml')
+                'kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml')
 
         log_message = """
         please wait until kube-dns deplyments are deployed before joining new nodes to the cluster.
@@ -325,9 +325,10 @@ class PrefabKubernetes(app):
 
         # remove node constriction for APISERVER
         init_node.core.run('systemctl stop kubelet docker')
-        time.sleep(5)
         init_node.core.run('sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
         init_node.core.run('systemctl start docker kubelet')
+        time.sleep(10)
+
         edit_cmd = """
         cd /etc/kubernetes
         sed -i.bak "s/kub01/{my_hostname}/g" /etc/kubernetes/*.conf
@@ -359,7 +360,8 @@ class PrefabKubernetes(app):
 
         if unsafe:
             # if unsafe  comppletly remove role master from the cluster
-            init_node.core.run('kubectl --kubeconfig=/etc/kubernetes/admin.config taint nodes --all node-role.kubernetes.io/master-')
+            init_node.core.run(
+                'kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes %s node-role.kubernetes.io/master-' % init_node.core.hostname)
         else:
             # write patch file used later on to register the nodes as masters
             init_node.core.file_write('/master.yaml', j.data.serializer.yaml.dumps(node_json))
