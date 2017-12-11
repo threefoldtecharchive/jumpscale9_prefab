@@ -28,12 +28,12 @@ Documentation=https://github.com/coreos
 [Service]
 ExecStart=$BINDIR/etcd \\
   --name {name} \\
-  --cert-file=/etc/etcd/pki/etcd.crt \\
-  --key-file=/etc/etcd/pki/etcd.key \\
-  --peer-cert-file=/etc/etcd/pki/etcd-peer.crt \\
-  --peer-key-file=/etc/etcd/pki/etcd-peer.key \\
-  --trusted-ca-file=/etc/etcd/pki/etcd-ca.crt \\
-  --peer-trusted-ca-file=/etc/etcd/pki/etcd-ca.crt \\
+  --cert-file=$CFGDIR/etcd/pki/etcd.crt \\
+  --key-file=$CFGDIR/etcd/pki/etcd.key \\
+  --peer-cert-file=$CFGDIR/etcd/pki/etcd-peer.crt \\
+  --peer-key-file=$CFGDIR/etcd/pki/etcd-peer.key \\
+  --trusted-ca-file=$CFGDIR/etcd/pki/etcd-ca.crt \\
+  --peer-trusted-ca-file=$CFGDIR/etcd/pki/etcd-ca.crt \\
   --peer-client-cert-auth \\
   --client-cert-auth \\
   --initial-advertise-peer-urls https://{node_ip}:2380 \\
@@ -59,9 +59,9 @@ api:
 etcd:
   endpoints:
 {endpoints}
-  caFile: /etc/etcd/pki/etcd-ca.crt
-  certFile: /etc/etcd/pki/etcd.crt
-  keyFile: /etc/etcd/pki/etcd.key
+  caFile: $CFGDIR/etcd/pki/etcd-ca.crt
+  certFile: $CFGDIR/etcd/pki/etcd.crt
+  keyFile: $CFGDIR/etcd/pki/etcd.key
   dataDir: /var/lib/etcd
   etcdVersion: v3.2.9
 networking:
@@ -175,7 +175,7 @@ class PrefabKubernetes(app):
         # build
         self.doneSet("install_base")
 
-    def setup_certs(self, nodes, cleanup=False):
+    def setup_certs(self, nodes, save=False):
         """
         Generate the  kubernets ssl certificates and etcd certifactes to be use by the cluster.
         it is recommended that this method run on a ceprate node that will be controlling the cluster so that
@@ -185,7 +185,7 @@ class PrefabKubernetes(app):
         """
 
         self.prefab.core.dir_ensure(
-            '{home_dir}/k8s/crt {home_dir}/k8s/key {home_dir}/k8s/csr'.format(home_dir=self.prefab.executor.dir_paths['HOMEDIR']))
+            '{tmp_dir}/k8s/crt {tmp_dir}/k8s/key {tmp_dir}/k8s/csr'.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR']))
         # get node ips from prefab
         nodes_ip = [node.executor.sshclient.addr for node in nodes]
 
@@ -194,20 +194,21 @@ class PrefabKubernetes(app):
         ssl_config = OPENSSL.format(alt_names_etcd=alt_names_etcd)
 
         # generate certigicates and sign them for use by etcd
-        self.prefab.core.file_write('%s/k8s/openssl.cnf' % self.prefab.executor.dir_paths['HOMEDIR'], ssl_config)
+        self.prefab.core.file_write('%s/k8s/openssl.cnf' % self.prefab.executor.dir_paths['TMPDIR'], ssl_config)
         cmd = """
-        openssl genrsa -out {home_dir}/k8s/key/etcd-ca.key 4096
-        openssl req -x509 -new -sha256 -nodes -key {home_dir}/k8s/key/etcd-ca.key -days 3650 -out {home_dir}/k8s/crt/etcd-ca.crt -subj "/CN=etcd-ca" -extensions v3_ca -config {home_dir}/k8s/openssl.cnf
-        openssl genrsa -out {home_dir}/k8s/key/etcd.key 4096
-        openssl req -new -sha256 -key {home_dir}/k8s/key/etcd.key -subj "/CN=etcd" -out {home_dir}/k8s/csr/etcd.csr
-        openssl x509 -req -in {home_dir}/k8s/csr/etcd.csr -sha256 -CA {home_dir}/k8s/crt/etcd-ca.crt -CAkey {home_dir}/k8s/key/etcd-ca.key -CAcreateserial -out {home_dir}/k8s/crt/etcd.crt -days 365 -extensions v3_req_etcd -extfile {home_dir}/k8s/openssl.cnf
-        openssl genrsa -out {home_dir}/k8s/key/etcd-peer.key 4096
-        openssl req -new -sha256 -key {home_dir}/k8s/key/etcd-peer.key -subj "/CN=etcd-peer" -out {home_dir}/k8s/csr/etcd-peer.csr
-        openssl x509 -req -in {home_dir}/k8s/csr/etcd-peer.csr -sha256 -CA {home_dir}/k8s/crt/etcd-ca.crt -CAkey {home_dir}/k8s/key/etcd-ca.key -CAcreateserial -out {home_dir}/k8s/crt/etcd-peer.crt -days 365 -extensions v3_req_etcd -extfile {home_dir}/k8s/openssl.cnf
-        """.format(home_dir=self.prefab.executor.dir_paths['HOMEDIR'])
+        openssl genrsa -out {tmp_dir}/k8s/key/etcd-ca.key 4096
+        openssl req -x509 -new -sha256 -nodes -key {tmp_dir}/k8s/key/etcd-ca.key -days 3650 -out {tmp_dir}/k8s/crt/etcd-ca.crt -subj "/CN=etcd-ca" -extensions v3_ca -config {tmp_dir}/k8s/openssl.cnf
+        openssl genrsa -out {tmp_dir}/k8s/key/etcd.key 4096
+        openssl req -new -sha256 -key {tmp_dir}/k8s/key/etcd.key -subj "/CN=etcd" -out {tmp_dir}/k8s/csr/etcd.csr
+        openssl x509 -req -in {tmp_dir}/k8s/csr/etcd.csr -sha256 -CA {tmp_dir}/k8s/crt/etcd-ca.crt -CAkey {tmp_dir}/k8s/key/etcd-ca.key -CAcreateserial -out {tmp_dir}/k8s/crt/etcd.crt -days 365 -extensions v3_req_etcd -extfile {tmp_dir}/k8s/openssl.cnf
+        openssl genrsa -out {tmp_dir}/k8s/key/etcd-peer.key 4096
+        openssl req -new -sha256 -key {tmp_dir}/k8s/key/etcd-peer.key -subj "/CN=etcd-peer" -out {tmp_dir}/k8s/csr/etcd-peer.csr
+        openssl x509 -req -in {tmp_dir}/k8s/csr/etcd-peer.csr -sha256 -CA {tmp_dir}/k8s/crt/etcd-ca.crt -CAkey {tmp_dir}/k8s/key/etcd-ca.key -CAcreateserial -out {tmp_dir}/k8s/crt/etcd-peer.crt -days 365 -extensions v3_req_etcd -extfile {tmp_dir}/k8s/openssl.cnf
+        """.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR'])
         self.prefab.core.run(cmd)
-        if cleanup:
-            self.prefab.core.run('rm -rf %s/k8s' % self.prefab.executor.dir_paths['HOMEDIR'])
+        if save:
+            self.prefab.core.file_copy(
+                '%s/k8s' % self.prefab.executor.dir_paths['HOMEDIR'], '%s/' % self.prefab.executor.dir_paths['TMPDIR'])
 
     def install_etcd_cluster(self, nodes):
         """
@@ -219,36 +220,37 @@ class PrefabKubernetes(app):
         nodes_ip = [node.executor.sshclient.addr for node in nodes]
         initial_cluster = ','.join(['kub0%s=https://%s:2380' % ((i + 1), ip) for i, ip in enumerate(nodes_ip)])
         for index, node in enumerate(nodes):
+            pm = node.system.processmanager.get('systemd')
             cmd = """
-            cd {home_dir}/etcd_{etcd_ver}
+            cd {tmp_dir}/etcd_{etcd_ver}
             curl -L {google_url}/{etcd_ver}/etcd-{etcd_ver}-linux-amd64.tar.gz -o etcd-{etcd_ver}-linux-amd64.tar.gz
             tar xzvf etcd-{etcd_ver}-linux-amd64.tar.gz -C .
-            """.format(google_url='https://storage.googleapis.com/etcd', home_dir=node.executor.dir_paths['HOMEDIR'],
+            """.format(google_url='https://storage.googleapis.com/etcd', tmp_dir=node.executor.dir_paths['TMPDIR'],
                        etcd_ver=etcd_ver, github_url='https://github.com/coreos/etcd/releases/download')
             node_ip = node.executor.sshclient.addr
-            node.core.dir_ensure('{home_dir}/etcd_{etcd_ver}'.format(home_dir=node.executor.dir_paths['HOMEDIR'],
-                                                                     etcd_ver=etcd_ver))
+            node.core.dir_ensure('{tmp_dir}/etcd_{etcd_ver}'.format(tmp_dir=node.executor.dir_paths['TMPDIR'],
+                                                                    etcd_ver=etcd_ver))
             node.core.run(cmd)
             node.core.dir_ensure('$BINDIR')
-            node.core.file_copy('$HOMEDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcd'.format(etcd_ver=etcd_ver),
+            node.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcd'.format(etcd_ver=etcd_ver),
                                 '$BINDIR/etcd')
-            node.core.file_copy('$HOMEDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcdctl'.format(etcd_ver=etcd_ver),
+            node.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcdctl'.format(etcd_ver=etcd_ver),
                                 '$BINDIR/etcdctl')
-            node.core.run("rm -rf /etc/etcd/pki", shell=True)
-            node.core.run("rm -rf /var/lib/etcd", shell=True)
-            node.core.dir_ensure('/etc/etcd/pki /var/lib/etcd')
-            self.prefab.core.execute_bash('ssh-keyscan -t rsa %s >> %s/.ssh/known_hosts' %
-                                          (node.executor.sshclient.addr, node.executor.dir_paths['HOMEDIR']))
+            node.core.dir_remove("$CFGDIR/etcd/pki")
+            node.core.dir_remove("/var/lib/etcd")
+            node.core.dir_ensure('$CFGDIR/etcd/pki /var/lib/etcd')
+            _, user, _ = self.prefab.core.run('whoami')
+            self.prefab.system.ssh.define_host(node.executor.sshclient.addr, user)
             cmd = """
-            scp -P {port} {home_dir}/k8s/crt/etcd* {node_ip}:/etc/etcd/pki/
-            scp -P {port} {home_dir}/k8s/key/etcd* {node_ip}:/etc/etcd/pki/
-            """.format(home_dir=self.prefab.executor.dir_paths['HOMEDIR'], node_ip=node_ip,
+            scp -P {port} {tmp_dir}/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
+            scp -P {port} {tmp_dir}/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
+            """.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR'], node_ip=node_ip,
                        port=node.executor.sshclient.port or 22)
             if self.prefab.executor.type == 'ssh':
                 cmd = """
-                scp -P {port} {prefab_ip}:{home_dir}/k8s/crt/etcd* {node_ip}:/etc/etcd/pki/
-                scp -P {port} {prefab_ip}:{home_dir}/k8s/key/etcd* {node_ip}:/etc/etcd/pki/
-                """.format(home_dir=self.prefab.executor.dir_paths['HOMEDIR'], node_ip=node_ip,
+                scp -P {port} {prefab_ip}:{tmp_dir}/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
+                scp -P {port} {prefab_ip}:{tmp_dir}/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
+                """.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR'], node_ip=node_ip,
                            port=node.executor.sshclient.port or 22)
 
             self.prefab.core.execute_bash(cmd)
@@ -256,9 +258,8 @@ class PrefabKubernetes(app):
                                                initial_cluster=initial_cluster)
 
             node.core.file_write('/etc/systemd/system/etcd.service', etcd_service, replaceInContent=True)
-            node.core.run('systemctl daemon-reload')
-            node.core.run('systemctl stop etcd')
-            node.core.run('systemctl start etcd')
+            pm.reload()
+            pm.restart('etcd')
 
     def install_kube_masters(self, nodes, external_ips, kube_cidr='10.0.0.0/16', flannel=True, dashboard=False, unsafe=False, reset=False):
         """
@@ -292,7 +293,7 @@ class PrefabKubernetes(app):
 
         # write config and run command
         init_node.core.file_write('%s/kubeadm-init.yaml' % init_node.executor.dir_paths['HOMEDIR'],
-                                  kube_init_yaml)
+                                  kube_init_yaml, replaceInContent=True)
         rc, out, err = init_node.core.run(cmd)
         if rc != 0:
             raise RuntimeError(err)
@@ -305,8 +306,8 @@ class PrefabKubernetes(app):
         pub_key = init_node.core.file_read(init_node.system.ssh.keygen()).strip()
         for node in nodes[1:]:
             node.executor.sshclient.ssh_authorize('root', pub_key)
-            init_node.core.execute_bash('ssh-keyscan -t rsa %s >> %s/.ssh/known_hosts' %
-                                        (node.executor.sshclient.addr, node.executor.dir_paths['HOMEDIR']))
+            _, user, _= init_node.core.run('whoami')
+            init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
 
         if flannel:
             init_node.core.run(
@@ -324,19 +325,19 @@ class PrefabKubernetes(app):
         print(log_message)
 
         # remove node constriction for APISERVER
-        init_node.core.run('systemctl stop kubelet docker')
+        pm = init_node.system.processmanager.get('systemd')
+        pm.stop('kubelet')
+        pm.stop('docker')
         init_node.core.run('sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
-        init_node.core.run('systemctl start docker kubelet')
-        time.sleep(10)
+        pm.start('kubelet')
+        pm.start('docker')
+        time.sleep(15)
 
         edit_cmd = """
         cd /etc/kubernetes
         sed -i.bak "s/kub01/{my_hostname}/g" /etc/kubernetes/*.conf
         sed -i.bak "s/{init_ip}/{node_ip}/g" /etc/kubernetes/*.conf
         sed -i.bak "s/advertise-address={init_ip}/advertise-address={node_ip}/g" /etc/kubernetes/manifests/kube-apiserver.yaml
-        systemctl daemon-reload
-        systemctl restart docker
-        systemctl restart kubelet
         """
         send_cmd = """
         eval `ssh-agent -s`
@@ -373,6 +374,9 @@ class PrefabKubernetes(app):
             master.core.execute_bash(edit_cmd.format(node_ip=master.executor.sshclient.addr,
                                                      my_hostname=init_node.core.hostname,
                                                      init_ip=init_node.executor.sshclient.addr))
+            pm.reload()
+            pm.restart('kubelet')
+            pm.restart('docker')
             # giving time for the nodes to be registered
             time.sleep(30)
             if not unsafe:

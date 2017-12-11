@@ -17,7 +17,7 @@ class PrefabProcessManager(base):
         return self._logger
 
     def systemdOK(self):
-        res = not self.prefab.core.isDocker and self.prefab.core.command_check("systemctl")
+        res =  self.prefab.core.command_check("systemctl")
         self.logger.info("systemd:%s" % res)
         return res
 

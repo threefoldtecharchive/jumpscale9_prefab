@@ -10,7 +10,7 @@ available methods include but are not limited to:
 c = j.tools.prefab.local
 c.virtualization.install_base()
 ```
- - Another more abstract method is used to deploy the entire cluster installing both master and minions and setting up flannel
+ - Another more abstract method is used to deploy the entire cluster installing both master and minions (or masters as minions using the unsafe flag) and setting up flannel
 ```
 c = j.tools.prefab.local
 c1 = j.tools.prefab.get('<machineip1>')
