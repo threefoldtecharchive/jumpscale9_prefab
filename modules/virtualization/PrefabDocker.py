@@ -17,32 +17,40 @@ class PrefabDocker(app):
                 return
             raise e
 
-    def install(self, reset=False):
+    def install(self, reset=False, branch=None):
         if reset is False and self.isInstalled():
             return
         if self.prefab.core.isUbuntu:
-            self.prefab.bash.envSet('LC_ALL', 'C.UTF-8')
-            self.prefab.bash.envSet('LANG', 'C.UTF-8')
-            if not self.prefab.core.command_check('docker'):
-                C = """
-                wget -qO- https://get.docker.com/ | sh
-                """
-                timeout = time.time() + 500
-                while True:
-                    if time.time() < timeout:
-                        if self.prefab.system.process.find('fuser /var/lib/dpkg/lock'):
-                            time.sleep(2)
+            if not branch:
+                self.prefab.bash.envSet('LC_ALL', 'C.UTF-8')
+                self.prefab.bash.envSet('LANG', 'C.UTF-8')
+                if not self.prefab.core.command_check('docker'):
+                    C = """
+                    wget -qO- https://get.docker.com/ | sh
+                    """
+                    timeout = time.time() + 500
+                    while True:
+                        if time.time() < timeout:
+                            if self.prefab.system.process.find('fuser /var/lib/dpkg/lock'):
+                                time.sleep(2)
+                            else:
+                                self.prefab.core.run(C)
+                                break
                         else:
-                            self.prefab.core.run(C)
-                            break
-                    else:
-                        raise TimeoutError('resource dpkg is busy')
-             # if not self.prefab.core.command_check('docker-compose'):
-            #     C = """
-            #     curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-            #     chmod +x /usr/local/bin/docker-compose
-            #     """
-            #     self.prefab.core.run(C)
+                            raise TimeoutError('resource dpkg is busy')
+                # if not self.prefab.core.command_check('docker-compose'):
+                #     C = """
+                #     curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+                #     chmod +x /usr/local/bin/docker-compose
+                #     """
+                #     self.prefab.core.run(C)
+            self.prefab.system.package.install(
+                'apt-transport-https,linux-image-extra-$(uname -r),linux-image-extra-virtual,software-properties-common')
+            self.prefab.core.run("curl -fsSL 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add -")
+            self.prefab.core.run('add-apt-repository "deb https://packages.docker.com/%s/apt/repo/ ubuntu-$(lsb_release -cs) main"' % branch)
+            self.prefab.system.package.mdupdate(reset=True)
+            self.prefab.system.package.install('docker-engine')
+
         if self.prefab.core.isArch:
             self.prefab.system.package.install("docker")
             # self.prefab.system.package.install("docker-compose")
