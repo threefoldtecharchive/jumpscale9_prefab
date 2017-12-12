@@ -386,7 +386,6 @@ class StorSpace(object):
     '''
     @config.setter
     def config(self, val):
-        import ipdb; ipdb.set_trace()
         #check dict
         #store in config also remote serialized !!!
         pass

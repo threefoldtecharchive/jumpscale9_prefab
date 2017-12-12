@@ -30,7 +30,6 @@ class PrefabGit(base):
     def pullRepo(self, url, dest=None, login=None, passwd=None, depth=None,
                  ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh="first"):
 
-        import ipdb; ipdb.set_trace()
         if dest is None:
             base, provider, account, repo, dest, url, port = j.clients.git.getGitRepoArgs(
                 url, dest, login, passwd, reset=reset, ssh=ssh, codeDir=self.prefab.core.dir_paths["CODEDIR"])
