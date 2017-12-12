@@ -16,4 +16,8 @@ else
 fi
 
 # Run tests
-sudo -HE bash -c "ssh -tA  root@localhost -p 2222 \"cd /opt/code/github/jumpscale/prefab9; python3 ./testscripts/test_prefabs.py\""
+
+# Run healthcheck once per day
+if [ -n $TRAVIS_EVENT_TYPE ] && [ $TRAVIS_EVENT_TYPE == "cron" ]; then
+  sudo -HE bash -c "ssh -tA  root@localhost -p 2222 \"cd /opt/code/github/jumpscale/prefab9; python3 ./testscripts/test_prefabs.py\""
+fi
