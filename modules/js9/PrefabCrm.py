@@ -18,8 +18,8 @@ class PrefabCrm(app):
             return
 
         # Install and start Postgres
-        self.prefab.apps.postgresql.install()
-        self.prefab.apps.postgresql.start()
+        self.prefab.db.postgresql.install()
+        self.prefab.db.postgresql.start()
 
         # Clone the repository and install python requirements
         self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
@@ -92,8 +92,8 @@ class PrefabCrm(app):
         self.prefab.core.file_write(self.replace("$CFGDIR/caddy.cfg"), caddy_cfg)
 
         # Configure Database
-        if not self.prefab.apps.postgresql.isStarted():
-            self.prefab.apps.postgresql.start()
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
 
         cmd = """
         cd {src_dir}
@@ -114,8 +114,8 @@ class PrefabCrm(app):
         """
         Start postgres, caddy, crm
         """
-        if not self.prefab.apps.postgresql.isStarted():
-            self.prefab.apps.postgresql.start()
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
 
         if not self.prefab.apps.caddy.isStarted():
             self.prefab.apps.caddy.start()
