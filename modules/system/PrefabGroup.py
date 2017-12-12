@@ -87,13 +87,14 @@ class PrefabGroup(base):
         assert self.check(group), "Group does not exist: %s" % (group)
         _, members_of_group, _ = self.prefab.core.run("getent group %s | awk -F':' '{print $4}'" % group)
         members = members_of_group.split(",")
-        is_primary_group = self.user_check(name=group)
+        members = [member.split(':')[0] for member in members]
+        is_primary_group = any(self.user_check(group=group, user=member) for member in members)
         if wipe:
             if len(members_of_group):
                 for user in members:
                     self.user_del(group, user)
             if is_primary_group:
-                self.prefab.user.remove(group)
+                self.prefab.system.user.remove(group)
             else:
                 self.prefab.core.sudo("groupdel %s" % group)
         elif not is_primary_group:
