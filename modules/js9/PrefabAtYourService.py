@@ -32,7 +32,8 @@ class PrefabAtYourService(base):
         config = {"ays_uri": "%s:%s" % (host, port)}
         self.prefab.web.portal.add_configuration(config)
         nav_path = "$JSAPPSDIR/portals/{portal}/base/AYS/.space/nav.wiki".format(portal=portal)
-        nav = self.prefab.core.file_read(nav_path).format(ays_uri="%s:%s" % (host, port))
+        nav = self.prefab.core.file_read(nav_path)
+        nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(config['ays_uri']), nav)
         self.prefab.core.file_write(nav_path, nav)
         self.prefab.web.portal.stop()
         self.prefab.web.portal.start()
