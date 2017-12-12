@@ -60,7 +60,7 @@ class PrefabPortal(base):
         cfg = self.prefab.executor.state.configGet('portal')
         for key, value in config_dict.items():
             cfg[name][key] = value
-        self.prefab.executor.state.configSet('portal',cfg)
+        self.prefab.executor.state.configSet('portal', cfg)
 
     def install(self, start=True, branch='master', reset=False, name="main", port='8200', ip='127.0.0.1'):
         """
@@ -144,7 +144,7 @@ class PrefabPortal(base):
 
         cmd = """
             cd {CODEDIR}/github/jumpscale/portal9
-            pip3 install -e .
+            pip3 install -e . -U
             """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
         self.prefab.core.execute_bash(cmd)
         self.doneSet("installdeps"+name)
