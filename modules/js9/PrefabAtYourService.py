@@ -26,14 +26,28 @@ class PrefabAtYourService(base):
         }
         self.executor.state.configSet('ays', ays_config, save=True)
 
-    def configure_portal(self, host="http://localhost", port="5000", portal="main"):
+    def configure_portal(self, host='http://localhost', port=5000, portal='main', console_url=''):
+        """Configure AYS in portal
+
+         Allows the user to configure AYS in portal
+
+        Keyword Arguments:
+            host {string} -- ays api host (default: {"http://localhost"})
+            port {int} -- ays api port (default: 5000)
+            portal {string} -- portal instance name (default: 5000)
+            console_url {string} -- ays console full url (default: {"http://<host>:<port>"})
+        """
+
         if not host.startswith('http'):
             host = "http://%s" % host
-        config = {"ays_uri": "%s:%s" % (host, port)}
+        config = {
+            'ays_uri': '%s:%s' % (host, port)
+        }
+        console_url = console_url if console_url else config['ays_uri']
         self.prefab.web.portal.add_configuration(config)
-        nav_path = "$JSAPPSDIR/portals/{portal}/base/AYS/.space/nav.wiki".format(portal=portal)
+        nav_path = '$JSAPPSDIR/portals/{portal}/base/AYS/.space/nav.wiki'.format(portal=portal)
         nav = self.prefab.core.file_read(nav_path)
-        nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(config['ays_uri']), nav)
+        nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(console_url), nav)
         self.prefab.core.file_write(nav_path, nav)
         self.prefab.web.portal.stop()
         self.prefab.web.portal.start()

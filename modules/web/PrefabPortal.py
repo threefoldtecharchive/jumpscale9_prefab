@@ -77,7 +77,7 @@ class PrefabPortal(base):
                 self.start(name=name)
             return
 
-        self.prefab.db.mongodb.install()
+        self.prefab.db.mongodb.install(start=start)
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
 
