@@ -53,13 +53,13 @@ class Prefabjs8Core(base):
     #
     #     self.prefab.system.base.install()
     #     self.prefab.runtimes.python.install()
-    #     self.prefab.runtime.pip.ensure()
+    #     self.prefab.runtimes.pip.ensure()
     #     self.prefab.apps.redis.install()
     #     self.prefab.lib.brotli.build()
     #     self.prefab.lib.brotli.install()
     #
-    #     self.prefab.runtime.pip.install('pytoml')
-    #     self.prefab.runtime.pip.install('pygo')
+    #     self.prefab.runtimes.pip.install('pytoml')
+    #     self.prefab.runtimes.pip.install('pygo')
     #     self.prefab.system.package.ensure('libxml2-dev')
     #     self.prefab.system.package.ensure('libxslt1-dev')
     #
@@ -154,16 +154,16 @@ class Prefabjs8Core(base):
     #     lxml
     #     pycapnp
     #     """
-    #     self.prefab.runtime.pip.multiInstall(C, upgrade=True)
+    #     self.prefab.runtimes.pip.multiInstall(C, upgrade=True)
     #
     #     # snappy install
     #     self.prefab.system.package.ensure('libsnappy-dev')
     #     self.prefab.system.package.ensure('libsnappy1v5')
-    #     self.prefab.runtime.pip.install('python-snappy')
+    #     self.prefab.runtimes.pip.install('python-snappy')
     #
     #     if self.prefab.platformtype.osname != "debian":
     #         C = """
     #         blosc
     #         bcrypt
     #         """
-    #         self.prefab.runtime.pip.multiInstall(C, upgrade=True)
+    #         self.prefab.runtimes.pip.multiInstall(C, upgrade=True)

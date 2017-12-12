@@ -40,4 +40,4 @@ class PrefabBrotli(app):
         make install
         """.format(self.src_dir)
         self.prefab.core.run(cmd)
-        self.prefab.runtime.pip.install('brotli>=0.5.2')
+        self.prefab.runtimes.pip.install('brotli>=0.5.2')
