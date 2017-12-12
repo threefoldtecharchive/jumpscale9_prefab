@@ -22,7 +22,7 @@ class PrefabDeployerBot(app):
         self.prefab.bash.fixlocale()
         if not self.prefab.core.isMac and not self.prefab.core.isCygwin:
             self.prefab.development.js8.install()
-            self.prefab.development.pip.packageUpgrade("pip")
+            self.prefab.runtime.pip.packageUpgrade("pip")
 
         self.install_deps()
         self.prefab.tools.git.pullRepo('https://github.com/Jumpscale/jscockpit.git')
@@ -61,7 +61,7 @@ class PrefabDeployerBot(app):
         flask
         python-telegram-bot
         """
-        self.prefab.development.pip.multiInstall(deps, upgrade=True)
+        self.prefab.runtime.pip.multiInstall(deps, upgrade=True)
 
     def link_code(self):
         self.prefab.core.dir_ensure("$JSAPPSDIR")

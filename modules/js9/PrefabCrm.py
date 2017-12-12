@@ -25,7 +25,7 @@ class PrefabCrm(app):
         self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
         self.prefab.system.package.install(["python3-dev", "libffi-dev"])
         requirements = j.sal.fs.readFile("{}/requirements.pip".format(self.crm_dir))
-        self.prefab.development.pip.multiInstall(requirements)
+        self.prefab.runtime.pip.multiInstall(requirements)
 
         # Install Caddy
         self.prefab.apps.caddy.build(plugins=['iyo', 'git', 'mailout'], reset=True)

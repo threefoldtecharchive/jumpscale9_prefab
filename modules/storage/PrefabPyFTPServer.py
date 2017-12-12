@@ -46,7 +46,7 @@ class PrefabPyFTPServer(base):
         if not reset and self.doneGet('install'):
             return
 
-        self.prefab.development.pip.install("pyftpdlib")
+        self.prefab.runtime.pip.install("pyftpdlib")
         self.configure(root=root, config=config, port=port)
 
         self.doneSet('install')

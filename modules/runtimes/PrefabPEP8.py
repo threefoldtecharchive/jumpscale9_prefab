@@ -8,7 +8,7 @@ class PrefabPEP8(base):
 
     def prepare(self, repo_path=None):
         """ Install pre-commit hook to run autopep8 """
-        self.development.pip.install('autopep8')
+        self.runtime.pip.install('autopep8')
 
         # Get git repos paths
         if repo_path is None:
@@ -34,7 +34,7 @@ class PrefabPEP8(base):
         @param repo_path: path of desired repo to autopep8, if None will find all recognized repos to jumpscale
         @param commit: commit with pep8 as the commit message
         """
-        self.development.pip.install('autopep8')
+        self.runtime.pip.install('autopep8')
 
         # Get git repos paths
         if repo_path is None:

@@ -29,7 +29,7 @@ class PrefabBtrfsProgs(PrefabApp):
         self._run("cd $LIBDIR; rm libbtrfs.so.0.1")
         self._run("cd $LIBDIR; rm libbtrfs.so.0")
         self._run("rm $BINDIR/btrfs")
-        self.prefab.development.pip.reset()
+        self.prefab.runtime.pip.reset()
 
     def build(self, reset=False):
         if reset is False and (self.isInstalled() or self.doneGet('build')):

@@ -30,6 +30,7 @@ class PrefabGit(base):
     def pullRepo(self, url, dest=None, login=None, passwd=None, depth=None,
                  ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh="first"):
 
+        import ipdb; ipdb.set_trace()
         if dest is None:
             base, provider, account, repo, dest, url, port = j.clients.git.getGitRepoArgs(
                 url, dest, login, passwd, reset=reset, ssh=ssh, codeDir=self.prefab.core.dir_paths["CODEDIR"])
@@ -45,6 +46,7 @@ class PrefabGit(base):
         self.prefab.core.file_attribs("$HOMEDIR/.ssh/known_hosts", mode=600)
 
         self.logger.info("pull %s with depth:%s" % (url, depth))
+
 
         return j.clients.git.pullGitRepo(url=url, dest=dest, login=login, passwd=passwd, depth=depth,
                                 ignorelocalchanges=ignorelocalchanges, reset=reset, branch=branch, revision=revision,
