@@ -1,6 +1,5 @@
 
 from js9 import j
-import random
 import time
 
 app = j.tools.prefab._getBaseAppClass()
@@ -116,7 +115,7 @@ class PrefabKubernetes(app):
 
         external_ips = [master.executor.sshclient.addr for master in masters] + external_ips
 
-        self.setup_certs(masters)
+        self.setup_etcd_certs(masters)
         self.install_etcd_cluster(masters)
         join_line = self.install_kube_masters(masters, external_ips=external_ips, unsafe=unsafe, reset=reset)
         for node in nodes:
@@ -175,7 +174,7 @@ class PrefabKubernetes(app):
         # build
         self.doneSet("install_base")
 
-    def setup_certs(self, nodes, save=False):
+    def setup_etcd_certs(self, nodes, save=False):
         """
         Generate the  kubernets ssl certificates and etcd certifactes to be use by the cluster.
         it is recommended that this method run on a ceprate node that will be controlling the cluster so that
@@ -183,9 +182,9 @@ class PrefabKubernetes(app):
 
         @param nodes,, list(prefab) list of master node prefab connections
         """
-
+        self.prefab.core.dir_remove('$TMPDIR/k8s')
         self.prefab.core.dir_ensure(
-            '{tmp_dir}/k8s/crt {tmp_dir}/k8s/key {tmp_dir}/k8s/csr'.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR']))
+            '$TMPDIR/k8s/crt $TMPDIR/k8s/key $TMPDIR/k8s/csr')
         # get node ips from prefab
         nodes_ip = [node.executor.sshclient.addr for node in nodes]
 
@@ -210,51 +209,61 @@ class PrefabKubernetes(app):
             self.prefab.core.file_copy(
                 '%s/k8s' % self.prefab.executor.dir_paths['HOMEDIR'], '%s/' % self.prefab.executor.dir_paths['TMPDIR'])
 
+    def copy_etcd_certs(self, controller_node):
+        _, user, _ = controller_node.core.run('whoami')
+        controller_node.system.ssh.define_host(self.prefab.executor.sshclient.addr, user)
+        cmd = """
+        scp -P {port} {tmp_dir}/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
+        scp -P {port} {tmp_dir}/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
+        """.format(tmp_dir=controller_node.executor.dir_paths['TMPDIR'], node_ip=self.prefab.executor.sshclient.addr,
+                   port=self.prefab.executor.sshclient.port or 22)
+        if controller_node.executor.type == 'ssh':
+            cmd = """
+            scp -P {port} {prefab_ip}:{tmp_dir}/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
+            scp -P {port} {prefab_ip}:{tmp_dir}/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
+            """.format(tmp_dir=controller_node.executor.dir_paths['TMPDIR'], node_ip=self.prefab.executor.sshclient.addr,
+                       port=self.prefab.executor.sshclient.port or 22)
+
+        controller_node.core.execute_bash(cmd)
+
+
+    def get_etcd_binaries(self):
+        etcd_ver = 'v3.2.9'
+        cmd = """
+        cd {tmp_dir}/etcd_{etcd_ver}
+        curl -L {google_url}/{etcd_ver}/etcd-{etcd_ver}-linux-amd64.tar.gz -o etcd-{etcd_ver}-linux-amd64.tar.gz
+        tar xzvf etcd-{etcd_ver}-linux-amd64.tar.gz -C .
+        """.format(google_url='https://storage.googleapis.com/etcd', tmp_dir=self.prefab.executor.dir_paths['TMPDIR'],
+                    etcd_ver=etcd_ver, github_url='https://github.com/coreos/etcd/releases/download')
+        self.prefab.core.dir_ensure('{tmp_dir}/etcd_{etcd_ver}'.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR'],
+                                                                etcd_ver=etcd_ver))
+        self.prefab.core.run(cmd)
+        self.prefab.core.dir_ensure('$BINDIR')
+        self.prefab.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcd'.format(etcd_ver=etcd_ver),
+                            '$BINDIR/etcd')
+        self.prefab.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcdctl'.format(etcd_ver=etcd_ver),
+                            '$BINDIR/etcdctl')
+        self.prefab.core.dir_remove("$CFGDIR/etcd/pki")
+        self.prefab.core.dir_remove("/var/lib/etcd")
+        self.prefab.core.dir_ensure('$CFGDIR/etcd/pki /var/lib/etcd')
+
+
+
     def install_etcd_cluster(self, nodes):
         """
         This installs etcd binaries and sets up the etcd cluster.
 
         @param nodes,, list(prefab) list of master node prefabs
         """
-        etcd_ver = 'v3.2.9'
+
         nodes_ip = [node.executor.sshclient.addr for node in nodes]
         initial_cluster = ','.join(['kub0%s=https://%s:2380' % ((i + 1), ip) for i, ip in enumerate(nodes_ip)])
         for index, node in enumerate(nodes):
             pm = node.system.processmanager.get('systemd')
-            cmd = """
-            cd {tmp_dir}/etcd_{etcd_ver}
-            curl -L {google_url}/{etcd_ver}/etcd-{etcd_ver}-linux-amd64.tar.gz -o etcd-{etcd_ver}-linux-amd64.tar.gz
-            tar xzvf etcd-{etcd_ver}-linux-amd64.tar.gz -C .
-            """.format(google_url='https://storage.googleapis.com/etcd', tmp_dir=node.executor.dir_paths['TMPDIR'],
-                       etcd_ver=etcd_ver, github_url='https://github.com/coreos/etcd/releases/download')
-            node_ip = node.executor.sshclient.addr
-            node.core.dir_ensure('{tmp_dir}/etcd_{etcd_ver}'.format(tmp_dir=node.executor.dir_paths['TMPDIR'],
-                                                                    etcd_ver=etcd_ver))
-            node.core.run(cmd)
-            node.core.dir_ensure('$BINDIR')
-            node.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcd'.format(etcd_ver=etcd_ver),
-                                '$BINDIR/etcd')
-            node.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcdctl'.format(etcd_ver=etcd_ver),
-                                '$BINDIR/etcdctl')
-            node.core.dir_remove("$CFGDIR/etcd/pki")
-            node.core.dir_remove("/var/lib/etcd")
-            node.core.dir_ensure('$CFGDIR/etcd/pki /var/lib/etcd')
-            _, user, _ = self.prefab.core.run('whoami')
-            self.prefab.system.ssh.define_host(node.executor.sshclient.addr, user)
-            cmd = """
-            scp -P {port} {tmp_dir}/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
-            scp -P {port} {tmp_dir}/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
-            """.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR'], node_ip=node_ip,
-                       port=node.executor.sshclient.port or 22)
-            if self.prefab.executor.type == 'ssh':
-                cmd = """
-                scp -P {port} {prefab_ip}:{tmp_dir}/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
-                scp -P {port} {prefab_ip}:{tmp_dir}/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
-                """.format(tmp_dir=self.prefab.executor.dir_paths['TMPDIR'], node_ip=node_ip,
-                           port=node.executor.sshclient.port or 22)
+            node.virtualization.kubernetes.get_etcd_binaries()
+            node.virtualization.kubernetes.copy_etcd_certs(self.prefab)
 
-            self.prefab.core.execute_bash(cmd)
-            etcd_service = ETCD_SERVICE.format(*nodes_ip, name='kub0%d' % (index + 1), node_ip=node_ip,
+            etcd_service = ETCD_SERVICE.format(*nodes_ip, name='kub0%d' % (index + 1), node_ip=node.executor.sshclient.addr,
                                                initial_cluster=initial_cluster)
 
             node.core.file_write('/etc/systemd/system/etcd.service', etcd_service, replaceInContent=True)
@@ -306,7 +315,7 @@ class PrefabKubernetes(app):
         pub_key = init_node.core.file_read(init_node.system.ssh.keygen()).strip()
         for node in nodes[1:]:
             node.executor.sshclient.ssh_authorize('root', pub_key)
-            _, user, _= init_node.core.run('whoami')
+            _, user, _ = init_node.core.run('whoami')
             init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
 
         if flannel:
@@ -331,7 +340,7 @@ class PrefabKubernetes(app):
         init_node.core.run('sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
         pm.start('kubelet')
         pm.start('docker')
-        time.sleep(15)
+        time.sleep(30)
 
         edit_cmd = """
         cd /etc/kubernetes
