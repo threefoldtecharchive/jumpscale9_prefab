@@ -102,8 +102,8 @@ class PrefabPortal(base):
         self.doneSet("install-"+name)
 
     def installNodeJSLibs(self):
-        self.prefab.apps.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
-        self.prefab.apps.nodejs.bowerInstall(["jquery",
+        self.prefab.runtimes.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
+        self.prefab.runtimes.nodejs.bowerInstall(["jquery",
                                                "flatui",
                                                "bootstrap",
                                                "famous",

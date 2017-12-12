@@ -66,7 +66,7 @@ class PrefabSyncthing(app):
             return
 
         self.build()
-        self.prefab.development.pip.install("syncthing")
+        self.prefab.runtimes.pip.install("syncthing")
 
         self.prefab.core.dir_ensure("$CFGDIR/syncthing")
         # self.prefab.core.file_write("$CFGDIR/syncthing/syncthing.xml", config)

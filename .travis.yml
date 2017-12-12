@@ -14,5 +14,3 @@ python:
 install: ./.travis_ci/prepare.sh
 
 script: ./run_tests.sh
-
-after_failure: "cat /tmp/zutils.log"

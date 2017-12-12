@@ -13,7 +13,7 @@ class PrefabPython(base):
         base.reset(self)
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
-        self.prefab.development.pip.reset()
+        self.prefab.runtimes.pip.reset()
 
     def build(self, reset=False):
         """

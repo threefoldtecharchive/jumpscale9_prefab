@@ -23,7 +23,7 @@ class PrefabS3Server(app):
         profile = self.prefab.bash.profileDefault
         profile.addPath(self.prefab.core.dir_paths['BINDIR'])
         profile.save()
-        self.prefab.apps.nodejs.install()
+        self.prefab.runtimes.nodejs.install()
         self.prefab.core.run('cd {} && npm install --python=python2.7'.format(path), profile=True)
         self.prefab.core.dir_remove('$JSAPPSDIR/S3', recursive=True)
         self.prefab.core.dir_ensure('$JSAPPSDIR')
