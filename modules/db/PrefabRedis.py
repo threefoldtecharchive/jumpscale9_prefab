@@ -24,7 +24,7 @@ class PrefabRedis(app):
             return
 
         if self.prefab.core.isUbuntu:
-            self.prefab.system.package.update()
+            self.prefab.system.package.mdupdate()
             self.prefab.system.package.install("build-essential")
 
             self.prefab.core.dir_remove("$TMPDIR/build/redis")
