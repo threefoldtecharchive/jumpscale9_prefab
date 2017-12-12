@@ -44,7 +44,7 @@ class PrefabAtYourService(base):
         }
         console_url = ays_console_url or ays_url
         self.prefab.web.portal.add_configuration(config)
-        nav_path = '$JSAPPSDIR/portals/{portal}/base/AYS/.space/nav.wiki'.format(portal_name=portal_name)
+        nav_path = '$JSAPPSDIR/portals/{portal}/base/AYS/.space/nav.wiki'.format(portal=portal_name)
         nav = self.prefab.core.file_read(nav_path)
         nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(console_url), nav)
         self.prefab.core.file_write(nav_path, nav)
