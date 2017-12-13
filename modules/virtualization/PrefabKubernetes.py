@@ -196,7 +196,7 @@ class PrefabKubernetes(app):
         ssl_config = OPENSSL.format(alt_names_etcd=alt_names_etcd)
 
         # generate certigicates and sign them for use by etcd
-        self.prefab.core.file_write('%s/k8s/openssl.cnf' % self.prefab.executor.dir_paths['TMPDIR'], ssl_config)
+        self.prefab.core.file_write('$TMPDIR/k8s/openssl.cnf', ssl_config)
         cmd = """
         openssl genrsa -out $TMPDIR/k8s/key/etcd-ca.key 4096
         openssl req -x509 -new -sha256 -nodes -key $TMPDIR/k8s/key/etcd-ca.key -days 3650 -out $TMPDIR/k8s/crt/etcd-ca.crt -subj "/CN=etcd-ca" -extensions v3_ca -config $TMPDIR/k8s/openssl.cnf
@@ -209,8 +209,7 @@ class PrefabKubernetes(app):
         """
         self.prefab.core.run(cmd)
         if save:
-            self.prefab.core.file_copy(
-                '%s/k8s' % self.prefab.executor.dir_paths['HOMEDIR'], '%s/' % self.prefab.executor.dir_paths['TMPDIR'])
+            self.prefab.core.file_copy('$TMPDIR/k8s','$HOMEDIR/')
 
     def copy_etcd_certs(self, controller_node):
         """
@@ -222,14 +221,16 @@ class PrefabKubernetes(app):
         _, user, _ = controller_node.core.run('whoami')
         controller_node.system.ssh.define_host(self.prefab.executor.sshclient.addr, user)
         cmd = """
-        scp -P {port} $TMPDIR/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
-        scp -P {port} $TMPDIR/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
-        """.format(node_ip=self.prefab.executor.sshclient.addr, port=self.prefab.executor.sshclient.port or 22)
+        scp -P {port} $TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        scp -P {port} $TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        """.format(node_ip=self.prefab.executor.sshclient.addr, cfg_dir=self.prefab.executor.dir_paths['TMPDIR'],
+                   port=self.prefab.executor.sshclient.port or 22)
         if controller_node.executor.type == 'ssh':
             cmd = """
-            scp -P {port} {prefab_ip}:$TMPDIR/k8s/crt/etcd* {node_ip}:$CFGDIR/etcd/pki/
-            scp -P {port} {prefab_ip}:$TMPDIR/k8s/key/etcd* {node_ip}:$CFGDIR/etcd/pki/
-            """.format(node_ip=self.prefab.executor.sshclient.addr, port=self.prefab.executor.sshclient.port or 22)
+            scp -P {port} {prefab_ip}:$TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+            scp -P {port} {prefab_ip}:$TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+            """.format(node_ip=self.prefab.executor.sshclient.addr, cfg_dir=self.prefab.executor.dir_paths['TMPDIR'],
+                       port=self.prefab.executor.sshclient.port or 22)
 
         controller_node.core.execute_bash(cmd)
 
