@@ -11,6 +11,7 @@ class PrefabRsync(base):
 
     def reset(self):
         self.core.dir_remove(self.BUILDDIRL)
+        self.doneDelete("build")
 
     def build(self, reset=False, install=True):
         """
