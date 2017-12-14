@@ -50,7 +50,7 @@ class PrefabOwnCloud(app):
         set -xe
         #TODO: *1 need to use primitives in prefab
         cd $TMPDIR && [ ! -d $TMPDIR/ays_owncloud ] && git clone https://github.com/0-complexity/ays_owncloud
-        cd $TMPDIR && [ ! -f $TMPDIR/owncloud-9.1.3.tar.bz2 ] && wget https://download.owncloud.org/community/owncloud-9.1.3.tar.bz2 && cd $TMPDIR && tar jxf owncloud-9.1.3.tar.bz2 && rm owncloud-9.1.3.tar.bz2
+        cd $TMPDIR && [ ! -f $TMPDIR/owncloud-9.1.3.tar.bz2 ] && curl -o owncloud-9.1.3.tar.bz2 https://download.owncloud.org/community/owncloud-9.1.3.tar.bz2 && cd $TMPDIR && tar jxf owncloud-9.1.3.tar.bz2 && rm owncloud-9.1.3.tar.bz2
         [ ! -d {storagepath} ] && mkdir -p {storagepath}
         """.format(storagepath=storagepath)
 

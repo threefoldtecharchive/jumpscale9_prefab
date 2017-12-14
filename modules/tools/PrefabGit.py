@@ -46,6 +46,7 @@ class PrefabGit(base):
 
         self.logger.info("pull %s with depth:%s" % (url, depth))
 
+
         return j.clients.git.pullGitRepo(url=url, dest=dest, login=login, passwd=passwd, depth=depth,
                                 ignorelocalchanges=ignorelocalchanges, reset=reset, branch=branch, revision=revision,
                                 ssh=ssh, executor=self.executor, tag=tag)

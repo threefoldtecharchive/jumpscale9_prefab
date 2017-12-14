@@ -18,7 +18,7 @@ class PrefabAlba(base):
         self._build()
 
     def _install_deps_opam(self):
-        self.prefab.system.package.update()
+        self.prefab.system.package.mdupdate()
         self.prefab.system.package.upgrade(distupgrade=True)
 
         apt_deps = """
@@ -171,7 +171,7 @@ class PrefabAlba(base):
                                      "deb http://archive.ubuntu.com/ubuntu/ wily universe\n")
         self.prefab.core.file_write('/etc/apt/sources.list.d/ovsaptrepo.list',
                                      "deb http://apt.openvstorage.org unstable main\n")
-        self.prefab.system.package.update()
+        self.prefab.system.package.mdupdate()
 
         apt_deps = """
         librdmacm-dev clang-3.5 liblttng-ust0 librdmacm1 libtokyocabinet9 libstdc++6:amd64 libzmq3 \

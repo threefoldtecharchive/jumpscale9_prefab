@@ -75,4 +75,4 @@ class PrefabCockpit(base):
         flask_wtf
         python-telegram-bot
         """
-        self.prefab.development.pip.multiInstall(deps, upgrade=True)
+        self.prefab.runtimes.pip.multiInstall(deps, upgrade=True)
