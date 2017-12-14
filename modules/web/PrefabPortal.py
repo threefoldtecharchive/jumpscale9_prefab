@@ -222,4 +222,4 @@ class PrefabPortal(base):
         if not admin:
             j.portal.tools.usermanager.createUser("admin", passwd, "admin@mail.com", "admin")
         else:
-            admin.update(passwd = passwd)
+            admin.update(passwd=passwd)
