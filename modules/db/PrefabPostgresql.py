@@ -55,8 +55,8 @@ class PrefabPostgresql(app):
         --shell /bin/bash --group --gecos "PostgreSQL administrator" postgres')
         c = """
         cd $JSAPPSDIR/pgsql
-        mkdir data
-        mkdir log
+        mkdir -p data
+        mkdir -p log
         chown -R postgres $JSAPPSDIR/pgsql/
         chown -R postgres {postgresdbdir}
         sudo -u postgres $BINDIR/initdb -D {postgresdbdir} --no-locale
