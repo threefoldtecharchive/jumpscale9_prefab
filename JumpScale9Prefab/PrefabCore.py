@@ -992,8 +992,6 @@ class PrefabCore(base):
         self.file_attribs(destination, mode, owner, group)
 
     def file_copy(self, source, dest, recursive=False, overwrite=True):
-        source = source.replace(" ", "\ ")
-        dest = dest.replace(" ", "\ ")
         source = self.replace(source)
         dest = self.replace(dest)
         cmd = "cp -v "
