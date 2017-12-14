@@ -16,7 +16,7 @@ class PrefabHadoop(base):
             wget -c http://www-us.apache.org/dist/hadoop/common/hadoop-2.7.2/hadoop-2.7.2.tar.gz
             tar -xf hadoop-2.7.2.tar.gz -C /opt/
             """
-            C = self.prefab.bash.replaceEnvironInText(C)
+            C = self.prefab.core.replace(C)
             C = self.replace(C)
             self.prefab.core.run(C, profile=True)
             self.prefab.bash.addPath("/opt/hadoop-2.7.2/bin")

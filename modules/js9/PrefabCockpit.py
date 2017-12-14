@@ -28,7 +28,7 @@ class PrefabCockpit(base):
             production=production,
             client_id=client_id,
             client_secret=portal_secret,
-            organization=organization,
+            scope_organization=organization,
             redirect_address='%s:8200' %
             ip)
 
@@ -75,4 +75,4 @@ class PrefabCockpit(base):
         flask_wtf
         python-telegram-bot
         """
-        self.prefab.development.pip.multiInstall(deps, upgrade=True)
+        self.prefab.runtimes.pip.multiInstall(deps, upgrade=True)

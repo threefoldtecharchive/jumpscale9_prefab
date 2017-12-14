@@ -57,6 +57,7 @@ class PrefabGolang(app):
             downl = "https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz"
         else:
             raise j.exceptions.RuntimeError("platform not supported")
+
         self.prefab.core.run(cmd=self.replace("rm -rf $GOROOTDIR"), die=True)
         self.prefab.core.dir_ensure(self.GOROOTDIR)
         self.prefab.core.dir_ensure(self.GOPATHDIR)
@@ -78,22 +79,30 @@ class PrefabGolang(app):
         self.get("github.com/tools/godep")
         self.doneSet("install")
 
-    def goraml(self):
+    def goraml(self,reset=False):
         """
         Install (using go get) goraml.
         """
+        if reset==False and self.doneGet('goraml'):
+            return
+        
         C = '''
+        go get -u github.com/tools/godep
+        go get -u github.com/jteeuwen/go-bindata/...
         go get -u github.com/Jumpscale/go-raml
         set -ex
         cd $GOPATH/src/github.com/Jumpscale/go-raml
         sh build.sh
         '''
         self.prefab.core.execute_bash(C, profile=True)
+        self.doneSet('goraml')
 
-    def bindata(self):
+    def bindata(self,reset=False):
         """
         Install (using go get) go-bindata.
         """
+        if reset==False and self.doneGet('bindata'):
+            return        
         C = '''
         set -ex
         go get -u github.com/jteeuwen/go-bindata/...
@@ -102,6 +111,7 @@ class PrefabGolang(app):
         go install
         '''
         self.prefab.core.execute_bash(C, profile=True)
+        self.doneSet('bindata')
 
     def glide(self):
         """
@@ -118,15 +128,28 @@ class PrefabGolang(app):
         srcpath = self.prefab.core.joinpaths(self.GOPATHDIR, 'src')
         self.prefab.core.dir_remove(srcpath)
 
-    def get(self, url):
+    def get(self, url, install=True, update=True):
         """
+        @param url ,, str url to run the go get command on.
+        @param install ,, bool will default build and install the repo if false will only get the repo.
+        @param update ,, bool will if True will update requirements if they exist.
         e.g. url=github.com/tools/godep
         """
         self.clean_src_path()
-        self.prefab.core.run('go get -v -u %s' % url, profile=True)
+        download_flag = ''
+        update_flag = ''
+        if not install:
+            download_flag = '-d'
+        if update:
+            update_flag = '-u'
+        self.prefab.core.run('go get %s -v %s %s' % (download_flag, update_flag, url),
+                             profile=True)
 
     def godep(self, url, branch=None, depth=1):
         """
+        @param url ,, str url to run the godep command on.
+        @param branch ,,str branch to use on the specified repo
+        @param depth ,,int depth of repo pull defines how shallow the git clone is
         e.g. url=github.com/tools/godep
         """
         self.clean_src_path()

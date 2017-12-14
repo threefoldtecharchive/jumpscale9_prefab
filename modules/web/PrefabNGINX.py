@@ -172,7 +172,7 @@ class PrefabNGINX(app):
         os.environ["LANG"] = "C.UTF-8"
 
         if self.prefab.core.isUbuntu:
-            self.prefab.system.package.update()
+            self.prefab.system.package.mdupdate()
             self.prefab.system.package.install("build-essential libpcre3-dev libssl-dev")
 
             self.prefab.core.dir_remove("$TMPDIR/build/nginx")

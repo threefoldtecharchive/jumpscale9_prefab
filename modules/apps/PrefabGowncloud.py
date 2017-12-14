@@ -10,12 +10,27 @@ class PrefabGowncloud(app):
         """
         build gowncloud and build
         """
+        if self.doneCheck("build"):
+            return
+        self.prefab.runtimes.golang.install()
+        self.prefab.runtimes.golang.bindata()
+
         gopath = self.prefab.runtimes.golang.GOPATH
         dest = "{gopath}/src/github.com/gowncloud/gowncloud".format(gopath=gopath)
         # self.prefab.core.run('mkdir -p {dest}'.format(dest=dest))
         self.prefab.tools.git.pullRepo("https://github.com/gowncloud/gowncloud.git", dest=dest, ssh=False)
         self.prefab.core.run('cd {dest} && go generate && go build'.format(dest=dest), profile=True)
         self.prefab.core.file_copy("{dest}/gowncloud".format(dest=dest), "$BINDIR")
+        self.doneSet('build')
+
+
+    def install(self, reset=False):
+        """
+        Install method
+        """
+        return self.build()
+
+
 
     def start(
             self,
@@ -40,4 +55,3 @@ class PrefabGowncloud(app):
     def stop(self):
         pm = self.prefab.system.processmanager.get()
         pm.stop("gowncloud")
-

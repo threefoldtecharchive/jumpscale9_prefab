@@ -48,26 +48,65 @@ class PrefabNodeJS(app):
             self.logger.info("node too low version, need to install.")
             return False
 
-        if self.doneGet("install") == False:
+        if self.doneGet("install") is False:
             return False
         return True
 
-    def phantomjs(self,reset=False):
+    def phantomjs(self, reset=False):
         """
         headless browser used for automation
         """
-        if self.doneGet("phantomjs") and reset==False:
-            return 
+        if self.doneGet("phantomjs") and reset is False:
+            return
         if not self.prefab.core.isUbuntu:
             raise RuntimeError("only ubuntu supported")
 
         url = 'https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2'
         cdest = self.prefab.core.file_download(
             url, expand=True, overwrite=False, to="$TMPDIR")
-        self.core.run("mv %s/bin/phantomjs /opt/bin/phantomjs"%cdest)
-        self.core.run("rm -rf %s"%cdest)
-        
+        self.core.run("mv %s/bin/phantomjs /opt/bin/phantomjs" % cdest)
+        self.core.run("rm -rf %s" % cdest)
+
         self.doneSet("phantomjs")
+
+    def npm_install(self, name,global_=True,reset=False):
+        """
+        @PARAM cmdname is the optional cmd name which will be used to put in path of the env (as alias to the name)
+        """
+        self.logger.info("npm install:%s"%name)
+        key="npm_%s"%name
+        if self.doneGet(key) and not reset:
+            return
+
+        if global_:
+            if self.prefab.core.isMac:
+                sudo="sudo "
+            else:
+                sudo=""
+            cmd = "cd /tmp;%snpm install -g %s --unsafe-perm=true --allow-root"%(sudo,name)
+        else:
+            cmd = "cd %s;npm i %s" % (self.NODE_PATH, name)
+        
+        self.prefab.core.run(cmd)
+
+        # cmdpath = "%s/nodejs_modules/node_modules/%s/bin/%s" % (
+        #     j.dirs.VARDIR, name, name)
+
+        # from IPython import embed
+        # embed(colors='Linux')
+
+        # if j.sal.fs.exists(srcCmd):
+        #     j.sal.fs.chmod(srcCmd, 0o770)
+        #     j.sal.fs.symlink(srcCmd, "/usr/local/bin/%s" %
+        #                      name, overwriteTarget=True)
+        #     j.sal.fs.chmod(srcCmd, 0o770)
+
+        # if j.sal.fs.exists(cmdpath):
+        #     j.sal.fs.symlink(cmdpath, "/usr/local/bin/%s" %
+        #                      name, overwriteTarget=True)
+
+        self.doneSet(key)
+                             
 
     def install(self, reset=False):
         """
@@ -80,7 +119,7 @@ class PrefabNodeJS(app):
 
         # version = "7.7.1"
         version = "8.4.0"
-        if reset == False and self.prefab.core.file_exists('$BINDIR/npm'):
+        if reset is False and self.prefab.core.file_exists('$BINDIR/npm'):
             return
 
         if self.prefab.core.isMac:
@@ -95,12 +134,13 @@ class PrefabNodeJS(app):
                 message="only support ubuntu & mac", level=1, source="", tags="", msgpub="")
 
         cdest = self.prefab.core.file_download(
-            url, expand=True, overwrite=False, to="$TMPDIR")
+            url, expand=True, overwrite=False, to="$TMPDIR/node")
 
-        self.core.run("rm -rf /opt/node;mv %s /opt/node"%(cdest))
-        self.core.run("rm /usr/local/bin/node;ln -s /opt/node/bin/node /usr/local/bin/node")
-        self.core.run("rm /usr/local/bin/npm;ln -s /opt/node/bin/npm /usr/local/bin/npm")
-        self.core.run("rm /usr/local/bin/npx;ln -s /opt/node/bin/npx /usr/local/bin/npx")
+        self.core.run("rm -rf /opt/node;mv %s /opt/node" % (cdest))
+
+        if self.prefab.core.isMac:
+            self.core.run('mv /opt/node/%s/* /opt/node' %
+                          j.sal.fs.getBaseName(url.strip('.tar.gz')))
 
         self.prefab.bash.profileDefault.envSet("NODE_PATH", self.NODE_PATH)
         self.prefab.bash.profileDefault.addPath(
@@ -108,7 +148,7 @@ class PrefabNodeJS(app):
         self.prefab.bash.profileDefault.save()
 
         rc, out, err = self.prefab.core.run("npm -v", profile=True)
-        if out != '5.3.0': #4.1.2
+        if out != '5.3.0':  # 4.1.2
             # needs to be this version because is part of the package which was downloaded
             # self.prefab.core.run("npm install npm@4.1.2 -g", profile=True)
             raise RuntimeError("npm version error")
@@ -128,6 +168,6 @@ class PrefabNodeJS(app):
             "npm config set init-cache $BASEDIR/node/.npm "), profile=True)
         self.prefab.core.run("npm install -g bower", profile=True, shell=True)
 
-        #self.prefab.core.run("npm install npm@latest -g", profile=True)
+        # self.prefab.core.run("npm install npm@latest -g", profile=True)
 
         self.doneSet("install")

@@ -23,6 +23,7 @@ class PrefabGogs(app):
     def GOPATH(self):
         return self.prefab.runtimes.golang.GOPATH
 
+
     def build(self, reset=False):
 
         if self.doneCheck("build", reset):
@@ -30,6 +31,10 @@ class PrefabGogs(app):
 
         self.prefab.runtimes.golang.install()
         self.prefab.runtimes.golang.glide()
+
+        self.GOGSPATH = self.replace("{}/src/github.com/gogits/gogs".format(self.GOPATH))
+        self.CODEDIR = self.GOGSPATH
+        self.INIPATH = self.replace("$GOGSPATH/custom/conf/app.ini")
 
         self.prefab.bash.envSet(
             'GOGITSDIR', '%s/src/github.com/gogits' % self.GOGSPATH)

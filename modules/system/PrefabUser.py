@@ -42,7 +42,8 @@ class PrefabUser(base):
         specific password/home/uid/gid/shell."""
 
         name = name.strip()
-        passwd = passwd.strip()
+        if passwd:
+            passwd = passwd.strip()
         options = []
 
         if home:
@@ -50,7 +51,7 @@ class PrefabUser(base):
         if uid:
             options.append("-u '%s'" % (uid))
         # if group exists already but is not specified, useradd fails
-        if not gid and self.prefab.group.check(name):
+        if not gid and self.prefab.system.group.check(name):
             gid = name
         if gid:
             options.append("-g '%s'" % (gid))

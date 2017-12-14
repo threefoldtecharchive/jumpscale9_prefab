@@ -19,7 +19,7 @@ class PrefabVolumeDriver(app):
                                      'deb http://apt.openvstorage.org unstable main')
         self.prefab.core.run(
             'echo "deb http://us.archive.ubuntu.com/ubuntu xenial main universe" >> /etc/apt/sources.list')
-        self.prefab.system.package.update()
+        self.prefab.system.package.mdupdate()
         self.prefab.system.package.upgrade(distupgrade=True)
 
         apt_deps = """
