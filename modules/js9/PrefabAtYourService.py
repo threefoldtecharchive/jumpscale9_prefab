@@ -121,7 +121,7 @@ class PrefabAtYourService(base):
         Starts an AYS instance
         """
         # check if the install was called before
-        if not j.sal.fs.exists(j.sal.fs.joinPaths(self.base_dir, 'main.py')):
+        if not self.prefab.core.exists(j.sal.fs.joinPaths(self.base_dir, 'main.py')):
             self.logger.warning('AYS is not installed. Installing it...')
             self.install()
 
