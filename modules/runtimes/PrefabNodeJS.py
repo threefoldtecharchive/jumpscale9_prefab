@@ -63,9 +63,13 @@ class PrefabNodeJS(app):
 
         url = 'https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2'
         cdest = self.prefab.core.file_download(
-            url, expand=True, overwrite=False, to="$TMPDIR")
+            url, expand=True, overwrite=False, to="$TMPDIR/phantomjs",removeTopDir=True,deletedest=True)
+
         self.core.run("mv %s/bin/phantomjs /opt/bin/phantomjs" % cdest)
         self.core.run("rm -rf %s" % cdest)
+
+        if self.prefab.core.isUbuntu:
+            j.tools.prefab.local.system.package.install("libfontconfig")
 
         self.doneSet("phantomjs")
 
