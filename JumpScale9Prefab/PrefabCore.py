@@ -500,7 +500,8 @@ class PrefabCore(base):
             multithread=False,
             expand=False,
             minsizekb=40,
-            removeTopDir=False):
+            removeTopDir=False,
+            deletedest=False):
         """
         download from url
         @return path of downloaded file
@@ -523,6 +524,9 @@ class PrefabCore(base):
             to = self.joinpaths("$TMPDIR", j.sal.fs.getBaseName(url))
 
         to = self.replace(to)
+
+        if deletedest:
+            self.dir_remove(to)
 
         if overwrite:
             if self.file_exists(to):
