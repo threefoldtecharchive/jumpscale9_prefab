@@ -172,7 +172,7 @@ class PrefabKubernetes(app):
         """
         self.prefab.core.run(script_content)
         self.prefab.system.package.mdupdate(reset=True)
-        self.prefab.system.package.install('kubelet,kubeadm,kubectl')
+        self.prefab.system.package.install('kubelet=1.8.5-00,kubeadm=1.8.5-00,kubectl=1.8.5-00')
 
         # build
         self.doneSet("install_base")
@@ -348,7 +348,7 @@ class PrefabKubernetes(app):
 
         log_message = """
         please wait until kube-dns deplyments are deployed before joining new nodes to the cluster.
-        to check use this use 'kubectl get pods --all-namepspaces'
+        to check this use 'kubectl get pods --all-namepspaces'
         then pass the join line returned string to the install_minion
         """
         print(log_message)

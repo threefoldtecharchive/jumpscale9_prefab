@@ -4,7 +4,7 @@ import time
 
 base = j.tools.prefab._getBaseClass()
 
-CMD_APT_GET = "DEBIAN_FRONTEND=noninteractive apt-get -q --yes -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' "
+CMD_APT_GET = "DEBIAN_FRONTEND=noninteractive apt-get -q --yes -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' --allow-downgrades "
 
 
 class PrefabPackage(base):
