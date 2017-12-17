@@ -404,10 +404,12 @@ class PrefabKubernetes(app):
             master.core.execute_bash(edit_cmd.format(node_ip=master.executor.sshclient.addr,
                                                      my_hostname=init_node.core.hostname,
                                                      init_ip=init_node.executor.sshclient.addr))
+
+            pm = master.system.processmanager.get('systemd')
             pm.reload()
             pm.restart('kubelet')
             pm.restart('docker')
-            init_node.virtualization.kubernetes.wait_on_apiserver()
+            master.virtualization.kubernetes.wait_on_apiserver()
 
             # giving time for the nodes to be registered
             for i in range(30):
