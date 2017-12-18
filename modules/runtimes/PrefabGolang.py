@@ -85,6 +85,9 @@ class PrefabGolang(app):
         """
         if reset==False and self.doneGet('goraml'):
             return
+
+        self.install()
+        self.bindata()
         
         C = '''
         go get -u github.com/tools/godep
