@@ -15,6 +15,8 @@ class PrefabMicroEditor(app):
         if self.doneCheck("install", reset):
             return
 
+        print("INSTALL MICROEDITOR")
+
         if self.core.isMac:
             url = "https://github.com/zyedidia/micro/releases/download/v1.3.3/micro-1.3.3-osx.tar.gz"
         elif self.core.isUbuntu:

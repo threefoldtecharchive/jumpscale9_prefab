@@ -18,6 +18,8 @@ class PrefabTarantool(app):
         if self.doneCheck("install", reset):
             return
 
+        self.prefab.system.base.development() 
+
         if self.core.isMac:
             # cmd="brew install tarantool"
             self.prefab.system.package.install(
@@ -105,12 +107,14 @@ class PrefabTarantool(app):
 
             self.doneSet('install')
 
+
     def install_luarocks_rock(self, name):
         """
         Installs a luarocks rock
         :param name: name of the rock to install
         :return:
         """
+
         if not self.doneCheck('install'):
             raise Exception('Tarantool is not installed')
 
