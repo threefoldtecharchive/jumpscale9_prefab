@@ -400,7 +400,7 @@ class PrefabKubernetes(app):
             # write patch file used later on to register the nodes as masters
             init_node.core.file_write('/master.yaml', j.data.serializer.yaml.dumps(node_json))
 
-        for master in nodes[1:]:
+        for index, master in enumerate(nodes[1:]):
             # send certs from init node to the rest of the master nodes
             init_node.core.execute_bash(send_cmd.format(master=master.executor.sshclient.addr))
             # adjust the configs in the new nodes with the relative ip and hostname
@@ -419,7 +419,7 @@ class PrefabKubernetes(app):
                 _, nodes_result, _ = init_node.core.run('kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes',
                                                         showout=False)
                 # checking if number of lines is equal to number of nodes to check if they are registered
-                if len(nodes_result.splitlines()) - 1 == len(nodes) + 1:
+                if len(nodes_result.splitlines()) - 1 == index + 2:
                     break
 
             if not unsafe:
