@@ -193,6 +193,7 @@ class PrefabKubernetes(app):
 
         # format ssl config to add these node ips and dns names to them
         alt_names_etcd = '\n'.join(['IP.{i} = {ip}'.format(i=i, ip=ip) for i, ip in enumerate(nodes_ip)])
+        alt_names_etcd += '\n'.join(['DNS.{i} = {hostname}'.format(i=i, hostname=node.core.hostname) for i, node in enumerate(nodes)])
         ssl_config = OPENSSL.format(alt_names_etcd=alt_names_etcd)
 
         # generate certigicates and sign them for use by etcd
@@ -317,8 +318,10 @@ class PrefabKubernetes(app):
         cmd = 'kubeadm init --config %s/kubeadm-init.yaml' % (
             init_node.executor.dir_paths['HOMEDIR'])
         endpoints = ''.join(['  - https://%s:2379\n' % ip for ip in nodes_ip])
+        dns_names = [node.core.hostname for node in nodes]
+        external_ips = j.data.serializer.yaml.dumps(external_ips + dns_names)
         kube_init_yaml = KUBE_INIT.format(node_ip=nodes_ip[0], flannel_subnet=kube_cidr, endpoints=endpoints,
-                                          external_ips=j.data.serializer.yaml.dumps(external_ips))
+                                          external_ips=external_ips)
 
         # write config and run command
         init_node.core.file_write('%s/kubeadm-init.yaml' % init_node.executor.dir_paths['HOMEDIR'],
