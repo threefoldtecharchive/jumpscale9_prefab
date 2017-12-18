@@ -500,7 +500,8 @@ class PrefabCore(base):
             multithread=False,
             expand=False,
             minsizekb=40,
-            removeTopDir=False):
+            removeTopDir=False,
+            deletedest=False):
         """
         download from url
         @return path of downloaded file
@@ -523,6 +524,9 @@ class PrefabCore(base):
             to = self.joinpaths("$TMPDIR", j.sal.fs.getBaseName(url))
 
         to = self.replace(to)
+
+        if deletedest:
+            self.dir_remove(to)
 
         if overwrite:
             if self.file_exists(to):
@@ -1061,6 +1065,29 @@ class PrefabCore(base):
             return out
         # return self.run('openssl dgst -md5 %s' % (location)).split("\n")[-1].split(")= ",1)[-1].strip()
 
+
+    # =============================================================================
+    #
+    # Network OPERATIONS
+    #
+    # =============================================================================
+
+    def getNetworkInfoGenrator(self):
+        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
+        exitcode, output, err = self.run("ip a", showout=False)
+        for m in IPBLOCKS.finditer(output):
+            block = m.group('block')
+            yield parseBlock(block)
+
+    @property
+    def networking_info(self):
+        if not self._networking_info:
+            all_info = list()
+            for device in getNetworkInfo():
+                all_info.append(device)
+        return all_info
+
+
     # =============================================================================
     #
     # DIRECTORY OPERATIONS
@@ -1142,7 +1169,8 @@ class PrefabCore(base):
 
     createDir = dir_ensure
 
-    def find(self, path, recursive=True, pattern="", findstatement="", type="", contentsearch="", extendinfo=False):
+    def find(self, path, recursive=True, pattern="", findstatement="", type="", contentsearch="",
+             executable=False, extendinfo=False):
         """
 
         @param findstatement can be used if you want to use your own find arguments
@@ -1161,8 +1189,12 @@ class PrefabCore(base):
             f    regular file
             l    symbolic link
 
+
         @param contentsearch
             looks for this content inside the files
+
+        @param executable
+            looks for executable files only
 
         @param extendinfo: this will return [[$path, $sizeinkb, $epochmod]]
         """
@@ -1179,6 +1211,9 @@ class PrefabCore(base):
 
         if type != "":
             cmd += " -type %s" % type
+
+        if executable:
+            cmd += " -executable"
 
         if extendinfo:
             cmd += " -printf '%p||%k||%T@\n'"

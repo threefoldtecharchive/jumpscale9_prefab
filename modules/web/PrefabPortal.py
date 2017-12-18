@@ -60,7 +60,7 @@ class PrefabPortal(base):
         cfg = self.prefab.executor.state.configGet('portal')
         for key, value in config_dict.items():
             cfg[name][key] = value
-        self.prefab.executor.state.configSet('portal',cfg)
+        self.prefab.executor.state.configSet('portal', cfg)
 
     def install(self, start=True, branch='master', reset=False, name="main", port='8200', ip='127.0.0.1'):
         """
@@ -77,7 +77,7 @@ class PrefabPortal(base):
                 self.start(name=name)
             return
 
-        self.prefab.db.mongodb.install()
+        self.prefab.db.mongodb.install(start=start)
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
 
@@ -102,8 +102,8 @@ class PrefabPortal(base):
         self.doneSet("install-"+name)
 
     def installNodeJSLibs(self):
-        self.prefab.apps.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
-        self.prefab.apps.nodejs.bowerInstall(["jquery",
+        self.prefab.runtimes.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
+        self.prefab.runtimes.nodejs.bowerInstall(["jquery",
                                                "flatui",
                                                "bootstrap",
                                                "famous",
@@ -144,7 +144,7 @@ class PrefabPortal(base):
 
         cmd = """
             cd {CODEDIR}/github/jumpscale/portal9
-            pip3 install -e .
+            pip3 install -e . -U
             """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
         self.prefab.core.execute_bash(cmd)
         self.doneSet("installdeps"+name)
