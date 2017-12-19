@@ -125,9 +125,17 @@ class PrefabSSH(base):
             return "%s.pub" % path
 
     #
-    def authorize(self, user, key):
-        """Adds the given key to the '.ssh/authorized_keys' for the given
-        user."""
+    def authorize(self, user, key, **kwargs):
+        """
+        Adds the given key to the '.ssh/authorized_keys' for the given
+        user.
+
+        @param user username to which authorization should be performed
+        @param key public ssh key to authorize
+        @param kwargs extra settings for this authorization. See https://www.ssh.com/ssh/authorized_keys/openssh
+          E.g. setting command option is done by adding the following kwarg: command='"/bin/myscript.sh"
+          E.g. setting no-agent-forwarding is done by adding the following kwarg: no-agent-forwarding=True
+        """
 
         if key is None or key.strip() == "":
             raise j.exceptions.Input("key cannot be empty")
@@ -143,17 +151,28 @@ class PrefabSSH(base):
             key += "\n"
         ret = None
 
+        settings=list()
+        for setting, value in kwargs.items():
+            if value is True:
+                settings.append(setting)
+            else:
+                settings.append('%s="%s"' % (setting, value))
+        if settings:
+            line = "%s %s" % (",".join(settings), key)
+        else:
+            line = key
+
         if self.prefab.core.file_exists(keyf):
             content = self.prefab.core.file_read(keyf)
             if content.find(key[:-1]) == -1:
-                self.prefab.core.file_append(keyf, key)
+                self.prefab.core.file_append(keyf, line)
                 ret = False
             else:
                 ret = True
         else:
             # Make sure that .ssh directory exists, see #42
             self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode="700")
-            self.prefab.core.file_write(keyf, key, owner=user, group=group, mode="600")
+            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode="600")
             ret = False
 
         self.prefab.core.sudomode = sudomode

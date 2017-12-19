@@ -268,7 +268,7 @@ class PrefabPackage(base):
                     res[p] = False
                 else:
                     if update:
-                        self.update(p)
+                        self.mdupdate(p)
                     res[p] = True
             if len(res) == 1:
                 for _, value in res.items():
