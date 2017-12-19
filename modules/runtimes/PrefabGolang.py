@@ -11,9 +11,9 @@ class PrefabGolang(app):
     NAME = 'go'
 
     def reset(self):
-        self.prefab.bash.profileDefault.deletePathFromEnv("GOPATH")
-        self.prefab.bash.profileDefault.deletePathFromEnv("GOROOT")
-        self.prefab.bash.profileJS.deletePathFromEnv("GOROOT")
+        # self.prefab.bash.profileDefault.deletePathFromEnv("GOPATH")
+        # self.prefab.bash.profileDefault.deletePathFromEnv("GOROOT")
+        # self.prefab.bash.profileJS.deletePathFromEnv("GOROOT")
 
         self.prefab.bash.profileDefault.deleteAll("GOPATH")
         self.prefab.bash.profileJS.deleteAll("GOPATH")

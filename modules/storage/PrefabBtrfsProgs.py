@@ -26,9 +26,9 @@ class PrefabBtrfsProgs(PrefabApp):
         self.core.dir_remove(self.BUILDDIR)
         self.core.dir_remove(self.CODEDIR + 'btrfs-progs-v4.8')
         self.doneDelete('build')
-        self._run("cd $LIBDIR; rm libbtrfs.so.0.1")
-        self._run("cd $LIBDIR; rm libbtrfs.so.0")
-        self._run("rm $BINDIR/btrfs")
+        self._run("cd $LIBDIR; rm -f libbtrfs.so.0.1")
+        self._run("cd $LIBDIR; rm -f libbtrfs.so.0")
+        self._run("rm -f $BINDIR/btrfs")
         self.prefab.runtimes.pip.reset()
 
     def build(self, reset=False):

@@ -11,6 +11,7 @@ class PrefabRsync(base):
 
     def reset(self):
         self.core.dir_remove(self.BUILDDIRL)
+        self.doneDelete("build")
 
     def build(self, reset=False, install=True):
         """
@@ -50,6 +51,9 @@ class PrefabRsync(base):
             self.install()
 
     def install(self):
+        if not self.doneGet("build"):
+            self.build(install=False)
+
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
         self.prefab.core.file_copy(
