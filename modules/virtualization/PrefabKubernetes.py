@@ -55,6 +55,7 @@ kind: MasterConfiguration
 api:
   advertiseAddress: {node_ip}
   bindPort: 6443
+authorizationMode: Node,RBAC
 etcd:
   endpoints:
 {endpoints}
@@ -193,7 +194,7 @@ class PrefabKubernetes(app):
 
         # format ssl config to add these node ips and dns names to them
         alt_names_etcd = '\n'.join(['IP.{i} = {ip}'.format(i=i, ip=ip) for i, ip in enumerate(nodes_ip)])
-        alt_names_etcd += '\n'.join(['DNS.{i} = {hostname}'.format(i=i, hostname=node.core.hostname) for i, node in enumerate(nodes)])
+        alt_names_etcd += '\n' + '\n'.join(['DNS.{i} = {hostname}'.format(i=i, hostname=node.core.hostname) for i, node in enumerate(nodes)])
         ssl_config = OPENSSL.format(alt_names_etcd=alt_names_etcd)
 
         # generate certigicates and sign them for use by etcd
@@ -210,11 +211,11 @@ class PrefabKubernetes(app):
         """
         self.prefab.core.run(cmd)
         if save:
-            self.prefab.core.file_copy('$TMPDIR/k8s','$HOMEDIR/')
+            self.prefab.core.file_copy('$TMPDIR/k8s', '$HOMEDIR/')
 
     def copy_etcd_certs(self, controller_node):
         """
-        Copies the etcd certificates from $TMPDIR/k8s/ to the controller node to the current node. This assumes certs
+        Copies the etcd certiftes from $TMPDIR/k8s/ to the controller node to the current node. This assumes certs
         are created in the specified location.
 
         @param controller_node ,, object(prefab) prefab connection to the controller node which deploys the cluster should have ssh access to all nodes.
@@ -267,13 +268,14 @@ class PrefabKubernetes(app):
         """
 
         nodes_ip = [node.executor.sshclient.addr for node in nodes]
-        initial_cluster = ','.join(['kub0%s=https://%s:2380' % ((i + 1), ip) for i, ip in enumerate(nodes_ip)])
+        initial_cluster = ['%s=https://%s:2380' % (node.core.hostname, node.executor.sshclient.addr) for node in nodes]
+        initial_cluster = ','.join(initial_cluster)
         for index, node in enumerate(nodes):
             pm = node.system.processmanager.get('systemd')
             node.virtualization.kubernetes.get_etcd_binaries()
             node.virtualization.kubernetes.copy_etcd_certs(self.prefab)
 
-            etcd_service = ETCD_SERVICE.format(*nodes_ip, name='kub0%d' % (index + 1), node_ip=node.executor.sshclient.addr,
+            etcd_service = ETCD_SERVICE.format(*nodes_ip, name=node.core.hostname, node_ip=node.executor.sshclient.addr,
                                                initial_cluster=initial_cluster)
 
             node.core.file_write('/etc/systemd/system/etcd.service', etcd_service, replaceInContent=True)
@@ -360,7 +362,7 @@ class PrefabKubernetes(app):
         pm = init_node.system.processmanager.get('systemd')
         pm.stop('kubelet')
         pm.stop('docker')
-        init_node.core.run('sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
+        init_node.core.run('sed -i.bak "s/,NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
         pm.start('kubelet')
         pm.start('docker')
 
