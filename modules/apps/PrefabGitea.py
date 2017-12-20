@@ -1,4 +1,5 @@
 from js9 import j
+import textwrap
 
 app = j.tools.prefab._getBaseAppClass()
 
@@ -10,10 +11,11 @@ class PrefabGitea(app):
         self._gogspath = str()
         self._gopath = str()
         self._appini = str()
-        self.BUILDDIR = self.replace('$BUILDDIR/caddy')
-        self.GITEAPATH = self.replace('$GOPATH/src/code.gitea.io/gitea')
+        # set needed paths
+        self.GITEAPATH = self.replace('{}/src/code.gitea.io/gitea'.format(self.GOPATH))
+        self.CUSTOM_PATH = self.replace('%s/custom' % self.GITEAPATH)
         self.CODEDIR = self.GITEAPATH
-        self.INIPATH = self.replace('$GITEAPATH/custom/conf/app.ini')
+        self.INIPATH = self.replace('%s/conf/app.ini' % self.CUSTOM_PATH)
 
     @property
     def GOPATH(self):
@@ -29,23 +31,7 @@ class PrefabGitea(app):
         if self.doneCheck('build', reset):
             return
 
-        # install dependencies
-        self.prefab.system.package.mdupdate()
-        self.prefab.system.package.ensure('git-core')
-        self.prefab.system.package.ensure('gcc')
-        self.prefab.runtimes.golang.install()
-
-        # set needed paths
-        self.GITEAPATH = self.replace('{}/src/code.gitea.io/gitea'.format(self.GOPATH))
-        self.CUSTOM_PATH = self.replace('$GITEAPATH/custom')
-        self.CODEDIR = self.GITEAPATH
-        self.INIPATH = self.replace('%s/conf/app.ini' % self.CUSTOM_PATH)
-
-        # set env vars
-        self.prefab.bash.envSet(
-            'GITEAITSDIR', '%s/src/github.com/gigforks' % self.GITEAPATH)
-        self.prefab.bash.envSet('GITEADIR', '$GITEAITSDIR/gitea')
-
+        self._installDeps()
         self.prefab.runtimes.golang.get('code.gitea.io/gitea')
 
         # change branch from master to gigforks/iyo_integration
@@ -62,12 +48,53 @@ class PrefabGitea(app):
         self.prefab.core.file_link(source='/opt/code/github/incubaid/gitea-custom',
                                    destination=self.CUSTOM_PATH)
 
+        self._configure()
+
         # build gitea (will be stored in self.GITEAPATH/gitea)
         self.prefab.core.run('cd %s && TAGS="bindata" make generate build' % self.GITEAPATH, profile=True,
                              timeout=1200)
         self.doneSet('build')
 
-    def install(self, reset=False):
+    def _installDeps(self):
+        """Install gitea deps
+
+        sys packages: git-core, gcc, golang
+        db: postgresql
+        """
+
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.ensure('git-core')
+        self.prefab.system.package.ensure('gcc')
+        self.prefab.runtimes.golang.install()
+        self.prefab.db.postgresql.install()
+
+    def _configure(self):
+        """Configure gitea
+        Configure: db, iyo
+        """
+
+        # Configure Database
+        config = """
+        RUN_MODE = prod
+        [database]
+        DB_TYPE  = postgres
+        HOST     = localhost:5432
+        NAME     = gitea
+        USER     = postgres
+        PASSWD   = postgres
+        SSL_MODE = disable
+        PATH     = data/gitea.db
+        [security]
+        INSTALL_LOCK = true
+        [log]
+        MODE      = file
+        LEVEL     = Info
+        """
+        config = textwrap.dedent(config)
+        self.prefab.core.file_write(location=self.INIPATH,
+                                    content=config)
+
+    def install(self, org_client_id, org_client_secret, reset=False, start=False):
         """Build Gitea with itsyou.online config
 
         Same as build but exists for standarization sake
@@ -77,6 +104,25 @@ class PrefabGitea(app):
         """
 
         self.build(reset=reset)
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
+
+        # Create postgres db
+        self.prefab.core.run('sudo -u postgres /opt/bin/psql -c \'create database gitea;\'', die=False)
+        self.start()
+        cmd = 'sudo -u postgres /opt/bin/psql gitea -c '
+        cmd += """
+        "INSERT INTO login_source (type, name, is_actived, cfg, created_unix, updated_unix)
+        VALUES (6, 'Itsyou.online', TRUE,
+        '{\"Provider\":\"itsyou.online\",\"ClientID\":\"%s\",\"ClientSecret\":\"%s\",\"OpenIDConnectAutoDiscoveryURL\":\"\",\"CustomURLMapping\":null}',
+        extract('epoch' from CURRENT_TIMESTAMP) , extract('epoch' from CURRENT_TIMESTAMP));"
+        """
+        cmd = cmd % (org_client_id, org_client_secret)
+        cmd = cmd.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
+        self.prefab.core.run(cmd)
+        if not start:
+            self.stop()
+            self.prefab.db.postgresql.stop()
 
     def start(self, name='main'):
         """Start GITEA server instance
@@ -114,6 +160,5 @@ class PrefabGitea(app):
         helper method to clean what this module generates.
         """
         super().reset()
-        self.core.dir_remove(self.BUILDDIR)
         self.core.dir_remove(self.CODEDIR)
         self._init()
