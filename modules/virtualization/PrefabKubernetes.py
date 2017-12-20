@@ -172,10 +172,28 @@ class PrefabKubernetes(app):
         """
         self.prefab.core.run(script_content)
         self.prefab.system.package.mdupdate(reset=True)
-        self.prefab.system.package.install('kubelet=1.8.5-00,kubeadm=1.8.5-00,kubectl=1.8.5-00')
+        self.prefab.system.package.install('kubelet=1.8.5-00,kubeadm=1.8.5-00')
+        self.install_kube_client(reset, '/usr/local/bin/kubectl')
 
         # build
         self.doneSet("install_base")
+
+    def install_kube_client(self, reset=False, location='$BINDIR/kubectl'):
+        """
+        Installs kubectl. Supported platformers are: macOS and Linux.
+        @param reset,, bool will default to false, if ture  will rebuild even if the code has been run before.
+        @param location,, string download file destination.
+        """
+        if self.doneCheck("install_kube_client", reset):
+            return
+        url = 'https://storage.googleapis.com/kubernetes-release/release/v1.8.5/bin/{}/amd64/kubectl'
+        if self.prefab.core.isMac:
+            url = url.format('darwin')
+        elif self.prefab.core.isLinux:
+            url = url.format('linux')
+        self.prefab.core.run('curl -L {url} -o {loc}'.format(url=url,loc=location))
+        self.prefab.core.file_attribs(location, mode='+x')
+        self.doneSet("install_kube_client")
 
     def setup_etcd_certs(self, nodes, save=False):
         """
