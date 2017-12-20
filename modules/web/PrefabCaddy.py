@@ -139,7 +139,7 @@ class PrefabCaddy(app):
 
         configpath = self.replace(configpath)
 
-        if not j.sal.fs.exists(configpath, followlinks=True):
+        if not self.prefab.core.exists(configpath):
             raise RuntimeError(
                 "could not find caddyconfigfile:%s" % configpath)
 
