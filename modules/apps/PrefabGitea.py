@@ -107,14 +107,14 @@ class PrefabGitea(app):
         if not self.prefab.db.postgresql.isStarted():
             self.prefab.db.postgresql.start()
 
-        # Create postgres db
+        # # Create postgres db
         self.prefab.core.run('sudo -u postgres /opt/bin/psql -c \'create database gitea;\'', die=False)
         self.start()
-        cmd = 'sudo -u postgres /opt/bin/psql gitea -c '
-        cmd += """
+        cmd = """
+        sudo -u postgres /opt/bin/psql gitea -c
         "INSERT INTO login_source (type, name, is_actived, cfg, created_unix, updated_unix)
         VALUES (6, 'Itsyou.online', TRUE,
-        '{\"Provider\":\"itsyou.online\",\"ClientID\":\"%s\",\"ClientSecret\":\"%s\",\"OpenIDConnectAutoDiscoveryURL\":\"\",\"CustomURLMapping\":null}',
+        '{\\"Provider\\":\\"itsyou.online\\",\\"ClientID\\":\\"%s\\",\\"ClientSecret\\":\\"%s\\",\\"OpenIDConnectAutoDiscoveryURL\\":\\"\\",\\"CustomURLMapping\\":null}',
         extract('epoch' from CURRENT_TIMESTAMP) , extract('epoch' from CURRENT_TIMESTAMP));"
         """
         cmd = cmd % (org_client_id, org_client_secret)
@@ -130,7 +130,8 @@ class PrefabGitea(app):
         Keyword Arguments:
             name {string} -- name of the server instance (default: {'main'})
         """
-
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
         cmd = '{giteapath}/gitea web'.format(giteapath=self.GITEAPATH)
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name='gitea_%s' % name, cmd=cmd)
