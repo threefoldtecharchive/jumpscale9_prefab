@@ -56,6 +56,7 @@ api:
   advertiseAddress: {node_ip}
   bindPort: 6443
 authorizationMode: Node,RBAC
+kubernetesVersion: 1.8.5
 etcd:
   endpoints:
 {endpoints}
