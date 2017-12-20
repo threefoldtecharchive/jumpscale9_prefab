@@ -11,11 +11,6 @@ class PrefabGitea(app):
         self._gogspath = str()
         self._gopath = str()
         self._appini = str()
-        # set needed paths
-        self.GITEAPATH = self.replace('{}/src/code.gitea.io/gitea'.format(self.GOPATH))
-        self.CUSTOM_PATH = self.replace('%s/custom' % self.GITEAPATH)
-        self.CODEDIR = self.GITEAPATH
-        self.INIPATH = self.replace('%s/conf/app.ini' % self.CUSTOM_PATH)
 
     @property
     def GOPATH(self):
@@ -28,6 +23,11 @@ class PrefabGitea(app):
             reset {bool} -- force build if True (default: {False})
         """
 
+        # set needed paths
+        self.GITEAPATH = self.replace('{}/src/code.gitea.io/gitea'.format(self.GOPATH))
+        self.CUSTOM_PATH = self.replace('%s/custom' % self.GITEAPATH)
+        self.CODEDIR = self.GITEAPATH
+        self.INIPATH = self.replace('%s/conf/app.ini' % self.CUSTOM_PATH)
         if self.doneCheck('build', reset):
             return
 
