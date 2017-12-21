@@ -364,8 +364,8 @@ class PrefabKubernetes(app):
             init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
 
         # move the config to be able to use kubectl directly
-        init_node.core.dir_ensure('/root/.kube')
-        init_node.core.file_copy('/etc/kubernetes/admin.conf', '/root/.kube/config')
+        init_node.core.dir_ensure('$HOMEDIR/.kube')
+        init_node.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
         if flannel:
             init_node.core.run(
                 'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
