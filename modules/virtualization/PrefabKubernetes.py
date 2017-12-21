@@ -122,14 +122,14 @@ class PrefabKubernetes(app):
 
         self.setup_etcd_certs(masters)
         self.install_etcd_cluster(masters)
-        join_line = self.install_kube_masters(masters, external_ips=external_ips, unsafe=unsafe, reset=reset)
+        join_line, config = self.install_kube_masters(masters, external_ips=external_ips, unsafe=unsafe, reset=reset)
         for node in nodes:
             node.virtualization.kubernetes.install_minion(join_line)
 
-        conf_text = masters[0].core.file_read('/etc/kubernetes/kubelet.conf')
+
         self.doneSet("multihost_install")
 
-        return conf_text, join_line
+        return config, join_line
 
     def install_dependencies(self, reset=False):
         """
@@ -193,7 +193,7 @@ class PrefabKubernetes(app):
             url = url.format('darwin')
         elif self.prefab.core.isLinux:
             url = url.format('linux')
-        self.prefab.core.run('curl -L {url} -o {loc}'.format(url=url,loc=location))
+        self.prefab.core.run('curl -L {url} -o {loc}'.format(url=url, loc=location))
         self.prefab.core.file_attribs(location, mode='+x')
         self.doneSet("install_kube_client")
 
@@ -213,7 +213,8 @@ class PrefabKubernetes(app):
 
         # format ssl config to add these node ips and dns names to them
         alt_names_etcd = '\n'.join(['IP.{i} = {ip}'.format(i=i, ip=ip) for i, ip in enumerate(nodes_ip)])
-        alt_names_etcd += '\n' + '\n'.join(['DNS.{i} = {hostname}'.format(i=i, hostname=node.core.hostname) for i, node in enumerate(nodes)])
+        alt_names_etcd += '\n' + '\n'.join(['DNS.{i} = {hostname}'.format(i=i,
+                                                                          hostname=node.core.hostname) for i, node in enumerate(nodes)])
         ssl_config = OPENSSL.format(alt_names_etcd=alt_names_etcd)
 
         # generate certigicates and sign them for use by etcd
@@ -362,13 +363,16 @@ class PrefabKubernetes(app):
             _, user, _ = init_node.core.run('whoami')
             init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
 
+        # move the config to be able to use kubectl directly
+        init_node.core.dir_ensure('$HOMEDIR/.kube')
+        init_node.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
         if flannel:
             init_node.core.run(
-                'kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
+                'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
 
         if dashboard:
             init_node.core.run(
-                'kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml')
+                'kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml')
 
         log_message = """
         please wait until kube-dns deplyments are deployed before joining new nodes to the cluster.
@@ -412,14 +416,26 @@ class PrefabKubernetes(app):
                 }]
             }
         }
+        system_node_config = {
+            "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+            "kind": "ClusterRoleBinding",
+            "metadata": {
+                "name": "system:node"
+            },
+            "subjects": [{
+                "kind": "Group",
+                "name": "system:nodes"
+            }]
+        }
+        init_node.core.file_write('$TMPDIR/system_node_config.yaml', j.data.serializer.yaml.dumps(system_node_config))
 
         if unsafe:
             # if unsafe  comppletly remove role master from the cluster
             init_node.core.run(
-                'kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes %s node-role.kubernetes.io/master-' % init_node.core.hostname)
+                'kubectl taint nodes %s node-role.kubernetes.io/master-' % init_node.core.hostname)
         else:
             # write patch file used later on to register the nodes as masters
-            init_node.core.file_write('/master.yaml', j.data.serializer.yaml.dumps(node_json))
+            init_node.core.file_write('$TMPDIR/master.yaml', j.data.serializer.yaml.dumps(node_json))
 
         for index, master in enumerate(nodes[1:]):
             # send certs from init node to the rest of the master nodes
@@ -437,7 +453,7 @@ class PrefabKubernetes(app):
 
             # giving time for the nodes to be registered
             for i in range(30):
-                _, nodes_result, _ = init_node.core.run('kubectl --kubeconfig=/etc/kubernetes/admin.conf get nodes',
+                _, nodes_result, _ = init_node.core.run('kubectl get nodes',
                                                         showout=False)
                 # checking if number of lines is equal to number of nodes to check if they are registered
                 if len(nodes_result.splitlines()) - 1 == index + 2:
@@ -445,14 +461,19 @@ class PrefabKubernetes(app):
 
             if not unsafe:
                 # else setting the nodes as master
-                register_cmd = """kubectl --kubeconfig=/etc/kubernetes/admin.conf patch node %s -p "$(cat /master.yaml)"
+                register_cmd = """kubectl patch node %s -p "$(cat $TMPDIR/master.yaml)"
                 """ % (master.core.hostname)
                 init_node.core.execute_bash(register_cmd)
+
+        # bind node users to system:node role
+        patch_user_command = 'kubectl patch clusterrolebinding system:node -p "$(cat $TMPDIR/system_node_config.yaml)"'
+        init_node.core.execute_bash(patch_user_command)
+        config = init_node.core.file_read('/etc/kubernetes/kubelet.conf')
 
         # build
         self.doneSet("install_master")
 
-        return join_line
+        return join_line, config
 
     def install_minion(self, join_line, reset=False):
         """
