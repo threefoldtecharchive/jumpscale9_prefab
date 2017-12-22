@@ -123,6 +123,7 @@ class PrefabNodeJS(app):
 
         # version = "7.7.1"
         version = "8.4.0"
+
         if reset is False and self.prefab.core.file_exists('$BINDIR/npm'):
             return
 
@@ -140,15 +141,14 @@ class PrefabNodeJS(app):
         cdest = self.prefab.core.file_download(
             url, expand=True, overwrite=False, to="$TMPDIR/node")
 
-        self.core.run("rm -rf /opt/node;mv %s /opt/node" % (cdest))
+        self.core.run("rm -rf $BASEDIR/node;mv %s $BASEDIR/node" % (cdest))
 
-        if self.prefab.core.isMac:
-            self.core.run('mv /opt/node/%s/* /opt/node' %
-                          j.sal.fs.getBaseName(url.strip('.tar.gz')))
+        # if self.prefab.core.isMac:
+        #     self.core.run('mv $BASEDIR/node/%s/* $BASEDIR/node' %
+        #                   j.sal.fs.getBaseName(url.strip('.tar.gz')))
 
         self.prefab.bash.profileDefault.envSet("NODE_PATH", self.NODE_PATH)
-        self.prefab.bash.profileDefault.addPath(
-            self.prefab.core.replace("$BASEDIR/node/bin/"))
+        self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BASEDIR/node/bin/"))
         self.prefab.bash.profileDefault.save()
 
         rc, out, err = self.prefab.core.run("npm -v", profile=True)

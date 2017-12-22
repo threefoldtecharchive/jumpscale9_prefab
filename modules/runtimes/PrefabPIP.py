@@ -61,8 +61,9 @@ class PrefabPIP(base):
         cmd = ""
 
         for package in packages:
+            todo=[]
             if reset or not self.doneGet("pip_%s" % package):
-
+                todo.append(package)
                 if self.prefab.core.isArch:
                     if package in ["credis", "blosc", "psycopg2"]:
                         continue
@@ -75,9 +76,10 @@ class PrefabPIP(base):
                     cmd += " --upgrade"
                 cmd += "\n"
 
-        self.prefab.core.run(cmd)
+        if len(todo)>0:
+            self.prefab.core.run(cmd)
 
-        for package in packages:
+        for package in todo:
             self.doneSet("pip_%s" % package)
 
     def packageRemove(self, package):

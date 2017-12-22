@@ -120,11 +120,13 @@ class PrefabPackage(base):
 
         cmd = "set -ex\n"
 
+        todo=[]
         for package in packages:
 
             key = "install_%s" % package
             if self.doneCheck(key, reset):
                 continue
+            todo.append(package)
 
             self.logger.info("prepare to install:%s" % package)
 
@@ -201,10 +203,11 @@ class PrefabPackage(base):
             #         self.doneSet(key)
             #         return out
 
-        self.core.execute_bash(cmd)
+        if len(todo)>0:
+            self.core.execute_bash(cmd)
 
-        for package in packages:
-            key += "install_%s," % package
+        for package in todo:
+            key = "install_%s," % package
             self.doneSet(key)
 
     # def multiInstall(self, packagelist, allow_unauthenticated=False, reset=False):

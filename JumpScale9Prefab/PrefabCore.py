@@ -1281,6 +1281,8 @@ class PrefabCore(base):
         @param profile, execute the bash profile first
         """
         # self.logger.info(cmd)
+        if cmd.strip()=="":
+            raise RuntimeError("cmd cannot be empty")
         if not env:
             env = {}
         if replaceArgs:
@@ -1452,7 +1454,7 @@ class PrefabCore(base):
                 rc = 0
             else:
                 self.logger.info(out)
-                raise RuntimeError("wrong output of cmd")
+                rc=998
             # out = self.file_read(outfile)
             # out = self._clean(out)
             # self.file_unlink(outfile)
@@ -1464,10 +1466,14 @@ class PrefabCore(base):
 
         if rc > 0:
             msg = "Could not execute script:\n%s\n" % content
-            msg += "Out/Err:\n%s\n" % out
+            if rc==998:
+                msg+="error in output, was expecting **ERROR** or **OK** at end of esecution of script\n"
+                msg+="lastline is:'%s'"%lastline
+            msg += "Out:\n%s\n" % out
+            if err.strip()!="":
+                msg += "Error:\n%s\n" % err
             msg += "\n****ERROR***: could not execute script !!!\n"
             out = msg
-
             if die:
                 raise j.exceptions.RuntimeError(out)
 

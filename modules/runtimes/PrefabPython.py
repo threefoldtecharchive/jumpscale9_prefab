@@ -326,16 +326,17 @@ class PrefabPython(base):
     #     self.sandbox(deps=False)
     #     self.doneSet("pipall")
 
-    def pip(self, pips, reset=False):
-        for item in pips.split("\n"):
-            item = item.strip()
-            if item == "":
-                continue
-            # cannot use prefab functionality because would not be sandboxed
-            if not self.doneGet("pip3_%s" % item) or reset:
-                C = "set -ex;cd $BUILDDIRL;source env.sh;pip3 install --trusted-host pypi.python.org %s" % item
-                self.prefab.core.run(self.replace(C), shell=True)
-                self.doneSet("pip3_%s" % item)
+    #PIP is of other module
+    # def pip(self, pips, reset=False):
+    #     for item in pips.split("\n"):
+    #         item = item.strip()
+    #         if item == "":
+    #             continue
+    #         # cannot use prefab functionality because would not be sandboxed
+    #         if not self.doneGet("pip3_%s" % item) or reset:
+    #             C = "set -ex;cd $BUILDDIRL;source env.sh;pip3 install --trusted-host pypi.python.org %s" % item
+    #             self.prefab.core.run(self.replace(C), shell=True)
+    #             self.doneSet("pip3_%s" % item)
 
     def install(self):
         """
