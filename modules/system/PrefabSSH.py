@@ -137,6 +137,11 @@ class PrefabSSH(base):
           E.g. setting no-agent-forwarding is done by adding the following kwarg: no-agent-forwarding=True
         """
 
+        def add_newline(content):
+            if content[-1] != "\n":
+                content += "\n"
+            return content
+
         if key is None or key.strip() == "":
             raise j.exceptions.Input("key cannot be empty")
         sudomode = self.prefab.core.sudomode
@@ -147,8 +152,7 @@ class PrefabSSH(base):
             raise j.exceptions.RuntimeError("did not find user:%s" % user)
         group = d["gid"]
         keyf = d["home"] + "/.ssh/authorized_keys"
-        if key[-1] != "\n":
-            key += "\n"
+        key = add_newline(key)
         ret = None
 
         settings=list()
@@ -165,7 +169,8 @@ class PrefabSSH(base):
         if self.prefab.core.file_exists(keyf):
             content = self.prefab.core.file_read(keyf)
             if content.find(key[:-1]) == -1:
-                self.prefab.core.file_append(keyf, line)
+                content = add_newline(content)
+                self.prefab.core.file_write(keyf, content+line)
                 ret = False
             else:
                 ret = True
