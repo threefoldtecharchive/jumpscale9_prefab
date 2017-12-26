@@ -67,6 +67,7 @@ etcd:
   etcdVersion: v3.2.9
 networking:
   podSubnet: {flannel_subnet}
+  serviceSubnet: {service_subnet}
 apiServerCertSANs:
 {external_ips}
 
@@ -92,7 +93,8 @@ class PrefabKubernetes(app):
 
         self.doneSet("minikube_install")
 
-    def multihost_install(self, nodes=[], external_ips=[], unsafe=False, reset=False):
+    def multihost_install(self, nodes=[], external_ips=[], unsafe=False, skip_flight_checks=False,
+                          service_subnet='10.96.0.0/16', reset=False):
         """
         Important !! only supports centos, fedora and ubuntu 1604
         Use a list of prefab connections where all nodes need to be reachable from all other nodes or at least from the master node.
@@ -106,7 +108,10 @@ class PrefabKubernetes(app):
         @param nodes ,,  are list of prefab clients which will be used to deploy kubernetes
         @param external_ips,,list(str) list of extra ips to add to certs
         @param unsafe,, bool will allow pods to be created on master nodes.
+        @param skip_flight_checks,, bool skip preflight checks from kubeadm.
+        @param service_subnet,, str cidr to use for the services in kubernets .
         @param reset ,, rerun the code even if it has been run again. this may not be safe (used for development only)
+
         @return (dict(), str) ,, return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
 
         """
@@ -122,7 +127,9 @@ class PrefabKubernetes(app):
 
         self.setup_etcd_certs(masters)
         self.install_etcd_cluster(masters)
-        join_line, config = self.install_kube_masters(masters, external_ips=external_ips, unsafe=unsafe, reset=reset)
+        join_line, config = self.install_kube_masters(masters, external_ips=external_ips, service_subnet=service_subnet,
+                                                      skip_flight_checks=skip_flight_checks,
+                                                      unsafe=unsafe, reset=reset)
         for node in nodes:
             node.virtualization.kubernetes.install_minion(join_line)
 
@@ -133,7 +140,7 @@ class PrefabKubernetes(app):
 
     def install_dependencies(self, reset=False):
         """
-        Use the go get command to get dependencies and install.
+        Installs required libs and packages for the cluster to run.
 
         @param reset ,,if True will resintall even if the code has been run before.
         """
@@ -253,7 +260,6 @@ class PrefabKubernetes(app):
             scp -P {port} {prefab_ip}:$TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
             """.format(node_ip=self.prefab.executor.sshclient.addr, cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
                        port=self.prefab.executor.sshclient.port or 22)
-
         controller_node.core.execute_bash(cmd)
 
     def get_etcd_binaries(self, version='3.2.9'):
@@ -313,16 +319,18 @@ class PrefabKubernetes(app):
             if timer > 30:
                 return
 
-    def install_kube_masters(self, nodes, external_ips, kube_cidr='10.0.0.0/16', flannel=True, dashboard=False, unsafe=False, reset=False):
+    def install_kube_masters(self, nodes, external_ips, kube_cidr='10.0.0.0/16', service_subnet='10.96.0.0/16',
+                             flannel=True, dashboard=False, unsafe=False, skip_flight_checks=False, reset=False):
         """
         Used to install kubernetes on master nodes configuring the flannel module and creating the certs
         will also optionally install dashboard
 
         @param nodes,, list(prefab) list of master node prefabs
         @param kube_cidr,,str Depending on what third-party provider you choose, you might have to set the --pod-network-cidr to something provider-specific.
+        @param service_subnet,, str cidr range for the kubernetes range.
         @param flannel,,bool  if true install and configure flannel
-        @param dashboard,,bool install and configure dashboard(could not expose on OVC)
-        @param external_ips,,list(str) list of extra ips to add to certs
+        @param dashboard,,bool install and configure dashboard(could not expose on OVC).
+        @param external_ips,,list(str) list of extra ips to add to certs.
         @param unsafe,, bool will allow pods to be created on master nodes.
         """
         if self.doneCheck("install_master", reset):
@@ -343,11 +351,13 @@ class PrefabKubernetes(app):
         dns_names = [node.core.hostname for node in nodes]
         external_ips = j.data.serializer.yaml.dumps(external_ips + dns_names)
         kube_init_yaml = KUBE_INIT.format(node_ip=nodes_ip[0], flannel_subnet=kube_cidr, endpoints=endpoints,
-                                          external_ips=external_ips)
+                                          service_subnet=service_subnet, external_ips=external_ips)
 
         # write config and run command
         init_node.core.file_write('%s/kubeadm-init.yaml' % init_node.executor.dir_paths['HOMEDIR'],
                                   kube_init_yaml, replaceInContent=True)
+        if skip_flight_checks:
+            cmd += ' --skip-preflight-checks'
         rc, out, err = init_node.core.run(cmd)
         if rc != 0:
             raise RuntimeError(err)
