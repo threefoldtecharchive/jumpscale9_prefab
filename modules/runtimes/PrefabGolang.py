@@ -11,9 +11,13 @@ class PrefabGolang(app):
     NAME = 'go'
 
     def reset(self):
-        # self.prefab.bash.profileDefault.deletePathFromEnv("GOPATH")
-        # self.prefab.bash.profileDefault.deletePathFromEnv("GOROOT")
-        # self.prefab.bash.profileJS.deletePathFromEnv("GOROOT")
+        if self.prefab.bash.profileDefault.envExists("GOPATH"):
+            go_path = self.prefab.bash.profileDefault.envGet("GOPATH")
+            self.prefab.bash.profileDefault.pathDelete(go_path)
+        if self.prefab.bash.profileDefault.envExists("GOROOT"):
+            go_root = self.prefab.bash.profileDefault.envGet("GOROOT")
+            self.prefab.bash.profileDefault.pathDelete(go_root)
+            self.prefab.bash.profileJS.pathDelete(go_root)
 
         self.prefab.bash.profileDefault.deleteAll("GOPATH")
         self.prefab.bash.profileJS.deleteAll("GOPATH")
@@ -31,7 +35,6 @@ class PrefabGolang(app):
         self.prefab.bash.profileDefault.save()
         self.prefab.bash.profileJS.save()
 
-        self.doneReset()
         self._init()
 
     def _init(self):
