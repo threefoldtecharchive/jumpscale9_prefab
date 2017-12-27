@@ -32,7 +32,7 @@ class PrefabZerotier(base):
             self.prefab.system.package.ensure('make')
 
         codedir = self.prefab.tools.git.pullRepo(
-            "https://github.com/zerotier/ZeroTierOne", reset=reset, depth=1, branch='1.1.14')
+            "https://github.com/zerotier/ZeroTierOne", reset=reset, depth=1, branch='master')
 
         cmd = "cd {code} && DESTDIR={build} make one".format(code=codedir, build=self.BUILDDIRL)
         self.prefab.core.run(cmd)
