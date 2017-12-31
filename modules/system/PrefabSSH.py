@@ -104,7 +104,15 @@ class PrefabSSH(base):
             return ips
 
     def define_host(self, addr, user='root'):
-        self.prefab.core.execute_bash('ssh-keyscan -t rsa %s >> /%s/.ssh/known_hosts' % (addr, user))
+        known_hostsfile = '/{}/.ssh/known_hosts'.format(user)
+        lines = self.prefab.core.file_read(known_hostsfile, default='').splitlines()
+        isknown = False
+        for line in lines:
+            if line.startswith(addr):
+                isknown = True
+                break
+        if not isknown:
+            self.prefab.core.execute_bash('ssh-keyscan -t rsa {} >> {}'.format(addr, known_hostsfile))
 
 
     def keygen(self, user="root", keytype="rsa", name="default"):
