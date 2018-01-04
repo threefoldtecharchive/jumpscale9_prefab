@@ -481,7 +481,7 @@ class PrefabKubernetes(app):
         # bind node users to system:node role
         patch_user_command = 'kubectl patch clusterrolebinding system:node -p "$(cat $TMPDIR/system_node_config.yaml)"'
         init_node.core.execute_bash(patch_user_command)
-        config = init_node.core.file_read('/etc/kubernetes/kubelet.conf')
+        config = init_node.core.file_read('/etc/kubernetes/admin.conf')
 
         # build
         self.doneSet("install_master")
