@@ -25,6 +25,9 @@ class PrefabCrm(app):
         # install git
         self.prefab.system.package.install(["git"])
 
+        # Clone the repository and install python requirements
+        self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
+
         # Install apt requirements
         requirements = j.sal.fs.readFile("{}/requirements.apt".format(self.crm_dir))
         self.prefab.system.package.install(requirements)
@@ -33,8 +36,7 @@ class PrefabCrm(app):
         requirements = j.sal.fs.readFile("{}/requirements.pip".format(self.crm_dir))
         self.prefab.runtimes.pip.multiInstall(requirements)
 
-        # Clone the repository and install python requirements
-        self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
+
 
         # Install Caddy
         self.prefab.web.caddy.build(plugins=['iyo', 'git', 'mailout'], reset=True)
@@ -148,8 +150,12 @@ class PrefabCrm(app):
         """
         Start postgres, caddy, crm
         """
+
+        if not self.prefab.db.postgresql.isInstalled() or not self.prefab.db.redis.isInstalled() or not self.prefab.web.caddy.isInstalled():
+            return
+
         if not self.prefab.db.postgresql.isStarted():
-            self.prefab.db.postgresql.start()
+                self.prefab.db.postgresql.start()
 
         if not self.prefab.db.redis.isStarted():
             self.prefab.db.redis.start()
