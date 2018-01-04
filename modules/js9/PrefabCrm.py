@@ -17,37 +17,62 @@ class PrefabCrm(app):
         if self.doneGet('build') or self.isInstalled():
             return
 
+        self.prefab.system.package.mdupdate()
+
+        # Install build-essential
+        self.prefab.system.package.install("build-essential")
+
+        # install git
+        self.prefab.system.package.install(["git"])
+
+        # Install apt requirements
+        requirements = j.sal.fs.readFile("{}/requirements.apt".format(self.crm_dir))
+        self.prefab.system.package.install(requirements)
+
+        # Install pip requirements
+        requirements = j.sal.fs.readFile("{}/requirements.pip".format(self.crm_dir))
+        self.prefab.runtimes.pip.multiInstall(requirements)
+
+        # Clone the repository and install python requirements
+        self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
+
+        # Install Caddy
+        self.prefab.web.caddy.build(plugins=['iyo', 'git', 'mailout'], reset=True)
+        self.prefab.web.caddy.install(reset=True)
+
         # Install and start Postgres
         self.prefab.db.postgresql.install()
         self.prefab.db.postgresql.start()
 
-        # Clone the repository and install python requirements
-        self.prefab.tools.git.pullRepo(self.git_url, dest=self.crm_dir, branch="production")
-        self.prefab.system.package.install(["python3-dev", "libffi-dev"])
-        requirements = j.sal.fs.readFile("{}/requirements.pip".format(self.crm_dir))
-        self.prefab.runtime.pip.multiInstall(requirements)
-
-        # Install Caddy
-        self.prefab.apps.caddy.build(plugins=['iyo', 'git', 'mailout'], reset=True)
-        self.prefab.apps.caddy.install(reset=True)
+        # Install redis
+        self.prefab.db.redis.install()
+        self.prefab.db.redis.start()
 
         self.doneSet('build')
 
     def install(self, reset=False, start=False, domain="localhost", caddy_port=80, db_name="crm", demo=False,
-                client_id=None, client_secret=None, tls="off"):
+                client_id=None, client_secret=None, tls="off", sendgrid_api_key=None, support_email=None):
         if reset is False and self.isInstalled():
             return
         if not self.doneGet('build'):
             self.build()
 
         if not self.doneGet('configure'):
-            self.configure(domain=domain, caddy_port=caddy_port, db_name=db_name,
-                           demo=demo, client_id=client_id, client_secret=client_secret, tls=tls)
+            self.configure(
+                domain=domain,
+                caddy_port=caddy_port,
+                db_name=db_name,
+                demo=demo,
+                client_id=client_id,
+                client_secret=client_secret,
+                sendgrid_api_key=sendgrid_api_key,
+                support_email=support_email,
+                tls=tls)
 
         if start:
-            self.start()
+            self.start(sendgrid_api_key=sendgrid_api_key, support_email=support_email)
 
-    def configure(self, caddy_port, db_name, demo, client_id, client_secret, domain, tls):
+    def configure(self, domain, caddy_port, db_name, demo, client_id, client_secret, sendgrid_api_key, support_email, tls):
         """
         Configure
         """
@@ -97,7 +122,10 @@ class PrefabCrm(app):
 
         cmd = """
         cd {src_dir}
-        export POSTGRES_DATABASE_URI="postgresql://postgres:postgres@localhost:5432/{db_name}"
+        export SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/{db_name}
+        export CACHE_BACKEND_URI=redis://127.0.0.1:6379/0
+        export SENDGRID_API_KEY={sendgrid_api_key}
+        export SUPPORT_EMAIL={support_email}
         export ENV=prod
         export FLASK_APP=app.py
         flask createdb
@@ -105,24 +133,39 @@ class PrefabCrm(app):
         """
         if demo:
             cmd += "flask loadfixtures"
-        cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name)
+        cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name, sendgrid_api_key=sendgrid_api_key, support_email=support_email)
         self.prefab.core.run(cmd, profile=True)
 
         self.doneSet('configure')
 
-    def start(self, db_name="crm"):
+    def start(self, db_name="crm", sendgrid_api_key=None, support_email=""):
         """
         Start postgres, caddy, crm
         """
         if not self.prefab.db.postgresql.isStarted():
             self.prefab.db.postgresql.start()
 
-        if not self.prefab.apps.caddy.isStarted():
-            self.prefab.apps.caddy.start()
+        if not self.prefab.db.redis.isStarted():
+            self.prefab.db.redis.start()
+
+        if not self.prefab.web.caddy.isStarted():
+            self.prefab.web.caddy.start()
 
         cmd = "cd {src_dir};"
-        cmd += "export POSTGRES_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/{db_name};"
-        cmd += "export ENV=prod;export FLASK_APP=app.py;flask db upgrade; uwsgi --ini uwsgi.ini"
-        cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name)
+        cmd += "export SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/{db_name};"
+        cmd += "export CACHE_BACKEND_URI=redis://127.0.0.1:6379/0;"
+        cmd += "export SENDGRID_API_KEY={sendgrid_api_key};"
+        cmd += "export SUPPORT_EMAIL={support_email};"
+        cmd += "export ENV=prod;export FLASK_APP=app.py;"
+        cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name, support_email=support_email,
+                             sendgrid_api_key=sendgrid_api_key)
+        crm_cmd = cmd + "flask db upgrade; uwsgi --ini uwsgi.ini"
+        mailer_cmd = cmd + "flask mailer"
+        sync_data_cmd = cmd  + "flask syncdata"
+        rq_worker_cmd = cmd + "flask rq_worker"
+
         pm = self.prefab.system.processmanager.get()
-        pm.ensure(name="crm", cmd=cmd, autostart=True)
+        pm.ensure(name="crm", cmd=crm_cmd, autostart=True)
+        pm.ensure(name="mailer", cmd=mailer_cmd, autostart=True)
+        pm.ensure(name="syncdata", cmd=sync_data_cmd, autostart=True)
+        pm.ensure(name="rq_worker", cmd=rq_worker_cmd, autostart=True)
