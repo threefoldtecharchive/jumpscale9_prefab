@@ -94,12 +94,15 @@ class PrefabCrm(app):
         log {LOGDIR}/access.log
         proxy / localhost:5000 {{
             header_upstream Host "{DOMAIN}"
+            except /docs/graphqlapi
         }}
+        root {CRM_DIR}
+        browse docs/graphqlapi/index.html
         errors {{
             * {LOGDIR}/errors.log
         }}
         tls {TLS}
-        """.format(LISTEN=listen, PORT=caddy_port, LOGDIR=log_dir, DOMAIN=domain, TLS=tls)
+        """.format(LISTEN=listen, PORT=caddy_port, LOGDIR=log_dir, DOMAIN=domain, TLS=tls, CRM_DIR=self.crm_dir)
 
         if client_id and client_secret:
             caddy_cfg += """
@@ -107,10 +110,13 @@ class PrefabCrm(app):
                 client_id                       {CLIENT_ID}
                 client_secret                   {CLIENT_SECRET}
                 redirect_url                    {SCHEME}://{LISTEN}/iyo_callback
-                extra_scopes                    user:address,user:email,user:phone
+                extra_scopes                    user:address,user:email,user:phone,user:memberof:threefold.crm_users
                 allow_extension                 api
                 allow_extension                 graphql
                 authentication_required         /
+                allow_extension html
+                allow_extension graphqlapi
+                allow_extension png
             }}
             """.format(CLIENT_ID=client_id, CLIENT_SECRET=client_secret, SCHEME=scheme, DOMAIN=domain, LISTEN=listen)
         self.prefab.core.dir_ensure(log_dir)
