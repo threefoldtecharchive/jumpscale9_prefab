@@ -394,10 +394,14 @@ class PrefabKubernetes(app):
         # remove node constriction for APISERVER
         pm = init_node.system.processmanager.get('systemd')
         pm.stop('kubelet')
-        pm.stop('docker')
-        init_node.core.run('sed -i.bak "s/,NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
+        dockers_names = init_node.virtualization.docker.list_containers_names()
+        for name in dockers_names:
+            if 'apiserver' in name:
+                init_node.core.run('docker stop %s' % name)
+                break
+        init_node.core.run('sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
         pm.start('kubelet')
-        pm.start('docker')
+        init_node.core.run('docker start %s' % name)
 
         init_node.virtualization.kubernetes.wait_on_apiserver()
 
@@ -458,7 +462,6 @@ class PrefabKubernetes(app):
             pm = master.system.processmanager.get('systemd')
             pm.reload()
             pm.restart('kubelet')
-            pm.restart('docker')
             master.virtualization.kubernetes.wait_on_apiserver()
 
             # giving time for the nodes to be registered
@@ -478,7 +481,7 @@ class PrefabKubernetes(app):
         # bind node users to system:node role
         patch_user_command = 'kubectl patch clusterrolebinding system:node -p "$(cat $TMPDIR/system_node_config.yaml)"'
         init_node.core.execute_bash(patch_user_command)
-        config = init_node.core.file_read('/etc/kubernetes/kubelet.conf')
+        config = init_node.core.file_read('/etc/kubernetes/admin.conf')
 
         # build
         self.doneSet("install_master")

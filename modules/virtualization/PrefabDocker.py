@@ -76,6 +76,17 @@ class PrefabDocker(app):
             """ % path
             self.prefab.core.execute_bash(C)
 
+    def list_containers_names(self, running=True):
+        """
+        Will return a list of containers names.
+        @param running,, if false will return names of all available containers otherwise only running containers 
+        """
+        args = "" if running else "-a "
+        _ ,out,_ = self.prefab.core.run('''docker ps %s--format="{{.Names}}"''' % args, replaceArgs=False)
+        if not out:
+            return []
+        return out.split('\n')
+
     def resetPasswd(self, dockerPrefabObject):
         # change passwd
         dockerPrefabObject.user.passwd("root", j.data.idgenerator.generateGUID())
