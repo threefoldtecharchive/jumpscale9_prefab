@@ -711,7 +711,7 @@ class PrefabCore(base):
         """
 
         rc, out, err = self.run("du -Lck %s" % path, showout=False)
-        if rc != 0 or err:
+        if rc != 0:
             raise j.exceptions.RuntimeError("Failed to define size of path '%s' \nerror: %s" % (path, err))
         res = out.split("\n")[-1].split("\t")[0].split(" ")[0]
         return int(res)
