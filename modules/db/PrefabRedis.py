@@ -14,8 +14,8 @@ class PrefabRedis(app):
     def build(self, reset=False, start=False):
         if self.doneCheck("build", reset):
             return
-        os.environ["LC_ALL"] = "C.UTF-8"
-        os.environ["LANG"] = "C.UTF-8"
+
+        self.prefab.bash.locale_check()
 
         """Building and installing redis"""
         if reset is False and self.isInstalled():

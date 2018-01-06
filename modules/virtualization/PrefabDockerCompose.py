@@ -20,8 +20,7 @@ class PrefabDockerCompose(app):
         if reset is False and self.isInstalled():
             return
         if self.prefab.core.isUbuntu:
-            self.prefab.bash.envSet('LC_ALL', 'C.UTF-8')
-            self.prefab.bash.envSet('LANG', 'C.UTF-8')
+            self.prefab.bash.locale_check()
             if not self.prefab.core.command_check('docker'):
                 C = """
                 wget -qO- https://get.docker.com/ | sh

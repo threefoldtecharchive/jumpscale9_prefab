@@ -70,7 +70,7 @@ class PrefabPortal(base):
         """
         self.logger.info("Install prefab portal on branch:'%s'" % branch)
         self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, name))
-        self.prefab.bash.fixlocale()
+        self.prefab.bash.locale_check()
         if not reset and self.doneGet("install-"+name):
             self.linkCode(name=name)
             if start:

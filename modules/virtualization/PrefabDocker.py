@@ -20,10 +20,9 @@ class PrefabDocker(app):
     def install(self, reset=False, branch=None):
         if reset is False and self.isInstalled():
             return
+        self.prefab.bash.locale_check()
         if self.prefab.core.isUbuntu:
             if not branch:
-                self.prefab.bash.envSet('LC_ALL', 'C.UTF-8')
-                self.prefab.bash.envSet('LANG', 'C.UTF-8')
                 if not self.prefab.core.command_check('docker'):
                     C = """
                     wget -qO- https://get.docker.com/ | sh

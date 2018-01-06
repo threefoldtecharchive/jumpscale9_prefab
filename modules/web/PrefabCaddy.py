@@ -26,13 +26,13 @@ class PrefabCaddy(app):
         :param plugins: list of plugins names to be installed
         :return:
         """
-        if not self.core.isUbuntu:
-            raise j.exceptions.RuntimeError("only ubuntu supported")
+        # if not self.core.isUbuntu:
+        #     raise j.exceptions.RuntimeError("only ubuntu supported")
 
         if self.doneGet('build') and reset is False:
             return
 
-        self.prefab.system.base.install()
+        self.prefab.system.base.install(upgrade=True)
         golang = self.prefab.runtimes.golang
         golang.install()
 
@@ -90,7 +90,7 @@ class PrefabCaddy(app):
         return False
 
     def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{CFGDIR}}/caddy.cfg",
-                  logdir="{{LOGDIR}}/caddy/log", email='info@greenitglobe.com', port=8000):
+                  logdir="{{LOGDIR}}/caddy/log", email='replaceme', port=8000):
         """
         @param caddyconfigfile
             template args available DATADIR, LOGDIR, WWWROOTDIR, PORT, TMPDIR, EMAIL ... (using mustasche)
@@ -143,7 +143,7 @@ class PrefabCaddy(app):
             raise RuntimeError(
                 "could not find caddyconfigfile:%s" % configpath)
 
-        tcpport = int(self.getTCPPort(configpath=configpath))
+        # tcpport = int(self.getTCPPort(configpath=configpath))
 
         # TODO: *1 reload does not work yet
         # if self.reload(configpath=configpath) == True:

@@ -107,7 +107,7 @@ class PrefabPackage(base):
     def install(self, package, reset=False):
         """
         """
-
+        
         # bring to list of packages
         if j.data.types.list.check(package) == False and package.find(",") != -1:
             package = [item.strip() for item in package.split(",")]
@@ -127,6 +127,7 @@ class PrefabPackage(base):
             if self.doneCheck(key, reset):
                 continue
             todo.append(package)
+            print("+ install: %s"%package)
 
             self.logger.info("prepare to install:%s" % package)
 
@@ -168,7 +169,7 @@ class PrefabPackage(base):
                 if "wget" == package:
                     package = "%s --enable-iri" % package
 
-                cmd += "brew install %s \n" % package
+                cmd += "brew install %s || brew upgrade  %s\n" % (package,package)
 
             elif self.prefab.core.isCygwin:
                 if package in ["run", "net-tools"]:
@@ -204,6 +205,7 @@ class PrefabPackage(base):
             #         return out
 
         if len(todo)>0:
+            print(cmd)
             self.core.execute_bash(cmd)
 
         for package in todo:

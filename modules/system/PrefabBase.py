@@ -10,13 +10,13 @@ class PrefabBase(base):
     the base for any install
     """
 
-    def install(self, reset=False):
+    def install(self, reset=False, upgrade=True):
 
         if self.doneCheck("install", reset):
             return
 
         if not self.doneCheck("fixlocale", reset):
-            self.prefab.bash.fixlocale()
+            self.prefab.bash.locale_check()
             self.doneSet("fixlocale")
 
         out = ""
@@ -58,7 +58,8 @@ class PrefabBase(base):
             self.prefab.core.dir_paths["BASEDIR"], "bin"))
         self.prefab.bash.profileJS.save()
 
-        self.upgrade(reset=reset, update=False)
+        if upgrade:
+            self.upgrade(reset=reset, update=False)
 
         self.doneSet("install")
 

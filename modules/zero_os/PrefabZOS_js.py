@@ -87,7 +87,7 @@ class PrefabZOS_js(base):
             "* re-login into your shell to have access to js, because otherwise the env arguments are not set properly.")
 
     def base(self):
-        self.prefab.bash.fixlocale()
+        self.prefab.bash.locale_check()
 
         if self.prefab.core.isMac:
             C = ""

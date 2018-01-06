@@ -58,18 +58,22 @@ class PrefabNodeJS(app):
         """
         if self.doneGet("phantomjs") and reset is False:
             return
-        if not self.prefab.core.isUbuntu:
-            raise RuntimeError("only ubuntu supported")
-
-        url = 'https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2'
-        cdest = self.prefab.core.file_download(
-            url, expand=True, overwrite=False, to="$TMPDIR/phantomjs",removeTopDir=True,deletedest=True)
-
-        self.core.run("mv %s/bin/phantomjs /opt/bin/phantomjs" % cdest)
-        self.core.run("rm -rf %s" % cdest)
-
         if self.prefab.core.isUbuntu:
-            j.tools.prefab.local.system.package.install("libfontconfig")
+
+            url = 'https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2'
+            cdest = self.prefab.core.file_download(
+                url, expand=True, overwrite=False, to="$TMPDIR/phantomjs",removeTopDir=True,deletedest=True)
+
+            self.core.run("mv %s/bin/phantomjs /opt/bin/phantomjs" % cdest)
+            self.core.run("rm -rf %s" % cdest)
+
+            self.prefab.system.package.install("libfontconfig")
+
+        elif self.prefab.core.isMac:
+            self.prefab.system.package.install("phantomjs")
+
+        else:
+            raise RuntimeError("phantomjs only supported don ubuntu or osx")
 
         self.doneSet("phantomjs")
 

@@ -3,9 +3,6 @@ import time
 import os
 
 base = j.tools.prefab._getBaseClass()
-os.environ['LC_ALL'] = "C.UTF-8"
-os.environ['LANG'] = "C.UTF-8"
-
 
 class PrefabTmux(base):
 
@@ -14,6 +11,7 @@ class PrefabTmux(base):
         @param name is name of session
         @screens is list with nr of screens required in session and their names (is [$screenname,...])
         """
+        self.prefab.bash.locale_check()        
         # if 'ubuntu' in j.core.platformtype.myplatform.platformtypes:
         if not self.prefab.core.command_check("tmux"):
             self.prefab.system.package.install("tmux")
@@ -37,8 +35,9 @@ class PrefabTmux(base):
         cmd = "tmux new-session -d -s %s -n %s" % (sessionname, screens[0])
         if user is not None:
             cmd = "sudo -u %s -i %s" % (user, cmd)
-        # j.sal.process.run(cmd, env=env)  #TODO: does not work in python3
+
         self.prefab.core.run(cmd, showout=False, profile=True)
+
         # now add the other screens to it
         if len(screens) > 1:
             for screen in screens[1:]:

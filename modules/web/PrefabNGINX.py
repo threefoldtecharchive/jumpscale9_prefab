@@ -168,8 +168,7 @@ class PrefabNGINX(app):
             self.start()
 
     def build(self, install=True):
-        os.environ["LC_ALL"] = "C.UTF-8"
-        os.environ["LANG"] = "C.UTF-8"
+        self.prefab.bash.locale_check()
 
         if self.prefab.core.isUbuntu:
             self.prefab.system.package.mdupdate()
