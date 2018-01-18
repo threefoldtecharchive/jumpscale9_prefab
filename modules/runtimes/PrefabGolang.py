@@ -45,7 +45,7 @@ class PrefabGolang(app):
     def isInstalled(self):
         rc, out, err = self.prefab.core.run(
             "go version", die=False, showout=False, profile=True)
-        if rc > 0 or "1.8" not in out:
+        if rc > 0 or "1.9" not in out:
             return False
         if self.doneGet("install") == False:
             return False
@@ -55,9 +55,9 @@ class PrefabGolang(app):
         if reset is False and self.isInstalled():
             return
         if self.prefab.core.isMac:
-            downl = "https://storage.googleapis.com/golang/go1.8.3.darwin-amd64.tar.gz"
+            downl = "https://storage.googleapis.com/golang/go1.9.2.darwin-amd64.tar.gz"
         elif "ubuntu" in self.prefab.platformtype.platformtypes:
-            downl = "https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz"
+            downl = "https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz"
         else:
             raise j.exceptions.RuntimeError("platform not supported")
 
@@ -82,16 +82,16 @@ class PrefabGolang(app):
         self.get("github.com/tools/godep")
         self.doneSet("install")
 
-    def goraml(self,reset=False):
+    def goraml(self, reset=False):
         """
         Install (using go get) goraml.
         """
-        if reset==False and self.doneGet('goraml'):
+        if reset == False and self.doneGet('goraml'):
             return
 
         self.install()
         self.bindata()
-        
+
         C = '''
         go get -u github.com/tools/godep
         go get -u github.com/jteeuwen/go-bindata/...
@@ -103,12 +103,12 @@ class PrefabGolang(app):
         self.prefab.core.execute_bash(C, profile=True)
         self.doneSet('goraml')
 
-    def bindata(self,reset=False):
+    def bindata(self, reset=False):
         """
         Install (using go get) go-bindata.
         """
-        if reset==False and self.doneGet('bindata'):
-            return        
+        if reset == False and self.doneGet('bindata'):
+            return
         C = '''
         set -ex
         go get -u github.com/jteeuwen/go-bindata/...

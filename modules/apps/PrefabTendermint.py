@@ -27,6 +27,9 @@ class PrefabTendermint(app):
         self.prefab.runtimes.golang.install()
         self.prefab.runtimes.golang.glide()
 
+        cmd = "git config --global http.sslVerify true"
+        # ONLY needed for osx I think, needs to be tested
+
         self.prefab.runtimes.golang.get(
             'github.com/tendermint/tendermint/cmd/tendermint')
         self.prefab.core.run("cd {TENDERMINTPATH} && glide install".format(
