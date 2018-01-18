@@ -20,7 +20,6 @@ class PrefabDocker(app):
     def install(self, reset=False, branch=None):
         if reset is False and self.isInstalled():
             return
-        self.prefab.bash.locale_check()
         if self.prefab.core.isUbuntu:
             if not branch:
                 if not self.prefab.core.command_check('docker'):
@@ -45,10 +44,17 @@ class PrefabDocker(app):
                 #     self.prefab.core.run(C)
             self.prefab.system.package.install(
                 'apt-transport-https,linux-image-extra-$(uname -r),linux-image-extra-virtual,software-properties-common')
-            self.prefab.core.run("curl -fsSL 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | sudo apt-key add -")
-            self.prefab.core.run('add-apt-repository "deb https://packages.docker.com/%s/apt/repo/ ubuntu-$(lsb_release -cs) main"' % branch)
-            self.prefab.system.package.mdupdate(reset=True)
-            self.prefab.system.package.install('docker-engine')
+            if int(branch.split('.')[0]) > 1:
+                self.prefab.core.run('curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -')
+                self.prefab.core.run('add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"')
+                self.prefab.system.package.mdupdate(reset=True)
+                self.prefab.system.package.install('libltdl7,aufs-tools')
+                self.prefab.system.package.install('docker-ce=%s.0~ce-0~ubuntu-xenial' % branch)
+            else:
+                self.prefab.core.run("curl -fsSL 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | apt-key add -")
+                self.prefab.core.run('add-apt-repository "deb https://packages.docker.com/%s/apt/repo/ ubuntu-$(lsb_release -cs) main"' % branch)
+                self.prefab.system.package.mdupdate(reset=True)
+                self.prefab.system.package.install('docker-engine')
 
         if self.prefab.core.isArch:
             self.prefab.system.package.install("docker")
@@ -78,7 +84,7 @@ class PrefabDocker(app):
     def list_containers_names(self, running=True):
         """
         Will return a list of containers names.
-        @param running,, if false will return names of all available containers otherwise only running containers 
+        @param running,, if false will return names of all available containers otherwise only running containers
         """
         args = "" if running else "-a "
         _ ,out,_ = self.prefab.core.run('''docker ps %s--format="{{.Names}}"''' % args, replaceArgs=False)

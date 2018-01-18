@@ -151,7 +151,7 @@ class PrefabKubernetes(app):
         self.prefab.system.package.mdupdate(reset=True)
         self.prefab.system.package.install('openssl,mercurial,conntrack,ntp,curl,apt-transport-https')
         # self.prefab.runtimes.golang.install()
-        self.prefab.virtualization.docker.install(branch='1.12')
+        self.prefab.virtualization.docker.install(branch='17.03')
 
         # required for bridge manipulation in ubuntu
         if self.prefab.core.isUbuntu:
