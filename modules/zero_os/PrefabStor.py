@@ -796,7 +796,7 @@ class StorSpace(object):
         # you have a big directory this will explode ! it needs to go back to
         # original text format & processing on disk directly not in mem
         flist = {}
-        for file in j.sal.fs.walk(path, recurse=True):
+        for file in j.sal.fswalker.walk(path, recurse=True):
             stat = j.sal.fs.statPath(file)
             hash = j.data.hash.md5(file)
             mode = oct(stat.st_mode)[3:]
