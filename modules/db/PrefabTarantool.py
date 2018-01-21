@@ -63,16 +63,23 @@ class PrefabTarantool(app):
             self.core.run(C)
         elif self.core.isUbuntu:
             if not self.doneCheck('dependencies', reset):
+                # self.prefab.system.package.install('build-essential,cmake,coreutils,sed,libreadline-dev,'
+                #                                    'libncurses5-dev,libyaml-dev,libssl-dev,libcurl4-openssl-dev,'
+                #                                    'libunwind-dev,python,python-pip,python-setuptools,python-dev,'
+                #                                    'python-msgpack,python-yaml,python-argparse,'
+                #                                    'python-six,python-gevent,luarocks')
+
+                #should be mainly done in self.prefab.system.base.development() 
                 self.prefab.system.package.install('build-essential,cmake,coreutils,sed,libreadline-dev,'
                                                    'libncurses5-dev,libyaml-dev,libssl-dev,libcurl4-openssl-dev,'
-                                                   'libunwind-dev,python,python-pip,python-setuptools,python-dev,'
-                                                   'python-msgpack,python-yaml,python-argparse,'
-                                                   'python-six,python-gevent,luarocks')
-                requirments = 'https://raw.githubusercontent.com/tarantool/test-run/master/requirements.txt'
-                download_to = '/tmp/tarantool_requirments.txt'
-                self.prefab.core.file_download(requirments, to=download_to, minsizekb=0)
-                cmd = 'pip install -r %s' % download_to
+                                                   'libunwind-dev,luarocks')
+
+                requirements = 'https://raw.githubusercontent.com/tarantool/test-run/master/requirements.txt'
+                download_to = '/tmp/tarantool_requirements.txt'
+                self.prefab.core.file_download(requirements, to=download_to, minsizekb=0)
+                cmd = 'pip3 install -r %s' % download_to
                 self.prefab.core.run(cmd, profile=True)
+
                 self.doneSet('dependencies')
 
             tarantool = 'tarantool'
@@ -106,6 +113,7 @@ class PrefabTarantool(app):
                 self.doneSet('msgpuck')
 
             self.doneSet('install')
+
 
 
     def install_luarocks_rock(self, name):

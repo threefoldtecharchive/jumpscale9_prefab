@@ -90,7 +90,7 @@ class PrefabGolang(app):
             return
 
         self.install()
-        self.bindata()
+        self.bindata(reset=reset)
 
         C = '''
         go get -u github.com/tools/godep

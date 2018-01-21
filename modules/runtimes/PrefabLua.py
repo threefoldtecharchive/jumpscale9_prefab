@@ -24,11 +24,11 @@ class PrefabLua(app):
     #     self.package("luasocket")
     #     self.package("luasec")
 
-    def reset(self):
-        C = """
-        brew uninstall lua
-        brew uninstall luajit
-        """
+    # def reset(self):
+    #     C = """
+    #     brew uninstall lua
+    #     brew uninstall luajit
+    #     """
 
     # def isInstalled(self):
     #     rc, out, err = self.prefab.core.run("tarantool -V", die=False, showout=False, profile=True)
