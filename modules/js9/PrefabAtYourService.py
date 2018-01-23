@@ -49,8 +49,8 @@ class PrefabAtYourService(base):
         nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(console_url), nav)
         self.prefab.core.file_write(nav_path, nav)
         if restart:
-            self.prefab.web.portal.stop(name=name)
-            self.prefab.web.portal.start(name=name)
+            self.prefab.web.portal.stop(name=portal_name)
+            self.prefab.web.portal.start(name=portal_name)
 
     def configure_api_console(self, url="http://localhost:5000"):
         """Configure AYS API Console
