@@ -21,7 +21,8 @@ class PrefabPortal(base):
             client_secret='',
             scope_organization='',
             redirect_address='',
-            name='main'):
+            name='main',
+            restart=True):
         """
         Configure portal
         :param mongodbip: mongodb ip to which portal will connect ; default -> "127.0.0.1"
@@ -51,6 +52,10 @@ class PrefabPortal(base):
 
         cfg[name]['mongoengine'] = {'host': mongodbip, 'port': mongoport}
         self.executor.state.configSet('portal', cfg, save=True)
+
+        if restart:
+            self.stop(name=name)
+            self.start(name=name)
 
     def add_configuration(self, config_dict, name="main"):
         """
