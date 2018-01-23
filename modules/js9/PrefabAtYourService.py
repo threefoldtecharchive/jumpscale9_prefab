@@ -23,7 +23,7 @@ class PrefabAtYourService(base):
         }
         self.executor.state.configSet('ays', ays_config, save=True)
 
-    def configure_portal(self, ays_url='http://localhost:5000', ays_console_url='', portal_name='main'):
+    def configure_portal(self, ays_url='http://localhost:5000', ays_console_url='', portal_name='main', restart=True):
         """Configure AYS in portal
 
          Allows the user to configure AYS in portal
@@ -45,8 +45,9 @@ class PrefabAtYourService(base):
         nav = self.prefab.core.file_read(nav_path)
         nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(console_url), nav)
         self.prefab.core.file_write(nav_path, nav)
-        self.prefab.web.portal.stop()
-        self.prefab.web.portal.start()
+        if restart:
+            self.prefab.web.portal.stop(name=name)
+            self.prefab.web.portal.start(name=name)
 
     def configure_api_console(self, url="http://localhost:5000"):
         """Configure AYS API Console
