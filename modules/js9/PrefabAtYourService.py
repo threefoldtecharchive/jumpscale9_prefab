@@ -12,20 +12,17 @@ class PrefabAtYourService(base):
         )
         self.repo_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["CODEDIR"], 'github/jumpscale/ays9/')
 
-    def configure(self, production=False, client_secret='', client_id='', organization='', redirect_address='locahost:5000'):
+    def configure(self, production=False, organization=''):
         jwt_key = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n27MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny66+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv"
         ays_config = {
             'production': production,
             'oauth': {
                 'jwt_key': jwt_key,
-                'client_secret': client_secret,
-                'redirect_uri': "https://{}".format(redirect_address),
-                'client_id': client_id,
                 'organization': organization
             }
         }
         self.executor.state.configSet('ays', ays_config, save=True)
-
+        
     def configure_portal(self, ays_url='http://localhost:5000', ays_console_url='', portal_name='main', restart=True):
         """Configure AYS in portal
 
