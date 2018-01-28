@@ -12,7 +12,7 @@ class PrefabAtYourService(base):
         )
         self.repo_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["CODEDIR"], 'github/jumpscale/ays9/')
 
-    def configure(self, production=False, organization=''):
+    def configure(self, production=False, organization='', restart=True):
         jwt_key = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n27MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny66+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv"
         ays_config = {
             'production': production,
@@ -22,7 +22,10 @@ class PrefabAtYourService(base):
             }
         }
         self.executor.state.configSet('ays', ays_config, save=True)
-
+        if restart:
+            self.stop()
+            self.start()
+        
     def configure_portal(self, ays_url='http://localhost:5000', ays_console_url='', portal_name='main', restart=True):
         """Configure AYS in portal
 
@@ -46,8 +49,8 @@ class PrefabAtYourService(base):
         nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(console_url), nav)
         self.prefab.core.file_write(nav_path, nav)
         if restart:
-            self.prefab.web.portal.stop(name=name)
-            self.prefab.web.portal.start(name=name)
+            self.prefab.web.portal.stop(name=portal_name)
+            self.prefab.web.portal.start(name=portal_name)
 
     def configure_api_console(self, url="http://localhost:5000"):
         """Configure AYS API Console
@@ -74,10 +77,13 @@ class PrefabAtYourService(base):
         self.logger.info("Get ays code on branch:'%s'" % branch)
         self.prefab.tools.git.pullRepo("https://github.com/Jumpscale/ays9.git", branch=branch)
 
-    def load_ays_space(self, install_portal=False):
+    def load_ays_space(self, install_portal=False, branch="master"):
         """
         add ays space to portal
         """
+        # make sure to have ays repo files locally even if you will connect the portal with a remote ays server
+        # to get ays app files
+        self.get_code(branch=branch)
         if install_portal:
             self.prefab.web.portal.install()
         if self.core.file_exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
@@ -114,7 +120,7 @@ class PrefabAtYourService(base):
         )
         self.load_ays_space(install_portal)
 
-    def start(self, host='127.0.0.1', port=5000, log='info', dev=False):
+    def start(self, log='info', dev=False):
         """
         Starts an AYS instance
         """
@@ -123,8 +129,13 @@ class PrefabAtYourService(base):
             self.logger.warning('AYS is not installed. Installing it...')
             self.install()
 
+        cfg = j.core.state.configGet('ays', {})
+        if not cfg:
+            j.atyourservice.server.config
+            cfg = j.core.state.configGet('ays', {})
+
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
-                                                                                      host=host, port=port, log=log)
+                                                                                      host=cfg['host'], port=cfg['port'], log=log)
         if dev:
             cmd += " --dev "
         pm = self.prefab.system.processmanager.get()
