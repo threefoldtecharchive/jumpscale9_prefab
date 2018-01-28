@@ -208,7 +208,7 @@ class PrefabTmux(base):
             cmd = "sudo -u %s -i %s" % (user, cmd)
         rc, out, err = self.prefab.core.run(
             cmd, die=False, showout=False, profile=True)
-        if err:
+        if rc != 0:
             return result
         for line in out.split():
             idx, name = line.split(':', 1)
