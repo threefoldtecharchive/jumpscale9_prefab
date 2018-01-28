@@ -172,7 +172,10 @@ class PrefabTmux(base):
 
         if die and rc > 0:
             # TODO: *1 does not seem to stop
-            raise j.exceptions.RuntimeError(err)
+            if err != "":
+                raise j.exceptions.RuntimeError(err)
+            else:
+                raise j.exceptions.RuntimeError(out)
 
         return rc, out
 
