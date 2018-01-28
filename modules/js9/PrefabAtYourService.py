@@ -19,8 +19,16 @@ class PrefabAtYourService(base):
             'oauth': {
                 'jwt_key': jwt_key,
                 'organization': organization
-            }
+            },
+            'host': '127.0.0.1',
+            'port': 5000
         }
+        rediskwargs = j.core.db.config_get('unixsocket')
+        if not rediskwargs['unixsocket']:
+            dbkwargs = j.core.db.connection_pool.connection_kwargs
+            rediskwargs = {'host': dbkwargs['host'], 'port': dbkwargs['port']}
+        ays_config.update({'redis': rediskwargs})
+
         self.executor.state.configSet('ays', ays_config, save=True)
         if restart:
             self.stop()
@@ -129,11 +137,8 @@ class PrefabAtYourService(base):
             self.logger.warning('AYS is not installed. Installing it...')
             self.install()
 
+        j.atyourservice.server.config
         cfg = j.core.state.configGet('ays', {})
-        if not cfg:
-            j.atyourservice.server.config
-            cfg = j.core.state.configGet('ays', {})
-
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
                                                                                       host=cfg['host'], port=cfg['port'], log=log)
         if dev:
