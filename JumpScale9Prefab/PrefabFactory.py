@@ -2,6 +2,8 @@ from js9 import j
 from JumpScale9Prefab.PrefabBase import *
 
 from JumpScale9Prefab.PrefabLoader import PrefabLoader
+
+
 class PrefabRootClassFactory:
 
     prefabs_instance = {}
@@ -12,7 +14,7 @@ class PrefabRootClassFactory:
         self.logger = j.logger.get("j.tools.prefab")
         self._local = None
 
-        self.loader=PrefabLoader()
+        self.loader = PrefabLoader()
 
     @property
     def local(self):
@@ -82,7 +84,7 @@ class PrefabRootClassFactory:
 
         prefab = PrefabRootClass(executor)
 
-        self.loader.load(executor,prefab)
+        self.loader.load(executor, prefab)
 
         self.prefabs_instance[executor.id] = prefab
 

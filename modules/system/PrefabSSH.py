@@ -114,7 +114,6 @@ class PrefabSSH(base):
         if not isknown:
             self.prefab.core.execute_bash('ssh-keyscan -t rsa {} >> {}'.format(addr, known_hostsfile))
 
-
     def keygen(self, user="root", keytype="rsa", name="default"):
         """Generates a pair of ssh keys in the user's home .ssh directory."""
         user = user.strip()
@@ -146,7 +145,7 @@ class PrefabSSH(base):
         """
 
         def add_newline(content):
-            if content[-1] != "\n":
+            if content and content[-1] != "\n":
                 content += "\n"
             return content
 
@@ -163,7 +162,7 @@ class PrefabSSH(base):
         key = add_newline(key)
         ret = None
 
-        settings=list()
+        settings = list()
         for setting, value in kwargs.items():
             if value is True:
                 settings.append(setting)
@@ -178,7 +177,7 @@ class PrefabSSH(base):
             content = self.prefab.core.file_read(keyf)
             if content.find(key[:-1]) == -1:
                 content = add_newline(content)
-                self.prefab.core.file_write(keyf, content+line)
+                self.prefab.core.file_write(keyf, content + line)
                 ret = False
             else:
                 ret = True
@@ -222,7 +221,7 @@ class PrefabSSH(base):
         # leave here is to make sure we have a backdoor for when something goes wrong further
         self.logger.info("create backdoor")
         self.prefab.system.user.ensure(backdoorlogin, passwd=backdoorpasswd, home=None, uid=None,
-                                 gid=None, shell=None, fullname=None, encrypted_passwd=True, group="root")
+                                       gid=None, shell=None, fullname=None, encrypted_passwd=True, group="root")
         self.prefab.core.run("rm -fr /home/%s/.ssh/" % backdoorlogin)
         self.prefab.system.group.user_add('sudo', '$(system.backdoor.login)')
 

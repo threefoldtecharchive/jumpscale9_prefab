@@ -868,7 +868,7 @@ class PrefabCore(base):
             content = self.replace(content)
 
         self.executor.file_write(
-            path=path, content=content, mode=mode, owner=owner, group=group, append=append)
+            path=path, content=content, mode=mode, owner=owner, group=group, append=append, sudo=True)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -1354,20 +1354,19 @@ class PrefabCore(base):
         self.sudomode = True
         if not force_sudo and getattr(self.executor, 'login', '') == "root":
             cmd = command
-        passwd = self.executor.passwd if hasattr(
-            self.executor, "passwd") else ''
+        passwd = self.executor.passwd if hasattr(self.executor, "passwd") else ''
+        if hasattr(self.executor, 'sshclient'):
+            # TODO: hack
+            passwd = self.executor.sshclient.config.data['passwd_']
         passwd = passwd or "\'\'"
         if shell:
             command = 'bash -c "%s"' % command
-        rc, out, err = self.executor.execute(
-            "which sudo", die=False, showout=False)
+        rc, out, err = self.executor.execute("which sudo", die=False, showout=False)
         if rc or out.strip() == '**OK**':
             # Install sudo if sudo not installed
-            cmd = 'apt-get install sudo && echo %s | sudo -SE -p \'\' %s' % (
-                passwd, command)
+            cmd = 'apt-get install sudo && echo %s | sudo -SE -p \'\' %s' % (passwd, command)
         else:
-            cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (
-                passwd, command.replace('"', '\\"'))
+            cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (passwd, command.replace('"', '\\"'))
         return cmd
 
     def cd(self, path):
