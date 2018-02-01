@@ -80,21 +80,7 @@ class PrefabKubernetes(app):
     Prefab that allows deployment of kubernetes cluster or adding new nodes to an existing cluster
     """
     NAME = "kubectl"
-
-    def minikube_install(self, reset=False, install_dependencies=True):
-        """
-        install full minikube, only support ubuntu 16.04+ (check this)
-        @param reset ,, rerun the code even if it has been run again. this may not be safe (used for development only)
-        @param install_depencies ,, if True will install dependencies
-        """
-
-        if self.doneCheck("minikube_install", reset):
-            return
-        if install_dependencies:
-            self.install_dependencies()
-
-        self.doneSet("minikube_install")
-
+    
     def multihost_install(self, nodes=[], external_ips=[], unsafe=False, skip_flight_checks=False,
                           service_subnet='10.96.0.0/16', reset=False, install_binaries=True):
         """
