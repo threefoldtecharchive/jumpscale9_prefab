@@ -80,21 +80,9 @@ class PrefabKubernetes(app):
     Prefab that allows deployment of kubernetes cluster or adding new nodes to an existing cluster
     """
     NAME = "kubectl"
-
-    def minikube_install(self, reset=False):
-        """
-        install full minikube, only support ubuntu 16.04+ (check this)
-        """
-
-        if self.doneCheck("minikube_install", reset):
-            return
-
-        self.install_dependencies()
-
-        self.doneSet("minikube_install")
-
+    
     def multihost_install(self, nodes=[], external_ips=[], unsafe=False, skip_flight_checks=False,
-                          service_subnet='10.96.0.0/16', reset=False):
+                          service_subnet='10.96.0.0/16', reset=False, install_binaries=True):
         """
         Important !! only supports centos, fedora and ubuntu 1604
         Use a list of prefab connections where all nodes need to be reachable from all other nodes or at least from the master node.
@@ -111,6 +99,7 @@ class PrefabKubernetes(app):
         @param skip_flight_checks,, bool skip preflight checks from kubeadm.
         @param service_subnet,, str cidr to use for the services in kubernets .
         @param reset ,, rerun the code even if it has been run again. this may not be safe (used for development only)
+        @param install_binaries ,, if True will call install_binaries before configuring nodes
 
         @return (dict(), str) ,, return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
 
@@ -124,7 +113,8 @@ class PrefabKubernetes(app):
             masters, nodes = nodes[:3], nodes[3:]
 
         external_ips = [master.executor.sshclient.addr for master in masters] + external_ips
-
+        if install_binaries:
+            self.install_binaries(masters)
         self.setup_etcd_certs(masters)
         self.install_etcd_cluster(masters)
         join_line, config = self.install_kube_masters(masters, external_ips=external_ips, service_subnet=service_subnet,
@@ -286,6 +276,11 @@ class PrefabKubernetes(app):
         self.prefab.core.dir_remove("/var/lib/etcd")
         self.prefab.core.dir_ensure('$CFGDIR/etcd/pki /var/lib/etcd')
 
+    def install_binaries(self, nodes):
+        for node in nodes:
+            node.virtualization.kubernetes.get_etcd_binaries()
+            node.virtualization.kubernetes.install_base()
+
     def install_etcd_cluster(self, nodes):
         """
         This installs etcd binaries and sets up the etcd cluster.
@@ -298,9 +293,7 @@ class PrefabKubernetes(app):
         initial_cluster = ','.join(initial_cluster)
         for index, node in enumerate(nodes):
             pm = node.system.processmanager.get('systemd')
-            node.virtualization.kubernetes.get_etcd_binaries()
             node.virtualization.kubernetes.copy_etcd_certs(self.prefab)
-
             etcd_service = ETCD_SERVICE.format(*nodes_ip, name=node.core.hostname, node_ip=node.executor.sshclient.addr,
                                                initial_cluster=initial_cluster)
 
@@ -338,9 +331,6 @@ class PrefabKubernetes(app):
 
         if flannel:
             kube_cidr = '10.244.0.0/16'
-
-        for node in nodes:
-            node.virtualization.kubernetes.install_base()
 
         # format docs and command with ips and names
         nodes_ip = [node.executor.sshclient.addr for node in nodes]
@@ -488,18 +478,19 @@ class PrefabKubernetes(app):
 
         return join_line, config
 
-    def install_minion(self, join_line, reset=False):
+    def install_minion(self, join_line, reset=False, install_base=True):
         """
         Used to install the basic componenets of kubernetes on a minion node and make that node join the cluster
         specified in the join line param.
 
         @param join_line ,,str an output line produced when deploying a master node this is the return from install_master method.
         @param reset ,,bool bool will default to false, if ture  will rebuild even if the code has been run before.
+        @param install_base ,, if True will install base
         """
         if self.doneCheck("install_minion", reset):
             return
-
-        self.install_base()
+        if install_base:
+            self.install_base()
         self.prefab.core.run(join_line.strip())
 
         # build
