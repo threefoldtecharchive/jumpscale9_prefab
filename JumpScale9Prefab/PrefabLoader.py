@@ -48,12 +48,12 @@ import pystache
 class PrefabCat():
     pass
 
-
-class PrefabLoader():
+JSBASE = j.application.jsbase_get_class()
+class PrefabLoader(JSBASE):
 
     def __init__(self):
         self.moduleList = {}
-        self.logger = j.logger.get("jsprefabloader")
+        JSBASE.__init__(self)
 
     def load(self, executor, prefab, moduleList=None):
         """
