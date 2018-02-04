@@ -13,7 +13,6 @@ class PrefabRootClassFactory:
         self.__jslocation__ = "j.tools.prefab"
         self.logger = j.logger.get("j.tools.prefab")
         self._local = None
-
         self.loader = PrefabLoader()
 
     @property
@@ -77,7 +76,6 @@ class PrefabRootClassFactory:
         or if used without executor then will be the local one
         """
         from JumpScale9Prefab.PrefabRootClass import PrefabRootClass
-        executor = j.tools.executor.get(executor)
 
         if usecache and executor.id in self.prefabs_instance:
             return self.prefabs_instance[executor.id]
