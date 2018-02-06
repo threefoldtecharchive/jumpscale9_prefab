@@ -196,15 +196,8 @@ base = j.tools.prefab._getBaseClass()
 class PrefabCore(base):
 
     def _init(self):
-        base.__init__(self)
         self.sudomode = False
         self._cd = '/root'
-
-    @property
-    def logger(self):
-        if self._logger is None:
-            self._logger = j.logger.get("prefab.core")
-        return self._logger
 
     def shell_safe(self, path):
         SHELL_ESCAPE = " '\";`|"
