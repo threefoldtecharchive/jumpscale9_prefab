@@ -3,10 +3,11 @@ from js9 import j
 
 from JumpScale9Prefab.PrefabCore import PrefabCore
 
-
-class PrefabRootClass:
+JSBASE = j.application.jsbase_get_class()
+class PrefabRootClass(JSBASE):
 
     def __init__(self, executor):
+        JSBASE.__init__(self)
         self.executor = executor
 
         self._platformtype = None

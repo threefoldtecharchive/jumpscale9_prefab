@@ -199,12 +199,6 @@ class PrefabCore(base):
         self.sudomode = False
         self._cd = '/root'
 
-    @property
-    def logger(self):
-        if self._logger is None:
-            self._logger = j.logger.get("prefab.core")
-        return self._logger
-
     def shell_safe(self, path):
         SHELL_ESCAPE = " '\";`|"
         """Makes sure that the given path/string is escaped and safe for shell"""

@@ -1,28 +1,21 @@
 from js9 import j
 import inspect
 
-
-class PrefabBase:
+JSBASE = j.application.jsbase_get_class()
+class PrefabBase(JSBASE):
 
     def __init__(self, executor, prefab):
+        JSBASE.__init__(self)
         self._classname = ""
-        self._cache = None
         self.executor = executor
         self.executor.dir_paths
         self.prefab = prefab
         self._initenvDone = False
-        self._logger = None
         self.env = self.executor.env
 
         if self.classname != 'PrefabCore':
             self.core = prefab.core
         self._init()
-
-    @property
-    def logger(self):
-        if self._logger is None:
-            self._logger = j.logger.get(self.classname)
-        return self._logger
 
     def _init(self):
         pass
@@ -136,13 +129,6 @@ class PrefabBase:
     def id(self):
         return self.executor.id
 
-    @property
-    def cache(self):
-        if self._cache is None:
-            self._cache = j.data.cache.get(
-                "prefab" + self.id + self.classname, reset=True, expiration=600)  # 10 min
-        return self._cache
-
     def __str__(self):
         return "%s:%s" % (self.classname, self.executor.id)
 
@@ -192,9 +178,10 @@ class PrefabApp(PrefabBase):
             raise NotImplementedError()
 
 
-class PrefabBaseLoader:
+class PrefabBaseLoader(JSBASE):
 
     def __init__(self, executor, prefab):
+        JSBASE.__init__(self)
         self.executor = executor
         self.prefab = prefab
         myClassName = str(self.__class__).split(".")[-1].split("'")[0]

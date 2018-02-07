@@ -3,15 +3,15 @@ from JumpScale9Prefab.PrefabBase import *
 
 from JumpScale9Prefab.PrefabLoader import PrefabLoader
 
-
-class PrefabRootClassFactory:
+JSBASE = j.application.jsbase_get_class()
+class PrefabRootClassFactory(JSBASE):
 
     prefabs_instance = {}
     _local = None
 
     def __init__(self):
         self.__jslocation__ = "j.tools.prefab"
-        self.logger = j.logger.get("j.tools.prefab")
+        JSBASE.__init__(self)
         self._local = None
         self.loader = PrefabLoader()
 
