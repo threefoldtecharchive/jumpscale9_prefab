@@ -31,8 +31,7 @@ class Prefabjs9Core(app):
         self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
 
         self.logger.info("js9_install")
-        self.core.run(
-            "export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
+        self.core.run("export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
 
         self.prefab.runtimes.pip.install("Cython,asyncssh,numpy,python-jose,PyNaCl,PyJWT,fakeredis,pudb,serial")
 
