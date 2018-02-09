@@ -13,8 +13,9 @@ class PrefabZOS_db(app):
         if reset is False and self.isInstalled():
             return
 
-        self.prefab.system.package.mdupdate()
-        self.prefab.system.package.install('build-essential')
+        if self.prefab.core.isUbuntu:
+            self.prefab.system.package.mdupdate()
+            self.prefab.system.package.install('build-essential')
 
         path = self.prefab.tools.git.pullRepo('https://github.com/zero-os/0-db')
 
