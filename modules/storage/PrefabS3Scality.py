@@ -5,8 +5,8 @@ from time import sleep
 app = j.tools.prefab._getBaseAppClass()
 
 
-class PrefabS3Server(app):
-    NAME = 's3server'
+class PrefabS3Scality(app):
+    NAME = 's3scality'
 
     def install(self, start=False, storageLocation="/data/", metaLocation="/meta/"):
         """
