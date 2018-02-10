@@ -6,7 +6,7 @@ app = j.tools.prefab._getBaseAppClass()
 class Prefabjs9Core(app):
     NAME = 'js9'
 
-    def install(self, reset=False, branch='9.3.0_ssh',full=False):
+    def install(self, reset=False, branch='9.3.0_ssh', full=False):
         """Install js9 core
         Keyword Arguments:
             reset {bool} -- force install if js9core was already installed (default: {False})
@@ -23,6 +23,8 @@ class Prefabjs9Core(app):
 
         if full:
             self.prefab.system.base.development()
+        else:
+            self.prefab.system.base.install()
 
         self.bashtools()
 
