@@ -80,7 +80,7 @@ class PrefabKubernetes(app):
     Prefab that allows deployment of kubernetes cluster or adding new nodes to an existing cluster
     """
     NAME = "kubectl"
-    
+
     def multihost_install(self, nodes=[], external_ips=[], unsafe=False, skip_flight_checks=False,
                           service_subnet='10.96.0.0/16', reset=False, install_binaries=True):
         """
@@ -244,12 +244,7 @@ class PrefabKubernetes(app):
         scp -P {port} $TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
         """.format(node_ip=self.prefab.executor.sshclient.addr, cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
                    port=self.prefab.executor.sshclient.port or 22)
-        if controller_node.executor.type == 'ssh':
-            cmd = """
-            scp -P {port} {prefab_ip}:$TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
-            scp -P {port} {prefab_ip}:$TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
-            """.format(node_ip=self.prefab.executor.sshclient.addr, cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
-                       port=self.prefab.executor.sshclient.port or 22)
+
         controller_node.core.execute_bash(cmd)
 
     def get_etcd_binaries(self, version='3.2.9'):
