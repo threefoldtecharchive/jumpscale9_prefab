@@ -19,21 +19,12 @@ from __future__ import with_statement
 import re
 import copy
 import base64
-import hashlib
 import os
-# import string
-# import tempfile
-# import subprocess
-# import types
-# import threading
 import sys
 import pystache
-# import functools
-# import platform
 
 from js9 import j
 import pygments.lexers
-# from pygments.formatters import get_formatter_by_name
 
 NOTHING = base64
 
@@ -308,17 +299,6 @@ class PrefabCore(base):
         args["HOSTNAME"] = self.hostname
         return args
 
-    def system_uuid_alias_add(self):
-        """Adds system UUID alias to /etc/hosts.
-        Some tools/processes rely/want the hostname as an alias in
-        /etc/hosts e.g. `127.0.0.1 localhost <hostname>`.
-        """
-        with mode_sudo():
-            old = "127.0.0.1 localhost"
-            new = old + " " + self.system_uuid()
-            self.file_update(
-                '/etc/hosts', lambda x: text_replace_line(x, old, new)[0])
-
     def system_uuid(self):
         """Gets a machines UUID (Universally Unique Identifier)."""
         return self.sudo('dmidecode -s system-uuid | tr "[A-Z]" "[a-z]"')
@@ -332,13 +312,6 @@ class PrefabCore(base):
     def locale_check(self, locale):
         locale_data = self.sudo("locale -a | egrep '^%s$' ; true" % (locale,))
         return locale_data == locale
-
-    def locale_ensure(self, locale):
-        if not self.locale_check(locale):
-            with fabric.context_managers.settings(warn_only=True):
-                self.sudo(
-                    "/usr/share/locales/install-language-pack %s" % (locale,))
-            self.sudo("dpkg-reconfigure locales")
 
     # =============================================================================
     #
@@ -1065,7 +1038,6 @@ class PrefabCore(base):
             return out
         # return self.run('openssl dgst -md5 %s' % (location)).split("\n")[-1].split(")= ",1)[-1].strip()
 
-
     # =============================================================================
     #
     # Network OPERATIONS
@@ -1073,7 +1045,7 @@ class PrefabCore(base):
     # =============================================================================
 
     def getNetworkInfoGenrator(self):
-        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
+        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS
         exitcode, output, err = self.run("ip a", showout=False)
         for m in IPBLOCKS.finditer(output):
             block = m.group('block')
@@ -1081,12 +1053,12 @@ class PrefabCore(base):
 
     @property
     def networking_info(self):
+        from JumpScale9.tools.nettools.NetTools import getNetworkInfo
         if not self._networking_info:
             all_info = list()
             for device in getNetworkInfo():
                 all_info.append(device)
         return all_info
-
 
     # =============================================================================
     #
@@ -1281,7 +1253,7 @@ class PrefabCore(base):
         @param profile, execute the bash profile first
         """
         # self.logger.info(cmd)
-        if cmd.strip()=="":
+        if cmd.strip() == "":
             raise RuntimeError("cmd cannot be empty")
         if not env:
             env = {}
@@ -1297,7 +1269,7 @@ class PrefabCore(base):
             # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
             # next will check if profile path exists, if not will put it
-            cmd0=cmd
+            cmd0 = cmd
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
                 ppath, ppath, ppath, cmd)
 
@@ -1454,7 +1426,7 @@ class PrefabCore(base):
                 rc = 0
             else:
                 self.logger.info(out)
-                rc=998
+                rc = 998
             # out = self.file_read(outfile)
             # out = self._clean(out)
             # self.file_unlink(outfile)
@@ -1466,11 +1438,11 @@ class PrefabCore(base):
 
         if rc > 0:
             msg = "Could not execute script:\n%s\n" % content
-            if rc==998:
-                msg+="error in output, was expecting **ERROR** or **OK** at end of esecution of script\n"
-                msg+="lastline is:'%s'"%lastline
+            if rc == 998:
+                msg += "error in output, was expecting **ERROR** or **OK** at end of esecution of script\n"
+                msg += "lastline is:'%s'" % lastline
             msg += "Out:\n%s\n" % out
-            if err.strip()!="":
+            if not tmux and err.strip() != "":
                 msg += "Error:\n%s\n" % err
             msg += "\n****ERROR***: could not execute script !!!\n"
             out = msg
