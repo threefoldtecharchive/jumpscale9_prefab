@@ -7,7 +7,7 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabMariadb(app):
     NAME = 'mariadb'
 
-    def install(self, start=False):
+    def install(self, start=False, reset=False):
         if self.doneCheck("install", reset):
             return
         self.prefab.system.package.install("mariadb-server")
@@ -29,4 +29,4 @@ class PrefabMariadb(app):
         cmd = "/usr/sbin/mysqld --basedir=/usr --datadir=/data/db \
                 --plugin-dir=/usr/lib/mysql/plugin --log-error=/dev/log/mysql/error.log \
                 --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/run/mysqld/mysqld.sock --port=3306"
-        self.prefab.core.run(cmd)
+        self.prefab.core.execute_script(cmd, tmux=True)
