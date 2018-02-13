@@ -122,7 +122,7 @@ class PrefabSynapse(app):
         config_data = self.prefab.core.file_read(config_file_path)
         config_data = j.data.serializer.json.loads(config_data)
         config_data["default_hs_url"] = "https://{}".format(domain)
-        config_data = j.data.serializer.yaml.dumps(config_data)
+        config_data = j.data.serializer.json.dumps(config_data)
         self.prefab.core.file_write("{}/config.json".format(self.client_path), config_data)
 
         # Create admin user
