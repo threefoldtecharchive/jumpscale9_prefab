@@ -95,11 +95,12 @@ class PrefabApache2(app):
             if line:
                 mod = "#" + line
                 conffile = conffile.replace(line, mod)
-        sitesdirconf = self.prefab.core.replace("\nInclude $JSCFGDIR/apache2/sites-enabled/*")
+        sitesdirconf = self.prefab.core.replace("\nInclude %s/apache2/sites-enabled/*" % j.dirs.CFGDIR)
         conffile += sitesdirconf
         conffile += "\nAddType application/x-httpd-php .php"
 
         # MAKE VHOSTS DIRECTORY
+        self.prefab.core.dir_ensure("%s/apache2/sites-enabled/" % j.dirs.CFGDIR)
         self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-available")
         self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-enabled")
         #self.logger.info("Config to be written = ", conffile)
