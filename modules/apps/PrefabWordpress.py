@@ -53,11 +53,26 @@ class PrefabWordpress(app):
         self.prefab.db.mariadb.admin_create(db_user, db_password, db_name= db_name)
         
         self.prefab.core.dir_ensure('/opt/var/data/www')
+
+        #start webserver here
+        
+
         self.prefab.executor.execute("wp core download --path=/opt/var/data/www")
         install_command = """
         wp core install --url={url} --title={title} --admin_user={admin_user}
          --admin_password={admin_password} --admin_email={admin_email}
         """.format(url=url, title=title, admin_user=admin_user, admin_password=admin_password, admin_email=admin_email)
+        self.prefab.executor.execute(install_command)
+
+        configure_command = """
+        wp config create --dbname={db_name} --dbuser={db_user} --dbpass={db_password}
+        """.format(db_name=db_name, db_user=db_user, db_password=db_password)
+        self.prefab.executor.execute(install_command)
+
+        #will add more plugins here
+        plugins_command = """
+        wp plugin install bbpress
+        """
         self.prefab.executor.execute(install_command)
 
         
