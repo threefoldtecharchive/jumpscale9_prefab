@@ -1,5 +1,4 @@
 from js9 import j
-import textwrap
 
 app = j.tools.prefab._getBaseAppClass()
 
@@ -7,108 +6,111 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabSynapse(app):
     NAME = "synapse"
 
-
     def build(self, reset=False):
-        """
-        build from pythong
-        """
-
         if self.doneCheck('build', reset):
             return
 
-        self._installDeps()
+        self.prefab.system.package.mdupdate()
+        needed_packages = [
+            "build-essential", "python2.7", "python2.7-dev", "libffi-dev",
+            "python-pip", "python-virtualenv", "python-setuptools", "libssl-dev",
+            "libjpeg-dev", "libxslt1-dev", "libpq-dev"
+        ]
+        for package in needed_packages:
+            self.prefab.system.package.ensure(package)
 
-        #PUT THE BUILD CODE HERE
-
-        self._configure()
-
+        self.prefab.db.postgresql.install()
+        self.prefab.web.caddy.install(plugins=["iyo"])
+        cmd = """
+        virtualenv -p python2.7 /root/.synapse
+        source /root/.synapse/bin/activate
+        pip install --upgrade pip
+        pip install --upgrade setuptools
+        pip install psycopg2
+        """
+        self.prefab.core.run(cmd)
         self.doneSet('build')
 
-    def _installDeps(self):
-        """
-
-        database on postgresql
-
-        """
-
-        self.prefab.system.package.mdupdate()
-        self.prefab.runtimes.python.install()
-        self.prefab.db.postgresql.install()
-
-
-    def _configure(self):
-        """Configure synapse
-        Configure: db
-        """
-
-        # Configure Database
-        config = """
-        """
-        self.prefab.core.file_write(location=self.INIPATH,content=config)
-
-    def install(self, adminpasswd, reset=False, start=False):
-        """
-
-
-        Keyword Arguments:
-            reset {bool} -- force build if True (default: {False})
-        """
-
+    def install(self, admin_username, admin_password, domain="localhost", reset=False, start=False):
         self.build(reset=reset)
 
-        # # Create postgres db
-        self.prefab.core.run('sudo -u postgres /opt/bin/psql -c \'create database synapse;\'', die=False)
-        self.start()
+        # Install synapse using pip
         cmd = """
-        sudo -u postgres /opt/bin/psql synapse -c
-        "INSERT INTO login_source (type, name, is_actived, cfg, created_unix, updated_unix)
-        VALUES (6, 'Itsyou.online', TRUE,
-        '{\\"Provider\\":\\"itsyou.online\\",\\"ClientID\\":\\"%s\\",\\"ClientSecret\\":\\"%s\\",\\"OpenIDConnectAutoDiscoveryURL\\":\\"\\",\\"CustomURLMapping\\":null}',
-        extract('epoch' from CURRENT_TIMESTAMP) , extract('epoch' from CURRENT_TIMESTAMP));"
+        pip install https://github.com/matrix-org/synapse/tarball/master
         """
-        cmd = cmd % (org_client_id, org_client_secret)
-        cmd = cmd.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
         self.prefab.core.run(cmd)
-        if not start:
-            self.stop()
-            self.prefab.db.postgresql.stop()
 
-    def start(self, name='main'):
-        """Start synapse server instance
-
-        Keyword Arguments:
-            name {string} -- name of the server instance (default: {'main'})
-        """
+        # Create database if not exists
         if not self.prefab.db.postgresql.isStarted():
             self.prefab.db.postgresql.start()
-        cmd = '{synapsepath}/synapse web'.format(synapsepath=self.synapsePATH)
-        pm = self.prefab.system.processmanager.get()
-        pm.ensure(name='synapse_%s' % name, cmd=cmd)
+        db_query = """
+                CREATE DATABASE synapse
+                ENCODING 'UTF8'
+                LC_COLLATE='C'
+                LC_CTYPE='C'
+                template=template0
+            """
+        self.prefab.core.run('sudo -u postgres /opt/bin/psql -c "{}"'.format(db_query), die=False)
+        self._configure(user=admin_username, password=admin_password, domain=domain)
+        if not start:
+            self.stop()
 
-    def stop(self, name='main'):
-        """Stop synapse server instance
+    def _configure(self, user, password, domain):
+        cmd = """
+        cd /root/.synapse
+        source ./bin/activate
+        python -m synapse.app.homeserver \
+            --server-name {} \
+            --config-path homeserver.yaml \
+            --generate-config \
+            --report-stats=yes
+        """.format(domain)
+        self.prefab.core.run(cmd)
 
-        Keyword Arguments:
-            name {string} -- name of the server instance (default: {'main'})
+        config_file_path = "/root/.synapse/homeserver.yaml"
+        config_data = self.prefab.core.file_read(config_file_path)
+        config_data = j.data.serializer.yaml.loads(config_data)
+        config_data["database"] = {
+            "name": "psycopg2",
+            "args": {
+                "user": "postgres",
+                "password": "postgres",
+                "database": "synapse",
+                "host": "localhost",
+                "cp_min": 5,
+                "cp_max": 10,
+            }
+        }
+        config_data["enable_registration"] = True
+        config_data = j.data.serializer.yaml.dumps(config_data)
+        self.prefab.core.file_write(config_file_path, config_data)
+
+        self.start()
+        cmd = """
+        cd /root/.synapse
+        source ./bin/activate
+        register_new_matrix_user -c homeserver.yaml -u {user} -p {password} -a https://localhost:8448
+        """.format(user=user, password=password)
+        self.prefab.core.run(cmd)
+
+    def start(self):
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
+        cmd = """
+        cd /root/.synapse
+        source ./bin/activate
+        synctl start
         """
+        self.prefab.core.run(cmd)
 
-        pm = self.prefab.system.processmanager.get()
-        pm.stop('synapse_%s' % name)
-
-    def restart(self, name='main'):
-        """Stop synapse server instance
-
-        Keyword Arguments:
-            name {string} -- name of the server instance (default: {'main'})
+    def stop(self):
+        cmd = """
+        cd /root/.synapse
+        source ./bin/activate
+        synctl stop
         """
-        pm = self.prefab.system.processmanager.get()
-        pm.stop('synapse_%s' % name)
-        self.start(name)
+        self.prefab.core.run(cmd)
 
-    def reset(self):
-        """
-        helper method to clean what this module generates.
-        """
-        super().reset()
-        self.core.dir_remove(self.CODEDIR)
-        self._init()
+    def restart(self):
+        self.stop()
+        self.start()
