@@ -1,4 +1,5 @@
 from js9 import j
+import time
 
 
 app = j.tools.prefab._getBaseAppClass()
@@ -6,8 +7,16 @@ app = j.tools.prefab._getBaseAppClass()
 
 class PrefabMariadb(app):
     NAME = 'mariadb'
+    PORT = '3306'
 
     def install(self, start=False, reset=False):
+        """install and configure mariadb
+
+        Keyword Arguments:
+            start {bool} -- flag to specify whether to start mariadb on installation (default: {False})
+            reset {bool} -- flag to specify whether to force install (default: {False})
+        """
+
         if self.doneCheck("install", reset):
             return
         self.prefab.system.package.install("mariadb-server")
@@ -26,7 +35,91 @@ class PrefabMariadb(app):
             self.start()
 
     def start(self):
-        cmd = "/usr/sbin/mysqld --basedir=/usr --datadir=/data/db \
+        """Start mariadb
+        """
+
+        cmd = '/usr/sbin/mysqld --basedir=/usr --datadir=/data/db \
                 --plugin-dir=/usr/lib/mysql/plugin --log-error=/dev/log/mysql/error.log \
-                --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/run/mysqld/mysqld.sock --port=3306"
-        self.prefab.core.execute_script(cmd, tmux=True)
+                --pid-file=/var/run/mysqld/mysqld.pid \
+                --socket=/var/run/mysqld/mysqld.sock --port={}'.format(self.PORT)
+
+        pm = self.prefab.system.processmanager.get()
+        pm.ensure('mariadb', cmd=cmd)
+
+    def init(self):
+        """Initialize the data directory
+        """
+        cmd = 'mysql_install_db'
+        self.prefab.core.run(cmd)
+
+    def db_export(self, dbname, targetdir):
+        """export specified database
+
+        Arguments:
+            db_name {string} -- name of the database to be exported
+            target_dir    {string} -- dir to which db will be exported to
+        """
+
+        target = j.sal.fs.joinPaths(
+            targetdir, 'datadump-' + str(int(time.time())) + '.sql')
+        cmd = 'mysqldump {} > {}'.format(dbname, target)
+        self.prefab.core.run(cmd)
+
+    def db_import(self, dbname, sqlfile):
+        """export specified database
+
+        Arguments:
+            dbname   {string} -- name of the database that sqlfile will be imported to
+            sqlfile  {string} -- sqlfile path to be imported
+        """
+        self._create_db(dbname)
+        cmd = 'mysql {dbname} < {sqlfile}'.format(
+            dbname=dbname, sqlfile=sqlfile)
+        self.prefab.core.run(cmd)
+
+    def user_create(self, username):
+        """creates user with no rights
+
+        Arguments:
+            username   {string} -- username to be created
+        """
+
+        cmd = 'echo "CREATE USER {username}" | mysql'.format(username=username)
+        self.prefab.core.run(cmd, die=False)
+
+    def admin_create(self, username):
+        """creates user with all rights
+
+        Arguments:
+            username   {string} -- username to be created
+        """
+
+        self.user_create(username)
+        cmd = 'echo "GRANT ALL PRIVILEGES ON *.* TO {username}@localhost WITH GRANT OPTION;" | mysql'.format(
+            username=username)
+        self.prefab.core.run(cmd, die=False)
+
+    def sql_execute(self, dbname, sql):
+        """[summary]
+
+        Arguments:
+            dbname {string} -- database name that query will run against
+            sql    {string} -- sql query to be run
+        """
+
+        cmd = 'mysql -e "{}" {}'.format(sql, dbname)
+        self.prefab.core.run(cmd)
+
+    def user_db_access(self, username, dbname):
+        """give use right to this database (fully)
+        username   {string} -- username to be granted the access
+        dbname     {string} -- database name to which access would be granted
+        """
+
+        cmd = 'echo "GRANT ALL PRIVILEGES ON {dbname}.* TO {username}@localhost WITH GRANT OPTION;" | mysql'.format(
+            dbname=dbname, username=username)
+        self.prefab.core.run(cmd, die=False)
+
+    def _create_db(self, dbname):
+        cmd = 'echo "CREATE DATABASE {dbname}" | mysql'.format(dbname=dbname)
+        self.prefab.core.run(cmd, die=False)
