@@ -9,7 +9,6 @@ class PrefabWordpress(app):
 
     def _init(self):
         self.user = "wordpress"
-        self.path = "/opt/var/data/www"
 
     def build(self, reset=False):
         """
@@ -69,8 +68,8 @@ class PrefabWordpress(app):
         # create a new super user for this database
         self.prefab.db.mariadb.admin_create(db_user, db_password, db_name= db_name)
         
-        self.prefab.core.dir_ensure(self.path)
-        self.prefab.core.run("chown {0}:{0} {1}".format(self.user, self.path))
+        self.prefab.core.dir_ensure(path)
+        self.prefab.core.run("chown {0}:{0} {1}".format(self.user, path))
 
         # start server
         cfg = """
@@ -79,24 +78,24 @@ class PrefabWordpress(app):
         	root {}
            	fastcgi / /var/run/php/php7.0-fpm.sock php
         }}
-        """.format(port, self.path)
+        """.format(port, path)
         self.prefab.web.caddy.add_website("wordpress",cfg)
 
-        self.prefab.executor.execute("rm -rf {}/*".format(self.path))
+        self.prefab.executor.execute("rm -rf {}/*".format(path))
         # download wordpress
-        self.prefab.executor.execute("sudo -u {} -i -- wp core download --path={}".format(self.user, self.path))
+        self.prefab.executor.execute("sudo -u {} -i -- wp core download --path={}".format(self.user, path))
 
         # configure wordpress
         configure_command = """
         sudo -u {user} -i -- wp --path={path} config create --dbname={db_name} --dbuser='{db_user}' --dbpass='{db_password}' 
-        """.format(user=self.user, db_name=db_name, db_user=db_user, db_password=db_password, path=self.path)
+        """.format(user=self.user, db_name=db_name, db_user=db_user, db_password=db_password, path=path)
         self.prefab.executor.execute(configure_command)
 
         # install wordpress
         install_command = """
         sudo -u {user} -i -- wp  --path={path} core install --url='{url}' --title='{title}' --admin_user='{admin_user}' --admin_password='{admin_password}' --admin_email='{admin_email}'
         """.format(user=self.user, url=url, title=title, admin_user=admin_user, 
-                   admin_password=admin_password, admin_email=admin_email, path=self.path)
+                   admin_password=admin_password, admin_email=admin_email, path=path)
         self.prefab.executor.execute(install_command)
         
         # install plugins
@@ -106,7 +105,7 @@ class PrefabWordpress(app):
         for plugin in plugins:
             plugins_command = """
             sudo -u {} -i -- wp --path={} plugin install {}
-            """.format(self.user, self.path, plugin)
+            """.format(self.user, path, plugin)
             self.prefab.core.run(plugins_command, die=False)
 
         
