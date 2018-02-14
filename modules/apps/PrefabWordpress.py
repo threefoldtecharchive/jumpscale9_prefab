@@ -9,7 +9,6 @@ class PrefabWordpress(app):
 
     def _init(self):
         self.user = "wordpress"
-        self.path = "/opt/var/data/www"
 
     def build(self, reset=False):
         """
@@ -42,9 +41,23 @@ class PrefabWordpress(app):
             self.prefab.system.user.create(self.user)
         self.doneSet("build")
 
-    def install(self, url, title, admin_user, admin_password, admin_email, 
-                db_name, db_user, db_password, port=8090, plugins=None, reset=False):
+    def install(self, path, url, title, admin_user, admin_password, admin_email, 
+                db_name='wordpress', db_user='wordpress', db_password='wordpress', port=8090, plugins=None, reset=False):
         """install 
+
+        @param path: a path to setup wordpress to, Note that all content in this path will be deleted
+        @param url: website's url
+        @param title: website's title
+        @param admin_user: admin username
+        @param admin_password: admin password
+        @param admin_email: admin email
+        @param db_name: (default = Wordpress) database name to be used in wordpress
+        @param db_user: (default = wordpress) database user 
+        @param db_password: (default = wordpress) database password, Very important to change with a strong password
+        @param port: (default = 8090) the host port
+        @param plugins: (default = None) list of plugin names you want to install, Acceps plugins slugs from 
+        wordpress plugins directory: https://wordpress.org/plugins/
+        @param reset: (default = False) if True build will start again even if it was already built
         """
         if self.doneCheck("install", reset):
             return
@@ -55,8 +68,8 @@ class PrefabWordpress(app):
         # create a new super user for this database
         self.prefab.db.mariadb.admin_create(db_user, db_password, db_name= db_name)
         
-        self.prefab.core.dir_ensure(self.path)
-        self.prefab.core.run("chown {0}:{0} {1}".format(self.user, self.path))
+        self.prefab.core.dir_ensure(path)
+        self.prefab.core.run("chown {0}:{0} {1}".format(self.user, path))
 
         # start server
         cfg = """
@@ -65,24 +78,24 @@ class PrefabWordpress(app):
         	root {}
            	fastcgi / /var/run/php/php7.0-fpm.sock php
         }}
-        """.format(port, self.path)
+        """.format(port, path)
         self.prefab.web.caddy.add_website("wordpress",cfg)
 
-        self.prefab.executor.execute("rm -rf {}/*".format(self.path))
+        self.prefab.executor.execute("rm -rf {}/*".format(path))
         # download wordpress
-        self.prefab.executor.execute("sudo -u {} -i -- wp core download --path={}".format(self.user, self.path))
+        self.prefab.executor.execute("sudo -u {} -i -- wp core download --path={}".format(self.user, path))
 
         # configure wordpress
         configure_command = """
         sudo -u {user} -i -- wp --path={path} config create --dbname={db_name} --dbuser='{db_user}' --dbpass='{db_password}' 
-        """.format(user=self.user, db_name=db_name, db_user=db_user, db_password=db_password, path=self.path)
+        """.format(user=self.user, db_name=db_name, db_user=db_user, db_password=db_password, path=path)
         self.prefab.executor.execute(configure_command)
 
         # install wordpress
         install_command = """
         sudo -u {user} -i -- wp  --path={path} core install --url='{url}' --title='{title}' --admin_user='{admin_user}' --admin_password='{admin_password}' --admin_email='{admin_email}'
         """.format(user=self.user, url=url, title=title, admin_user=admin_user, 
-                   admin_password=admin_password, admin_email=admin_email, path=self.path)
+                   admin_password=admin_password, admin_email=admin_email, path=path)
         self.prefab.executor.execute(install_command)
         
         # install plugins
@@ -92,7 +105,7 @@ class PrefabWordpress(app):
         for plugin in plugins:
             plugins_command = """
             sudo -u {} -i -- wp --path={} plugin install {}
-            """.format(self.user, self.path, plugin)
+            """.format(self.user, path, plugin)
             self.prefab.core.run(plugins_command, die=False)
 
         
