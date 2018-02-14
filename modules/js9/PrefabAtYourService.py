@@ -106,6 +106,13 @@ class PrefabAtYourService(base):
         self.prefab.core.run(cmd)
 
     def install(self, install_portal=False, branch=None):
+        """
+        installing Ays
+
+        Keyword Arguments:
+            install_portal {boolean} -- if True it will install the portal and add the AYS space there and configure it
+            branch {String} -- branch name
+        """
         self.prefab.core.dir_ensure(self.base_dir)
         server_dir = j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/')
         self.prefab.core.dir_ensure(server_dir)
