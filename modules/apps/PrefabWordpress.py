@@ -42,9 +42,23 @@ class PrefabWordpress(app):
             self.prefab.system.user.create(self.user)
         self.doneSet("build")
 
-    def install(self, url, title, admin_user, admin_password, admin_email, 
-                db_name, db_user, db_password, port=8090, plugins=None, reset=False):
+    def install(self, path, url, title, admin_user, admin_password, admin_email, 
+                db_name='wordpress', db_user='wordpress', db_password='wordpress', port=8090, plugins=None, reset=False):
         """install 
+
+        @param path: a path to setup wordpress to, Note that all content in this path will be deleted
+        @param url: website's url
+        @param title: website's title
+        @param admin_user: admin username
+        @param admin_password: admin password
+        @param admin_email: admin email
+        @param db_name: (default = Wordpress) database name to be used in wordpress
+        @param db_user: (default = wordpress) database user 
+        @param db_password: (default = wordpress) database password, Very important to change with a strong password
+        @param port: (default = 8090) the host port
+        @param plugins: (default = None) list of plugin names you want to install, Acceps plugins slugs from 
+        wordpress plugins directory: https://wordpress.org/plugins/
+        @param reset: (default = False) if True build will start again even if it was already built
         """
         if self.doneCheck("install", reset):
             return
