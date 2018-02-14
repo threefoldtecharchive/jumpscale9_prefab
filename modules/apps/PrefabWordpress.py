@@ -42,7 +42,7 @@ class PrefabWordpress(app):
         self.doneSet("build")
 
     def install(self, path, url, title, admin_user, admin_password, admin_email, 
-                db_name='wordpress', db_user='wordpress', db_password='wordpress', port=8090, plugins=None, reset=False):
+                db_name='wordpress', db_user='wordpress', db_password='wordpress', port=8090, plugins=None, theme=None, reset=False):
         """install 
 
         @param path: a path to setup wordpress to, Note that all content in this path will be deleted
@@ -98,7 +98,23 @@ class PrefabWordpress(app):
                    admin_password=admin_password, admin_email=admin_email, path=path)
         self.prefab.executor.execute(install_command)
         
+        # install themes
+        self.install_theme(path, theme)
+
         # install plugins
+        self.install_plugins(path, plugins)
+
+        
+        self.doneSet("install")
+
+    def install_theme(self, path, theme):
+        if theme:
+            themes_command = """
+            sudo -u {} -i -- wp --path={} theme install {} --activate
+            """.format(self.user, path, theme)
+            self.prefab.core.run(themes_command, die=False)
+
+    def install_plugins(self, path, plugins):
         if not plugins:
             plugins = []
         
@@ -107,9 +123,3 @@ class PrefabWordpress(app):
             sudo -u {} -i -- wp --path={} plugin install {}
             """.format(self.user, path, plugin)
             self.prefab.core.run(plugins_command, die=False)
-
-        
-        self.doneSet("install")
-
-
-    
