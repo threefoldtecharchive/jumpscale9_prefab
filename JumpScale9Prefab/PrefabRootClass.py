@@ -4,6 +4,8 @@ from js9 import j
 from JumpScale9Prefab.PrefabCore import PrefabCore
 
 JSBASE = j.application.jsbase_get_class()
+
+
 class PrefabRootClass(JSBASE):
 
     def __init__(self, executor):

@@ -69,13 +69,13 @@ class PrefabSSH(base):
             try:
                 # out=self.prefab.core.run("nmap -p 22 %s | grep for"%range,showout=False)
                 _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX $TMPDIR/nmap" %
-                                                  (range))
+                                                 (range))
             except Exception as e:
                 if str(e).find("command not found") != -1:
                     self.prefab.system.package.install("nmap")
                     # out=self.prefab.core.run("nmap -p 22 %s | grep for"%range)
                     _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX $TMPDIR/nmap" %
-                                                      (range))
+                                                     (range))
             out = self.prefab.core.file_read("$TMPDIR/nmap")
             import xml.etree.ElementTree as ET
             root = ET.fromstring(out)
@@ -177,14 +177,14 @@ class PrefabSSH(base):
             content = self.prefab.core.file_read(keyf)
             if content.find(key[:-1]) == -1:
                 content = add_newline(content)
-                self.prefab.core.file_write(keyf, content + line)
+                self.prefab.core.file_write(keyf, content + line, sudo=True)
                 ret = False
             else:
                 ret = True
         else:
             # Make sure that .ssh directory exists, see #42
             self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode="700")
-            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode="600")
+            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode="600", sudo=True)
             ret = False
 
         self.prefab.core.sudomode = sudomode

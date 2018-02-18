@@ -4,6 +4,8 @@ from JumpScale9Prefab.PrefabBase import *
 from JumpScale9Prefab.PrefabLoader import PrefabLoader
 
 JSBASE = j.application.jsbase_get_class()
+
+
 class PrefabRootClassFactory(JSBASE):
 
     prefabs_instance = {}
@@ -59,10 +61,6 @@ class PrefabRootClassFactory(JSBASE):
                                                 port=port,
                                                 login=login,
                                                 passwd=passwd)
-
-    def getFromSSH(self, addr, port=22):
-        e = j.tools.executor.getSSHBased(addr, port=port)
-        return self.get(executor=e)
 
     def get(self, executor=None, usecache=True):
         """
