@@ -303,7 +303,7 @@ class PrefabKubernetes(app):
         timer = 0
         while not self.prefab.system.process.tcpport_check(6443):
             time.sleep(1)
-            timer = + 1
+            timer += 1
             if timer > 30:
                 return
 
