@@ -14,7 +14,7 @@ class PrefabSSH(base):
         for item in self.scan(range=range):
             self.logger.info("test for login/passwd on %s" % item)
             try:
-                client = j.clients.ssh.getFromIP(addr=item, port=port, login=login, passwd=passwd, timeout=1, die=False)
+                client = j.clients.ssh.new(addr=item, port=port, login=login, passwd=passwd, timeout=1, die=False)
             except Exception as e:
                 self.logger.info("  NOT OK")
                 continue
