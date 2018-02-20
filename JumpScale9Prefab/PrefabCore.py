@@ -990,7 +990,7 @@ class PrefabCore(base):
         location = self.replace(location)
         if not self.dir_exists(location):
             self.run('mkdir %s %s' %
-                     (recursive and "-p" or "", location), showout=False)
+                     (recursive and "-p" or "", location), showout=False, sudo=True)
         if owner or group or mode:
             self.dir_attribs(location, owner=owner, group=group,
                              mode=mode, recursive=recursive)
@@ -1087,6 +1087,12 @@ class PrefabCore(base):
     # CORE
     # -----------------------------------------------------------------------------
 
+    def sudo(self, cmd, die=True, showout=True):
+        """
+        Keep this for backward compatibality
+        """
+        return self.run(cmd=cmd, die=die, showout=showout, sudo=True)
+
     def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
             shell=False, env=None, timeout=600, sudo=False):
         """
@@ -1116,7 +1122,7 @@ class PrefabCore(base):
         self.logger.debug(cmd)
 
         rc, out, err = self.executor.execute(
-            cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo, shell=shell)
+            cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
 
         # out = self._clean(out)
 
