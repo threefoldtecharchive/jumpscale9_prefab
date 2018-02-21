@@ -193,20 +193,20 @@ class PrefabTeleport(app):
         """
         if insecure:
             cmd += ' --insecure'
-        pm = self.prefab.system.processmanager.get()
+        pm = self.prefab.system.processmanager.get('systemtd')
         pm.ensure(name='teleport', cmd=cmd)
 
     def stop(self):
         """
         Stop the teleport service.
         """
-        pm = self.prefab.system.processmanager.get()
+        pm = self.prefab.system.processmanager.get('systemd')
         pm.stop('teleport')
 
     def restart(self):
         """
         restart the teleport service.
         """
-        pm = self.prefab.system.processmanager.get()
+        pm = self.prefab.system.processmanager.get('systemd')
         pm.stop("teleport")
         self.start()
