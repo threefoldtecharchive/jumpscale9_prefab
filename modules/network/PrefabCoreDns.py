@@ -1,6 +1,5 @@
 from js9 import j
 
-
 app = j.tools.prefab._getBaseAppClass()
 
 
@@ -10,7 +9,7 @@ class PrefabCoreDns(app):
     def _init(self):
         self.GOPATHDIR = self.prefab.core.dir_paths['BASEDIR'] + "/go_proj"
 
-    def install(self, domain, reset=False):
+    def install(self, zone, reset=False):
         """
         installs and runs coredns server with redis plugin
         """
@@ -31,16 +30,17 @@ class PrefabCoreDns(app):
         self.prefab.core.file_write(plugins_path, self.coredns_plugins)
         # configure coredns
         config = """
-. {
-    redis %s {
+%s:53 {
+    redis {
         address localhost:6379
         connect_timeout 100
         read_timeout 100
         ttl 360
-        prefix _dns:
     }
+    errors stdout
+    log stdout
 }
-        """ % domain
+        """ % zone
         config_path = self.prefab.core.dir_paths['CFGDIR'] + "/Corefile"
         self.prefab.core.file_write(config_path, config)
         # install coredns redis plugin
@@ -51,6 +51,7 @@ class PrefabCoreDns(app):
         go build
         """.format(coredns_dir=coredns_dir)
 
+        self.prefab.core.run(cmd)
         # start coredns 
         self.start(coredns_dir + "/coredns", config_path)
         
@@ -58,11 +59,12 @@ class PrefabCoreDns(app):
 
 
     def start(self, coredns_path, config_path):
-        
+
         cmd = "{coredns_path} -conf {config_path}".format(coredns_path=coredns_path, config_path=config_path)
         self.prefab.system.processmanager.get().ensure("coredns", cmd, wait=10, expect='53')
 
-    def register_a_record(self, ns_addr, domain_name, subdomain, resolve_to=None, redis_port=6379, redis_password='', ttl=300, override=False):
+    def register_a_record(self, ns_addr, domain_name, subdomain, resolve_to=None,
+                          redis_port=6379, redis_password='', ttl=300, override=False):
         """registers an A record on a coredns server through redis connection
         
         Arguments:
@@ -100,24 +102,22 @@ class PrefabCoreDns(app):
             exist = True
 
         if not exist or override:
-            a_record = "{\"a\":[{\"ttl\":300, \"ip\":\"%s\"}]}" % resolve_to
+            a_record = '{"a": [{"ttl": 300, "ip": "%s"}]}' % resolve_to
             
-            command = 'HSET {domain_name} {subdomain} "{a_record}"'.format(domain_name=domain_name, subdomain=subdomain,
+            #this is a bad hack
+            #TODO: handle "" properly in core.run
+            command = "HSET {domain_name} {subdomain} '{a_record}'".format(domain_name=domain_name, subdomain=subdomain,
                                                                          a_record=a_record)
-
-            rc, out, _ = self.prefab.core.run('redis-cli {ns_addr} {redis_port} {redis_password} {command}'.format(
-                         ns_addr=ns_addr, redis_port=redis_port, redis_password=redis_password, command=command))
+            cmd = """
+            redis-cli {ns_addr} {redis_port} {redis_password} {command};
+            """.format(ns_addr=ns_addr, redis_port=redis_port, redis_password=redis_password, command=command)
+            
+            self.prefab.core.file_write('/tmp/gen.sh', cmd)
+            
+            rc, _, err = self.prefab.executor._execute_script("bash /tmp/gen.sh")
+            if rc != 0:
+                raise RuntimeError(err)
         
-        from IPython import embed
-        embed(colors='Linux')
-
-    @property
-    def coredns_config(self):
-        return """
-        
-        """
-
-
     @property
     def coredns_plugins(self):
         plugins = """
