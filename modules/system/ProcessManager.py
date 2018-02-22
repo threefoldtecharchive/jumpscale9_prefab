@@ -109,8 +109,6 @@ class PrefabSystemd(ProcessManagerBase):
             if value:
                 envstr += "Environment=%s=%s\n" % (name0, self.prefab.core.replace(value))
 
-        cmd = self.prefab.core._clean(cmd)
-
         if systemdunit != "":
             C = systemdunit
         else:
