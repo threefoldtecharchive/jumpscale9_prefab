@@ -98,7 +98,7 @@ class PrefabAtYourService(base):
         # to get ays app files
         self.get_code(branch=branch)
         if install_portal:
-            self.prefab.web.portal.install()
+            self.prefab.web.portal.install(branch=branch)
         if self.core.file_exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
             self.prefab.web.portal.addSpace('{}apps/AYS'.format(self.repo_dir))
             self.prefab.web.portal.addActor('{}apps/ays__tools'.format(self.repo_dir))
@@ -138,7 +138,7 @@ class PrefabAtYourService(base):
             j.sal.fs.joinPaths(self.repo_dir, 'main.py'),
             j.sal.fs.joinPaths(self.base_dir, 'main.py')
         )
-        self.load_ays_space(install_portal)
+        self.load_ays_space(install_portal, branch=branch)
 
     def start(self, log='info', dev=False):
         """
