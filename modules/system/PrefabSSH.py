@@ -146,7 +146,7 @@ class PrefabSSH(base):
         """
 
         def add_newline(content):
-            if content[-1] != "\n":
+            if content and content[-1] != "\n":
                 content += "\n"
             return content
 
