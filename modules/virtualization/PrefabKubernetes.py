@@ -357,10 +357,11 @@ class PrefabKubernetes(app):
             node.executor.sshclient.ssh_authorize('root', pub_key)
             _, user, _ = init_node.core.run('whoami')
             init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
-            # move the config to be able to use kubectl directly
-            node.core.dir_ensure('$HOMEDIR/.kube')
-            node.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
 
+
+        # move the config to be able to use kubectl directly
+        init_node.core.dir_ensure('$HOMEDIR/.kube')
+        init_node.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
         if flannel:
             init_node.core.run(
                 'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
@@ -448,6 +449,8 @@ class PrefabKubernetes(app):
             pm.reload()
             pm.restart('kubelet')
             master.virtualization.kubernetes.wait_on_apiserver()
+            master.core.dir_ensure('$HOMEDIR/.kube')
+            master.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
 
             # giving time for the nodes to be registered
             for i in range(30):
