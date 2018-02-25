@@ -92,6 +92,7 @@ class PrefabWordpress(app):
         self.prefab.executor.execute(configure_command)
 
         # install wordpress
+        #TODO:*1 why like this with sudo?
         install_command = """
         sudo -u {user} -i -- wp  --path={path} core install --url='{url}' --title='{title}' --admin_user='{admin_user}' --admin_password='{admin_password}' --admin_email='{admin_email}'
         """.format(user=self.user, url=url, title=title, admin_user=admin_user, 

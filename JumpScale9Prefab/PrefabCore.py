@@ -98,7 +98,7 @@ class PrefabCore(base):
         args are additional arguments in dict form
 
         """
-
+        text = j.data.text.strip(text)
         # for backwards compatibility
         if "$" in text:
             for key, var in self.dir_paths.items():

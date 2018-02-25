@@ -6,15 +6,20 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabCoreDns(app):
     NAME = "coredns"
 
-    def _init(self):
-        self.GOPATHDIR = self.prefab.core.dir_paths['BASEDIR'] + "/go_proj"
+    def __init(self):
+        self.golang = self.prefab.runtimes.golang
+        self.coredns_code_dir = self.golang.GOPATHDIR + '/src/github.com/coredns/coredns'
+        self.path_config = self.prefab.core.dir_paths['CFGDIR'] + "/CoreDNSConfig.json"
 
-    def install(self, zone, reset=False):
+    def install(self, zone=".", reset=False, start=True):
         """
         installs and runs coredns server with redis plugin
         """
+        self.__init()
 
         if self.doneCheck("install", reset):
+            if start:
+                self.start()
             return
         # install golang
         self.prefab.runtimes.golang.install()
@@ -24,54 +29,62 @@ class PrefabCoreDns(app):
         self.prefab.db.redis.start(ip='0.0.0.0')
 
         # install coredns
-        self.prefab.core.run('go get github.com/coredns/coredns', die=False)
-        coredns_dir = self.GOPATHDIR + '/src/github.com/coredns/coredns'
-        plugins_path = coredns_dir + '/plugin.cfg'
+        # get
+        # TODO:*3 weird we have to do this
+        try:
+            self.golang.get(url='github.com/coredns/coredns', install=False)
+        except Exception as e:
+            if not "github.com/mholt/caddy/startupshutdown" in str(e):
+                raise RuntimeError(e)
+
+        plugins_path = self.coredns_code_dir + '/plugin.cfg'
         self.prefab.core.file_write(plugins_path, self.coredns_plugins)
         # configure coredns
         config = """
-%s:53 {
-    redis {
-        address localhost:6379
-        connect_timeout 100
-        read_timeout 100
-        ttl 360
-    }
-    errors stdout
-    log stdout
-}
+        %s:53 {
+            redis {
+                address localhost:6379
+                connect_timeout 100
+                read_timeout 100
+                ttl 360
+            }
+            errors stdout
+            log stdout
+        }
         """ % zone
-        config_path = self.prefab.core.dir_paths['CFGDIR'] + "/Corefile"
-        self.prefab.core.file_write(config_path, config)
+
+        self.prefab.core.file_write(
+            self.path_config, config, replaceInContent=True)
         # install coredns redis plugin
         cmd = """
         go get github.com/arvancloud/redis
-        cd {coredns_dir}
+        cd {coredns_code_dir}
         go generate
         go build
-        """.format(coredns_dir=coredns_dir)
-
+        """.format(coredns_code_dir=self.coredns_code_dir)
         self.prefab.core.run(cmd)
-        # start coredns 
-        self.start(coredns_dir + "/coredns", config_path)
-        
+        # start coredns
+
+        if start:
+            self.start()
+
         self.doneSet('install')
 
-
-    def start(self, coredns_path, config_path):
-
-        cmd = "{coredns_path} -conf {config_path}".format(coredns_path=coredns_path, config_path=config_path)
+    def start(self):
+        self.__init()
+        cmd = "/opt/go_proj/bin/coredns/coredns -conf {path_config}".format(
+            coredns_path=self.coredns_path, path_config=self.path_config)
         self.prefab.system.processmanager.get().ensure("coredns", cmd, wait=10, expect='53')
 
     def register_a_record(self, ns_addr, domain_name, subdomain, resolve_to=None,
                           redis_port=6379, redis_password='', ttl=300, override=False):
         """registers an A record on a coredns server through redis connection
-        
+
         Arguments:
             ns_addr {string} -- dns ip address
             domain_name {string} -- domain to register an A record on
-            subdomain {string} -- subdomain to regsiter
-        
+            subdomain {string} -- subdomain to register (hostname)
+
         Keyword Arguments:
             resolve_to {string} -- target ip, if none will use the machine pub ip (default: {None})
             redis_port {number} -- redis port allowed by the dns server (default: {6379})
@@ -79,11 +92,11 @@ class PrefabCoreDns(app):
             ttl {number} -- time to live (default: 300)
             override {boolean} -- if true it will override if A record exists (default: {False})
         """
-
+        self.__init()
         self.prefab.system.package.install("redis-tools")
         if redis_password:
             redis_password = '-a {}'.format(redis_password)
-        
+
         if redis_port:
             redis_port = '-p {}'.format(redis_port)
 
@@ -93,7 +106,7 @@ class PrefabCoreDns(app):
         command = 'HGET {domain_name} {subdomain}'
         # check connection and check if key exists
         rc, out, _ = self.prefab.core.run('redis-cli {ns_addr} {redis_port} {redis_password} {command}'.format(
-                         ns_addr=ns_addr, redis_port=redis_port, redis_password=redis_password, command=command))
+            ns_addr=ns_addr, redis_port=redis_port, redis_password=redis_password, command=command))
         if rc != 0:
             raise RuntimeError("Can't connect to {ns_addr} on port {port},"
                                "please make sure that this host is reachable and redis server is running")
@@ -103,57 +116,58 @@ class PrefabCoreDns(app):
 
         if not exist or override:
             a_record = '{"a": [{"ttl": 300, "ip": "%s"}]}' % resolve_to
-            
-            #this is a bad hack
-            #TODO: handle "" properly in core.run
+
+            # this is a bad hack
+            # TODO: handle "" properly in core.run
             command = "HSET {domain_name} {subdomain} '{a_record}'".format(domain_name=domain_name, subdomain=subdomain,
-                                                                         a_record=a_record)
+                                                                           a_record=a_record)
             cmd = """
             redis-cli {ns_addr} {redis_port} {redis_password} {command};
             """.format(ns_addr=ns_addr, redis_port=redis_port, redis_password=redis_password, command=command)
-            
+
             self.prefab.core.file_write('/tmp/gen.sh', cmd)
-            
-            rc, _, err = self.prefab.executor._execute_script("bash /tmp/gen.sh")
+
+            rc, _, err = self.prefab.executor._execute_script(
+                "bash /tmp/gen.sh")
             if rc != 0:
                 raise RuntimeError(err)
-        
+
     @property
     def coredns_plugins(self):
         plugins = """
-tls:tls
-nsid:nsid
-root:root
-bind:bind
-debug:debug
-trace:trace
-health:health
-pprof:pprof
-prometheus:metrics
-errors:errors
-log:log
-dnstap:dnstap
-chaos:chaos
-loadbalance:loadbalance
-cache:cache
-rewrite:rewrite
-dnssec:dnssec
-autopath:autopath
-reverse:reverse
-template:template
-hosts:hosts
-route53:route53
-federation:federation
-kubernetes:kubernetes
-file:file
-auto:auto
-secondary:secondary
-etcd:etcd
-redis:github.com/arvancloud/redis
-forward:forward
-proxy:proxy
-erratic:erratic
-whoami:whoami
-on:github.com/mholt/caddy/onevent
+        tls:tls
+        nsid:nsid
+        root:root
+        bind:bind
+        debug:debug
+        trace:trace
+        health:health
+        pprof:pprof
+        prometheus:metrics
+        errors:errors
+        log:log
+        dnstap:dnstap
+        chaos:chaos
+        loadbalance:loadbalance
+        cache:cache
+        rewrite:rewrite
+        dnssec:dnssec
+        autopath:autopath
+        reverse:reverse
+        template:template
+        hosts:hosts
+        route53:route53
+        federation:federation
+        kubernetes:kubernetes
+        file:file
+        auto:auto
+        secondary:secondary
+        etcd:etcd
+        redis:github.com/arvancloud/redis
+        forward:forward
+        proxy:proxy
+        erratic:erratic
+        whoami:whoami
+        on:github.com/mholt/caddy/onevent
         """
-        return plugins
+        return j.data.text.strip(plugins)

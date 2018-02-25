@@ -4,13 +4,15 @@ The `prefab.system.tmux` module is a client for tmux.
 
 Examples of methods inside tmux:
 
+#TODO:*1 need to be updated, names have been changed
+
 - **attachSession**: attach to a running session
 - **configure**: write the default tmux configuration
 - **createSession**: create a new tmux session
 - **createWindow**: create a window in a session
 - **executeInScreen**: execute a command
-- **getSessions**: list the running sessions
-- **getWindows**: list the running windows in a session
+- **session_gets**: list the running sessions
+- **window_gets**: list the running windows in a session
 - **killSession**: kill a session
 - **killSessions**: kill all sessions
 - **killWindow**: kill a window
