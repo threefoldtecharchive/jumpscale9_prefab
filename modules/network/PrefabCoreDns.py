@@ -22,11 +22,11 @@ class PrefabCoreDns(app):
                 self.start()
             return
         # install golang
-        self.prefab.runtimes.golang.install()
+        self.prefab.runtimes.golang.install(reset=reset)
 
         # install redis
         self.prefab.db.redis.install()
-        self.prefab.db.redis.start(ip='0.0.0.0')
+        self.prefab.db.redis.start(ip='0.0.0.0', password=password)
 
         # install coredns
         # get
@@ -40,21 +40,26 @@ class PrefabCoreDns(app):
         plugins_path = self.coredns_code_dir + '/plugin.cfg'
         self.prefab.core.file_write(plugins_path, self.coredns_plugins)
         # configure coredns
-        config = """
-        %s:53 {
-            redis {
-                address localhost:6379
-                connect_timeout 100
-                read_timeout 100
-                ttl 360
-            }
-            errors stdout
-            log stdout
-        }
-        """ % zone
+        if password:
+            password = "password %s" % password
+        else:
+            password = ""
 
-        self.prefab.core.file_write(
-            self.path_config, config, replaceInContent=True)
+        config = """
+%s:53 {
+    redis {
+        address localhost:6379
+        %s
+        connect_timeout 100
+        read_timeout 100
+        ttl 360
+    }
+    errors stdout
+    log stdout
+}
+        """ % (zone, password)
+        config_path = self.prefab.core.dir_paths['CFGDIR'] + "/Corefile"
+        self.prefab.core.file_write(config_path, config)
         # install coredns redis plugin
         cmd = """
         go get github.com/arvancloud/redis
