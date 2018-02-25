@@ -44,7 +44,7 @@ class PrefabTeleport(app):
             self.build(reset=reset)
             self.install(reset=reset)
         self.write_config()
-        self.start()
+        self.start(insecure=True)
         self.apply_permissions(client_secret, client_id, teams, exposed_ip, name, logins)
         self.doneSet('full_setup')
 
@@ -187,7 +187,7 @@ class PrefabTeleport(app):
                 raise RuntimeError("teleport could not be reached")
         self.prefab.core.run('tctl create $TMPDIR/github.yaml')
 
-    def start(self, cmd="$BINDIR/teleport start", insecure=True):
+    def start(self, cmd="$BINDIR/teleport start", insecure=False):
         """
         Start the teleport service.
         """
