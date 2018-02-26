@@ -11,7 +11,7 @@ class PrefabCoreDns(app):
         self.coredns_code_dir = self.golang.GOPATHDIR + '/src/github.com/coredns/coredns'
         self.path_config = self.prefab.core.dir_paths['CFGDIR'] + "/CoreDNSConfig.json"
 
-    def install(self, zone=".", reset=False, start=True):
+    def install(self, zone=".", password=None, reset=False, start=True):
         """
         installs and runs coredns server with redis plugin
         """
@@ -25,6 +25,9 @@ class PrefabCoreDns(app):
         self.prefab.runtimes.golang.install(reset=reset)
 
         # install redis
+        if not password:
+            j.logger.logger.warning("You didn't set a password for redis, that's not secure"
+                                    "you shouldn't use this in a production machine")
         self.prefab.db.redis.install()
         self.prefab.db.redis.start(ip='0.0.0.0', password=password)
 
@@ -58,8 +61,8 @@ class PrefabCoreDns(app):
     log stdout
 }
         """ % (zone, password)
-        config_path = self.prefab.core.dir_paths['CFGDIR'] + "/Corefile"
-        self.prefab.core.file_write(config_path, config)
+        self.prefab.core.file_write(
+            self.path_config, config, replaceInContent=True)
         # install coredns redis plugin
         cmd = """
         go get github.com/arvancloud/redis
