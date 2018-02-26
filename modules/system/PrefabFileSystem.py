@@ -31,8 +31,12 @@ class PrefabFileSystem(base):
         '''
 
         prefab = self.prefab
-        mount_point_contains_data = prefab.executor.execute("ls  %s/*" % mount_point)
-        if copy and mount_point_contains_data:
+
+        # make sure mount point folder exists
+        prefab.core.createDir(mount_point)
+
+        data_in_mount_point = prefab.core.exists('%s/*' % mount_point)
+        if copy and data_in_mount_point:
             # generate random tmp folder name
             tmp = 'mnt/tmp%s'% str(uuid.uuid4()).replace('-','')
 
@@ -44,7 +48,7 @@ class PrefabFileSystem(base):
             prefab.executor.execute("cp -ax %s/* %s" % (mount_point, tmp))       
 
             # unmount the partition
-            prefab.executor.execute("umount %s" % device)    
+            prefab.executor.execute("umount %s" % device)
 
         # mount device
         prefab.executor.execute("mount %s %s" % (device, mount_point))
