@@ -15,6 +15,8 @@ class PrefabBase(base):
         if self.doneCheck("install", reset):
             return
 
+        self.upgrade()
+
         if not self.doneCheck("fixlocale", reset):
             self.prefab.bash.locale_check()
             self.doneSet("fixlocale")

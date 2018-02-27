@@ -51,7 +51,7 @@ class PrefabCaddy(app):
         """
 
         if not self.doneGet('build'):
-            self.build(plugins=plugins)
+            self.build(plugins=plugins, reset=reset)
 
         if self.doneGet('install') and reset is False and self.isInstalled():
             return
@@ -162,3 +162,15 @@ class PrefabCaddy(app):
 
     def stop(self):
         self.prefab.system.processmanager.get().stop("caddy")
+
+    def add_website(self, name, cfg, configpath="{{CFGDIR}}/caddy.cfg"):
+        file_contents = self.prefab.core.file_read(configpath)
+        vhosts_dir = self.replace("{{CFGDIR}}/vhosts")
+        if vhosts_dir not in file_contents:
+            file_contents = "import {}/*\n".format(vhosts_dir) + file_contents
+        self.prefab.core.file_write(configpath, file_contents)
+        self.prefab.core.dir_ensure(vhosts_dir)
+        cfg_path = "{}/{}.conf".format(vhosts_dir, name)
+        self.prefab.core.file_write(cfg_path, cfg)
+        self.stop()
+        self.start()

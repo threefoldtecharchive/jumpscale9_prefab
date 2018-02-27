@@ -26,160 +26,7 @@ import pystache
 from js9 import j
 import pygments.lexers
 
-NOTHING = base64
-
-STRINGIFY_MAXSTRING = 80
-STRINGIFY_MAXLISTSTRING = 20
-
-
-# MODE_LOCAL              = "MODE_LOCAL"
-# MODE_SUDO               = "MODE_SUDO"
-
-# SUDO_PASSWORD           = "CUISINE_SUDO_PASSWORD"
-# OPTION_PACKAGE          = "CUISINE_OPTION_PACKAGE"
-# OPTION_PYTHON_PACKAGE   = "CUISINE_OPTION_PYTHON_PACKAGE"
-# OPTION_OS_FLAVOUR       = "CUISINE_OPTION_OS_FLAVOUR"
-# OPTION_USER             = "CUISINE_OPTION_USER"
-# OPTION_GROUP            = "CUISINE_OPTION_GROUP"
-# OPTION_HASH             = "CUISINE_OPTION_HASH"
-
-
-def stringify(value):
-    """Turns the given value in a user-friendly string that can be displayed"""
-    if isinstance(value, (str, bytes)) and len(value) > STRINGIFY_MAXSTRING:
-        return '{0}...'.format(value[0:STRINGIFY_MAXSTRING])
-
-    if isinstance(value, (list, tuple)) and len(value) > 10:
-        return '[{0},...]'.format(', '.join([stringify(_) for _ in value[0:STRINGIFY_MAXLISTSTRING]]))
-    return str(value)
-
-
-def text_detect_eol(text):
-    MAC_EOL = "\n"
-    UNIX_EOL = "\n"
-    WINDOWS_EOL = "\r\n"
-
-    # TODO: Should look at the first line
-    if text.find("\r\n") != -1:
-        return WINDOWS_EOL
-    if text.find("\n") != -1:
-        return UNIX_EOL
-    if text.find("\r") != -1:
-        return MAC_EOL
-    return "\n"
-
-
-def text_get_line(text, predicate):
-    """Returns the first line that matches the given predicate."""
-    for line in text.split("\n"):
-        if predicate(line):
-            return line
-    return ""
-
-
-def text_normalize(text):
-    """Converts tabs and spaces to single space and strips the text."""
-    RE_SPACES = re.compile("[\s\t]+")
-    return RE_SPACES.sub(" ", text).strip()
-
-
-def text_nospace(text):
-    """Converts tabs and spaces to single space and strips the text."""
-    RE_SPACES = re.compile("[\s\t]+")
-    return RE_SPACES.sub("", text).strip()
-
-
-def text_replace_line(text, old, new, find=lambda old, new: old == new, process=lambda _: _):
-    """Replaces lines equal to 'old' with 'new', returning the new
-    text and the count of replacements.
-
-    Returns: (text, number of lines replaced)
-
-    `process` is a function that will pre-process each line (you can think of
-    it as a normalization function, by default it will return the string as-is),
-    and `find` is the function that will compare the current line to the
-    `old` line.
-
-    The finds the line using `find(process(current_line), process(old_line))`,
-    and if this matches, will insert the new line instead.
-    """
-    res = []
-    replaced = 0
-    eol = text_detect_eol(text)
-    for line in text.split(eol):
-        if find(process(line), process(old)):
-            res.append(new)
-            replaced += 1
-        else:
-            res.append(line)
-    return eol.join(res), replaced
-
-
-def text_replace_regex(text, regex, new, **kwargs):
-    """Replace lines that match with the regex returning the new text
-
-    Returns: text
-
-    `kwargs` is for the compatibility with re.sub(),
-    then we can use flags=re.IGNORECASE there for example.
-    """
-    res = []
-    eol = text_detect_eol(text)
-    for line in text.split(eol):
-        res.append(re.sub(regex, new, line, **kwargs))
-    return eol.join(res)
-
-
-def text_ensure_line(text, *lines):
-    """Ensures that the given lines are present in the given text,
-    otherwise appends the lines that are not already in the text at
-    the end of it."""
-    eol = text_detect_eol(text)
-    res = list(text.split(eol))
-    if res[0] == '' and len(res) == 1:
-        res = list()
-    for line in lines:
-        assert line.find(eol) == - \
-            1, "No EOL allowed in lines parameter: " + repr(line)
-        found = False
-        for l in res:
-            if l == line:
-                found = True
-                break
-        if not found:
-            res.append(line)
-    return eol.join(res)
-
-
-def text_strip_margin(text, margin="|"):
-    """Will strip all the characters before the left margin identified
-    by the `margin` character in your text. For instance
-
-    ```
-            |Hello, world!
-    ```
-
-    will result in
-
-    ```
-    Hello, world!
-    ```
-    """
-    res = []
-    eol = text_detect_eol(text)
-    for line in text.split(eol):
-        l = line.split(margin, 1)
-        if len(l) == 2:
-            _, line = l
-            res.append(line)
-    return eol.join(res)
-
-# def text_template(text, variables):
-#     """Substitutes '${PLACEHOLDER}'s within the text with the
-#     corresponding values from variables."""
-#     template = string.Template(text)
-#     return template.safe_substitute(variables)
-
+from .PrefabCoreTools import *
 
 base = j.tools.prefab._getBaseClass()
 
@@ -189,12 +36,6 @@ class PrefabCore(base):
     def _init(self):
         self.sudomode = False
         self._cd = '/root'
-
-    @property
-    def logger(self):
-        if self._logger is None:
-            self._logger = j.logger.get("prefab.core")
-        return self._logger
 
     def shell_safe(self, path):
         SHELL_ESCAPE = " '\";`|"
@@ -255,7 +96,7 @@ class PrefabCore(base):
         args are additional arguments in dict form
 
         """
-
+        text = j.data.text.strip(text)
         # for backwards compatibility
         if "$" in text:
             for key, var in self.dir_paths.items():
@@ -301,7 +142,7 @@ class PrefabCore(base):
 
     def system_uuid(self):
         """Gets a machines UUID (Universally Unique Identifier)."""
-        return self.sudo('dmidecode -s system-uuid | tr "[A-Z]" "[a-z]"')
+        return self.run('dmidecode -s system-uuid | tr "[A-Z]" "[a-z]"', sudo=True)
 
     # =============================================================================
     #
@@ -310,8 +151,14 @@ class PrefabCore(base):
     # =============================================================================
 
     def locale_check(self, locale):
-        locale_data = self.sudo("locale -a | egrep '^%s$' ; true" % (locale,))
+        locale_data = self.run("locale -a | egrep '^%s$' ; true" % (locale,), sudo=True)
         return locale_data == locale
+
+    def locale_ensure(self, locale):
+        if not self.locale_check(locale):
+            with fabric.context_managers.settings(warn_only=True):
+                self.run("/usr/share/locales/install-language-pack %s" % (locale,), sudo=True)
+            self.run("dpkg-reconfigure locales", sudo=True)
 
     # =============================================================================
     #
@@ -619,8 +466,7 @@ class PrefabCore(base):
         default will be returned if the file does not exist."""
         location = self.replace(location)
         if default is None:
-            assert self.file_exists(
-                location), "prefab.file_read: file does not exists {0}".format(location)
+            assert self.file_exists(location), "prefab.file_read: file does not exists {0}".format(location)
         elif not self.file_exists(location):
             return default
         frame = self.file_base64(location)
@@ -695,6 +541,7 @@ class PrefabCore(base):
 
     @hostname.setter
     def hostname(self, val):
+
         sudo = self.sudomode
         self.sudomode = True
         if val == self.hostname:
@@ -703,7 +550,7 @@ class PrefabCore(base):
         val = val.strip()
         if self.isMac:
             hostfile = "/private/etc/hostname"
-            self.file_write(hostfile, val, sudo=True)
+            self.file_write(hostfile, val)
         else:
             hostfile = "/etc/hostname"
             self.file_write(hostfile, val)
@@ -828,7 +675,7 @@ class PrefabCore(base):
         self.executor.download(source, dest)
 
     def file_write(self, location, content, mode=None, owner=None, group=None, check=False,
-                   strip=True, showout=True, append=False, replaceInContent=False):
+                   strip=True, showout=True, append=False, replaceInContent=False, sudo=False):
         """
         @param append if append then will add to file
         """
@@ -839,9 +686,8 @@ class PrefabCore(base):
 
         if replaceInContent:
             content = self.replace(content)
-
         self.executor.file_write(
-            path=path, content=content, mode=mode, owner=owner, group=group, append=append)
+            path=path, content=content, mode=mode, owner=owner, group=group, append=append, sudo=sudo)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -999,7 +845,7 @@ class PrefabCore(base):
         """Returns the base64 - encoded content of the file at the given location."""
         location = self.replace(location)
         cmd = "cat {0} | base64".format(self.shell_safe((location)))
-        rc, out, err = self.run(cmd, debug=False, checkok=False, showout=False)
+        rc, out, err = self.run(cmd, debug=False, checkok=False, showout=False, profile=False)
         return out
 
     def file_sha256(self, location):
@@ -1045,7 +891,7 @@ class PrefabCore(base):
     # =============================================================================
 
     def getNetworkInfoGenrator(self):
-        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS
+        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
         exitcode, output, err = self.run("ip a", showout=False)
         for m in IPBLOCKS.finditer(output):
             block = m.group('block')
@@ -1132,7 +978,7 @@ class PrefabCore(base):
         location = self.replace(location)
         if not self.dir_exists(location):
             self.run('mkdir %s %s' %
-                     (recursive and "-p" or "", location), showout=False)
+                     (recursive and "-p" or "", location), showout=False, sudo=True)
         if owner or group or mode:
             self.dir_attribs(location, owner=owner, group=group,
                              mode=mode, recursive=recursive)
@@ -1229,26 +1075,14 @@ class PrefabCore(base):
     # CORE
     # -----------------------------------------------------------------------------
 
-    # def _clean(self, output):
-    #     if self.sudomode and hasattr(self.executor, 'login'):
-    #         dirt = '[sudo] password for %s: ' % self.executor.login
-    #         if output.find(dirt) != -1:
-    #             output = output.lstrip(dirt)
-    #     return output
-
-    def set_sudomode(self):
-        self.sudomode = True
-
     def sudo(self, cmd, die=True, showout=True):
-        sudomode = self.sudomode
-        self.sudomode = True
-        try:
-            return self.run(cmd, die=die, showout=showout)
-        finally:
-            self.sudomode = sudomode
+        """
+        Keep this for backward compatibality
+        """
+        return self.run(cmd=cmd, die=die, showout=showout, sudo=True)
 
     def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
-            shell=False, env=None, timeout=600):
+            shell=False, env=None, timeout=600, sudo=False):
         """
         @param profile, execute the bash profile first
         """
@@ -1265,36 +1099,18 @@ class PrefabCore(base):
             debugremember = copy.copy(debug)
             self.executor.debug = debug
 
-        if profile:
+        if profile and self.executor.state_disabled == False:
             # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
             # next will check if profile path exists, if not will put it
-            cmd0 = cmd
-            cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
-                ppath, ppath, ppath, cmd)
+            cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (ppath, ppath, ppath, cmd)
 
-            if showout:
-                self.logger.info("RUN:%s" % cmd0)
-            else:
-                self.logger.debug("RUN:%s" % cmd0)
-            shell = True
-        if shell and '"' in cmd:
-            cmd = cmd.replace('"', '\\"')
+        sudo = self.sudomode or sudo
 
-        if self.sudomode:
-            cmd = self.sudo_cmd(cmd, shell=shell)
-        elif shell:  # only when shell is asked for
-            cmd = 'bash -c "%s"' % cmd
-
-        # old_path = self.executor.execute("echo $PATH", showout=False)[2]
-        # if "/usr/local/bin" not in old_path:
-        #     path = ['/usr/local/bin']
-        #     path += [old_path] if old_path else []
-        #     path += env.get("PATH", [])
-        #     env = {"PATH": ":".join(path)}
+        self.logger.debug(cmd)
 
         rc, out, err = self.executor.execute(
-            cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout)
+            cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
 
         # out = self._clean(out)
 
@@ -1317,30 +1133,19 @@ class PrefabCore(base):
 
         return rc, out, err
 
-    def sudo_cmd(self, command, shell=False, force_sudo=False):
-        # TODO: Fix properly. This is just a workaround
-        self.sudomode = False
-        if "darwin" in self.prefab.platformtype.osname:
-            self.sudomode = True
-            return command
-        self.sudomode = True
-        if not force_sudo and getattr(self.executor, 'login', '') == "root":
-            cmd = command
-        passwd = self.executor.passwd if hasattr(
-            self.executor, "passwd") else ''
-        passwd = passwd or "\'\'"
-        if shell:
-            command = 'bash -c "%s"' % command
-        rc, out, err = self.executor.execute(
-            "which sudo", die=False, showout=False)
-        if rc or out.strip() == '**OK**':
-            # Install sudo if sudo not installed
-            cmd = 'apt-get install sudo && echo %s | sudo -SE -p \'\' %s' % (
-                passwd, command)
-        else:
-            cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (
-                passwd, command.replace('"', '\\"'))
-        return cmd
+    # def sudo_cmd(self, command, shell=False):
+    #     passwd = self.executor.passwd if hasattr(self.executor, "passwd") else ''
+    #     if hasattr(self.executor, 'sshclient'):
+    #         passwd = self.executor.sshclient.config.data['passwd_']
+    #     passwd = passwd or "\'\'"
+    #     if shell:
+    #         command = 'bash -c "%s"' % command
+    #     command = command.replace('"', '\\"')
+    #     if command.strip("\"").strip() is "":
+    #         raise RuntimeError("cannot sudo empty command")
+    #     cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (passwd, command)
+    #     self.logger.debug(cmd)
+    #     return cmd
 
     def cd(self, path):
         """cd to the given path"""
@@ -1351,11 +1156,12 @@ class PrefabCore(base):
         return self._cd
 
     def execute_script(self, content, die=True, profile=False, interpreter="bash", tmux=False,
-                       replace=True, showout=True):
+                       replace=True, showout=True, sudo=False):
         """
         generic exection of script, default interpreter is bash
 
         """
+
         if replace:
             content = self.replace(content)
         content = j.data.text.strip(content)
@@ -1401,19 +1207,15 @@ class PrefabCore(base):
         cmd = "%s %s" % (interpreter, path)
 
         if self.sudomode:
-            cmd = self.sudo_cmd(cmd)
+            cmd = self.executor.sudo_cmd(cmd)
 
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
         if tmux:
-            rc, out = self.prefab.system.tmux.executeInScreen(
-                "cmd", "cmd", cmd, wait=True, die=False)
+            rc, out = self.prefab.system.tmux.executeInScreen("cmd", "cmd", cmd, wait=True, die=False)
             if showout:
                 self.logger.info(out)
         else:
-            # outfile = "$TMPDIR/%s.out" % (rnr)
-            # outfile = self.replace(outfile)
-            # cmd = cmd + " 2>&1 || echo **ERROR** | tee %s" % outfile
             cmd = cmd + " 2>&1 || echo **ERROR**"
             rc, out, err = self.executor.executeRaw(
                 cmd, showout=showout, die=False)
@@ -1442,7 +1244,7 @@ class PrefabCore(base):
                 msg += "error in output, was expecting **ERROR** or **OK** at end of esecution of script\n"
                 msg += "lastline is:'%s'" % lastline
             msg += "Out:\n%s\n" % out
-            if not tmux and err.strip() != "":
+            if err.strip() != "":
                 msg += "Error:\n%s\n" % err
             msg += "\n****ERROR***: could not execute script !!!\n"
             out = msg

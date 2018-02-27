@@ -2,12 +2,14 @@ from js9 import j
 
 app = j.tools.prefab._getBaseAppClass()
 
+SUPPORTED_MODE = ['user', 'seq', 'direct']
+
 
 class PrefabZOS_db(app):
     """
     0-db key-value store
     """
-    NAME = 'db'
+    NAME = 'zdb'
 
     def build(self, debug=False, start=False, install=True, reset=False):
         if reset is False and self.isInstalled():
@@ -34,12 +36,19 @@ class PrefabZOS_db(app):
         if start:
             self.start()
 
-    def start(self, index="/tmp/zdb-index", data="/tmp/zdb-data", verbose=True):
+    def start(self, instance='main', host='localhost', port=9900, index="/tmp/zdb-index", data="/tmp/zdb-data", mode='user', verbose=True):
+        if mode not in SUPPORTED_MODE:
+            raise ValueError("mode %s is not supported" % mode)
+
         # FIXME: add mode selection
         pm = self.prefab.system.processmanager.get()
-        cmdline = "$BINDIR/zdb --index %s --data %s" % (index, data)
+        cmdline = "$BINDIR/zdb --listen %s --port %s --index %s --data %s --mode %s" % (host, port, index, data, mode)
 
         if verbose:
             cmdline += " -v"
 
-        pm.ensure('0db', cmd=cmdline)
+        pm.ensure('%s_0db' % instance, cmd=cmdline)
+
+    def stop(self, instance='main'):
+        pm = self.prefab.system.processmanager.get()
+        pm.stop('%s_0db' % instance)
