@@ -115,12 +115,16 @@ class PrefabWordpress(app):
             """.format(self.user, path, theme)
             self.prefab.core.run(themes_command, die=False)
 
-    def install_plugins(self, path, plugins):
+    def install_plugins(self, path, plugins, activate=False):
         if not plugins:
             plugins = []
         
+        activate_cmd = ""
+        if activate:
+            activate_cmd ="--active"
+
         for plugin in plugins:
             plugins_command = """
-            sudo -u {} -i -- wp --path={} plugin install {}
-            """.format(self.user, path, plugin)
+            sudo -u {} -i -- wp --path={} plugin install {} {}
+            """.format(self.user, path, plugin, activate_cmd)
             self.prefab.core.run(plugins_command, die=False)
