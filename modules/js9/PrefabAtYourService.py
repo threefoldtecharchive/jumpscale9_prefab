@@ -133,14 +133,14 @@ class PrefabAtYourService(base):
     def start(self, host='127.0.0.1', port=5000, log='info', dev=False):
         """
         Starts an AYS instance
+        Please configure first
         """
         # check if the install was called before
         if not self.prefab.core.exists(j.sal.fs.joinPaths(self.base_dir, 'main.py')):
             self.logger.warning('AYS is not installed. Installing it...')
             self.install()
 
-        j.atyourservice.server.config
-        cfg = j.core.state.configGet('ays', {})
+        cfg = self.executor.state.configGet('ays', {})
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
                                                                                       host=host, port=port, log=log)
         if dev:
