@@ -17,11 +17,11 @@ class PrefabDocker(app):
                 return
             raise e
 
-    def install(self, reset=False, branch=None):
+    def install(self, reset=False, version=None):
         if reset is False and self.isInstalled():
             return
         if self.prefab.core.isUbuntu:
-            if not branch:
+            if not version:
                 if not self.prefab.core.command_check('docker'):
                     C = """
                     wget -qO- https://get.docker.com/ | sh
@@ -44,15 +44,20 @@ class PrefabDocker(app):
                 #     self.prefab.core.run(C)
             self.prefab.system.package.install(
                 'apt-transport-https,linux-image-extra-$(uname -r),linux-image-extra-virtual,software-properties-common')
-            if int(branch.split('.')[0]) > 1:
+
+            if not version:
+                version = "17.12.0~ce-0~ubuntu"
+
+            if int(version.split('.')[0]) > 1:
                 self.prefab.core.run('curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -')
                 self.prefab.core.run('add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"')
                 self.prefab.system.package.mdupdate(reset=True)
                 self.prefab.system.package.install('libltdl7,aufs-tools')
-                self.prefab.system.package.install('docker-ce=%s.0~ce-0~ubuntu-xenial' % branch)
+                # self.prefab.system.package.install('docker-ce=%s.0~ce-0~ubuntu-xenial' % version)
+                self.prefab.system.package.install('docker-ce=%s' % version)
             else:
                 self.prefab.core.run("curl -fsSL 'https://sks-keyservers.net/pks/lookup?op=get&search=0xee6d536cf7dc86e2d7d56f59a178ac6c6238f52e' | apt-key add -")
-                self.prefab.core.run('add-apt-repository "deb https://packages.docker.com/%s/apt/repo/ ubuntu-$(lsb_release -cs) main"' % branch)
+                self.prefab.core.run('add-apt-repository "deb https://packages.docker.com/%s/apt/repo/ ubuntu-$(lsb_release -cs) main"' % version)
                 self.prefab.system.package.mdupdate(reset=True)
                 self.prefab.system.package.install('docker-engine')
 
