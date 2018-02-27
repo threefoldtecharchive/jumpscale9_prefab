@@ -98,7 +98,7 @@ class PrefabWordpress(app):
         """.format(user=self.user, url=url, title=title, admin_user=admin_user, 
                    admin_password=admin_password, admin_email=admin_email, path=path)
         self.prefab.executor.execute(install_command)
-        
+
         # install themes
         self.install_theme(path, theme)
 
@@ -121,7 +121,7 @@ class PrefabWordpress(app):
         
         activate_cmd = ""
         if activate:
-            activate_cmd ="--active"
+            activate_cmd ="--activate"
 
         for plugin in plugins:
             plugins_command = """
