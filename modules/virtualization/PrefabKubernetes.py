@@ -81,43 +81,7 @@ class PrefabKubernetes(app):
     """
     NAME = "kubectl"
 
-    def multihost_install(self, nodes, external_ips=None, unsafe=False, skip_flight_checks=False,
-                          service_subnet='10.96.0.0/16', reset=False, install_binaries=True):
-        """
-        note:: Deprecated
-        use multihost_install2 instead
-
-        Important !! only supports centos, fedora and ubuntu 1604
-        Use a list of prefab connections where all nodes need to be reachable from all other nodes or at least from the master node.
-        this installer will:
-        - use first node as master
-        - deploy/generate required secrets/keys to allow user to access this kubernetes
-        - make sure that dashboard is installed as well on kubernetes
-        - use /storage inside the node (make sure is btrfs partition?) as the backend for kubernetes
-        - deploy zerotier network (optional) into the node which connects to the kubernetes (as pub network?)
-
-        @param nodes ,,  are list of prefab clients which will be used to deploy kubernetes
-        @param external_ips,,list(str) list of extra ips to add to certs
-        @param unsafe,, bool will allow pods to be created on master nodes.
-        @param skip_flight_checks,, bool skip preflight checks from kubeadm.
-        @param service_subnet,, str cidr to use for the services in kubernets .
-        @param reset ,, rerun the code even if it has been run again. this may not be safe (used for development only)
-        @param install_binaries ,, if True will call install_binaries before configuring nodes
-
-        @return (dict(), str) ,, return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
-
-        """
-        if unsafe:
-            masters, nodes = nodes, []
-        else:
-            masters, nodes = nodes[:3], nodes[3:]
-
-        self.multihost_install2(
-            masters, nodes, external_ips=external_ips, skip_flight_checks=skip_flight_checks,
-            service_subnet=service_subnet, reset=reset, install_binaries=install_binaries
-        )
-
-    def multihost_install2(self, masters, nodes=None, external_ips=None, skip_flight_checks=False,
+    def multihost_install(self, masters, nodes=None, external_ips=None, skip_flight_checks=False,
                           service_subnet='10.96.0.0/16', reset=False, install_binaries=True):
         """
         Important !! only supports centos, fedora and ubuntu 1604
