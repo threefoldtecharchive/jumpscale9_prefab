@@ -6,7 +6,7 @@ app = j.tools.prefab._getBaseAppClass()
 class Prefabjs9Core(app):
     NAME = 'js9'
 
-    def install(self, reset=False, branch='master', full_installation=False):
+    def install(self, reset=False, branch='9.3.0_ssh', full=False):
         """Install js9 core
         Keyword Arguments:
             reset {bool} -- force install if js9core was already installed (default: {False})
@@ -21,7 +21,10 @@ class Prefabjs9Core(app):
         if self.doneCheck("install", reset):
             return
 
-        self.prefab.system.base.development()
+        if full:
+            self.prefab.system.base.development()
+        else:
+            self.prefab.system.base.install()
 
         self.bashtools()
 
@@ -30,14 +33,9 @@ class Prefabjs9Core(app):
         self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
 
         self.logger.info("js9_install")
-        if full_installation:
-            self.core.run(
-                "export JS9BRANCH=%s;ZInstall_host_js9_full" % branch, profile=True)
-        else:
-            self.core.run(
-                "export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
+        self.core.run("export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
 
-        self.prefab.runtimes.pip.install("Cython,asyncssh,numpy,tarantool")
+        self.prefab.runtimes.pip.install("Cython,asyncssh,numpy,python-jose,PyNaCl,PyJWT,fakeredis,pudb,serial")
 
         self.doneSet("install")
 

@@ -31,16 +31,16 @@ class PrefabSSHReflector(base):
 
         passwd = j.data.idgenerator.generateGUID()
         self.prefab.user.ensure("sshreflector", passwd=passwd, home="/home/sshreflector",
-                                 uid=None, gid=None, shell=None, fullname=None, encrypted_passwd=True, group=None)
+                                uid=None, gid=None, shell=None, fullname=None, encrypted_passwd=True, group=None)
 
         self.prefab.core.run('ufw allow %s' % port, die=False)
 
         self.prefab.core.dir_ensure("/home/sshreflector/.ssh", recursive=True, mode=None,
-                                     owner="sshreflector", group="sshreflector")
+                                    owner="sshreflector", group="sshreflector")
 
         lpath = os.environ["HOME"] + "/.ssh/reflector"
         path = "/home/sshreflector/.ssh/reflector"
-        ftp = self.prefab.core.executor.sshclient.getSFTP()
+        ftp = self.prefab.core.executor.sshclient.sftp
         if j.sal.fs.exists(lpath) and j.sal.fs.exists(lpath + ".pub"):
             self.logger.info("UPLOAD EXISTING SSH KEYS")
             ftp.put(lpath, path)
@@ -112,14 +112,14 @@ class PrefabSSHReflector(base):
             if reset or not j.sal.fs.exists(lpath) or not j.sal.fs.exists(lpath_pub):
                 self.logger.info("DOWNLOAD SSH KEYS")
                 # get private key from reflector
-                ftp = remoteprefab.core.executor.sshclient.getSFTP()
+                ftp = remoteprefab.core.executor.sshclient.sftp
                 path = "/home/sshreflector/.ssh/reflector"
                 ftp.get(path, lpath)
                 ftp.get(path + ".pub", lpath + ".pub")
                 ftp.close()
 
             # upload to reflector client
-            ftp = self.prefab.core.executor.sshclient.getSFTP()
+            ftp = self.prefab.core.executor.sshclient.sftp
             rpath = "/root/.ssh/reflector"
             ftp.put(lpath, rpath)
             ftp.put(lpath + ".pub", rpath + ".pub")
@@ -147,7 +147,7 @@ class PrefabSSHReflector(base):
             if remoteprefab.core.file_exists("/home/sshreflector/reflectorclients") is False:
                 self.logger.info("reflectorclientsfile does not exist")
                 remoteprefab.core.file_write("/home/sshreflector/reflectorclients", "%s:%s\n" %
-                                              (self.prefab.platformtype.hostname, 9800))
+                                             (self.prefab.platformtype.hostname, 9800))
                 newport = 9800
                 out2 = remoteprefab.core.file_read("/home/sshreflector/reflectorclients")
             else:
@@ -184,7 +184,7 @@ class PrefabSSHReflector(base):
             _, cpath, _ = self.prefab.core.run("which autossh")
             cmd = "%s -M 0 -N -o ExitOnForwardFailure=yes -o \"ServerAliveInterval 60\" -o \"ServerAliveCountMax 3\" -R %s:localhost:22 sshreflector@%s -p %s -i /root/.ssh/reflector" % (
                 cpath, newport, rname, reflport)
-            
+
             pm = self.prefab.system.processmanager.get()
             pm.ensure("autossh_%s" % rname_short, cmd, descr='')
 
@@ -211,7 +211,7 @@ class PrefabSSHReflector(base):
 
         rpath = "/home/sshreflector/reflectorclients"
         lpath = os.environ["HOME"] + "/.ssh/reflectorclients"
-        ftp = prefab.core.executor.sshclient.getSFTP()
+        ftp = prefab.core.executor.sshclient.sftp
         ftp.get(rpath, lpath)
 
         out = self.prefab.core.file_read(lpath)
@@ -238,6 +238,6 @@ class PrefabSSHReflector(base):
 
     def __str__(self):
         return "prefab.reflector:%s:%s" % (getattr(self.executor, 'addr', 'local'),
-                                            getattr(self.executor, 'port', ''))
+                                           getattr(self.executor, 'port', ''))
 
     __repr__ = __str__

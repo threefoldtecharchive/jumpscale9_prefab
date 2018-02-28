@@ -2,17 +2,20 @@ from js9 import j
 from JumpScale9Prefab.PrefabBase import *
 
 from JumpScale9Prefab.PrefabLoader import PrefabLoader
-class PrefabRootClassFactory:
+
+JSBASE = j.application.jsbase_get_class()
+
+
+class PrefabRootClassFactory(JSBASE):
 
     prefabs_instance = {}
     _local = None
 
     def __init__(self):
         self.__jslocation__ = "j.tools.prefab"
-        self.logger = j.logger.get("j.tools.prefab")
+        JSBASE.__init__(self)
         self._local = None
-
-        self.loader=PrefabLoader()
+        self.loader = PrefabLoader()
 
     @property
     def local(self):
@@ -43,7 +46,7 @@ class PrefabRootClassFactory:
         if keyname == '':
             return self._generate_pubkey()
 
-        key = j.clients.ssh.SSHKeyGetPathFromAgent(keyname)
+        key = j.clients.ssh.sshkey_path_get(keyname)
         return j.sal.fs.fileGetContents(key + '.pub')
 
     def _get_ssh_executor(self, addr, port, login, passphrase, passwd):
@@ -59,10 +62,6 @@ class PrefabRootClassFactory:
                                                 login=login,
                                                 passwd=passwd)
 
-    def getFromSSH(self, addr, port=22):
-        e = j.tools.executor.getSSHBased(addr, port=port)
-        return self.get(executor=e)
-
     def get(self, executor=None, usecache=True):
         """
         example:
@@ -75,14 +74,13 @@ class PrefabRootClassFactory:
         or if used without executor then will be the local one
         """
         from JumpScale9Prefab.PrefabRootClass import PrefabRootClass
-        executor = j.tools.executor.get(executor)
 
         if usecache and executor.id in self.prefabs_instance:
             return self.prefabs_instance[executor.id]
 
         prefab = PrefabRootClass(executor)
 
-        self.loader.load(executor,prefab)
+        self.loader.load(executor, prefab)
 
         self.prefabs_instance[executor.id] = prefab
 

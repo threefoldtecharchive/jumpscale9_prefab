@@ -8,7 +8,7 @@ class PrefabCelery(base):
     def install(self):
         self.prefab.runtimes.pip.install('celery[redis]')
         self.prefab.runtimes.pip.install('flower')
-        j.clients.redis.start4core()
+        j.clients.redis.core_start()
 
     def start(self, cmd, path="$JSAPPSDIR/celery/tasks.py", broker='redis://localhost:6379', appname='celery'):
         """
@@ -21,9 +21,10 @@ class PrefabCelery(base):
         module = j.sal.fs.getBaseName(path).split('.py')[0]
         if parent == '$JSAPPSDIR/celery' and not self.prefab.core.exists('$JSAPPSDIR/celery/tasks.py'):
             content = """
-from celery import Celery
-app = Celery('{name}', broker='{back}', backend='{back}')
+            from celery import Celery
+            app = Celery('{name}', broker='{back}', backend='{back}')
             """.format(back=broker, name=appname)
+            content = j.data.text.strip(content)
             self.prefab.core.dir_ensure(parent)
             self.prefab.core.file_write(path, content)
         cmd = 'celery -A {module} {cmd} --broker={broker}'.format(module=module, cmd=cmd, broker=broker)

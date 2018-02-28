@@ -48,12 +48,12 @@ import pystache
 class PrefabCat():
     pass
 
-
-class PrefabLoader():
+JSBASE = j.application.jsbase_get_class()
+class PrefabLoader(JSBASE):
 
     def __init__(self):
         self.moduleList = {}
-        self.logger = j.logger.get("jsprefabloader")
+        JSBASE.__init__(self)
 
     def load(self, executor, prefab, moduleList=None):
         """
@@ -73,7 +73,7 @@ class PrefabLoader():
         if moduleList is None:
             moduleList = self.moduleList
 
-        self.logger.info("find prefab modules in %s" % path)
+        self.logger.debug("find prefab modules in %s" % path)
 
         for cat in j.sal.fs.listDirsInDir(path, recursive=False, dirNameOnly=True, findDirectorySymlinks=True, followSymlinks=True):
             catpath = j.sal.fs.joinPaths(path, cat)

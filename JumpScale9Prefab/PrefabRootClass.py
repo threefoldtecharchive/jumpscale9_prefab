@@ -3,10 +3,13 @@ from js9 import j
 
 from JumpScale9Prefab.PrefabCore import PrefabCore
 
+JSBASE = j.application.jsbase_get_class()
 
-class PrefabRootClass:
+
+class PrefabRootClass(JSBASE):
 
     def __init__(self, executor):
+        JSBASE.__init__(self)
         self.executor = executor
 
         self._platformtype = None
@@ -34,6 +37,6 @@ class PrefabRootClass:
         if self.executor.type == "local":
             return "prefab:local"
         else:
-            return "prefab:%s:%s" % (getattr(self.executor.sshclient, 'addr', 'local'), getattr(self.executor.sshclient, 'port', ''))
+            return "prefab:%s:%s:%s" % (getattr(self.executor.sshclient, 'addr', 'local'), getattr(self.executor.sshclient, 'port', ''), getattr(self.executor.sshclient, 'login', ''))
 
     __repr__ = __str__

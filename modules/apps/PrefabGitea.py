@@ -107,7 +107,7 @@ class PrefabGitea(app):
         if not self.prefab.db.postgresql.isStarted():
             self.prefab.db.postgresql.start()
 
-        # # Create postgres db
+        # # Create postgres db  : #TODO:*1 this should be part of the postgresql prefab module
         self.prefab.core.run('sudo -u postgres /opt/bin/psql -c \'create database gitea;\'', die=False)
         self.start()
         cmd = """

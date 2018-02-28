@@ -49,19 +49,12 @@ class PrefabPIP(base):
 
         '''
         self.ensure()
+        packages = j.data.text.getList(package, "str")
 
-        if "," in package:
-            package = [item.strip() for item in package.split(",")]
-        elif "\n" in package:
-            package = [item.strip() for item in package.split("\n")]
-        elif j.data.types.list.check(package) is False:
-            package = [package]
-
-        packages = package
         cmd = ""
 
         for package in packages:
-            todo=[]
+            todo = []
             if reset or not self.doneGet("pip_%s" % package):
                 todo.append(package)
                 if self.prefab.core.isArch:
@@ -76,7 +69,7 @@ class PrefabPIP(base):
                     cmd += " --upgrade"
                 cmd += "\n"
 
-        if len(todo)>0:
+        if len(todo) > 0:
             self.prefab.core.run(cmd)
 
         for package in todo:

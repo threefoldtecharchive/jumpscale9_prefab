@@ -14,7 +14,7 @@ class PrefabSSH(base):
         for item in self.scan(range=range):
             self.logger.info("test for login/passwd on %s" % item)
             try:
-                client = j.clients.ssh.get(item, port, login, passwd, timeout=1, die=False)
+                client = j.clients.ssh.new(addr=item, port=port, login=login, passwd=passwd, timeout=1, die=False)
             except Exception as e:
                 self.logger.info("  NOT OK")
                 continue
@@ -69,13 +69,13 @@ class PrefabSSH(base):
             try:
                 # out=self.prefab.core.run("nmap -p 22 %s | grep for"%range,showout=False)
                 _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX $TMPDIR/nmap" %
-                                                  (range))
+                                                 (range))
             except Exception as e:
                 if str(e).find("command not found") != -1:
                     self.prefab.system.package.install("nmap")
                     # out=self.prefab.core.run("nmap -p 22 %s | grep for"%range)
                     _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX $TMPDIR/nmap" %
-                                                      (range))
+                                                     (range))
             out = self.prefab.core.file_read("$TMPDIR/nmap")
             import xml.etree.ElementTree as ET
             root = ET.fromstring(out)
@@ -113,7 +113,6 @@ class PrefabSSH(base):
                 break
         if not isknown:
             self.prefab.core.execute_bash('ssh-keyscan -p {} -t rsa {} >> {}'.format(port, addr, known_hostsfile))
-
 
     def keygen(self, user="root", keytype="rsa", name="default"):
         """Generates a pair of ssh keys in the user's home .ssh directory."""
@@ -163,7 +162,7 @@ class PrefabSSH(base):
         key = add_newline(key)
         ret = None
 
-        settings=list()
+        settings = list()
         for setting, value in kwargs.items():
             if value is True:
                 settings.append(setting)
@@ -178,14 +177,14 @@ class PrefabSSH(base):
             content = self.prefab.core.file_read(keyf)
             if content.find(key[:-1]) == -1:
                 content = add_newline(content)
-                self.prefab.core.file_write(keyf, content+line)
+                self.prefab.core.file_write(keyf, content + line, sudo=True)
                 ret = False
             else:
                 ret = True
         else:
             # Make sure that .ssh directory exists, see #42
             self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode="700")
-            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode="600")
+            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode="600", sudo=True)
             ret = False
 
         self.prefab.core.sudomode = sudomode
@@ -222,7 +221,7 @@ class PrefabSSH(base):
         # leave here is to make sure we have a backdoor for when something goes wrong further
         self.logger.info("create backdoor")
         self.prefab.system.user.ensure(backdoorlogin, passwd=backdoorpasswd, home=None, uid=None,
-                                 gid=None, shell=None, fullname=None, encrypted_passwd=True, group="root")
+                                       gid=None, shell=None, fullname=None, encrypted_passwd=True, group="root")
         self.prefab.core.run("rm -fr /home/%s/.ssh/" % backdoorlogin)
         self.prefab.system.group.user_add('sudo', '$(system.backdoor.login)')
 
