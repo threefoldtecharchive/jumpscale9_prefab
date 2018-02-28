@@ -36,6 +36,7 @@ class PrefabDocker(app):
                                 break
                         else:
                             raise TimeoutError('resource dpkg is busy')
+                self._init_docker()
                 return
                 # if not self.prefab.core.command_check('docker-compose'):
                 #     C = """
