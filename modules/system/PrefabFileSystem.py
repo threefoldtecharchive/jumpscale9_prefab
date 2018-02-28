@@ -1,5 +1,7 @@
-from js9 import j
 import uuid
+import time
+from js9 import j
+import JumpScale9
 
 base = j.tools.prefab._getBaseClass()
 
@@ -18,7 +20,7 @@ class PrefabFileSystem(base):
 
     def mount(self, mount_point, device, 
               copy=False, reboot=False, 
-              append_fstab=False, fs_type=None):
+              append_fstab=False, fs_type=None, reboot_timeout=600):
         '''
         Mount file system
 
@@ -30,25 +32,29 @@ class PrefabFileSystem(base):
         @fs_type (required only if @append_fstab==True): type of the new filesystem (ex. 'ext4')
         '''
 
+
         prefab = self.prefab
+        mount_point.strip().rstrip('/')
 
         # make sure mount point folder exists
         prefab.core.createDir(mount_point)
 
-        data_in_mount_point = prefab.core.exists('%s/*' % mount_point)
-        if copy and data_in_mount_point:
+        if copy:
             # generate random tmp folder name
-            tmp = 'mnt/tmp%s'% str(uuid.uuid4()).replace('-','')
+            tmp = '/mnt/tmp%s'% str(uuid.uuid4()).replace('-','')
 
             # mount new filesystem in tmp mount point
             prefab.core.createDir(tmp)
-            prefab.executor.execute("mount %s %s" % (device, tmp))
-
-            # backup data at the mount point in temporary directory
-            prefab.executor.execute("cp -ax %s/* %s" % (mount_point, tmp))       
-
-            # unmount the partition
-            prefab.executor.execute("umount %s" % device)
+            try:
+                prefab.executor.execute("mount %s %s" % (device, tmp))
+                try:
+                    # backup data at the mount point in temporary directory
+                    prefab.executor.execute("cp -ax %s/* %s" % (mount_point, tmp))       
+                finally:
+                    # unmount the partition
+                    prefab.executor.execute("umount %s" % device)
+            finally:
+                prefab.core.dir_remove(tmp)
 
         # mount device
         prefab.executor.execute("mount %s %s" % (device, mount_point))
@@ -62,4 +68,27 @@ class PrefabFileSystem(base):
 
         if reboot:
             prefab.executor.execute('reboot')
+            if isinstance(prefab.executor, JumpScale9.tools.executor.ExecutorSSH.ExecutorSSH):
+                start = time.time()
+                def wait():
+                    if time.time() < start+ reboot_timeout:
+                        time.sleep(1)
+                    else:
+                        raise RuntimeError('timed out waiting for machine to get rebooted within %s seconds' % reboot_timeout)
+                try:
+                    while True:
+                        prefab.executor.execute('ls')
+                        wait()
+                except:
+                    pass
+                while True:
+                    try:
+                        prefab.executor.sshclient.connect()
+                        break
+                    except:
+                        wait()
+
+                        
+
+        
         
