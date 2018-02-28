@@ -41,7 +41,7 @@ class PrefabMinio(app):
         if start:
             self.start()
 
-    def start(self, name="main", datadir="/tmp/shared", address="localhost", port=10443, miniokey="", miniosecret=""):
+    def start(self, name="main", datadir="/tmp/shared", address="0.0.0.0", port=90000, miniokey="", miniosecret=""):
         """
         Starts minio.
         """
