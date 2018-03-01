@@ -19,12 +19,14 @@ from __future__ import with_statement
 import re
 import copy
 import base64
+import hashlib
 import os
 import sys
 import pystache
 
 from js9 import j
-import pygments.lexers
+# import pygments.lexers
+# from pygments.formatters import get_formatter_by_name
 
 from .PrefabCoreTools import *
 
@@ -139,6 +141,17 @@ class PrefabCore(base):
             args[key.upper()] = var
         args["HOSTNAME"] = self.hostname
         return args
+
+    def system_uuid_alias_add(self):
+        """Adds system UUID alias to /etc/hosts.
+        Some tools/processes rely/want the hostname as an alias in
+        /etc/hosts e.g. `127.0.0.1 localhost <hostname>`.
+        """
+        with mode_sudo():
+            old = "127.0.0.1 localhost"
+            new = old + " " + self.system_uuid()
+            self.file_update(
+                '/etc/hosts', lambda x: text_replace_line(x, old, new)[0])
 
     def system_uuid(self):
         """Gets a machines UUID (Universally Unique Identifier)."""
