@@ -241,10 +241,14 @@ class PrefabKubernetes(app):
         _, user, _ = controller_node.core.run('whoami')
         controller_node.system.ssh.define_host(self.prefab.executor.sshclient.addr, user)
         cmd = """
-        scp -P {port} $TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
-        scp -P {port} $TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
-        """.format(node_ip=self.prefab.executor.sshclient.addr, cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
-                   port=self.prefab.executor.sshclient.port or 22)
+        scp -P {port} -i {key} $TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        scp -P {port} -i {key} $TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        """.format(
+            node_ip=self.prefab.executor.sshclient.addr,
+            cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
+            port=self.prefab.executor.sshclient.port or 22,
+            key=self.prefab.executor.sshclient.sshkey.path
+        )
 
         controller_node.core.execute_bash(cmd)
 
