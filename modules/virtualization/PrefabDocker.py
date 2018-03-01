@@ -36,6 +36,8 @@ class PrefabDocker(app):
                                 break
                         else:
                             raise TimeoutError('resource dpkg is busy')
+                self._init_docker()
+                return
                 # if not self.prefab.core.command_check('docker-compose'):
                 #     C = """
                 #     curl -L https://github.com/docker/compose/releases/download/1.8.0-rc1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose

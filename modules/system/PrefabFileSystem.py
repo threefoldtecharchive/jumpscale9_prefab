@@ -87,8 +87,3 @@ class PrefabFileSystem(base):
                         break
                     except:
                         wait()
-
-                        
-
-        
-        
