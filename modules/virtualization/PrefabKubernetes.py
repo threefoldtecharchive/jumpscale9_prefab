@@ -249,6 +249,7 @@ class PrefabKubernetes(app):
         )
 
         passphrase = self.prefab.executor.sshclient.sshkey.passpharse
+
         code, _, _ = controller_node.core.run('ssh-keygen -p -P "%s" -N "" -f %s' % (passphrase, tmp_key))
         if code != 0:
             raise RuntimeError('failed to decrypt key')
