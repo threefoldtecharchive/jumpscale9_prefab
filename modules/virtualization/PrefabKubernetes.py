@@ -248,7 +248,7 @@ class PrefabKubernetes(app):
             tmp_key
         )
 
-        passphrase = self.prefab.executor.sshclient.sshkey.passpharse
+        passphrase = self.prefab.executor.sshclient.sshkey.passphrase
 
         code, _, _ = controller_node.core.run('ssh-keygen -p -P "%s" -N "" -f %s' % (passphrase, tmp_key))
         if code != 0:
