@@ -81,42 +81,43 @@ class PrefabKubernetes(app):
     """
     NAME = "kubectl"
 
-    def multihost_install(self, nodes=[], external_ips=[], unsafe=False, skip_flight_checks=False,
+    def multihost_install(self, masters, nodes=None, external_ips=None, skip_flight_checks=False,
                           service_subnet='10.96.0.0/16', reset=False, install_binaries=True):
         """
         Important !! only supports centos, fedora and ubuntu 1604
         Use a list of prefab connections where all nodes need to be reachable from all other nodes or at least from the master node.
         this installer will:
-        - use first node as master
         - deploy/generate required secrets/keys to allow user to access this kubernetes
         - make sure that dashboard is installed as well on kubernetes
         - use /storage inside the node (make sure is btrfs partition?) as the backend for kubernetes
         - deploy zerotier network (optional) into the node which connects to the kubernetes (as pub network?)
 
-        @param nodes ,,  are list of prefab clients which will be used to deploy kubernetes
-        @param external_ips,,list(str) list of extra ips to add to certs
-        @param unsafe,, bool will allow pods to be created on master nodes.
-        @param skip_flight_checks,, bool skip preflight checks from kubeadm.
-        @param service_subnet,, str cidr to use for the services in kubernets .
-        @param reset ,, rerun the code even if it has been run again. this may not be safe (used for development only)
-        @param install_binaries ,, if True will call install_binaries before configuring nodes
+        :param masters: required list of masters prefabs connection
+        :param nodes: list of workers prefab connection, if not given, we assume masters can run workload
+        :param external_ips: list(str) list of extra ips to add to certs
+        :param unsafe: bool will allow pods to be created on master nodes.
+        :param skip_flight_checks: bool skip preflight checks from kubeadm.
+        :param service_subnet: str cidr to use for the services in kubernets .
+        :param reset: rerun the code even if it has been run again. this may not be safe (used for development only)
+        :param install_binaries: if True will call install_binaries before configuring nodes
 
-        @return (dict(), str) ,, return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
+        :return (dict(), str): return the kubelet config as a dict write as yaml file to any kubectl that need to control the cluster
 
         """
         if self.doneCheck("multihost_install", reset):
             return
 
-        if unsafe:
-            masters, nodes = nodes, []
-        else:
-            masters, nodes = nodes[:3], nodes[3:]
+        if nodes is None:
+            nodes = []
+        if external_ips is None:
+            external_ips = []
 
         external_ips = [master.executor.sshclient.addr for master in masters] + external_ips
         if install_binaries:
             self.install_binaries(masters)
         self.setup_etcd_certs(masters)
         self.install_etcd_cluster(masters)
+        unsafe = len(nodes) == 0  # allow work load to run on masters
         join_line, config = self.install_kube_masters(masters, external_ips=external_ips, service_subnet=service_subnet,
                                                       skip_flight_checks=skip_flight_checks,
                                                       unsafe=unsafe, reset=reset)
