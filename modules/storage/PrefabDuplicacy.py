@@ -7,9 +7,6 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabDuplicacy(app):
     NAME = "duplicacy"
 
-    def _init(self):
-        self.BUILDDIR = self.replace("$TMPDIR/duplicacy")
-
     def build(self, reset=False, install=False):
         """
         Builds duplicacy
@@ -18,10 +15,9 @@ class PrefabDuplicacy(app):
         """
         if self.doneCheck("build", reset):
             return
-        self.prefab.core.dir_ensure(self.BUILDDIR)
 
         dup_url = "https://github.com/gilbertchen/duplicacy/releases/download/v2.0.10/duplicacy_linux_x64_2.0.10"
-        self.prefab.core.file_download(dup_url, overwrite=True, to=self.BUILDDIR, expand=False, removeTopDir=True)
+        self.prefab.core.file_download(dup_url, overwrite=True, to="$TMPDIR/duplicacy")
         self.doneSet('build')
 
         if install:
@@ -35,7 +31,7 @@ class PrefabDuplicacy(app):
         """
         if self.doneCheck("install", reset):
             return
-        self.prefab.core.run("cp $TMPDIR/duplicacy_linux_x64_2.0.10 $BINDIR/duplicacy")
+        self.prefab.core.run("cp $TMPDIR/duplicacy $BINDIR/")
         self.doneSet('install')
 
         if start:
