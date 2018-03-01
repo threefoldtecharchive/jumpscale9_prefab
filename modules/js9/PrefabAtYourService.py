@@ -130,7 +130,7 @@ class PrefabAtYourService(base):
         )
         self.load_ays_space(install_portal)
 
-    def start(self, host='127.0.0.1', port=5000, log='info', dev=False):
+    def start(self, log='info', dev=False):
         """
         Starts an AYS instance
         Please configure first
@@ -142,7 +142,7 @@ class PrefabAtYourService(base):
 
         cfg = self.executor.state.configGet('ays', {})
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
-                                                                                      host=host, port=port, log=log)
+                                                                                      host=cfg['host'], port=cfg['port'], log=log)
         if dev:
             cmd += " --dev "
         pm = self.prefab.system.processmanager.get()
