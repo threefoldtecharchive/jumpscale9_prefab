@@ -19,19 +19,16 @@ class PrefabFileSystem(base):
         prefab.executor.execute(cmd)
 
     def mount(self, mount_point, device, 
-              copy=False, reboot=False, 
-              append_fstab=False, fs_type=None, reboot_timeout=600):
+              copy=False, append_fstab=False, fs_type=None):
         '''
         Mount file system
 
         @device (required): device name to mount (ex. /dev/vdb)
         @mount_point (required): mount point (ex. /var)
         @copy (default to False):  copy old data from @mount_point directory to the new device
-        @reboot (default to False): reboot machine after mounting the device
         @append_fstab (default to False): append fstab file
         @fs_type (required only if @append_fstab==True): type of the new filesystem (ex. 'ext4')
         '''
-
 
         prefab = self.prefab
         mount_point.strip().rstrip('/')
@@ -66,25 +63,4 @@ class PrefabFileSystem(base):
             # append to fstab
             prefab.core.file_append("/etc/fstab", "%s\t%s\t%s\tdefaults\t0 0" % (device, mount_point, fs_type))
 
-        if reboot:
-            prefab.executor.execute('reboot')
-            if isinstance(prefab.executor, JumpScale9.tools.executor.ExecutorSSH.ExecutorSSH):
-                start = time.time()
-                def wait():
-                    if time.time() < start+ reboot_timeout:
-                        time.sleep(1)
-                    else:
-                        raise RuntimeError('timed out waiting for machine to get rebooted within %s seconds' % reboot_timeout)
-                try:
-                    while True:
-                        prefab.executor.execute('ls')
-                        wait()
-                except:
-                    pass
-                while True:
-                    try:
-                        prefab.executor.sshclient.connect()
-                        break
-                    except:
-                        wait()
 
