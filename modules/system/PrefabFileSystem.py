@@ -35,10 +35,10 @@ class PrefabFileSystem(base):
 
         prefab = self.prefab
         mount_point.strip().rstrip('/')
+
         # make sure mount point folder exists
         prefab.core.createDir(mount_point)
 
- #       data_in_mount_point = prefab.core.exists('%s/*' % mount_point)
         if copy:
             # generate random tmp folder name
             tmp = '/mnt/tmp%s'% str(uuid.uuid4()).replace('-','')
@@ -74,7 +74,7 @@ class PrefabFileSystem(base):
                     if time.time() < start+ reboot_timeout:
                         time.sleep(1)
                     else:
-                        raise RuntimeError()
+                        raise RuntimeError('timed out waiting for machine to get rebooted within %s seconds' % reboot_timeout)
                 try:
                     while True:
                         prefab.executor.execute('ls')
@@ -88,6 +88,3 @@ class PrefabFileSystem(base):
                     except:
                         wait()
 
-                        
-
-        
