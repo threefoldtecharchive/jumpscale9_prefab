@@ -90,10 +90,13 @@ class PrefabAtYourService(base):
         self.logger.info("Get ays code on branch:'%s'" % branch)
         self.prefab.tools.git.pullRepo("https://github.com/Jumpscale/ays9.git", branch=branch)
 
-    def load_ays_space(self, install_portal=False):
+    def load_ays_space(self, install_portal=False, branch="master"):
         """
         add ays space to portal
         """
+        # make sure to have ays repo files locally even if you will connect the portal with a remote ays server
+        # to get ays app files
+        self.get_code(branch=branch)
         if install_portal:
             self.prefab.web.portal.install()
         if self.core.file_exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
