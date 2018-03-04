@@ -240,13 +240,32 @@ class PrefabKubernetes(app):
         """
         _, user, _ = controller_node.core.run('whoami')
         controller_node.system.ssh.define_host(self.prefab.executor.sshclient.addr, user)
+        tmp_key = j.sal.fs.getTmpFilePath()
+
+        # we do this to avoid asking for passpharse interactively
+        controller_node.core.file_copy(
+            self.prefab.executor.sshclient.sshkey.path,
+            tmp_key
+        )
+
+        passphrase = self.prefab.executor.sshclient.sshkey.passphrase
+
+        code, _, _ = controller_node.core.run('ssh-keygen -p -P "%s" -N "" -f %s' % (passphrase, tmp_key))
+        if code != 0:
+            raise RuntimeError('failed to decrypt key')
+
         cmd = """
-        scp -P {port} $TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
-        scp -P {port} $TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
-        """.format(node_ip=self.prefab.executor.sshclient.addr, cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
-                   port=self.prefab.executor.sshclient.port or 22)
+        scp -P {port} -i {key} $TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        scp -P {port} -i {key} $TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        """.format(
+            node_ip=self.prefab.executor.sshclient.addr,
+            cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
+            port=self.prefab.executor.sshclient.port or 22,
+            key=tmp_key
+        )
 
         controller_node.core.execute_bash(cmd)
+        controller_node.core.file_unlink(tmp_key)
 
     def get_etcd_binaries(self, version='3.2.9'):
         """
