@@ -1112,12 +1112,6 @@ class PrefabCore(base):
             debugremember = copy.copy(debug)
             self.executor.debug = debug
 
-        if profile and self.executor.state_disabled == False:
-            # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
-            # next will check if profile path exists, if not will put it
-            cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (ppath, ppath, ppath, cmd)
-
         sudo = self.sudomode or sudo
 
         self.logger.debug(cmd)
@@ -1183,13 +1177,6 @@ class PrefabCore(base):
 
         if content[-1] != "\n":
             content += "\n"
-
-        if profile:
-            # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
-            # next will check if profile path exists, if not will put it
-            content = "[ ! -e \"%s\" ] && touch \"%s\" \n. %s\n%s\n" % (
-                ppath, ppath, ppath, content)
 
         if interpreter == "bash":
             content += "\necho '**OK**'\n"
