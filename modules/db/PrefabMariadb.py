@@ -90,7 +90,7 @@ class PrefabMariadb(app):
         """
         if password:
             password = "IDENTIFIED BY '{password}'".format(password=password)
-        cmd = 'echo "CREATE USER {username} {password}"| mysql'.format(username=username)
+        cmd = 'echo "CREATE USER {username} {password}"| mysql'.format(username=username, password=password)
         self.prefab.core.run(cmd, die=False)
 
     def admin_create(self, username, password=''):
