@@ -25,7 +25,7 @@ class PrefabWordpress(app):
             "php7.0-fpm, php7.0-mysql, php7.0-curl, php7.0-gd, php7.0-mbstring, php7.0-mcrypt, php7.0-xml, php7.0-xmlrpc")
 
         # 2- install mysql
-        self.prefab.db.mariadb.install()
+        self.prefab.db.mariadb.install(start=True)
 
         # 3- install caddy
         self.prefab.web.caddy.install(plugins=["iyo"])
@@ -64,9 +64,9 @@ class PrefabWordpress(app):
         self.build(reset=reset)
         
         # create a database 
-        self.prefab.db.mariadb.sql_execute("CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" % db_name)
+        self.prefab.db.mariadb.sql_execute(None, "CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" % db_name)
         # create a new super user for this database
-        self.prefab.db.mariadb.admin_create(db_user, db_password, db_name= db_name)
+        self.prefab.db.mariadb.admin_create(db_user, db_password)
         
         self.prefab.core.dir_ensure(path)
         self.prefab.core.run("chown {0}:{0} {1}".format(self.user, path))
@@ -98,7 +98,7 @@ class PrefabWordpress(app):
         """.format(user=self.user, url=url, title=title, admin_user=admin_user, 
                    admin_password=admin_password, admin_email=admin_email, path=path)
         self.prefab.executor.execute(install_command)
-        
+
         # install themes
         self.install_theme(path, theme)
 
@@ -115,12 +115,16 @@ class PrefabWordpress(app):
             """.format(self.user, path, theme)
             self.prefab.core.run(themes_command, die=False)
 
-    def install_plugins(self, path, plugins):
+    def install_plugins(self, path, plugins, activate=False):
         if not plugins:
             plugins = []
         
+        activate_cmd = ""
+        if activate:
+            activate_cmd ="--activate"
+
         for plugin in plugins:
             plugins_command = """
-            sudo -u {} -i -- wp --path={} plugin install {}
-            """.format(self.user, path, plugin)
+            sudo -u {} -i -- wp --path={} plugin install {} {}
+            """.format(self.user, path, plugin, activate_cmd)
             self.prefab.core.run(plugins_command, die=False)
