@@ -143,7 +143,7 @@ class PrefabAtYourService(base):
         except j.exceptions.Input:
             self.logger.warning('AYS has not been configured. Will start with default host:127.0.0.1 and port:5000')
 
-        cfg = self.executor.state.configGet('ays', {'host': '127.0.0.1', 'port': 5000})
+        cfg = self.executor.state.configGet('ays', {'host': '127.0.0.1', 'port': 5000}, set=True)
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
                                                                                       host=cfg['host'], port=cfg['port'], log=log)
         if dev:
