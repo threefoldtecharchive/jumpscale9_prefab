@@ -110,7 +110,8 @@ class PrefabMariadb(app):
             dbname {string} -- database name that query will run against
             sql    {string} -- sql query to be run
         """
-
+        if not dbname:
+            dbname = ''
         cmd = 'mysql -e "{}" {}'.format(sql, dbname)
         self.prefab.core.run(cmd)
 
