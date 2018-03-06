@@ -14,7 +14,7 @@ import traceback
 
 
 # set the logger level
-j.logger.logger_level_set(logging.ERROR)
+j.logger.loggers_level_set(logging.ERROR)
 
 PROCESS_TIMEOUT = 15 * 60 # 15 minutes timeout per process
 
