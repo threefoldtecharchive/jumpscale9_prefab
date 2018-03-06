@@ -152,7 +152,7 @@ class PrefabCaddy(app):
 
         self.stop()  # will also kill
 
-        cmd = self.prefab.bash.cmdGetPath("caddy")
+        cmd = self.replace("$BINDIR/caddy")
         if agree:
             agree = " -agree"
 
