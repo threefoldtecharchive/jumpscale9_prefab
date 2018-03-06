@@ -90,7 +90,7 @@ class PrefabMariadb(app):
         """
         if password:
             password = "IDENTIFIED BY '{password}'".format(password=password)
-        cmd = 'echo "CREATE USER {username} {password}"| mysql'.format(username=username, password=password)
+        cmd = 'echo "CREATE USER {username}@localhost {password}"| mysql'.format(username=username, password=password)
         self.prefab.core.run(cmd, die=False)
 
     def admin_create(self, username, password=''):
@@ -102,7 +102,7 @@ class PrefabMariadb(app):
         """
 
         self.user_create(username, password=password)
-        cmd = 'echo "GRANT ALL PRIVILEGES ON *.* TO {username}@localhost WITH GRANT OPTION;" | mysql'.format(
+        cmd = 'echo "GRANT ALL PRIVILEGES ON *.* TO \'{username}\'@\'localhost\' WITH GRANT OPTION;" | mysql'.format(
             username=username)
         self.prefab.core.run(cmd, die=False)
 

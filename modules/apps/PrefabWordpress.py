@@ -25,7 +25,7 @@ class PrefabWordpress(app):
             "php7.0-fpm, php7.0-mysql, php7.0-curl, php7.0-gd, php7.0-mbstring, php7.0-mcrypt, php7.0-xml, php7.0-xmlrpc")
 
         # 2- install mysql
-        self.prefab.db.mariadb.install()
+        self.prefab.db.mariadb.install(start=True)
 
         # 3- install caddy
         self.prefab.web.caddy.install(plugins=["iyo"])
