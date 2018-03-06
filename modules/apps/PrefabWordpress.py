@@ -66,7 +66,7 @@ class PrefabWordpress(app):
         # create a database 
         self.prefab.db.mariadb.sql_execute(None, "CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" % db_name)
         # create a new super user for this database
-        self.prefab.db.mariadb.admin_create(db_user, db_password, db_name= db_name)
+        self.prefab.db.mariadb.admin_create(db_user, db_password)
         
         self.prefab.core.dir_ensure(path)
         self.prefab.core.run("chown {0}:{0} {1}".format(self.user, path))
