@@ -38,7 +38,7 @@ class PrefabAtYourService(base):
         if restart:
             self.stop()
             self.start()
-        
+
     def configure_portal(self, ays_url='http://localhost:5000', ays_console_url='', portal_name='main', restart=True):
         """Configure AYS in portal
 
@@ -81,7 +81,7 @@ class PrefabAtYourService(base):
             r'baseUri: .*',
             r'baseUri: %s' % url,
             raml
-            )
+        )
         self.prefab.core.file_write(raml_path, raml)
 
     def get_code(self, branch):
@@ -131,7 +131,7 @@ class PrefabAtYourService(base):
             j.sal.fs.joinPaths(self.repo_dir, 'main.py'),
             j.sal.fs.joinPaths(self.base_dir, 'main.py')
         )
-        self.load_ays_space(install_portal)
+        self.load_ays_space(install_portal, branch=branch)
 
     def start(self, log='info', dev=False):
         """
