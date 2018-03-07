@@ -62,6 +62,17 @@ class PrefabRootClassFactory(JSBASE):
                                                 login=login,
                                                 passwd=passwd)
 
+    def getFromSSH(self, addr, port=22, login='root'):
+        instance = '{0}:{1}'.format(addr, port)
+        data = {
+            'addr': addr,
+            'port': port,
+            'login': login
+        }
+        sshclient = j.clients.ssh.get(instance, data)
+        e = j.tools.executor.ssh_get(sshclient)
+        return self.get(executor=e)
+
     def get(self, executor=None, usecache=True):
         """
         example:
