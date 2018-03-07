@@ -51,6 +51,9 @@ class Prefabjs9Core(app):
         """
 
         self.core.execute_bash(S)
+        path = j.sal.fs.joinPaths(j.dirs.HOMEDIR, '.bash_profile')
+        self.prefab.bash.profileJS.addInclude(path)
+        self.prefab.bash.profileJS.save()
 
         self.doneSet("bashtools")
 
