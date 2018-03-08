@@ -219,12 +219,12 @@ class PrefabKubernetes(app):
         self.prefab.core.file_write('$TMPDIR/k8s/openssl.cnf', ssl_config)
         cmd = """
         openssl genrsa -out $TMPDIR/k8s/key/etcd-ca.key 4096
-        openssl req -x509 -new -sha256 -nodes -key $TMPDIR/k8s/key/etcd-ca.key -days 3650 -out $TMPDIR/k8s/crt/etcd-ca.crt -subj "/CN=etcd-ca" -extensions v3_ca -config $TMPDIR/k8s/openssl.cnf
+        openssl req -x509 -new -sha256 -nodes -key $TMPDIR/k8s/key/etcd-ca.key -days 3650 -out $TMPDIR/k8s/crt/etcd-ca.crt -subj '/CN=etcd-ca' -extensions v3_ca -config $TMPDIR/k8s/openssl.cnf
         openssl genrsa -out $TMPDIR/k8s/key/etcd.key 4096
-        openssl req -new -sha256 -key $TMPDIR/k8s/key/etcd.key -subj "/CN=etcd" -out $TMPDIR/k8s/csr/etcd.csr
+        openssl req -new -sha256 -key $TMPDIR/k8s/key/etcd.key -subj '/CN=etcd' -out $TMPDIR/k8s/csr/etcd.csr
         openssl x509 -req -in $TMPDIR/k8s/csr/etcd.csr -sha256 -CA $TMPDIR/k8s/crt/etcd-ca.crt -CAkey $TMPDIR/k8s/key/etcd-ca.key -CAcreateserial -out $TMPDIR/k8s/crt/etcd.crt -days 365 -extensions v3_req_etcd -extfile $TMPDIR/k8s/openssl.cnf
         openssl genrsa -out $TMPDIR/k8s/key/etcd-peer.key 4096
-        openssl req -new -sha256 -key $TMPDIR/k8s/key/etcd-peer.key -subj "/CN=etcd-peer" -out $TMPDIR/k8s/csr/etcd-peer.csr
+        openssl req -new -sha256 -key $TMPDIR/k8s/key/etcd-peer.key -subj '/CN=etcd-peer' -out $TMPDIR/k8s/csr/etcd-peer.csr
         openssl x509 -req -in $TMPDIR/k8s/csr/etcd-peer.csr -sha256 -CA $TMPDIR/k8s/crt/etcd-ca.crt -CAkey $TMPDIR/k8s/key/etcd-ca.key -CAcreateserial -out $TMPDIR/k8s/crt/etcd-peer.crt -days 365 -extensions v3_req_etcd -extfile $TMPDIR/k8s/openssl.cnf
         """
         self.prefab.core.run(cmd)
