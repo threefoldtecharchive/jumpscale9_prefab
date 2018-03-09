@@ -1125,8 +1125,6 @@ class PrefabCore(base):
             else:
                 self.logger.debug("RUN:%s" % cmd0)
             shell = True
-        if shell and '"' in cmd:
-            cmd = cmd.replace('"', '\\"')
 
         sudo = self.sudomode or sudo
 
