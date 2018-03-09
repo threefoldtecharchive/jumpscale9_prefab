@@ -1133,16 +1133,6 @@ class PrefabCore(base):
         rc, out, err = self.executor.execute(
             cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
 
-        # out = self._clean(out)
-
-        if rc > 0 and "brew unlink" in out and "To install this version" in out:
-            from IPython import embed
-            self.logger.info("DEBUG NOW brew unlink (run)")
-            embed()
-            raise RuntimeError("stop debug here")
-            self.executor.execute(
-                "brew unlink ", checkok=checkok, die=False, showout=showout, env=env)
-
         # If command fails and die is true, raise error
         if rc > 0 and die:
             raise j.exceptions.RuntimeError('%s, %s' % (cmd, err))
@@ -1153,20 +1143,6 @@ class PrefabCore(base):
         out = out.strip()
 
         return rc, out, err
-
-    # def sudo_cmd(self, command, shell=False):
-    #     passwd = self.executor.passwd if hasattr(self.executor, "passwd") else ''
-    #     if hasattr(self.executor, 'sshclient'):
-    #         passwd = self.executor.sshclient.config.data['passwd_']
-    #     passwd = passwd or "\'\'"
-    #     if shell:
-    #         command = 'bash -c "%s"' % command
-    #     command = command.replace('"', '\\"')
-    #     if command.strip("\"").strip() is "":
-    #         raise RuntimeError("cannot sudo empty command")
-    #     cmd = 'echo %s | sudo -H -SE -p \'\' bash -c "%s"' % (passwd, command)
-    #     self.logger.debug(cmd)
-    #     return cmd
 
     def cd(self, path):
         """cd to the given path"""
