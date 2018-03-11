@@ -14,9 +14,9 @@ class PrefabLibffi(base):
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
 
-    def build(self, destpath="", reset=False):
+    def build(self, reset=False):
         """
-        @param destpath, if '' then will be $TMPDIR/build/openssl
+        js9 'j.tools.prefab.local.lib.libffi.build()'
         """
         if reset:
             self.reset()
@@ -26,22 +26,28 @@ class PrefabLibffi(base):
 
         self.prefab.system.package.mdupdate()
         self.prefab.core.dir_ensure(self.BUILDDIRL)
-        self.prefab.system.package.install(['build-essential', 'dh-autoreconf'])
+        j.tools.prefab.local.lib.openssl.build()
+        if not self.core.isMac:
+            self.prefab.system.package.install('dh-autoreconf')
         url = "https://github.com/libffi/libffi.git"
-        cpath = self.prefab.tools.git.pullRepo(url, reset=reset, ssh=False)
+        cpath = self.prefab.tools.git.pullRepo(url, reset=False, ssh=False)
 
         assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
 
         if not self.doneGet("compile") or reset:
             C = """
             set -ex
+            mkdir -p $BUILDDIRL
             cd $CODEDIRL
             ./autogen.sh
             ./configure  --prefix=$BUILDDIRL --disable-docs
             make
             make install
             """
-            self.prefab.core.run(self.replace(C))
+            self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.replace(C))
+            self.logger.info("compile libffi")
+            self.logger.debug(C)                
+            self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)            
             self.doneSet("compile")
             self.logger.info("BUILD DONE")
         else:

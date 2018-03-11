@@ -65,23 +65,33 @@ class PrefabBase(base):
 
         self.doneSet("install")
 
-    def development(self,reset=False):
+    def development(self,reset=False,python=True):
         """
         install all components required for building (compiling)
         """
+
         C = """
-        autoconf
-        libffi-dev
+        autoconf        
         gcc
-        make
-        build-essential
+        make        
         autoconf
         libtool
         pkg-config
-        libpq-dev
-        libsqlite3-dev
-        python3-dev
         """
+        C=j.data.text.strip(C)
+
+        if self.core.isMac:
+            C+="libffi\n"
+            C+="automake\n"
+        else:
+            C+="libffi-dev\n"
+            C+="build-essential\n"
+            C+="libsqlite3-dev\n"
+            C+="libpq-dev\n"
+        
+        if python:
+            C+="python3-dev\n"
+
         self.install()
         if self.doneCheck("development", reset):
             return        
