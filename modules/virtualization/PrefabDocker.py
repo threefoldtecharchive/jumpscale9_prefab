@@ -46,9 +46,9 @@ class PrefabDocker(app):
                 #     self.prefab.core.run(C)
             self.prefab.system.package.install(
                 'apt-transport-https,linux-image-extra-$(uname -r),linux-image-extra-virtual,software-properties-common')
+            _,release,_ = self.prefab.core.run('echo $(lsb_release -cs)')
             if int(branch.split('.')[0]) > 1:
                 self.prefab.core.run('curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -')
-                _,release,_ = self.prefab.core.run('echo $(lsb_release -cs)')
                 self.prefab.core.run("add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu %s stable'" % release)
                 self.prefab.system.package.mdupdate(reset=True)
                 self.prefab.system.package.install('libltdl7,aufs-tools')
