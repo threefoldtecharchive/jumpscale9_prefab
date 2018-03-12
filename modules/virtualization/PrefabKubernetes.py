@@ -170,7 +170,7 @@ class PrefabKubernetes(app):
         cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
         deb http://apt.kubernetes.io/ kubernetes-xenial main
         """
-        self.prefab.core.run(script_content)
+        self.prefab.core.run(script_content, showout=False)
         self.prefab.system.package.mdupdate(reset=True)
         self.prefab.system.package.install('kubelet=1.8.5-00,kubeadm=1.8.5-00')
         self.install_kube_client(reset, '/usr/local/bin/kubectl')
@@ -191,7 +191,7 @@ class PrefabKubernetes(app):
             url = url.format('darwin')
         elif self.prefab.core.isLinux:
             url = url.format('linux')
-        self.prefab.core.run('curl -L {url} -o {loc}'.format(url=url, loc=location))
+        self.prefab.core.run('curl -L {url} -o {loc}'.format(url=url, loc=location), showout=False)
         self.prefab.core.file_attribs(location, mode='+x')
         self.doneSet("install_kube_client")
 
@@ -227,7 +227,7 @@ class PrefabKubernetes(app):
         openssl req -new -sha256 -key $TMPDIR/k8s/key/etcd-peer.key -subj '/CN=etcd-peer' -out $TMPDIR/k8s/csr/etcd-peer.csr
         openssl x509 -req -in $TMPDIR/k8s/csr/etcd-peer.csr -sha256 -CA $TMPDIR/k8s/crt/etcd-ca.crt -CAkey $TMPDIR/k8s/key/etcd-ca.key -CAcreateserial -out $TMPDIR/k8s/crt/etcd-peer.crt -days 365 -extensions v3_req_etcd -extfile $TMPDIR/k8s/openssl.cnf
         """
-        self.prefab.core.run(cmd)
+        self.prefab.core.run(cmd, showout=False)
         if save:
             self.prefab.core.file_copy('$TMPDIR/k8s', '$HOMEDIR/')
 
@@ -238,7 +238,7 @@ class PrefabKubernetes(app):
 
         @param controller_node ,, object(prefab) prefab connection to the controller node which deploys the cluster should have ssh access to all nodes.
         """
-        _, user, _ = controller_node.core.run('whoami')
+        _, user, _ = controller_node.core.run('whoami', showout=False)
         controller_node.system.ssh.define_host(self.prefab.executor.sshclient.addr, user)
         tmp_key = j.sal.fs.getTmpFilePath()
 
@@ -250,7 +250,10 @@ class PrefabKubernetes(app):
 
         passphrase = self.prefab.executor.sshclient.sshkey.passphrase
 
-        code, _, _ = controller_node.core.run('ssh-keygen -p -P "%s" -N "" -f %s' % (passphrase, tmp_key))
+        code, _, _ = controller_node.core.run(
+            'ssh-keygen -p -P "%s" -N "" -f %s' % (passphrase, tmp_key),
+            showout=False
+        )
         if code != 0:
             raise RuntimeError('failed to decrypt key')
 
@@ -281,7 +284,7 @@ class PrefabKubernetes(app):
         """.format(google_url='https://storage.googleapis.com/etcd', etcd_ver=etcd_ver,
                    github_url='https://github.com/coreos/etcd/releases/download')
         self.prefab.core.dir_ensure('$TMPDIR/etcd_{etcd_ver}'.format(etcd_ver=etcd_ver))
-        self.prefab.core.run(cmd)
+        self.prefab.core.run(cmd, showout=False)
         self.prefab.core.dir_ensure('$BINDIR')
         self.prefab.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcd'.format(etcd_ver=etcd_ver),
                                    '$BINDIR/etcd')
@@ -363,7 +366,7 @@ class PrefabKubernetes(app):
                                   kube_init_yaml, replaceInContent=True)
         if skip_flight_checks:
             cmd += ' --skip-preflight-checks'
-        rc, out, err = init_node.core.run(cmd)
+        rc, out, err = init_node.core.run(cmd, showout=False)
         if rc != 0:
             raise RuntimeError(err)
         for line in reversed(out.splitlines()):
@@ -375,7 +378,7 @@ class PrefabKubernetes(app):
         pub_key = init_node.core.file_read(init_node.system.ssh.keygen()).strip()
         for node in nodes[1:]:
             node.executor.sshclient.ssh_authorize('root', pub_key)
-            _, user, _ = init_node.core.run('whoami')
+            _, user, _ = init_node.core.run('whoami', showout=False)
             init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
 
 
@@ -384,11 +387,15 @@ class PrefabKubernetes(app):
         init_node.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
         if flannel:
             init_node.core.run(
-                'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml')
+                'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml',
+                showout=False
+            )
 
         if dashboard:
             init_node.core.run(
-                'kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml')
+                'kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml',
+                showout=False
+            )
 
         log_message = """
         please wait until kube-dns deplyments are deployed before joining new nodes to the cluster.
@@ -403,11 +410,14 @@ class PrefabKubernetes(app):
         dockers_names = init_node.virtualization.docker.list_containers_names()
         for name in dockers_names:
             if 'apiserver' in name:
-                init_node.core.run('docker stop %s' % name)
+                init_node.core.run('docker stop %s' % name, showout=False)
                 break
-        init_node.core.run('sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml')
+        init_node.core.run(
+            'sed -i.bak "s/NodeRestriction//g" /etc/kubernetes/manifests/kube-apiserver.yaml',
+            showout=False
+        )
         pm.start('kubelet')
-        init_node.core.run('docker start %s' % name)
+        init_node.core.run('docker start %s' % name, showout=False)
 
         init_node.virtualization.kubernetes.wait_on_apiserver()
 
@@ -452,7 +462,9 @@ class PrefabKubernetes(app):
         if unsafe:
             # if unsafe  comppletly remove role master from the cluster
             init_node.core.run(
-                'kubectl taint nodes %s node-role.kubernetes.io/master-' % init_node.core.hostname)
+                'kubectl taint nodes %s node-role.kubernetes.io/master-' % init_node.core.hostname,
+                showout=False
+            )
         else:
             # write patch file used later on to register the nodes as masters
             init_node.core.file_write('$TMPDIR/master.yaml', j.data.serializer.yaml.dumps(node_json))
@@ -474,8 +486,10 @@ class PrefabKubernetes(app):
 
             # giving time for the nodes to be registered
             for i in range(30):
-                _, nodes_result, _ = init_node.core.run('kubectl get nodes',
-                                                        showout=False)
+                _, nodes_result, _ = init_node.core.run(
+                    'kubectl get nodes',
+                    showout=False
+                )
                 # checking if number of lines is equal to number of nodes to check if they are registered
                 if len(nodes_result.splitlines()) - 1 == index + 2:
                     break
@@ -509,7 +523,7 @@ class PrefabKubernetes(app):
             return
         if install_base:
             self.install_base()
-        self.prefab.core.run(join_line.strip())
+        self.prefab.core.run(join_line.strip(), showout=False)
 
         # build
         self.doneSet("install_minion")
