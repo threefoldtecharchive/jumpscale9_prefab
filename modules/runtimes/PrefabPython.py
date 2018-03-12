@@ -66,8 +66,8 @@ class PrefabPython(base):
                 export PATH=$openssldir/lib:/$openssldir/bin:/usr/local/bin:/usr/bin:/bin
 
                 export CFLAGS="-I$CPATH/"
-                export CPPFLAGS="-I$CPATH/"
-                export LDFLAGS="-L$LIBRARY_PATH/"
+                export CPPFLAGS="-I$CPATH/ -I$(brew --prefix openssl)/include"
+                export LDFLAGS="-L$LIBRARY_PATH/ -L$(brew --prefix openssl)/lib"
                 # export LDFLAGS="-L$openssldirlib"
 
                 echo $CFLAGS
