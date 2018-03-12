@@ -36,13 +36,15 @@ class PrefabZOS_db(app):
         if start:
             self.start()
 
-    def start(self, instance='main', host='localhost', port=9900, index="/tmp/zdb-index", data="/tmp/zdb-data", mode='user', verbose=True):
+    def start(self, instance='main', host='localhost', port=9900, index="/tmp/zdb-index", data="/tmp/zdb-data", mode='user', verbose=True, adminsecret=""):
         if mode not in SUPPORTED_MODE:
             raise ValueError("mode %s is not supported" % mode)
 
-        # FIXME: add mode selection
         pm = self.prefab.system.processmanager.get()
         cmdline = "$BINDIR/zdb --listen %s --port %s --index %s --data %s --mode %s" % (host, port, index, data, mode)
+
+        if adminsecret is not "":
+            cmdline += " --admin %s"%adminsecret
 
         if verbose:
             cmdline += " -v"
