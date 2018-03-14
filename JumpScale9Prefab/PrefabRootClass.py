@@ -34,9 +34,6 @@ class PrefabRootClass(JSBASE):
         return self._bash
 
     def __str__(self):
-        if self.executor.type == "local":
-            return "prefab:local"
-        else:
-            return "prefab:%s:%s:%s" % (getattr(self.executor.sshclient, 'addr', 'local'), getattr(self.executor.sshclient, 'port', ''), getattr(self.executor.sshclient, 'login', ''))
+        return "prefab:%s" % repr(self.executor)
 
     __repr__ = __str__
