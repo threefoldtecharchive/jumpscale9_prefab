@@ -1,4 +1,4 @@
-
+import urllib3
 from js9 import j
 
 
@@ -31,21 +31,30 @@ class PrefabGit(base):
                  ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh="first"):
 
         if dest is None:
-            base, provider, account, repo, dest, url, port = j.clients.git.getGitRepoArgs(
+            _, _, _, _, dest, url, _ = j.clients.git.getGitRepoArgs(
                 url, dest, login, passwd, reset=reset, ssh=ssh, codeDir=self.prefab.core.dir_paths["CODEDIR"])
             # we need to work in remote linux so we only support /opt/code
         else:
             dest = self.replace(dest)
 
         self.prefab.core.dir_ensure(j.sal.fs.getParent(dest))
-        self.prefab.core.dir_ensure('$HOMEDIR/.ssh')
-        keys = self.prefab.core.run("ssh-keyscan -H github.com")[1]
-        self.prefab.core.dir_ensure('$HOMEDIR/.ssh')
-        self.prefab.core.file_append("$HOMEDIR/.ssh/known_hosts", keys)
-        self.prefab.core.file_attribs("$HOMEDIR/.ssh/known_hosts", mode=600)
+
+        parsed_url = urllib3.util.parse_url(url)
+        if parsed_url.scheme in ('ssh', 'git'):
+            self.prefab.core.dir_ensure('$HOMEDIR/.ssh')
+            keys = self.prefab.core.run("ssh-keyscan -H -p %s %s" % (parsed_url.port or 22, parsed_url.host))[1]
+            self.prefab.core.dir_ensure('$HOMEDIR/.ssh')
+            known_hosts = "$HOMEDIR/.ssh/known_hosts"
+            if self.prefab.core.exists(known_hosts):
+                known_hosts_lines = set(self.prefab.core.file_read("$HOMEDIR/.ssh/known_hosts").splitlines())
+                keys = set(keys.splitlines())
+                keys_to_add = "\n".join(known_hosts_lines.union(keys))
+            else:
+                keys_to_add = keys
+            self.prefab.core.file_append("$HOMEDIR/.ssh/known_hosts", keys_to_add)
+            self.prefab.core.file_attribs("$HOMEDIR/.ssh/known_hosts", mode=600)
 
         self.logger.info("pull %s with depth:%s" % (url, depth))
-
 
         return j.clients.git.pullGitRepo(url=url, dest=dest, login=login, passwd=passwd, depth=depth,
                                 ignorelocalchanges=ignorelocalchanges, reset=reset, branch=branch, revision=revision,
