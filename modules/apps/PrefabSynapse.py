@@ -9,7 +9,7 @@ class PrefabSynapse(app):
     def _init(self):
         self.server_path = "/root/.synapse"
         self.client_path = "/opt/var/riot"
-        self.client_url = "https://github.com/vector-im/riot-web/releases/download/v0.13.5/riot-v0.13.5.tar.gz"
+        self.client_url = "https://github.com/gigforks/riot-web/archive/iyo.tar.gz"
 
     def build(self, reset=False):
         if self.doneCheck('build', reset):
@@ -46,8 +46,8 @@ class PrefabSynapse(app):
 
         self.doneSet('build')
 
-    def install(self, admin_username, admin_password, domain="localhost", client_port=8080,
-                reset=False, start=False):
+    def install(self, admin_username, admin_password, iyo_client_id, iyo_client_secret, client_domain,
+                domain="localhost", client_port=8080, reset=False, start=False):
         """
         Build and Install synapse matrix server and web client
         :param admin_username: the username of synapse admin that will be created
@@ -63,7 +63,7 @@ class PrefabSynapse(app):
         # Install synapse using pip
         cmd = """
         source {}/bin/activate
-        pip install https://github.com/matrix-org/synapse/tarball/master
+        pip install https://github.com/gigforks/synapse/tarball/master
         """.format(self.server_path)
         self.prefab.core.run(cmd)
 
@@ -80,12 +80,14 @@ class PrefabSynapse(app):
         self.prefab.core.run('sudo -u postgres /opt/bin/psql -c "{}"'.format(db_query), die=False)
 
         # Configure synapse server and riot client
-        self._configure(user=admin_username, password=admin_password,
-                        domain=domain, client_port=client_port)
+        self._configure(user=admin_username, password=admin_password, iyo_client_id=iyo_client_id,
+                        iyo_client_secret=iyo_client_secret, domain=domain, client_port=client_port,
+                        client_domain=client_domain)
         if not start:
             self.stop()
 
-    def _configure(self, user, password, domain, client_port):
+    def _configure(self, user, password, domain, client_domain, client_port,
+                   iyo_client_id, iyo_client_secret):
 
         # Generate config file homeserver.yaml
         cmd = """
@@ -112,6 +114,15 @@ class PrefabSynapse(app):
                 "cp_min": 5,
                 "cp_max": 10,
             }
+        }
+        config_data['jwt_config'] = {
+            "enabled": True,
+            "algorithm": "ES384",
+            "secret": """-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n2
+7MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny6
+6+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv
+-----END PUBLIC KEY-----"""
         }
         config_data["enable_registration"] = True
         config_data = j.data.serializer.yaml.dumps(config_data)
@@ -141,11 +152,20 @@ class PrefabSynapse(app):
             gzip
             browse
             root {{client_path}}
+            oauth {
+                client_id       {{iyo_client_id}}
+                client_secret   {{iyo_client_secret}}
+                redirect_url    https://{{client_domain}}/oauth/callback
+                login_url       /iyo
+            }
         }
         """
         caddy_cfg = self.replace(caddy_cfg, {
             "client_path": self.client_path,
             "client_port": client_port,
+            "iyo_client_id": iyo_client_id,
+            "iyo_client_secret": iyo_client_secret,
+            "client_domain": client_domain,
         })
         self.prefab.web.caddy.add_website("riot_client", caddy_cfg)
 
