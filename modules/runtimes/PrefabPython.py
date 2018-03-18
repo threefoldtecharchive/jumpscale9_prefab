@@ -6,6 +6,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabPython(base):
 
     def _init(self):
+        self.logger_enable()
         self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
         self.CODEDIRL = self.core.replace("$CODEDIR/github/python/cpython/")
 
@@ -205,6 +206,9 @@ class PrefabPython(base):
 
 
     def _pipAll(self, reset=False):
+        """
+        js9 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
+        """
         # needs at least items from /JS8/code/github/jumpscale/jumpscale_core9/install/dependencies.py
         if self.doneCheck("pipall", reset):
             return
@@ -244,6 +248,8 @@ class PrefabPython(base):
         pytoml
         autopep8
         asyncssh
+        psutil
+        libtmux
 
         """
         self._pip(C, reset=reset)
@@ -262,85 +268,3 @@ class PrefabPython(base):
                 self.prefab.core.run(self.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
 
-
-
-    #BELOW IS FOR LATER, LETS MAKE SURE WE HAVE THE BUILDING & PIP GOING WELL
-
-
-    # def install(self):
-    #     """
-    #     will not use the platform python, will be build from scratch
-    #     """
-    #     if self.doneCheck("install", reset):
-    #         return
-    #     self.build()
-    #     self.prefab.core.dir_ensure(j.dirs.JSBASEDIR)
-    #     self.prefab.core.dir_ensure(j.dirs.JSBASEDIR + "/bin")
-    #     self.prefab.core.dir_ensure(j.dirs.JSBASEDIR + "/lib")
-    #     command = """
-    #     rsync -ldr --ignore-existing {python_build}/bin/* {JSBASE}/bin
-    #     rsync -ldr --ignore-existing {python_build}/lib/* {JSBASE}/lib
-    #     cp -r {python_build}/include {JSBASE}/include
-    #     cp -r {python_build}/plib    {JSBASE}/plib
-    #     cp {python_build}/env.sh {JSBASE}/env.sh
-    #     cp {python_build}/_sysconfigdata_m_linux_x86_64-linux-gnu.py {JSBASE}
-    #     """.format(python_build=self.BUILDDIRL, JSBASE=j.dirs.JSBASEDIR)
-
-    #     self.prefab.core.run(command)
-
-
-
-
-
-
-
-    # def sandbox(self, reset=False, deps=True):
-    #     if deps:
-    #         self.build(reset=reset)
-    #     if self.doneCheck("sandbox", reset):
-    #         return
-
-    #     C = """
-    #     set -ex
-    #     cd $BUILDDIRL
-
-    #     rm -rf share
-    #     mkdir -p lib/python3.6/site-packages/
-    #     rsync -rav lib/python3.6/site-packages/ plib/site-packages/
-    #     rm -rf lib/python3.6
-    #     find . -name '*.pyc' -delete
-
-    #     find . -name 'get-pip.py' -delete
-    #     set +ex
-    #     find -L .  -name '__pycache__' -exec rm -rf {} \;
-    #     find . -name "*.dist-info" -exec rm -rf {} \;
-    #     find . -name "*.so" -exec mv {} lib/ \;
-
-    #     # rm -f _sysconfigdata_m_darwin_darwin.py
-    #     rm -f openssl*
-
-    #     """
-    #     self.prefab.core.run(self.replace(C))
-
-    #     # now copy jumpscale in
-    #     linkpath = "%s/lib/JumpScale" % self.prefab.core.dir_paths["JSBASEDIR"]
-    #     C = "ln -s %s %s/lib/JumpScale" % (linkpath, self.BUILDDIRL)
-    #     if not self.prefab.core.file_exists("%s/lib/JumpScale" % self.BUILDDIRL):
-    #         self.core.run('rm -rf %s/lib/JumpScale' % self.BUILDDIRL)
-    #         self.prefab.core.run(C)
-
-    #     # # now create packaged dir
-    #     # destpath2 = self.BUILDDIRL.rstrip("/").rstrip() + "2"
-    #     # self.prefab.core.copyTree(source=self.BUILDDIRL, dest=destpath2, keepsymlinks=False, deletefirst=True,
-    #     #                            overwriteFiles=True,
-    #     #                            recursive=True, rsyncdelete=True, createdir=True)
-
-    #     # zip trick does not work yet lets leave for now
-    #     # C = """
-    #     # set -ex
-    #     # cd %s/plib
-    #     # zip -r ../plib.zip *
-    #     # cd ..
-    #     # rm -rf plib
-    #     # """ % destpath2
-    #     # self.prefab.core.run(C)
