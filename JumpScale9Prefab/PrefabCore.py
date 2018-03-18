@@ -1095,7 +1095,7 @@ class PrefabCore(base):
         return self.run(cmd=cmd, die=die, showout=showout, sudo=True)
 
     def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
-            shell=False, env=None, timeout=600, sudo=False):
+            shell=False, env=None, timeout=600, sudo=False, raw=False):
         """
         @param profile, execute the bash profile first
         """
@@ -1129,10 +1129,12 @@ class PrefabCore(base):
         sudo = self.sudomode or sudo
 
         self.logger.debug(cmd)
-
-        rc, out, err = self.executor.execute(
-            cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
-
+        if not raw:
+            rc, out, err = self.executor.execute(
+                cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
+        else:
+            rc, out, err = self.executor.executeRaw(
+                cmd, die=die, showout=showout)
         # If command fails and die is true, raise error
         if rc > 0 and die:
             raise j.exceptions.RuntimeError('%s, %s' % (cmd, err))
