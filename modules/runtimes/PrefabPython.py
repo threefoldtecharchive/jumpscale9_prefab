@@ -115,7 +115,7 @@ class PrefabPython(base):
 
             self.logger.info("compile python3")
             self.logger.debug(C)
-            self.prefab.core.run("cd %s;bash mycompile_all.sh" % self.CODEDIRL) #makes it easy to test & make changes where required
+            self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True) #makes it easy to test & make changes where required
 
             self.doneSet("compile")
 
