@@ -58,26 +58,26 @@ class PrefabSynapse(app):
         :param start: if you need to start server after installation
         :return:
         """
-        # self.build(reset=reset)
-        #
-        # # Install synapse using pip
-        # cmd = """
-        # source {}/bin/activate
-        # pip install https://github.com/gigforks/synapse/tarball/master
-        # """.format(self.server_path)
-        # self.prefab.core.run(cmd)
-        #
-        # # Create database if not exists
-        # if not self.prefab.db.postgresql.isStarted():
-        #     self.prefab.db.postgresql.start()
-        # db_query = """
-        #         CREATE DATABASE synapse
-        #         ENCODING 'UTF8'
-        #         LC_COLLATE='C'
-        #         LC_CTYPE='C'
-        #         template=template0
-        #     """
-        # self.prefab.core.run('sudo -u postgres /opt/bin/psql -c "{}"'.format(db_query), die=False)
+        self.build(reset=reset)
+
+        # Install synapse using pip
+        cmd = """
+        source {}/bin/activate
+        pip install https://github.com/gigforks/synapse/tarball/master
+        """.format(self.server_path)
+        self.prefab.core.run(cmd)
+
+        # Create database if not exists
+        if not self.prefab.db.postgresql.isStarted():
+            self.prefab.db.postgresql.start()
+        db_query = """
+                CREATE DATABASE synapse
+                ENCODING 'UTF8'
+                LC_COLLATE='C'
+                LC_CTYPE='C'
+                template=template0
+            """
+        self.prefab.core.run('sudo -u postgres /opt/bin/psql -c "{}"'.format(db_query), die=False)
 
         # Configure synapse server and riot client
         self._configure(user=admin_username, password=admin_password, iyo_client_id=iyo_client_id,
@@ -89,61 +89,61 @@ class PrefabSynapse(app):
     def _configure(self, user, password, domain, client_domain, client_port,
                    iyo_client_id, iyo_client_secret):
 
-#         # Generate config file homeserver.yaml
-#         cmd = """
-#         cd {}
-#         source ./bin/activate
-#         python -m synapse.app.homeserver \
-#             --server-name {} \
-#             --config-path homeserver.yaml \
-#             --generate-config \
-#             --report-stats=yes
-#         """.format(self.server_path, domain)
-#         self.prefab.core.run(cmd)
-#
-#         config_file_path = "{}/homeserver.yaml".format(self.server_path)
-#         config_data = self.prefab.core.file_read(config_file_path)
-#         config_data = j.data.serializer.yaml.loads(config_data)
-#         config_data["database"] = {
-#             "name": "psycopg2",
-#             "args": {
-#                 "user": "postgres",
-#                 "password": "postgres",
-#                 "database": "synapse",
-#                 "host": "localhost",
-#                 "cp_min": 5,
-#                 "cp_max": 10,
-#             }
-#         }
-#         config_data['jwt_config'] = {
-#             "enabled": True,
-#             "algorithm": "ES384",
-#             "secret": """-----BEGIN PUBLIC KEY-----
-# MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n2
-# 7MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny6
-# 6+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv
-# -----END PUBLIC KEY-----"""
-#         }
-#         config_data["enable_registration"] = True
-#         config_data = j.data.serializer.yaml.dumps(config_data)
-#         self.prefab.core.file_write(config_file_path, config_data)
-#
-#         # Edit config file of the riot client to refer to our own matrix
-#         config_file_path = "{}/config.sample.json".format(self.client_path)
-#         config_data = self.prefab.core.file_read(config_file_path)
-#         config_data = j.data.serializer.json.loads(config_data)
-#         config_data["default_hs_url"] = "https://{}".format(domain)
-#         config_data = j.data.serializer.json.dumps(config_data)
-#         self.prefab.core.file_write("{}/config.json".format(self.client_path), config_data)
-#
-#         # Create admin user
-#         self.start()
-#         cmd = """
-#         cd {server_path}
-#         source ./bin/activate
-#         register_new_matrix_user -c homeserver.yaml -u {user} -p {password} -a https://localhost:8448
-#         """.format(server_path=self.server_path, user=user, password=password)
-#         self.prefab.core.run(cmd)
+        # Generate config file homeserver.yaml
+        cmd = """
+        cd {}
+        source ./bin/activate
+        python -m synapse.app.homeserver \
+            --server-name {} \
+            --config-path homeserver.yaml \
+            --generate-config \
+            --report-stats=yes
+        """.format(self.server_path, domain)
+        self.prefab.core.run(cmd)
+
+        config_file_path = "{}/homeserver.yaml".format(self.server_path)
+        config_data = self.prefab.core.file_read(config_file_path)
+        config_data = j.data.serializer.yaml.loads(config_data)
+        config_data["database"] = {
+            "name": "psycopg2",
+            "args": {
+                "user": "postgres",
+                "password": "postgres",
+                "database": "synapse",
+                "host": "localhost",
+                "cp_min": 5,
+                "cp_max": 10,
+            }
+        }
+        config_data['jwt_config'] = {
+            "enabled": True,
+            "algorithm": "ES384",
+            "secret": """-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n2
+7MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny6
+6+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv
+-----END PUBLIC KEY-----"""
+        }
+        config_data["enable_registration"] = True
+        config_data = j.data.serializer.yaml.dumps(config_data)
+        self.prefab.core.file_write(config_file_path, config_data)
+
+        # Edit config file of the riot client to refer to our own matrix
+        config_file_path = "{}/config.sample.json".format(self.client_path)
+        config_data = self.prefab.core.file_read(config_file_path)
+        config_data = j.data.serializer.json.loads(config_data)
+        config_data["default_hs_url"] = "https://{}".format(domain)
+        config_data = j.data.serializer.json.dumps(config_data)
+        self.prefab.core.file_write("{}/config.json".format(self.client_path), config_data)
+
+        # Create admin user
+        self.start()
+        cmd = """
+        cd {server_path}
+        source ./bin/activate
+        register_new_matrix_user -c homeserver.yaml -u {user} -p {password} -a https://localhost:8448
+        """.format(server_path=self.server_path, user=user, password=password)
+        self.prefab.core.run(cmd)
 
         # Create Caddy config file to serve the web client
         caddy_cfg = """
