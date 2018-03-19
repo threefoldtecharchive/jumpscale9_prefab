@@ -50,14 +50,20 @@ class PrefabRsync(base):
         if install:
             self.install()
 
-    def install(self):
-        if not self.doneGet("build"):
-            self.build(install=False)
+    def install(self,build=False):
+        if build:
+            if not self.doneGet("build"):
+                self.build(install=False)
+            self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
+            self.prefab.bash.profileDefault.save()
+            self.prefab.core.file_copy(
+                "%s/%s/rsync" %
+                (self.BUILDDIRL,
+                self.VERSION),
+                self.prefab.core.dir_paths['BINDIR'])
+        else:
+            self.prefab.system.package.install("rsync")
 
-        self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
-        self.prefab.bash.profileDefault.save()
-        self.prefab.core.file_copy(
-            "%s/%s/rsync" %
-            (self.BUILDDIRL,
-             self.VERSION),
-            self.prefab.core.dir_paths['BINDIR'])
+    def configure(self):
+        self.install(build=False)
+        

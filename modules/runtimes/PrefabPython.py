@@ -32,9 +32,10 @@ class PrefabPython(base):
             return
 
         self.prefab.system.base.development(python=False) #make sure all required components are there
+        self.prefab.js9.js9core.install(full=True)
 
         if not self.doneGet("compile") or reset:
-            cpath = self.prefab.tools.git.pullRepo('https://github.com/python/cpython', branch="3.6", reset=False)
+            cpath = self.prefab.tools.git.pullRepo('https://github.com/python/cpython', branch="3.6", reset=False,ssh=False)
             #TODO:*1 there seems to be something wrong here, keeps on redoing the pull, should only do this once
             assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
 
@@ -250,6 +251,12 @@ class PrefabPython(base):
         asyncssh
         psutil
         libtmux
+        fakeredis
+        serial
+        numpy
+        PyNaCl
+        PyJWT
+        
 
         """
         self._pip(C, reset=reset)
