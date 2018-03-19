@@ -4,7 +4,7 @@ from js9 import j
 base = j.tools.prefab._getBaseClass()
 
 
-class PrefabFW(base):
+class PrefabUbuntu(base):
 
     def _init(self):
         pass
