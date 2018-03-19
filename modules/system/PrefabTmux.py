@@ -11,7 +11,9 @@ class PrefabTmux(base):
         @param name is name of session
         @screens is list with nr of screens required in session and their names (is [$screenname,...])
         """
-        self.prefab.bash.locale_check()        
+        if "LEDE" not in self.prefab.platformtype.osname:
+            self.prefab.bash.locale_check()
+
         # if 'ubuntu' in j.core.platformtype.myplatform.platformtypes:
         if not self.prefab.core.command_check("tmux"):
             self.prefab.system.package.install("tmux")

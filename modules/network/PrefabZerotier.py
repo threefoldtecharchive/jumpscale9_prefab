@@ -7,7 +7,11 @@ class PrefabZerotier(base):
 
     def _init(self):
         self.BUILDDIRL = self.core.replace("$BUILDDIR/zerotier/")
-        self.CLI = j.sal.fs.joinPaths(self.prefab.core.dir_paths['BINDIR'], 'zerotier-cli')
+        if "LEDE" in self.prefab.platformtype.osname:
+            self.CLI = 'zerotier-cli'
+        else:
+            self.CLI = j.sal.fs.joinPaths(self.prefab.core.dir_paths['BINDIR'], 'zerotier-cli')
+
 
     def reset(self):
         super().reset()
@@ -16,10 +20,16 @@ class PrefabZerotier(base):
         self.doneDelete("build")
 
     def build(self, reset=False, install=True):
+
         if reset:
             self.reset()
 
         if self.doneGet("build") and not reset:
+            return
+
+        if "LEDE" in self.prefab.platformtype.osname:
+            self.prefab.core.run("opkg install zerotier")
+            self.doneSet("build")
             return
 
         if self.prefab.core.isMac:
@@ -47,6 +57,8 @@ class PrefabZerotier(base):
     def install(self):
         if not self.doneGet("build"):
             self.build(install=False)
+        if "LEDE" in self.prefab.platformtype.osname:
+            return
         bindir = self.prefab.core.dir_paths['BINDIR']
         self.prefab.core.dir_ensure(bindir)
         for item in self.prefab.core.find(j.sal.fs.joinPaths(self.BUILDDIRL, 'usr/sbin')):
