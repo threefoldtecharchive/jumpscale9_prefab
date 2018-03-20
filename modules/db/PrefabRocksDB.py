@@ -5,12 +5,8 @@ base = j.tools.prefab._getBaseClass()
 
 class PrefabRocksDB(base):
 
-    # WIP : builds but still cannot install gorocksdb yet , based on
-    # https://github.com/g8os/initramfs/blob/0.12.0/internals/gorocksdb.sh
     def _init(self):
         self.BUILDDIRL = self.core.replace("$BUILDDIR/rocksdb/")
-        self.ROCKSDB_VERSION = "5.1.2"
-        self.ROCKSDB_LINK = "https://github.com/facebook/rocksdb/archive/v%s.tar.gz" % self.ROCKSDB_VERSION
 
     def build(self, reset=True, install=True):
         # Get binaries and build rocksdb.
@@ -19,50 +15,36 @@ class PrefabRocksDB(base):
 
         self.prefab.core.dir_ensure(self.BUILDDIRL)
 
-        # install deps
-        self.prefab.system.package.mdupdate()
-        self.prefab.system.package.install('build-essential')
-        self.prefab.system.package.install('libsnappy-dev')
-        self.prefab.system.package.install('zlib1g-dev')
-        self.prefab.system.package.install('libbz2-dev')
-        self.prefab.system.package.install('libzstd-dev')
-        self.prefab.system.package.install('librocksdb-dev')
+        build_script = """
+        #!/bin/bash
 
-        # set env variables
-        profile = self.prefab.bash.profileDefault
-        profile.envSet("ROCKSDB_VERSION", self.ROCKSDB_VERSION)
-        profile.envSet("ROCKSDB_LINK", self.ROCKSDB_LINK)
-        profile.envSet("ROCKSDB_CHECKSUM", "b682f574363edfea0e2f7dbf01fc0e5b")
-        profile.envSet("CGO_CFLAGS", "-I%s/rocksdb-%s/include" %
-                       (self.BUILDDIRL, self.ROCKSDB_VERSION))
-        profile.envSet("CGO_LDFLAGS",
-                       "-L%s/rocksdb-%s -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4" % (self.BUILDDIRL,
-                                                                                            self.ROCKSDB_VERSION))
-        profile.save()
+        set -x
 
-        # download gorocksdb
-        self.prefab.core.file_download(
-            '%s' % self.ROCKSDB_LINK, '$TMPDIR/rocksdb-%s.tar.gz' % self.ROCKSDB_VERSION)
+        apt-get update
+        apt-get install -y build-essential cmake libsnappy-dev zlib1g-dev libbz2-dev libgflags-dev liblz4-dev git python3-pip python-dev
+        git clone https://github.com/facebook/rocksdb.git
+        cd rocksdb
+        mkdir -p build && cd build
+        # cmake ..
+        PORTABLE=1 make shared_lib
+        make install
+        ldconfig
 
-        # extract rocksdb
-        if not self.prefab.core.file_exists('$TMPDIR/rocksdb-%s.tar.gz' % self.ROCKSDB_VERSION):
-            raise RuntimeError('could not find tar of rocksdb')
-        self.prefab.core.run(
-            'cd $TMPDIR && tar -xf rocksdb-%s.tar.gz -C .' % self.ROCKSDB_VERSION)
-
-        # compile and install
-        self.prefab.core.run('cd $TMPDIR/rocksdb-%s && PORTABLE=1 make shared_lib' % self.ROCKSDB_VERSION,
-                             profile=True)
-        self.prefab.core.run('cd $TMPDIR/rocksdb-%s && cp -a librocksdb.so* %s' % (self.ROCKSDB_VERSION,
-                                                                                   self.BUILDDIRL))
-        self.prefab.core.run(
-            'cd $TMPDIR/rocksdb-%s && cp -a librocksdb.so* /usr/lib' % self.ROCKSDB_VERSION)
-        # self.prefab.runtimes.golang.get('github.com/tecbot/gorocksdb', tags=['embed'])
+        cd ../
+        pip3 install -U setuptools>=25
+        pip3 install python-rocksdb==0.6.9
+        """
+        j.tools.prefab.local.core.execute_script(build_script,
+                                                 die=True,
+                                                 profile=False,
+                                                 interpreter='bash',
+                                                 tmux=False,
+                                                 replace=False,
+                                                 showout=True,
+                                                 sudo=False)
 
         self.doneSet("build")
-
-        if install:
-            self.install(reset)
+        self.doneSet("install")
 
     def install(self, reset=False):
         # install required packages to run.
