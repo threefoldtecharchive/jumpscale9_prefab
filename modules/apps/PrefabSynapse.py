@@ -9,7 +9,7 @@ class PrefabSynapse(app):
     def _init(self):
         self.server_path = "/root/.synapse"
         self.client_path = "/opt/var/riot"
-        self.client_url = "https://github.com/gigforks/riot-web/archive/iyo.tar.gz"
+        self.client_url = "https://github.com/gigforks/riot-web/files/1822807/riot-v0.13.5-624-g836fcab.tar.gz"
 
     def build(self, reset=False):
         if self.doneCheck('build', reset):
