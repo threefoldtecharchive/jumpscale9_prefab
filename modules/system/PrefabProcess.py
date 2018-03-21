@@ -120,8 +120,10 @@ class PrefabProcess(base):
         # NOTE: ps -A seems to be the only way to not have the grep appearing
         # as well
         RE_SPACES = re.compile("[\s\t]+")
-
-        cmd = "ps -A | grep {0} ; true".format(name) if is_string else "ps -A"
+        if "LEDE" in self.prefab.platformtype.osname:
+            cmd = "ps w | grep {0} ; true".format(name) if is_string else "ps w"
+        else:
+            cmd = "ps -A | grep {0} ; true".format(name) if is_string else "ps -A"
         rc, processes, err = self.prefab.core.run(cmd, replaceArgs=False, die=False)
 
         res = []
@@ -138,7 +140,11 @@ class PrefabProcess(base):
             # message creep up the output)
             if len(line) < 4:
                 continue
-            pid, tty, time, command = line
+            if "LEDE" in self.prefab.platformtype.osname:
+                pid, __user, __vsz, __stat, command = line
+            else:
+                pid, tty, time, command = line
+
             if is_string:
                 if pid and ((exact and command == name) or (not exact and command.find(name) >= 0)):
                     if command.find("prefab") == -1:
