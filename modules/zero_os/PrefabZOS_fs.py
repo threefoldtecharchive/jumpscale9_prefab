@@ -24,7 +24,7 @@ class PrefabZOS_fs(app):
 
     def install(self, start=False):
         """
-        download, install, move files to appropriate places, and create relavent configs
+        download, install, move files to appropriate places, and create relevant configs
         """
         content = """
         [[mount]]
