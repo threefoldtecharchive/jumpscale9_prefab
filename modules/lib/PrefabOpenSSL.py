@@ -36,27 +36,24 @@ sudo mv -f /usr/bin/openssl_ /usr/bin/openssl
 class PrefabOpenSSL(base):
 
     def _init(self):
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/openssl/")
-        self.CODEDIRL = self.core.replace("$CODEDIR/github/openssl/openssl/")
+        self.BUILDDIRL = self.core.replace("$BUILDDIR/openssl")
+        self.CODEDIRL = self.core.replace("$BUILDDIR/code/openssl")
 
     def reset(self):
         base.reset(self)
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
 
-    def build(self, destpath="", reset=False):
+    def build(self, reset=False):
         """
-        @param destpath, if '' then will be $TMPDIR/build/openssl
-        js9 'j.tools.prefab.local.lib.openssl.build()'
+        js9 'j.tools.prefab.local.lib.openssl.build();print(j.tools.prefab.local.lib.openssl.BUILDDIRL)'
         """
 
         if self.doneCheck("build") and not reset:
             return
         self.prefab.system.base.development(python=False)
         url = "https://github.com/openssl/openssl.git"
-        cpath = self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable", reset=False, ssh=False)
-
-        assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
+        self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable",dest=self.CODEDIRL, reset=False, ssh=False)
 
         if not self.doneGet("compile") or reset:
             C = """
