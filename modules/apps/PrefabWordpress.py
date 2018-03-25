@@ -92,12 +92,24 @@ class PrefabWordpress(app):
         self.prefab.executor.execute(configure_command)
 
         # install wordpress
-        #TODO:*1 why like this with sudo?
         install_command = """
         sudo -u {user} -i -- wp  --path={path} core install --url='{url}' --title='{title}' --admin_user='{admin_user}' --admin_password='{admin_password}' --admin_email='{admin_email}'
         """.format(user=self.user, url=url, title=title, admin_user=admin_user, 
                    admin_password=admin_password, admin_email=admin_email, path=path)
         self.prefab.executor.execute(install_command)
+
+        # allow file uploads
+        cmd = """
+        sudo chown -R www-data:www-data {path}
+        """.format(path=path)
+        self.prefab.executor.execute(cmd)
+
+        # allow plugins upload from ui without ftp and increase allowed file size
+        cfg = """
+        define('FS_METHOD', 'direct');
+        define('WP_MEMORY_LIMIT', '256M');
+        """
+        self.prefab.core.file_append(path + "/wp-config.php", cfg)
 
         # install themes
         self.install_theme(path, theme)

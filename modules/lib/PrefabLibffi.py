@@ -6,8 +6,8 @@ base = j.tools.prefab._getBaseClass()
 class PrefabLibffi(base):
 
     def _init(self):
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/libffi/")
-        self.CODEDIRL = self.core.replace("$CODEDIR/github/libffi/libffi/")
+        self.BUILDDIRL = self.core.replace("$BUILDDIR/libffi")
+        self.CODEDIRL = self.core.replace("$BUILDDIR/code/libffi")
 
     def reset(self):
         base.reset(self)
@@ -16,7 +16,7 @@ class PrefabLibffi(base):
 
     def build(self, reset=False):
         """
-        js9 'j.tools.prefab.local.lib.libffi.build()'
+        js9 'j.tools.prefab.local.lib.libffi.build(reset=True)'
         """
         if reset:
             self.reset()
@@ -26,13 +26,10 @@ class PrefabLibffi(base):
 
         self.prefab.system.package.mdupdate()
         self.prefab.core.dir_ensure(self.BUILDDIRL)
-        j.tools.prefab.local.lib.openssl.build()
         if not self.core.isMac:
             self.prefab.system.package.install('dh-autoreconf')
         url = "https://github.com/libffi/libffi.git"
-        cpath = self.prefab.tools.git.pullRepo(url, reset=False, ssh=False)
-
-        assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
+        self.prefab.tools.git.pullRepo(url, reset=False,dest=self.CODEDIRL, ssh=False)
 
         if not self.doneGet("compile") or reset:
             C = """
