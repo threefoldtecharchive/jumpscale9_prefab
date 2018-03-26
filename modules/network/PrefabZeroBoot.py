@@ -27,7 +27,8 @@ class PrefabZeroBoot(base):
         self.prefab.core.run("uci commit")
 
         self.prefab.core.dir_ensure('/opt/storage')
-        self.prefab.core.run("wget https://raw.githubusercontent.com/0-complexity/G8_testing/master/pxe.tar.gz -O /opt/storage/pxe.tar.gz")
+        self.prefab.core.run("opkg install curl")
+        self.prefab.core.run("curl https://raw.githubusercontent.com/0-complexity/G8_testing/master/pxe.tar.gz -o /opt/storage/pxe.tar.gz")
         self.prefab.core.run("tar -xzf /opt/storage/pxe.tar.gz -C /opt/storage")
         self.prefab.core.run("cp -r /opt/storage/pxe/* /opt/storage")
         self.prefab.core.run("rm -rf /opt/storage/pxe")
