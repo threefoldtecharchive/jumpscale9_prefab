@@ -96,13 +96,13 @@ class PrefabWordpress(app):
         sudo -u {user} -i -- wp  --path={path} core install --url='{url}' --title='{title}' --admin_user='{admin_user}' --admin_password='{admin_password}' --admin_email='{admin_email}'
         """.format(user=self.user, url=url, title=title, admin_user=admin_user, 
                    admin_password=admin_password, admin_email=admin_email, path=path)
-        self.prefab.executor.execute(install_command)
+        self.prefab.executor.execute(install_command) 
 
-        # allow file uploads
-        cmd = """
-        sudo chown -R www-data:www-data {path}
-        """.format(path=path)
-        self.prefab.executor.execute(cmd)
+        # install themes
+        self.install_theme(path, theme)
+
+        # install plugins
+        self.install_plugins(path, plugins)
 
         # allow plugins upload from ui without ftp and increase allowed file size
         cfg = """
@@ -111,12 +111,11 @@ class PrefabWordpress(app):
         """
         self.prefab.core.file_append(path + "/wp-config.php", cfg)
 
-        # install themes
-        self.install_theme(path, theme)
-
-        # install plugins
-        self.install_plugins(path, plugins)
-
+        # allow file uploads
+        cmd = """
+        sudo chown -R www-data:www-data {path}
+        """.format(path=path)
+        self.prefab.executor.execute(cmd)
         
         self.doneSet("install")
 
