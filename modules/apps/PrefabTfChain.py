@@ -26,10 +26,12 @@ class PrefabTfChain(app):
                                                   'src',
                                                   dir_location, 'cmd')
 
-        cmd = 'cd {} && go build -ldflags "-linkmode external -extldflags -static" -o ../../bin/{}'
-        self.prefab.core.execute_bash(cmd.format(
-            self.prefab.core.joinpaths(dir_location, 'tfchaind'), 'tfchaind'))
-        self.prefab.core.execute_bash(cmd.format(
-            self.prefab.core.joinpaths(dir_location, 'tfchainc'), 'tfchainc'))
+        cmd = 'cd {} && go build -ldflags "-linkmode external -extldflags -static" -o {}'
+        self.prefab.core.run(cmd.format(
+            self.prefab.core.joinpaths(dir_location, 'tfchaind'),
+            j.sal.fs.joinPaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchaind')), profile=True)
+        self.prefab.core.run(cmd.format(
+            self.prefab.core.joinpaths(dir_location, 'tfchainc'),
+            j.sal.fs.joinPaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchainc')), profile=True)
 
         self.doneSet('build')
