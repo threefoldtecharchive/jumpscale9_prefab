@@ -55,12 +55,12 @@ class PrefabGolang(app):
         if reset is False and self.isInstalled():
             return
         if self.prefab.core.isMac:
-            if old==False:
+            if old is False:
                 downl = "https://storage.googleapis.com/golang/go1.9.4.darwin-amd64.tar.gz"
             else:
                 downl = "https://storage.googleapis.com/golang/go1.8.7.darwin-amd64.tar.gz"
         elif "ubuntu" in self.prefab.platformtype.platformtypes:
-            if old==False:
+            if old is False:
                 downl = "https://storage.googleapis.com/golang/go1.9.4.linux-amd64.tar.gz"
             else:
                 downl = "https://storage.googleapis.com/golang/go1.8.7.linux-amd64.tar.gz"
@@ -92,7 +92,7 @@ class PrefabGolang(app):
         """
         Install (using go get) goraml.
         """
-        if reset == False and self.doneGet('goraml'):
+        if reset is False and self.doneGet('goraml'):
             return
 
         self.install()
@@ -113,7 +113,7 @@ class PrefabGolang(app):
         """
         Install (using go get) go-bindata.
         """
-        if reset == False and self.doneGet('bindata'):
+        if reset is False and self.doneGet('bindata'):
             return
         C = '''
         set -ex
@@ -140,7 +140,7 @@ class PrefabGolang(app):
         srcpath = self.prefab.core.joinpaths(self.GOPATHDIR, 'src')
         self.prefab.core.dir_remove(srcpath)
 
-    def get(self, url, install=True, update=True):
+    def get(self, url, install=True, update=True, die=True):
         """
         @param url ,, str url to run the go get command on.
         @param install ,, bool will default build and install the repo if false will only get the repo.
@@ -155,7 +155,7 @@ class PrefabGolang(app):
         if update:
             update_flag = '-u'
         self.prefab.core.run('go get %s -v %s %s' % (download_flag, update_flag, url),
-                             profile=True)
+                             profile=True, die=die)
 
     def godep(self, url, branch=None, depth=1):
         """
