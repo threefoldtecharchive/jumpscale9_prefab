@@ -189,7 +189,7 @@ class PrefabPython(base):
         C = """
         uvloop
         redis
-        paramiko
+        # paramiko
         watchdog
         gitpython
         click
@@ -221,7 +221,7 @@ class PrefabPython(base):
         sanic
         pytoml
         autopep8
-        asyncssh
+        # asyncssh
         psutil
         libtmux
         fakeredis
@@ -231,7 +231,7 @@ class PrefabPython(base):
         PyJWT
         ovh
         ipcalc
-
+        ssh2-python
         """
         self._pip(C, reset=reset)
         # self.sandbox(deps=False)
