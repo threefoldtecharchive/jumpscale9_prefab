@@ -124,6 +124,7 @@ class PrefabProcess(base):
             cmd = "ps w | grep {0} ; true".format(name) if is_string else "ps w"
         else:
             cmd = "ps -A | grep {0} ; true".format(name) if is_string else "ps -A"
+
         rc, processes, err = self.prefab.core.run(cmd, replaceArgs=False, die=False)
 
         res = []
@@ -132,7 +133,11 @@ class PrefabProcess(base):
                 continue
             if ' grep ' in line:
                 continue
-            line = RE_SPACES.split(line, 3)
+
+            items_num = 4
+            if "LEDE" in self.prefab.platformtype.osname:
+                items_num = 5
+            line = RE_SPACES.split(line, items_num-1)
             # 3010 pts/1    00:00:07 gunicorn
             # PID  TTY      TIME     CMD
             # 0    1        2        3
