@@ -5,7 +5,7 @@ base = j.tools.prefab._getBaseClass()
 
 class PrefabZeroBoot(base):
     def install(self, network_id, token, reset=False):
-        if self.doneCheck("install") or reset:
+        if self.doneCheck("install") or not reset:
             return
         # update zerotier config
         self.prefab.network.zerotier.build(install=True)
@@ -18,7 +18,16 @@ class PrefabZeroBoot(base):
         self.prefab.core.run("uci set zerotier.sample_config.join='{}'".format(network_id)) # Join zerotier network
         self.prefab.core.run("uci set zerotier.sample_config.secret='generate'") # Generate secret on the first start
         self.prefab.core.run("uci commit")
-        self.prefab.core.run("zerotier-cli token={token} join {network_id}".format(network_id=network_id, token=token))
+
+        # Join Network
+        self.prefab.core.run("zerotier-cli join {network_id}".format(network_id=network_id))
+
+        # Authorize machine into the network
+        info_output = self.prefab.core.run("zerotier-cli info")[1]
+        machine_address = info_output.split()[2]
+        zerotier_cli = j.clients.zerotier.get(data={"token_": token})
+        zerotier_cli.client.network.updateMember(address=machine_address, id=network_id,
+                                                 data={"config": {"authorized": True}})
 
         # update TFTP and DHCP
         self.prefab.core.run("uci set dhcp.@dnsmasq[0].enable_tftp='1'")
@@ -46,6 +55,7 @@ class PrefabZeroBoot(base):
         self.prefab.core.run("uci set firewall.@zone[-1].forward='ACCEPT'")
         self.prefab.core.run("uci set firewall.@zone[-1].masq='1'")
         self.prefab.core.run("uci set firewall.@zone[-1].network='{0}'".format(network_name))
+        self.prefab.core.run("uci add firewall forwarding")
         self.prefab.core.run("uci set firewall.@forwarding[-2]=forwarding")
         self.prefab.core.run("uci set firewall.@forwarding[-2].dest='lan'")
         self.prefab.core.run("uci set firewall.@forwarding[-2].src='zerotier'")
