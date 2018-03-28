@@ -102,7 +102,7 @@ class PrefabWordpress(app):
         self.install_theme(path, theme)
 
         # install plugins
-        self.install_plugins(path, plugins)
+        self.install_plugins(path, plugins, True)
 
         # allow plugins upload from ui without ftp and increase allowed file size
         cfg = """
