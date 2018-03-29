@@ -105,15 +105,15 @@ class PrefabWordpress(app):
         self.install_plugins(path, plugins, True)
 
         # allow plugins upload from ui without ftp and increase allowed file size
-        cfg = """
-        define('FS_METHOD', 'direct');
-        define('WP_MEMORY_LIMIT', '256M');
-        """
-        self.prefab.core.file_append(path + "/wp-config.php", cfg)
+        configs = {
+            'FS_METHOD': 'direct',
+            'WP_MEMORY_LIMIT': '256M'
+        }
+        self.add_config(path, configs)
 
         # allow file uploads
         cmd = """
-        sudo chown -R www-data:www-data {path}
+        sudo chown -R www-data:www-data {path}/wp-content
         """.format(path=path)
         self.prefab.executor.execute(cmd)
         
@@ -139,3 +139,16 @@ class PrefabWordpress(app):
             sudo -u {} -i -- wp --path={} plugin install {} {}
             """.format(self.user, path, plugin, activate_cmd)
             self.prefab.core.run(plugins_command, die=False)
+
+    def add_config(self, path, config):
+        """add constants to wordpress config
+        
+        Arguments:
+            config {Dict} -- constances to be added
+        """
+        for item in config.items():
+            command = """
+            sudo -u {} -i -- wp --path={} config set {} {} --type="constant"
+            """.format(self.user, path, item[0], item[1])
+            self.prefab.core.run(command)
+
