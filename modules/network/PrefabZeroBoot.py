@@ -5,19 +5,21 @@ base = j.tools.prefab._getBaseClass()
 
 class PrefabZeroBoot(base):
     def install(self, network_id, token, reset=False):
-        if self.doneCheck("install") or not reset:
+        if not reset and self.doneCheck("install"):
             return
         # update zerotier config
-        self.prefab.network.zerotier.build(install=True)
-        
-        self.prefab.core.run("bash /etc/init.d/zerotier enable")
-        self.prefab.core.run("bash /etc/init.d/zerotier start")
+        self.prefab.network.zerotier.build(install=True, reset=reset)
+        # Start zerotier at least one time to generate config files
+        self.prefab.network.zerotier.start()
+        self.prefab.network.zerotier.stop()
         self.prefab.core.run("uci set zerotier.sample_config=zerotier")
         self.prefab.core.run("uci set zerotier.sample_config.enabled='1'")
         self.prefab.core.run("uci set zerotier.sample_config.interface='wan'") # restart ZT when wan status changed
         self.prefab.core.run("uci set zerotier.sample_config.join='{}'".format(network_id)) # Join zerotier network
         self.prefab.core.run("uci set zerotier.sample_config.secret='generate'") # Generate secret on the first start
         self.prefab.core.run("uci commit")
+        self.prefab.core.run("/etc/init.d/zerotier enable")
+        self.prefab.core.run("/etc/init.d/zerotier start")
 
         # Join Network
         self.prefab.core.run("zerotier-cli join {network_id}".format(network_id=network_id))
@@ -36,7 +38,7 @@ class PrefabZeroBoot(base):
         self.prefab.core.run("uci commit")
 
         self.prefab.core.dir_ensure('/opt/storage')
-        self.prefab.core.run("opkg install curl")
+        self.prefab.core.run("opkg install curl ca-bundle")
         self.prefab.core.run("curl https://raw.githubusercontent.com/0-complexity/G8_testing/master/pxe.tar.gz -o /opt/storage/pxe.tar.gz")
         self.prefab.core.run("tar -xzf /opt/storage/pxe.tar.gz -C /opt/storage")
         self.prefab.core.run("cp -r /opt/storage/pxe/* /opt/storage")
