@@ -170,3 +170,24 @@ class PrefabZerotier(base):
             peers.append(peer)
 
         return peers
+
+
+    def network_name_get(self, network_id):
+        """"gets a network name with ip
+        
+        Arguments:
+            network_id {string} -- network id to look for
+        
+        Raises:
+            RuntimeError -- if there is no networks with the given id
+        
+        Returns:
+            string -- network name
+        """
+
+        networks = self.list_networks()
+        for network in networks:
+            if network['network_id'] == network_id:
+                return network['name']
+        
+        raise RuntimeError("no networks found with id {}, make sure that you proberly joined this network".format(network_id))

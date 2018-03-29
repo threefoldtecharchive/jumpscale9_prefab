@@ -124,7 +124,6 @@ class PrefabProcess(base):
             cmd = "ps w | grep {0} ; true".format(name) if is_string else "ps w"
         else:
             cmd = "ps -A | grep {0} ; true".format(name) if is_string else "ps -A"
-
         rc, processes, err = self.prefab.core.run(cmd, replaceArgs=False, die=False)
 
         res = []
