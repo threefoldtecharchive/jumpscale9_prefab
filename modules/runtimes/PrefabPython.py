@@ -8,17 +8,18 @@ class PrefabPython(base):
     def _init(self):
         self.logger_enable()
         self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
-        self.CODEDIRL = self.core.replace("$CODEDIR/github/python/cpython/")
+        self.CODEDIRL = self.core.replace("$BUILDDIR/code/python3/")
 
     def reset(self):
         base.reset(self)
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
+     
 
     def build(self, reset=False):
         """
-        js9 'j.tools.prefab.local.runtimes.python.build()'
+        js9 'j.tools.prefab.local.runtimes.python.build(reset=False)'
 
 
         will build python and install all pip's inside the builded directory
@@ -32,24 +33,20 @@ class PrefabPython(base):
             return
 
         self.prefab.system.base.development(python=False) #make sure all required components are there
-        self.prefab.js9.js9core.install(full=True)
-
+        
+    
         if not self.doneGet("compile") or reset:
-            cpath = self.prefab.tools.git.pullRepo('https://github.com/python/cpython', branch="3.6", reset=False,ssh=False)
-            #TODO:*1 there seems to be something wrong here, keeps on redoing the pull, should only do this once
-            assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
-
-            ##TODO:*1 GET THIS TO WORK ON LINUX & OSX (couldn't get the ssl to work)
+            self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, branch="3.6", reset=False,ssh=False)
+            
             if self.core.isMac:  
-                self.prefab.lib.openssl.build()
-                # self.prefab.lib.libffi.build()
-
-                if not self.doneGet("xcode_install"):
+                #clue to get it finally working was in https://stackoverflow.com/questions/46457404/how-can-i-compile-python-3-6-2-on-macos-with-openssl-from-homebrew
+                if reset or not self.doneGet("xcode_install"):
                     self.prefab.core.run(
                         "xcode-select --install", die=False, showout=True)
                     C = """
                     openssl
                     xz
+                    libffi
                     """
                     self.prefab.system.package.install(C)
                     self.doneSet("xcode_install")
@@ -59,37 +56,15 @@ class PrefabPython(base):
                 cd $CODEDIRL
                 mkdir -p $BUILDDIRL
 
-                # export LIBRARY_PATH="$openssldir/lib:$libffidir/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib"
-                # export LD_LIBRARY_PATH="$openssldir/lib:$libffidir/lib:/usr/lib/x86_64-linux-gnu:/usr/lib:/usr/local/lib"
-                export LIBRARY_PATH="$openssldir/lib:$libffidir/lib:/usr/lib:/usr/local/lib"
-                export LD_LIBRARY_PATH="$openssldir/lib:$libffidir/lib:/usr/lib:/usr/local/lib"
-                export CPPPATH="$openssldir/include:/usr/include"
-                export CPATH="$openssldir/include:/usr/include"
-                export PATH=$openssldir/lib:/$openssldir/bin:/usr/local/bin:/usr/bin:/bin
+                export OPENSSLPATH=$(brew --prefix openssl)
 
-                export CFLAGS="-I$CPATH/"
-                export CPPFLAGS="-I$CPATH/ -I$(brew --prefix openssl)/include"
-                export LDFLAGS="-L$LIBRARY_PATH/ -L$(brew --prefix openssl)/lib"
-                # export LDFLAGS="-L$openssldirlib"
-
-                echo $CFLAGS
-                echo $LDFLAGS
-
-                ./configure --prefix=$BUILDDIRL
+                ./configure --prefix=$BUILDDIRL  CPPFLAGS="-I$OPENSSLPATH/include" LDFLAGS="-L$OPENSSLPATH/lib" 
 
                 #if you do the optimizations then it will do all the tests
                 # ./configure --prefix=$BUILDDIRL --enable-optimizations
                 
-                # make -s -j8
-                # mkdir -p dbuild
-                # make -C dbuild 
                 make -j8 EXTRATESTOPTS=--list-tests install
-
-
                 """
-
-                C = C.replace("$openssldir", self.prefab.lib.openssl.BUILDDIRL.rstrip("/"))
-                C = C.replace("$libffidir", self.prefab.lib.libffi.BUILDDIRL.rstrip("/"))
                 C = self.replace(C)
 
             else: 
@@ -138,23 +113,21 @@ class PrefabPython(base):
 
         export PBASE=`pwd`
 
-        export PATH=$PATH:$openssldir/bin:/usr/local/bin:/usr/bin:/bin
+        export OPENSSLPATH=$(brew --prefix openssl)
 
-        export LIBRARY_PATH="$LIBRARY_PATH:$openssldir/lib:$libffidir/lib:/usr/lib:/usr/local/lib:/lib:/lib/x86_64-linux-gnu"
+        export PATH=$PATH:$OPENSSLPATH/bin:/usr/local/bin:/usr/bin:/bin
+
+        export LIBRARY_PATH="$LIBRARY_PATH:$OPENSSLPATH/lib:/usr/lib:/usr/local/lib:/lib:/lib/x86_64-linux-gnu"
         export LD_LIBRARY_PATH="$LIBRARY_PATH"
 
-        export CPPPATH="$PBASE/include/python3.6m:$openssldir/include:/usr/include"
+        export CPPPATH="$PBASE/include/python3.6m:$OPENSSLPATH/include:/usr/include"
         export CPATH="$CPPPATH"
 
         export CFLAGS="-I$CPATH/"
         export CPPFLAGS="-I$CPATH/"
         export LDFLAGS="-L$LIBRARY_PATH/"
 
-
-        #python -s -S $@
         """
-        C = C.replace("$openssldir", self.prefab.lib.openssl.BUILDDIRL.rstrip("/"))
-        C = C.replace("$libffidir", self.prefab.lib.libffi.BUILDDIRL.rstrip("/"))
         C = self.replace(C)        
         self.prefab.core.file_write("%s/envbuild.sh" %  self.BUILDDIRL, C)   
 
@@ -197,7 +170,7 @@ class PrefabPython(base):
             #for osx SHOULD NOT BE DONE BECAUSE WE SHOULD HAVE IT BUILD BEFORE AND ARE USING I FOR OSX
             self.prefab.system.package.ensure("libcapnp-dev")
         else:
-            self.prefab.system.package.ensure("capnp")  #hope this installs the dev libs as well on osx
+            self.prefab.system.package.ensure("capnp")
 
         self._pipAll(reset=reset)
 
@@ -216,7 +189,7 @@ class PrefabPython(base):
         C = """
         uvloop
         redis
-        paramiko
+        # paramiko
         watchdog
         gitpython
         click
@@ -248,7 +221,7 @@ class PrefabPython(base):
         sanic
         pytoml
         autopep8
-        asyncssh
+        # asyncssh
         psutil
         libtmux
         fakeredis
@@ -256,8 +229,9 @@ class PrefabPython(base):
         numpy
         PyNaCl
         PyJWT
-        
-
+        ovh
+        ipcalc
+        ssh2-python
         """
         self._pip(C, reset=reset)
         # self.sandbox(deps=False)
@@ -274,4 +248,6 @@ class PrefabPython(base):
                 C = "set -ex;cd $BUILDDIRL;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
                 self.prefab.core.run(self.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
+
+        self.prefab.local.zero_os.zos_stor_client.build(python_build=True) #builds the zos_stor_client
 

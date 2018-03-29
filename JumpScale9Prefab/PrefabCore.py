@@ -1203,6 +1203,12 @@ class PrefabCore(base):
 
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
+        if profile:
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            # next will check if profile path exists, if not will put it
+            cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
+                ppath, ppath, ppath, cmd)
+
         if tmux:
             rc, out = self.prefab.system.tmux.executeInScreen("cmd", "cmd", cmd, wait=True, die=False)
             if showout:

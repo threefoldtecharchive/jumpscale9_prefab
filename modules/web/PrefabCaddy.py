@@ -38,11 +38,11 @@ class PrefabCaddy(app):
 
         # build caddy from source using our caddyman
         self.prefab.tools.git.pullRepo("https://github.com/incubaid/caddyman", dest="/tmp/caddyman")
-        self.prefab.core.execute_bash("cd /tmp/caddyman && chmod u+x caddyman.sh")
+        self.prefab.core.run("cd /tmp/caddyman && chmod u+x caddyman.sh")
         if not plugins:
             plugins = self.default_plugins
         cmd = "/tmp/caddyman/caddyman.sh install {plugins}".format(plugins=" ".join(plugins))
-        self.prefab.core.execute_bash(cmd)
+        self.prefab.core.run(cmd)
         self.doneSet('build')
 
     def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/caddy.cfg"):
