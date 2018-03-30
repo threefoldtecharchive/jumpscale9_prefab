@@ -44,7 +44,7 @@ class PrefabZOS_db(app):
         cmdline = "$BINDIR/zdb --listen %s --port %s --index %s --data %s --mode %s" % (host, port, index, data, mode)
 
         if adminsecret is not "":
-            cmdline += " --admin %s"%adminsecret
+            cmdline += " --admin %s" % adminsecret
 
         if verbose:
             cmdline += " -v"

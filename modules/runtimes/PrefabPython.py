@@ -15,7 +15,6 @@ class PrefabPython(base):
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
-     
 
     def build(self, reset=False):
         """
@@ -32,14 +31,13 @@ class PrefabPython(base):
         if self.doneCheck("build", reset):
             return
 
-        self.prefab.system.base.development(python=False) #make sure all required components are there
-        
-    
+        self.prefab.system.base.development(python=False)  # make sure all required components are there
+
         if not self.doneGet("compile") or reset:
-            self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, branch="3.6", reset=False,ssh=False)
-            
-            if self.core.isMac:  
-                #clue to get it finally working was in https://stackoverflow.com/questions/46457404/how-can-i-compile-python-3-6-2-on-macos-with-openssl-from-homebrew
+            self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, branch="3.6", reset=False, ssh=False)
+
+            if self.core.isMac:
+                # clue to get it finally working was in https://stackoverflow.com/questions/46457404/how-can-i-compile-python-3-6-2-on-macos-with-openssl-from-homebrew
                 if reset or not self.doneGet("xcode_install"):
                     self.prefab.core.run(
                         "xcode-select --install", die=False, showout=True)
@@ -67,9 +65,9 @@ class PrefabPython(base):
                 """
                 C = self.replace(C)
 
-            else: 
+            else:
 
-                #on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
+                # on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
                 self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev')
 
                 C = """
@@ -91,7 +89,7 @@ class PrefabPython(base):
 
             self.logger.info("compile python3")
             self.logger.debug(C)
-            self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True) #makes it easy to test & make changes where required
+            self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True)  # makes it easy to test & make changes where required
 
             self.doneSet("compile")
 
@@ -107,7 +105,7 @@ class PrefabPython(base):
         js9 'j.tools.prefab.local.runtimes.python._package(reset=True)'
         """
 
-        C="""
+        C = """
 
         source env.sh
 
@@ -128,10 +126,10 @@ class PrefabPython(base):
         export LDFLAGS="-L$LIBRARY_PATH/"
 
         """
-        C = self.replace(C)        
-        self.prefab.core.file_write("%s/envbuild.sh" %  self.BUILDDIRL, C)   
+        C = self.replace(C)
+        self.prefab.core.file_write("%s/envbuild.sh" % self.BUILDDIRL, C)
 
-        C="""
+        C = """
         export PBASE=`pwd`
 
         export PATH=$PBASE/bin:/usr/local/bin:/usr/bin
@@ -149,7 +147,7 @@ class PrefabPython(base):
         export PS1="JS9: "        
 
         """
-        self.prefab.core.file_write("%s/env.sh" %  self.BUILDDIRL, C)           
+        self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C)
 
         if not self.doneGet("pip3install") or reset:
             C = """
@@ -160,14 +158,14 @@ class PrefabPython(base):
             curl https://bootstrap.pypa.io/get-pip.py > get-pip.py
             $BUILDDIRL/bin/python3 get-pip.py
             """
-            C = self.replace(C)        
-            self.prefab.core.file_write("%s/pip3build.sh" % self.BUILDDIRL, C)   
+            C = self.replace(C)
+            self.prefab.core.file_write("%s/pip3build.sh" % self.BUILDDIRL, C)
             self.prefab.core.run("cd %s;bash pip3build.sh" % self.BUILDDIRL)
         self.doneSet("pip3install")
 
         if not self.core.isMac:
-            self.prefab.system.package.ensure("libssl-dev") 
-            #for osx SHOULD NOT BE DONE BECAUSE WE SHOULD HAVE IT BUILD BEFORE AND ARE USING I FOR OSX
+            self.prefab.system.package.ensure("libssl-dev")
+            # for osx SHOULD NOT BE DONE BECAUSE WE SHOULD HAVE IT BUILD BEFORE AND ARE USING I FOR OSX
             self.prefab.system.package.ensure("libcapnp-dev")
         else:
             self.prefab.system.package.ensure("capnp")
@@ -177,7 +175,6 @@ class PrefabPython(base):
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
         self.logger.info(msg)
-
 
     def _pipAll(self, reset=False):
         """
@@ -237,7 +234,7 @@ class PrefabPython(base):
         # self.sandbox(deps=False)
         self.doneSet("pipall")
 
-    #need to do it here because all runs in the sandbox
+    # need to do it here because all runs in the sandbox
     def _pip(self, pips, reset=False):
         for item in pips.split("\n"):
             item = item.strip()
@@ -249,5 +246,4 @@ class PrefabPython(base):
                 self.prefab.core.run(self.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
 
-        self.prefab.local.zero_os.zos_stor_client.build(python_build=True) #builds the zos_stor_client
-
+        self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
