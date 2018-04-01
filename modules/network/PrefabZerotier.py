@@ -74,7 +74,7 @@ class PrefabZerotier(base):
         pm = self.prefab.system.processmanager.get()
         pm.stop('zerotier-one')
 
-    def join_network(self, network_id):
+    def network_join(self, network_id):
         """
         join the netowrk identied by network_id
         """
@@ -83,7 +83,7 @@ class PrefabZerotier(base):
         if rc != 0 or out.find('OK') == -1:
             raise j.exceptions.RuntimeError("error while joinning network: \n{}".format(err))
 
-    def leave_network(self, network_id):
+    def network_leave(self, network_id):
         """
         leave the netowrk identied by network_id
         """
@@ -97,7 +97,7 @@ class PrefabZerotier(base):
                 error_msg += out
             raise j.exceptions.RuntimeError(error_msg)
 
-    def list_networks(self):
+    def networks_list(self):
         """
         list all joined networks.
         return a list of dict
@@ -136,7 +136,7 @@ class PrefabZerotier(base):
 
         return networks
 
-    def list_peers(self):
+    def peers_list(self):
         """
         list connected peers.
         return a list of dict
@@ -185,7 +185,7 @@ class PrefabZerotier(base):
             string -- network name
         """
 
-        networks = self.list_networks()
+        networks = self.networks_list()
         for network in networks:
             if network['network_id'] == network_id:
                 return network['name']
