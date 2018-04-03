@@ -110,7 +110,7 @@ class PrefabARDB(app):
             cp ardb.conf $BUILDDIRARDB/
             """
         C = C.replace("$storageEngine", storageEngine)
-        self.prefab.core.run(self.replace(C))
+        self.prefab.core.execute_bash(self.replace(C))
 
         self.doneSet("buildardb")
 
