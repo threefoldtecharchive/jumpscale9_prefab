@@ -32,7 +32,7 @@ class PrefabARDB(app):
         # not needed to build separately is done in ardb automatically
         # self.buildForestDB(reset=reset)
 
-        self.build(reset=reset)
+        self.buildARDB(reset=reset)
         self.doneSet("build")
 
     def buildForestDB(self, reset=False):
@@ -66,32 +66,29 @@ class PrefabARDB(app):
         self.prefab.core.run(self.replace(C))
         self.doneSet("buildforestdb")
 
-    def build(self, reset=False, storageEngine="forestdb"):
+    def buildARDB(self, reset=False, storageEngine="forestdb"):
         """
         @param storageEngine rocksdb or forestdb
-
-        js9 'j.tools.prefab.local.db.ardb.build()'
-
         """
-        if self.doneCheck("build", reset):
+        if self.doneCheck("buildardb", reset):
             return
-
-        if self.prefab.platformtype.isMac:
-            storageEngine = "rocksdb"
-            # self.prefab.system.package.install("boost")
 
         # Default packages needed
         packages = ["wget", "bzip2"]
 
         if self.prefab.platformtype.isMac:
-            packages += []
+            storageEngine = "rocksdb"
+            # ForestDB
+            packages += ["git", "cmake", "libsnappy-dev", "gcc48"]
+            # self.prefab.system.package.install("boost")
         else:
             # ForestDB
-            packages += ["git-core", "cmake", "libsnappy-dev", "g++"]
-            # PerconaFT
-            packages += ["unzip"]
+            packages += ["git", "cmake", "libsnappy-dev", "g++"]
             # RocksDB
             packages += ["libbz2-dev"]
+
+        # PerconaFT
+        packages += ["unzip"]
 
         # Install dependancies
         self.prefab.system.package.install(packages)
@@ -114,20 +111,17 @@ class PrefabARDB(app):
             cp ardb.conf $BUILDDIRARDB/
             """
         C = C.replace("$storageEngine", storageEngine)
-        self.prefab.core.run(self.replace(C))
+        self.prefab.core.execute_bash(self.replace(C))
 
-        self.doneSet("build")
+        self.doneSet("buildardb")
 
     def install(self, name='main', host='localhost', port=16379, datadir=None, reset=False, start=True):
         """
         as backend use ForestDB
-
-        js9 'j.tools.prefab.local.db.ardb.install()'
-
         """
         if self.doneCheck("install-%s" % name, reset):
             return
-        self.build()
+        self.buildARDB()
         self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.dir_ensure("$CFGDIR")
         if not self.prefab.core.file_exists('$BINDIR/ardb-server'):
