@@ -22,7 +22,6 @@ class PrefabZOS_db(app):
 
         path = self.prefab.tools.git.pullRepo('https://github.com/rivine/0-db')
         self.prefab.core.run("cd %s; git reset --hard HEAD~10 && git pull"%path)
-        from IPython import embed;embed(colors='Linux')
 
         make = "make" if debug else "make release"
         self.prefab.core.run("cd %s && make clean && %s" % (path, make))

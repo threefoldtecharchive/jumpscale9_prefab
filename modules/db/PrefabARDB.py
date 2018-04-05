@@ -32,7 +32,7 @@ class PrefabARDB(app):
         # not needed to build separately is done in ardb automatically
         # self.buildForestDB(reset=reset)
 
-        self.buildARDB(reset=reset)
+        self.build(reset=reset)
         self.doneSet("build")
 
     def buildForestDB(self, reset=False):
@@ -66,11 +66,14 @@ class PrefabARDB(app):
         self.prefab.core.run(self.replace(C))
         self.doneSet("buildforestdb")
 
-    def buildARDB(self, reset=False, storageEngine="forestdb"):
+    def build(self, reset=False, storageEngine="forestdb"):
         """
         @param storageEngine rocksdb or forestdb
+
+        js9 'j.tools.prefab.local.db.ardb.build()'
+
         """
-        if self.doneCheck("buildardb", reset):
+        if self.doneCheck("build", reset):
             return
 
         if self.prefab.platformtype.isMac:
@@ -80,14 +83,15 @@ class PrefabARDB(app):
         # Default packages needed
         packages = ["wget", "bzip2"]
 
-        # ForestDB
-        packages += ["git-core", "cmake", "libsnappy-dev", "g++"]
-
-        # RocksDB
-        packages += ["libbz2-dev"]
-
-        # PerconaFT
-        packages += ["unzip"]
+        if self.prefab.platformtype.isMac:
+            packages += []
+        else:
+            # ForestDB
+            packages += ["git-core", "cmake", "libsnappy-dev", "g++"]
+            # PerconaFT
+            packages += ["unzip"]
+            # RocksDB
+            packages += ["libbz2-dev"]
 
         # Install dependancies
         self.prefab.system.package.install(packages)
@@ -112,15 +116,18 @@ class PrefabARDB(app):
         C = C.replace("$storageEngine", storageEngine)
         self.prefab.core.run(self.replace(C))
 
-        self.doneSet("buildardb")
+        self.doneSet("build")
 
     def install(self, name='main', host='localhost', port=16379, datadir=None, reset=False, start=True):
         """
         as backend use ForestDB
+
+        js9 'j.tools.prefab.local.db.ardb.install()'
+
         """
         if self.doneCheck("install-%s" % name, reset):
             return
-        self.buildARDB()
+        self.build()
         self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.dir_ensure("$CFGDIR")
         if not self.prefab.core.file_exists('$BINDIR/ardb-server'):
