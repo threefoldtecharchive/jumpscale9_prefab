@@ -1,21 +1,23 @@
 from js9 import j
 import time
+import re
 
 base = j.tools.prefab._getBaseClass()
 
+ZEROTIER_FIREWALL_ZONE_REGEX = re.compile(r"^firewall\.@zone\[(\d+)\]\.name='zerotier'$")
+FORWARDING_FIREWALL_REGEX = re.compile(r"^firewall\.@forwarding\[(\d+)\].*('\s+')?$")
+
 
 class PrefabZeroBoot(base):
+
     def install(self, network_id, token, reset=False):
         if not reset and self.doneCheck("install"):
             return
         # update zerotier config
         self.prefab.network.zerotier.build(install=True, reset=reset)
         # Start zerotier at least one time to generate config files
-        try:
-            self.prefab.network.zerotier.start()
-        except Exception:
-            self.logger.warning("Failed to start zerotier maye it's already started")
-        self.prefab.network.zerotier.stop()
+        self.prefab.core.run("/etc/init.d/zerotier start")
+        self.prefab.core.run("/etc/init.d/zerotier stop")
         self.prefab.core.run("uci set zerotier.sample_config=zerotier")
         self.prefab.core.run("uci set zerotier.sample_config.enabled='1'")
         self.prefab.core.run("uci set zerotier.sample_config.interface='wan'") # restart ZT when wan status changed
@@ -23,6 +25,7 @@ class PrefabZeroBoot(base):
         self.prefab.core.run("uci set zerotier.sample_config.secret='generate'") # Generate secret on the first start
         self.prefab.core.run("uci commit")
         self.prefab.core.run("/etc/init.d/zerotier enable")
+        self.prefab.core.run("/etc/init.d/zerotier stop")
         self.prefab.core.run("/etc/init.d/zerotier start")
 
         # Join Network
@@ -48,25 +51,65 @@ class PrefabZeroBoot(base):
         self.prefab.core.run("cp -r /opt/storage/pxe/* /opt/storage")
         self.prefab.core.run("rm -rf /opt/storage/pxe")
         self.prefab.core.run('sed "s|a84ac5c10a670ca3|%s|g" /opt/storage/pxelinux.cfg/default' % network_id)
-        time.sleep(30) # this is needed to make sure that network name is ready
-        network_name = self.prefab.network.zerotier.network_name_get(network_id)
+        # this is needed to make sure that network name is ready
+        for _ in range(12):
+            try:
+                network_name = self.prefab.network.zerotier.network_name_get(network_id)
+                if network_name:
+                    break
+            except:
+                time.sleep(5)
+        else:
+            raise RuntimeError("Unable to join network within 60 seconds!")
         self.prefab.core.run("uci set network.{0}=interface".format(network_name))
         self.prefab.core.run("uci set network.{0}.proto='none'".format(network_name))
         self.prefab.core.run("uci set network.{0}.ifname='{0}'".format(network_name))
-        self.prefab.core.run("uci set firewall.@zone[2]=zone")
-        self.prefab.core.run("uci set firewall.@zone[2].input='ACCEPT'")
-        self.prefab.core.run("uci set firewall.@zone[2].output='ACCEPT'")
-        self.prefab.core.run("uci set firewall.@zone[2].name='zerotier'")
-        self.prefab.core.run("uci set firewall.@zone[2].forward='ACCEPT'")
-        self.prefab.core.run("uci set firewall.@zone[2].masq='1'")
-        self.prefab.core.run("uci set firewall.@zone[2].network='{0}'".format(network_name))
-        self.prefab.core.run("uci add firewall forwarding")
-        self.prefab.core.run("uci set firewall.@forwarding[1]=forwarding")
-        self.prefab.core.run("uci set firewall.@forwarding[1].dest='lan'")
-        self.prefab.core.run("uci set firewall.@forwarding[1].src='zerotier'")
-        self.prefab.core.run("uci set firewall.@forwarding[2]=forwarding")
-        self.prefab.core.run("uci set firewall.@forwarding[2].dest='zerotier'")
-        self.prefab.core.run("uci set firewall.@forwarding[2].src='lan'")
+
+        try:
+            zone_id = self.get_zerotier_firewall_zone()
+        except KeyError:
+            self.prefab.core.run("uci add firewall zone")
+            zone_id = -1
+
+        self.prefab.core.run("uci set firewall.@zone[{0}]=zone".format(zone_id))
+        self.prefab.core.run("uci set firewall.@zone[{0}].input='ACCEPT'".format(zone_id))
+        self.prefab.core.run("uci set firewall.@zone[{0}].output='ACCEPT'".format(zone_id))
+        self.prefab.core.run("uci set firewall.@zone[{0}].name='zerotier'".format(zone_id))
+        self.prefab.core.run("uci set firewall.@zone[{0}].forward='ACCEPT'".format(zone_id))
+        self.prefab.core.run("uci set firewall.@zone[{0}].masq='1'".format(zone_id))
+        self.prefab.core.run("uci set firewall.@zone[{0}].network='{1}'".format(zone_id, network_name))
+
+        self.add_forwarding('lan', 'zerotier')
+        self.add_forwarding('zerotier', 'lan')
+
         self.prefab.core.run("uci commit")
         
         self.doneSet("install")
+
+    def get_zerotier_firewall_zone(self):
+        _, out, _ = self.prefab.core.run("uci show firewall")
+        for line in out.splitlines():
+            m = ZEROTIER_FIREWALL_ZONE_REGEX.match(line)
+            if m:
+                return int(m.group(1))
+        raise KeyError("Zerotier zone in firewall configuration was not found!")
+    
+    def add_forwarding(self, dest, src):
+        _, out, _ = self.prefab.core.run("uci show firewall")
+        forwards = dict()
+        for line in out.splitlines():
+            m = FORWARDING_FIREWALL_REGEX.match(line)
+            if m:
+                if line.endswith("=forwarding"):
+                    forwards[m.group(1)] = dict()
+                elif ".dest=" in line:
+                    forwards[m.group(1)]['dest'] = m.group(2)
+                elif ".src=" in line:
+                    forwards[m.group(1)]['src'] = m.group(2)
+        if {'dest': "'%s'" % dest, 'src': "'%s'" % src} in forwards.values():
+            return
+        self.prefab.core.run("uci add firewall forwarding")
+        self.prefab.core.run("uci set firewall.@forwarding[-1]=forwarding")
+        self.prefab.core.run("uci set firewall.@forwarding[-1].dest='%s'" % dest)
+        self.prefab.core.run("uci set firewall.@forwarding[-1].src='%s'" % src)
+        
