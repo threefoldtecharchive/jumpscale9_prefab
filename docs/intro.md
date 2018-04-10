@@ -1,5 +1,19 @@
 # intro to prefab
 
+## prerequisites
+
+to be able to use `prefab` you will need to have these packages installed on the remote machine:  
+* bash
+* openssh-sftp-server
+* openssl-util
+* coreutils-base64
+* tmux  
+
+you can install these packages manually or you can just run this snippet (after configuring a sshclient)
+
+```python
+sshclient.execute(cmd="opkg update") sshclient.execute(cmd="opkg install bash") sshclient.execute(cmd="opkg install openssh-sftp-server") sshclient.execute(cmd="opkg install openssl-util") sshclient.execute(cmd="opkg install coreutils-base64") sshclient.execute(cmd="opkg install tmux") 
+```
 ## on each class the following primitives are available
 
 ```python3
