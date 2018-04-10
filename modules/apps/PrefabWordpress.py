@@ -1,5 +1,6 @@
 from js9 import j
 import textwrap
+import time
 
 app = j.tools.prefab._getBaseAppClass()
 
@@ -152,3 +153,36 @@ class PrefabWordpress(app):
             """.format(self.user, path, item[0], item[1])
             self.prefab.core.run(command)
 
+
+    def download_backup(self, path, cfg_path='/opt/cfg', dbname='wordpress'):
+        """download a full packup for a wordpress website including
+        1- databse dump
+        2- wp files
+        3- caddy configurations
+        
+        Arguments:
+            path {STRING} -- wordpress installation path
+            dbname {STRING} -- databse name
+        """
+        
+        backup_path = "/tmp/backup_{}".format(str(time.time()))
+        self.prefab.core.dir_ensure(backup_path)
+        # export database
+        self.prefab.db.mariadb.db_export(dbname, backup_path)
+        # get wordpress files
+        self.prefab.core.dir_ensure(backup_path + path)
+        self.prefab.core.copyTree(path, backup_path + path)
+        # get get cfgs
+        self.prefab.core.dir_ensure(backup_path + cfg_path)
+        self.prefab.core.copyTree(cfg_path, backup_path + cfg_path)
+
+        backup_tar_name = "/tmp/backup_{}.tar.gz".format(str(time.time()))
+        
+        rc, _, _ = self.prefab.core.run('tar -czvf {} {}'.format(backup_tar_name, backup_path))
+        if rc == 0:
+            self.logger.info('Backup done successfuly')
+        else:
+            self.logger.info('an error happened while compressing your backup')
+        
+        # clean up
+        self.prefab.core.dir_remove(backup_path)
