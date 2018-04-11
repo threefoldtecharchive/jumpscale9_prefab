@@ -1,41 +1,137 @@
 # Prefab
 
-The JumpScale implementation of Prefab is a fork of the original Prefab as available on GitHub: <https://github.com/sebastien/prefab>
-
-Prefab provides [Chef](https://en.wikipedia.org/wiki/Chef_(software) software-like functionality for [Fabric](http://www.fabfile.org/).
-
-Prefab makes it easy to automate server installations and create configuration recipes by wrapping common administrative tasks, such as installing packages and creating users and groups, in Python functions.
-
-Prefab takes an `executor` object as an argument, through which you connect locally or remotely.
-
-## Local
-
-```python
-executor = j.tools.executorLocal
-prefab = j.tools.prefab.get(executor)
-# or simply j.tools.prefab.local
-```
-
-## Remote
-
-```python
-executor = j.tools.executor.getSSHBased(addr, port, login, passwd)
-prefab = j.tools.prefab.get(executor)
-```
-
 ## Prefab modules
 - [prefab.apps](prefab.apps.md)
-- [prefab.bash](prefab.bash.md)
-- [prefab.btrfs](prefab.btrfs.md)
-- [prefab.core](prefab.core.md)
-- [prefab.development](prefab.development.md)
-- [prefab.group](prefab.group.md)
-- [prefab.kwm](prefab.kvm.md)
-- [prefab.net](prefab.net.md)
-- [prefab.package](prefab.package.md)
-- [prefab.processmanager](prefab.processmanager.md)
-- [prefab.ssh](prefab.ssh.md)
-- [prefab.systemservices](prefab.systemservices.md)
-- [prefab.system.tmux](prefab.tmux.md)
-- [prefab.db.tarantool](prefab.tarantool.md)
-- [prefab.runtimes.build](prefab.build.md)
+    - Gitea
+    - Gogs
+    - Gowncloud
+    - MicroEditor
+    - NoVNC
+    - Odoo
+    - OwnCloud
+    - Synapsebot
+    - Synapse
+    - Teleport
+    - Tendermint
+    - TfChain
+    - Wordpress
+    - XRDP
+- [prefab.db](prefab.db.md)
+    - Arakoon
+    - ARDB
+    - CockroachDB
+    - Etcd
+    - Hadoop
+    - Influxdb
+    - Ledis
+    - Mariadb
+    - MongoCluster
+    - Mongodb
+    - Postgresql
+    - Redis
+    - RocksDB
+    - Tarantool
+    - TIDB
+- [prefab.js9](prefab.js9.md)
+    - AtYourService
+    - Cockpit
+    - Crm
+    - IssueManager
+    - js8Core
+    - js9Core
+    - JSAgent
+    - Sandbox
+- [prefab.lib](prefab.lib.md)
+    - Brotli
+    - Capnp
+    - Cmake
+    - Libffi
+    - OpenSSL
+    - Protobuf
+- [prefab.monitoring](prefab.monitoring.md)
+    - Grafana
+    - Smartmontools
+- [prefab.network](prefab.network.md)
+    - CoreDns
+    - DNSMasq
+    - GateOne
+    - GeoDns
+    - ProxyClassic
+    - Tools
+    - VRouter
+    - ZeroBoot
+    - Zerotier
+- [prefab.os](prefab.os.md)
+    - Ubuntu
+- [prefab.physical](prefab.physical.md)
+    - BootMediaInstaller
+    - PNode
+- [prefab.runtimes](prefab.runtimes.md)
+    - Build
+    - Celery
+    - Golang
+    - Lua
+    - NodeJS
+    - PEP8
+    - PHP
+    - PIP
+    - Python
+    - Rust
+- [prefab.security](prefab.security.md)
+    - FW
+    - UFW
+- [prefab.storage](prefab.storage.md)
+    - Alba
+    - AydoStor
+    - BtrfsProgs
+    - Duplicacy
+    - Fuse
+    - IPFS
+    - Minio
+    - PyFTPServer
+    - Restic
+    - S3Scality
+    - Syncthing
+    - VolumeDriver
+    - ZDisk
+- [prefab.system](prefab.system.md)
+    - Base
+    - FileSystem
+    - Group
+    - Net
+    - NS
+    - Package
+    - ProcessManager
+    - Process
+    - Rsync
+    - SSH
+    - SSHReflector
+    - Tmux
+    - User
+- [prefab.tools](prefab.tools.md)
+    - Git
+    - Mercurial
+- [prefab.virtualization](prefab.virtualization.md)
+    - DockerCompose
+    - Docker
+    - Kubernetes
+    - KVM
+    - OpenvSwitch
+    - VirtualBox
+- [prefab.web](prefab.web.md)
+    - Apache2
+    - Caddy
+    - NGINX
+    - Portal
+    - SkyDns
+    - Traefik
+    - Vulcand
+- [prefab.zero_os](prefab.zero_os.md)
+    - Stor
+    - ZOS_controller
+    - ZOS_core
+    - ZOS_db
+    - ZOS_fs
+    - ZOS_js
+    - ZOS_stor_client
+    - ZOS_ufs
