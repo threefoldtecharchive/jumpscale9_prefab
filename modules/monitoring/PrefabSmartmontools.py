@@ -18,7 +18,7 @@ class PrefabSmartmontools(base):
 
     def install(self):
         """
-        Installs version 6.6 of smartmontools 
+        Installs version 6.6 of smartmontools
         (apt-get version is 6.5
         Version 6.6 is needed for NVMe support)
         Ensures smartctl is installed
@@ -29,13 +29,13 @@ class PrefabSmartmontools(base):
             
         self.logger.info("installing smartctl...")
 
-        tmp_location = j.tools.prefab.local.core.file_download(self._DOWNLOAD_URL, expand=True)
+        tmp_location = self.prefab.core.file_download(self._DOWNLOAD_URL, expand=True)
 
         # move downloaded binary to installation destination
         self.core.run("mv %s %s" % (j.sal.fs.joinPaths(tmp_location, self._REL_INSTALL_LOCATION, "smartctl") , j.sal.fs.joinPaths(os.sep, self._REL_INSTALL_LOCATION)))
         
         # cleanup
-        j.tools.prefab.local.core.dir_remove(tmp_location)
+        self.prefab.core.dir_remove(tmp_location)
 
         if not self.isInstalled():
             raise RuntimeError("Failed to install Smartmontools")
