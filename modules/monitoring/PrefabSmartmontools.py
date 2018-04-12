@@ -48,7 +48,7 @@ class PrefabSmartmontools(base):
         cmd = "smartctl --version"
         rc, out, err = self.prefab.core.run(cmd, die=False)
         if rc != 0:
-            self.logger.error("smartctl --version failed, assuming it's not installed: %s", err)
+            self.logger.warning("'smartctl --version' failed, assuming it's not installed: %s", err)
             return False
 
         # version number should be the second word of the first line
@@ -56,7 +56,7 @@ class PrefabSmartmontools(base):
         self.logger.debug("smartctl version '%s' found" % version)
 
         if version != self._VERSION:
-            self.logger.error("smartctl found but was version: %s\nNeed version %s to be installed" % (version, self._VERSION))
+            self.logger.warning("smartctl found but was version: %s\nNeed version %s to be installed" % (version, self._VERSION))
             return False
         
         return True
