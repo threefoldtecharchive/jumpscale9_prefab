@@ -23,6 +23,10 @@ The `prefab.network.zeroboot` module should be used to bootstrap a router with z
 
 ```python
 sshclient = j.clients.ssh.get(instance='<instance_name>')
+# Install prefab requirements
+sshclient.execute(cmd="opkg update")
+sshclient.execute(cmd="opkg install bash openssh-sftp-server openssl-util coreutils-base64 tmux")
+# Use the zeroboot prefab to configure the router
 prefab = sshclient.prefab 
 prefab.network.zeroboot.install('<zerotier_network_id>', '<zerotier_token>')
 ```
