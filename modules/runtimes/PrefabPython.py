@@ -68,7 +68,7 @@ class PrefabPython(base):
             else:
 
                 # on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
-                self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev')
+                self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev,libsnappy-dev')
 
                 C = """
 
@@ -227,7 +227,6 @@ class PrefabPython(base):
         ovh
         ipcalc
         ssh2-python
-        libsnappy-dev
         """
         self._pip(C, reset=reset)
         # self.sandbox(deps=False)
