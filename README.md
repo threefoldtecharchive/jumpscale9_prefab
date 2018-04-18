@@ -10,7 +10,7 @@ Prefab makes it easy to automate server installations and create configuration r
 Prefab also contains [Modules](docs/README.md) to install complete services with all its dependencies
 
 ## Terminology
-In the following sections __agent machine__ will be used to refer to the machine on which there exists a prefab installation, while __target machine__ will be used to refer to the targeted machine on which we want to perform any of the operations mentioned above, note that in case of local prefab the __target machine__ is the same as __agent machine__.
+In the following sections **agent machine** will be used to refer to the machine on which there exists a prefab installation, while **target machine** will be used to refer to the targeted machine on which we want to perform any of the operations mentioned above, note that in case of local prefab the **target machine** is the same as **agent machine**.
 
 ## Prerequisites
 - on Agent machine

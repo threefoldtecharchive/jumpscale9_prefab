@@ -27,6 +27,7 @@ class PrefabProcessManager(base):
         return res
 
     def get_prefered(self):
+        #TODO : this will always return tmux, it should check other pms first
         for pm in ["tmux", "systemd", "sv"]:
             if self.is_available(pm):
                 return pm
@@ -42,10 +43,20 @@ class PrefabProcessManager(base):
             return False
 
     def get(self, pm=None):
+        """gets a process manager prefab you can choose the process manager type like this:
+        Tmux: prefab.system.processmanager.get(pm='tmux') 
+        Runit: prefab.system.processmanager.get(pm='sv') 
+        SystemD: prefab.system.processmanager.get(pm='tmux') 
+        
+        if pm=None, prefab will try to get your prefered process manager
+            by checking what pm is available 
+        
+        :param pm: process manager or none to let prefab select your prefered process manager, defaults to None
+        :param pm: String, optional
+        :return: process manager to be used
+        :rtype: Process manager
         """
-        pm is tmux, systemd or sv
-        (sv=runit)
-        """
+
         if pm is None:
             pm = self.get_prefered()
         else:

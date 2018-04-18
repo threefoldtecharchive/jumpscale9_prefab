@@ -77,23 +77,23 @@ class PrefabCore(base):
 
 
         dirs:
-        - BASEDIR
-        - JSAPPSDIR
-        - TEMPLATEDIR
-        - VARDIR
-        - GOPATH
-        - GOROOT
-        - BINDIR
         - CODEDIR
-        - JSCFGDIR
-        - HOMEDIR
-        - JSLIBDIR
-        - LIBDIR
+        - HOSTCFGDIR
         - LOGDIR
-        - PIDDIR
+        - BUILDDIR
+        - BINDIR
+        - TEMPLATEDIR
+        - LIBDIR
+        - DATADIR
+        - BASEDIR
+        - HOMEDIR
+        - BASEDIRJS
+        - VARDIR
+        - HOSTDIR
+        - JSAPPSDIR
+        - CFGDIR
         - TMPDIR
-        system
-        - HOSTNAME
+        
 
         args are additional arguments in dict form
 
@@ -117,23 +117,22 @@ class PrefabCore(base):
         get all arguments in a dict, keys are in uppercase
 
         dirs:
-        - BASEDIR
-        - JSAPPSDIR
-        - TEMPLATEDIR
-        - VARDIR
-        - GOPATH
-        - GOROOT
-        - BINDIR
         - CODEDIR
-        - JSCFGDIR
-        - HOMEDIR
-        - JSLIBDIR
-        - LIBDIR
+        - HOSTCFGDIR
         - LOGDIR
-        - PIDDIR
+        - BUILDDIR
+        - BINDIR
+        - TEMPLATEDIR
+        - LIBDIR
+        - DATADIR
+        - BASEDIR
+        - HOMEDIR
+        - BASEDIRJS
+        - VARDIR
+        - HOSTDIR
+        - JSAPPSDIR
+        - CFGDIR
         - TMPDIR
-        system
-        - HOSTNAME
 
         """
         args = {}
