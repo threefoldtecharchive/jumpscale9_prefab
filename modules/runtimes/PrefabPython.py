@@ -186,7 +186,6 @@ class PrefabPython(base):
         C = """
         uvloop
         redis
-        # paramiko
         watchdog
         gitpython
         click
@@ -218,7 +217,6 @@ class PrefabPython(base):
         sanic
         pytoml
         autopep8
-        # asyncssh
         psutil
         libtmux
         fakeredis
