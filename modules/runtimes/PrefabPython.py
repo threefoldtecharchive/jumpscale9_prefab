@@ -227,6 +227,7 @@ class PrefabPython(base):
         ovh
         ipcalc
         ssh2-python
+        libsnappy-dev
         """
         self._pip(C, reset=reset)
         # self.sandbox(deps=False)
