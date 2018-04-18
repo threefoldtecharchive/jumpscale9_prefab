@@ -27,32 +27,32 @@ class Prefabjs9Core(app):
         else:
             self.prefab.system.base.install()
 
-        self.bashtools()
+        self.bashtools(branch)
 
         self._base()
 
         self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
 
         self.logger.info("js9_install")
+
         self.core.run("export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
 
-        self.prefab.runtimes.pip.install("Cython,asyncssh,numpy,python-jose,PyNaCl,PyJWT,fakeredis,pudb,serial")
-
+        
         self.doneSet("install")
 
-    def bashtools(self, reset=False):
+    def bashtools(self, branch='master', reset=False):
 
         if self.doneCheck("bashtools", reset):
             return
 
         S = """
         echo "INSTALL BASHTOOLS"
-        curl https://raw.githubusercontent.com/Jumpscale/bash/master/install.sh?$RANDOM > /tmp/install.sh
+        curl https://raw.githubusercontent.com/Jumpscale/bash/{}/install.sh?$RANDOM > /tmp/install.sh
         bash /tmp/install.sh
-        """
+        """.format(branch)
 
         self.core.execute_bash(S)
-        path = j.sal.fs.joinPaths(j.dirs.HOMEDIR, '.bash_profile')
+        path = "/opt/code/github/jumpscale/bash/zlibs.sh"
         self.prefab.bash.profileJS.addInclude(path)
         self.prefab.bash.profileJS.save()
 
