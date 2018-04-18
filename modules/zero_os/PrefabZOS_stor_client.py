@@ -25,11 +25,6 @@ class PrefabZOS_stor_client(base):
         self.prefab.core.run('cd {}; git submodule init; git submodule update'.format(self.CODEDIRL))
 
         if python_build:
-            if self.core.isMac:
-                libpath = "lib.macosx-10.13-x86_64-3.6/g8storclient.cpython-36m-darwin.so"
-            else:
-                libpath = "lib.macosx-10.13-x86_64-3.6" #TODO:*1
-
             C= """
             set -ex
             cd $BUILDDIRL
@@ -40,10 +35,14 @@ class PrefabZOS_stor_client(base):
             cd python/
             python3 setup.py build
             cd $BUILDDIRL
-            cp python/build/$libpath ../python3/lib/python3.6/lib-dynload/
+
             """
+            if self.core.isMac:
+                libpath = "lib.macosx-10.13-x86_64-3.6/g8storclient.cpython-36m-darwin.so"
+                C = C + "cp python/build/$libpath ../python3/lib/python3.6/lib-dynload/"
+                C = C.replace("$libpath",libpath)
+
             C=self.replace(C)
-            C=C.replace("$libpath",libpath)
             self.core.file_write("%s/build.sh"%self.BUILDDIRL,C)
             self.prefab.core.run("bash %s/build.sh"%self.BUILDDIRL)
         else:
