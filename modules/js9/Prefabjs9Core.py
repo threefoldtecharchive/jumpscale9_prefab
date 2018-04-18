@@ -52,7 +52,7 @@ class Prefabjs9Core(app):
         """.format(branch)
 
         self.core.execute_bash(S)
-        path = "/opt/code/github/jumpscale/bash/zlibs.sh"
+        path = j.sal.fs.joinPaths(j.dirs.CODEDIR, 'github', 'jumpscale', 'bash', 'zlibs.sh')
         self.prefab.bash.profileJS.addInclude(path)
         self.prefab.bash.profileJS.save()
 
