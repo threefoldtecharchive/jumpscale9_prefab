@@ -6,8 +6,6 @@ app = j.tools.prefab._getBaseAppClass()
 
 class PrefabCaddy(app):
     NAME = "caddy"
-    default_plugins = ['git', 'jwt', 'login', 'webdav', 'restic', 'cgi',
-                       'hugo', 'minify', 'search', 'filter', 'ratelimit']
 
     def _init(self):
         self.BUILDDIR_ = self.replace("$BUILDDIR/caddy")
@@ -40,7 +38,7 @@ class PrefabCaddy(app):
         self.prefab.tools.git.pullRepo("https://github.com/incubaid/caddyman", dest="/tmp/caddyman")
         self.prefab.core.run("cd /tmp/caddyman && chmod u+x caddyman.sh")
         if not plugins:
-            plugins = self.default_plugins
+            plugins = ["iyo"]
         cmd = "/tmp/caddyman/caddyman.sh install {plugins}".format(plugins=" ".join(plugins))
         self.prefab.core.run(cmd)
         self.doneSet('build')
@@ -50,11 +48,8 @@ class PrefabCaddy(app):
         will build if required & then install binary on right location
         """
 
-        if not self.doneGet('build'):
+        if not reset and not self.doneGet('build'):
             self.build(plugins=plugins, reset=reset)
-
-        if self.doneGet('install') and reset is False and self.isInstalled():
-            return
 
         self.prefab.core.file_copy('/opt/go_proj/bin/caddy', '$BINDIR/caddy')
         self.prefab.bash.profileDefault.addPath(self.prefab.core.dir_paths['BINDIR'])
@@ -95,32 +90,19 @@ class PrefabCaddy(app):
         @param caddyconfigfile
             template args available DATADIR, LOGDIR, WWWROOTDIR, PORT, TMPDIR, EMAIL ... (using mustasche)
         """
-
+        vhosts_dir = self.replace("{{CFGDIR}}/vhosts")
+        self.prefab.core.dir_ensure(vhosts_dir)
         C = """
         #tcpport:{{PORT}}
-        :{{PORT}}
-        gzip
-        log {{LOGDIR}}/access.log
-        errors {
-            * {{LOGDIR}}/errors.log
-        }
-        root {{WWWROOTDIR}}
+        import {{VHOSTS_DIR}}/*
         """
 
         configpath = self.replace(configpath)
-
-        args = {}
-        args["WWWROOTDIR"] = self.replace(wwwrootdir).rstrip("/")
-        args["LOGDIR"] = self.replace(logdir).rstrip("/")
-        args["PORT"] = str(port)
-        args["EMAIL"] = email
-        args["CONFIGPATH"] = configpath
-
+        args = {
+            "PORT": str(port),
+            "VHOSTS_DIR": vhosts_dir
+        }
         C = self.replace(C, args)
-
-        self.prefab.core.dir_ensure(args["LOGDIR"])
-        self.prefab.core.dir_ensure(args["WWWROOTDIR"])
-
         self.prefab.core.file_write(configpath, C)
 
     def getTCPPort(self, configpath="{{CFGDIR}}/caddy.cfg"):

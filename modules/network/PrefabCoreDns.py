@@ -171,7 +171,7 @@ class PrefabCoreDns(app):
         auto:auto
         secondary:secondary
         etcd:etcd
-        redis:github.com/gigforks/redis
+        redis:github.com/arvancloud/redis
         forward:forward
         proxy:proxy
         erratic:erratic

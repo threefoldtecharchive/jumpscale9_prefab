@@ -9,7 +9,7 @@ class PrefabSynapse(app):
     def _init(self):
         self.server_path = "/root/.synapse"
         self.client_path = "/opt/var/riot"
-        self.client_url = "https://github.com/gigforks/riot-web/files/1822807/riot-v0.13.5-624-g836fcab.tar.gz"
+        self.client_url = "https://github.com/gigforks/riot-web/files/1927636/riot-iyo-1-gf8883e8.tar.gz"
 
     def build(self, reset=False):
         if self.doneCheck('build', reset):
@@ -33,11 +33,12 @@ class PrefabSynapse(app):
 
         # Install prerequisite python libs
         cmd = """
-        virtualenv -p python2.7 {server_path}
+        virtualenv --always-copy -p python2.7 {server_path}
         source /root/.synapse/bin/activate
         pip install --upgrade pip
         pip install --upgrade setuptools
-        pip install psycopg2-binary 
+        pip install psycopg2-binary
+        pip install https://github.com/gigforks/synapse/tarball/master
         """.format(server_path=self.server_path)
         self.prefab.core.run(cmd)
 
@@ -59,13 +60,6 @@ class PrefabSynapse(app):
         :return:
         """
         self.build(reset=reset)
-
-        # Install synapse using pip
-        cmd = """
-        source {}/bin/activate
-        pip install https://github.com/gigforks/synapse/tarball/master
-        """.format(self.server_path)
-        self.prefab.core.run(cmd)
 
         # Create database if not exists
         if not self.prefab.db.postgresql.isStarted():
