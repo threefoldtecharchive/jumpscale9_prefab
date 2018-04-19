@@ -9,6 +9,8 @@ class PrefabPython(base):
         self.logger_enable()
         self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
         self.CODEDIRL = self.core.replace("$BUILDDIR/code/python3/")
+        self.JS9_BRANCH = None
+        self.include_js9 = None
 
     def reset(self):
         base.reset(self)
@@ -16,7 +18,7 @@ class PrefabPython(base):
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
 
-    def build(self, reset=False):
+    def build(self, js9_branch='development', include_js9=True, reset=False):
         """
         js9 'j.tools.prefab.local.runtimes.python.build(reset=False)'
 
@@ -30,7 +32,9 @@ class PrefabPython(base):
 
         if self.doneCheck("build", reset):
             return
-
+        
+        self.JS9_BRANCH = js9_branch
+        self.include_js9 = include_js9
         self.prefab.system.base.development(python=False)  # make sure all required components are there
 
         if not self.doneGet("compile") or reset:
@@ -170,7 +174,8 @@ class PrefabPython(base):
         else:
             self.prefab.system.package.ensure("capnp")
 
-        self._pipAll(reset=reset)
+        if self.include_js9:
+            self._pipAll(reset=reset)
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
@@ -184,50 +189,10 @@ class PrefabPython(base):
         if self.doneCheck("pipall", reset):
             return
         C = """
-        uvloop
-        redis
-        watchdog
-        gitpython
-        click
-        pymux
-        pyyaml
-        ipdb
-        pudb
-        requests
-        netaddr
-        ipython
-        cython
-        pycapnp
-        path.py
-        colored-traceback
-        colorlog
-        msgpack-python
-        pyblake2
-        brotli
-        pysodium
-        curio
-        uvloop
-        gevent
-        pystache
-        httplib2
-        python-jose
-        python-dateutil
-        docker
-        jsonschema
-        sanic
-        pytoml
-        autopep8
-        psutil
-        libtmux
-        fakeredis
-        serial
-        numpy
-        PyNaCl
-        PyJWT
-        ovh
-        ipcalc
-        ssh2-python
-        """
+        git+https://github.com/Jumpscale/core9@{0}
+        git+https://github.com/Jumpscale/lib9@{0}
+        git+https://github.com/Jumpscale/prefab9@{0}
+        """.format(self.JS9_BRANCH)
         self._pip(C, reset=reset)
         # self.sandbox(deps=False)
         self.doneSet("pipall")
