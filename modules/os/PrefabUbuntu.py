@@ -9,7 +9,7 @@ class PrefabUbuntu(base):
     def _init(self):
         pass
 
-    def install(self, dist, passwd, jwt):
+    def install(self, dist, passwd, jwt, reset=False):
         if self.doneCheck("install", reset):
             return
 
@@ -19,10 +19,11 @@ class PrefabUbuntu(base):
 
         cmd = '{script_path} --dist={dist} --password={password} --jwt={jwt}'
         self.prefa.core.run(cmd)
-        
+
         self.doneSet('install')
+
     @property
-    def  script_content(self):
+    def script_content(self):
         return """
 #!/bin/bash
 set -e
