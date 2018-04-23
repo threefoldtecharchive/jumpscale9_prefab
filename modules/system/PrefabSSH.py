@@ -1,4 +1,4 @@
-
+from grp import getgrgid
 from js9 import j
 import netaddr
 
@@ -157,7 +157,7 @@ class PrefabSSH(base):
         d = self.prefab.system.user.check(user, need_passwd=False)
         if d is None:
             raise j.exceptions.RuntimeError("did not find user:%s" % user)
-        group = d["gid"]
+        group = getgrgid(d["gid"]).gr_name
         keyf = d["home"] + "/.ssh/authorized_keys"
         key = add_newline(key)
         ret = None
@@ -184,7 +184,7 @@ class PrefabSSH(base):
         else:
             # Make sure that .ssh directory exists, see #42
             self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode="700")
-            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode="600", sudo=True)
+            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode=0o600, sudo=True)
             ret = False
 
         self.prefab.core.sudomode = sudomode

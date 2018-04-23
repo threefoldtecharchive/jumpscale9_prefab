@@ -21,7 +21,7 @@ class PrefabGroup(base):
         '{"name":<str>,"gid":<str>}' if the group has no members
         or
         'None' if the group does not exists."""
-        _, data, _ = self.prefab.core.run("getent group | egrep '^%s:' ; true" % (name))
+        _, data, _ = self.prefab.core.run("getent group | egrep '^%s:' ; true" % (name), die=False)
         if len(data.split(":")) == 4:
             name, _, gid, members = data.split(":", 4)
             return dict(name=name, gid=gid,
