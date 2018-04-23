@@ -53,6 +53,9 @@ class PrefabSynapse(app):
         Build and Install synapse matrix server and web client
         :param admin_username: the username of synapse admin that will be created
         :param admin_password: password of the synapse admin
+        :param iyo_client_id: itsyou.online organization which will be used for authentication
+        :param iyo_client_secret: password of the synapse admin
+        :param client_domain: the domain which will run riot app
         :param domain: the domain that will serve the synapse server without https://
         :param client_port: the port on which the web client will be served
         :param reset: if you need to reset the installation
@@ -98,6 +101,8 @@ class PrefabSynapse(app):
         config_file_path = "{}/homeserver.yaml".format(self.server_path)
         config_data = self.prefab.core.file_read(config_file_path)
         config_data = j.data.serializer.yaml.loads(config_data)
+        config_data['url_preview_enabled'] = True
+        config_data['url_preview_ip_range_blacklist'] = ['127.0.0.0/8']
         config_data["database"] = {
             "name": "psycopg2",
             "args": {
