@@ -27,8 +27,8 @@ class PrefabZeroaccess(app):
         # Install 0-access
         self.prefab.core.run('cd {} && pip3 install -r requirements.txt'.format(self.zeroaccess_dir))
         self.prefab.core.run("""
-        cp {zeroaccess_path}/lash $BINDIR 
-        chmod 755 $BINDIR/lash
+        cp {zeroaccess_path}/lash /bin 
+        chmod 755 /bin/lash
         mkdir -p /var/recordings/index
         chmod -R 777 /var/recordings
         mkdir -p /var/run/sshd
