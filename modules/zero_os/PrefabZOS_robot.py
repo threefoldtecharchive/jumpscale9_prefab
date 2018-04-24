@@ -6,7 +6,7 @@ from js9 import j
 app = j.tools.prefab._getBaseAppClass()
 
 
-class PrefabZeroRobot(app):
+class PrefabZOS_robot(app):
     NAME = "0-robot"
     GITURL = "https://github.com/zero-os/0-robot.git"
 
