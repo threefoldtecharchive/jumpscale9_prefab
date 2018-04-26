@@ -7,7 +7,7 @@ app = j.tools.prefab._getBaseAppClass()
 
 
 class PrefabZOS_robot(app):
-    NAME = "0-robot"
+    NAME = "zrobot"
     GITURL = "https://github.com/zero-os/0-robot.git"
 
     def install(self, branch="master", reset=False):
