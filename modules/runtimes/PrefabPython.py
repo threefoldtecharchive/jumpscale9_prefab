@@ -194,6 +194,15 @@ class PrefabPython(base):
         git+https://github.com/Jumpscale/prefab9@{0}
         """.format(self.JS9_BRANCH)
         self._pip(C, reset=reset)
+        
+        j.clients.git.pullGitRepo(url='https://github.com/rivine/recordchain.git')
+        C = """git+https://github.com/rivine/recordchain@master"""
+        self._pip(C, reset=reset)
+        
+        j.clients.git.pullGitRepo(url='https://github.com/zero-os/0-robot.git')
+        C = """git+https://github.com/zero-os/0-robot@master"""
+        self._pip(C, reset=reset)        
+      
         # self.sandbox(deps=False)
         self.doneSet("pipall")
 
