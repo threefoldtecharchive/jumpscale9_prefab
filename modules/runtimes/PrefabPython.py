@@ -192,8 +192,8 @@ class PrefabPython(base):
         git+https://github.com/Jumpscale/core9@{0}
         git+https://github.com/Jumpscale/lib9@{0}
         git+https://github.com/Jumpscale/prefab9@{0}
-        git+https://github.com/rivine/recordchain@master
         git+https://github.com/zero-os/0-robot@{0}
+        git+https://github.com/rivine/recordchain@master
         """.format(self.JS9_BRANCH)
         self._pip(C, reset=reset)
 
