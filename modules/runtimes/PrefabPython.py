@@ -32,7 +32,7 @@ class PrefabPython(base):
 
         if self.doneCheck("build", reset):
             return
-        
+
         self.JS9_BRANCH = js9_branch
         self.include_js9 = include_js9
         self.prefab.system.base.development(python=False)  # make sure all required components are there
@@ -60,11 +60,11 @@ class PrefabPython(base):
 
                 export OPENSSLPATH=$(brew --prefix openssl)
 
-                ./configure --prefix=$BUILDDIRL  CPPFLAGS="-I$OPENSSLPATH/include" LDFLAGS="-L$OPENSSLPATH/lib" 
+                ./configure --prefix=$BUILDDIRL  CPPFLAGS="-I$OPENSSLPATH/include" LDFLAGS="-L$OPENSSLPATH/lib"
 
                 #if you do the optimizations then it will do all the tests
                 # ./configure --prefix=$BUILDDIRL --enable-optimizations
-                
+
                 make -j8 EXTRATESTOPTS=--list-tests install
                 """
                 C = self.replace(C)
@@ -148,7 +148,7 @@ class PrefabPython(base):
         export LC_ALL=en_US.UTF-8
         export LANG=en_US.UTF-8
 
-        export PS1="JS9: "        
+        export PS1="JS9: "
 
         """
         self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C)
@@ -192,16 +192,12 @@ class PrefabPython(base):
         git+https://github.com/Jumpscale/core9@{0}
         git+https://github.com/Jumpscale/lib9@{0}
         git+https://github.com/Jumpscale/prefab9@{0}
+        git+https://github.com/rivine/recordchain@master
+        git+https://github.com/zero-os/0-robot@{0}
         """.format(self.JS9_BRANCH)
         self._pip(C, reset=reset)
-        
-        j.clients.git.pullGitRepo(url='https://github.com/rivine/recordchain.git')
-        self.prefab.core.run("cd /opt/code/github/rivine/recordchain && sh install.sh")
-        
-        j.clients.git.pullGitRepo(url='https://github.com/zero-os/0-robot.git')
-        C = """git+https://github.com/zero-os/0-robot@master"""
-        self._pip(C, reset=reset)        
-      
+
+
         # self.sandbox(deps=False)
         self.doneSet("pipall")
 
