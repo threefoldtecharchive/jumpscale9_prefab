@@ -196,8 +196,7 @@ class PrefabPython(base):
         self._pip(C, reset=reset)
         
         j.clients.git.pullGitRepo(url='https://github.com/rivine/recordchain.git')
-        C = """git+https://github.com/rivine/recordchain@master"""
-        self._pip(C, reset=reset)
+        self.prefab.core.run("cd /opt/code/github/rivine/recordchain && sh install.sh")
         
         j.clients.git.pullGitRepo(url='https://github.com/zero-os/0-robot.git')
         C = """git+https://github.com/zero-os/0-robot@master"""
