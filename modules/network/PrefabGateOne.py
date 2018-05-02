@@ -31,12 +31,14 @@ class PrefabGateOne(app):
 
         cmd = """
 cd /opt/code/github/liftoff/GateOne
-apt-get install build-essential python3-dev python3-setuptools -y
+apt-get install build-essential python3-dev python3-setuptools python3-pip -y
+pip3 install tornado==4.5.3
 python3 setup.py install
 cp /usr/local/bin/gateone $BINDIR/gateone
+ln -s /usr/bin/python3 /usr/bin/python
 """
         self.prefab.core.run(cmd)
-
+        self.prefab.system.ssh.keygen(name="id_rsa")
         self.doneSet('install')
 
     def start(self, name="main", address="localhost", port=10443):
@@ -49,8 +51,7 @@ cp /usr/local/bin/gateone $BINDIR/gateone
         @param port: int: port number.
 
         """
-
-        cmd = "gateone --address={} --port={} --disable_ssl".format(address, port)
+        cmd = "eval `ssh-agent -s` ssh-add /root/.ssh/id_rsa && gateone --address={} --port={} --disable_ssl".format(address, port)
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name='gateone_{}'.format(name), cmd=cmd)
 

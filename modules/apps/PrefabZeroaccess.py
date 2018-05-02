@@ -26,6 +26,7 @@ class PrefabZeroaccess(app):
 
         # Install 0-access
         self.prefab.core.run('cd {} && pip3 install -r requirements.txt'.format(self.zeroaccess_dir))
+        self.prefab.system.ssh.keygen(name="id_rsa")
         self.prefab.core.run("""
         cp {zeroaccess_path}/lash /bin 
         chmod 755 /bin/lash
@@ -34,7 +35,8 @@ class PrefabZeroaccess(app):
         mkdir -p /var/run/sshd
         """.format(zeroaccess_path=self.zeroaccess_dir))
 
-    def start(self, organization, client_secret, uri, port, ssh_ip, ssh_port, session_timeout=600):
+    def start(self, organization, client_secret, uri, port, ssh_ip, ssh_port,
+              gateone_url=None, session_timeout=600):
         self.stop()
         cmd = "python3 0-access.py {organization} {client_secret} {uri} {port} {ssh_ip} {ssh_port} {session_timeout}"
         cmd = cmd.format(
@@ -46,7 +48,8 @@ class PrefabZeroaccess(app):
             ssh_port=ssh_port,
             session_timeout=session_timeout
         )
-        print(cmd)
+        if gateone_url:
+            cmd += " --gateone-url {}".format(gateone_url)
         self.prefab.system.processmanager.get().ensure("zeroaccess", cmd, path=self.zeroaccess_dir,
                                                        wait=10, expect="sshd")
 
