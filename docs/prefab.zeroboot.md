@@ -16,7 +16,7 @@ The `prefab.network.zeroboot` module should be used to bootstrap a router with z
     - Use the default login username `admin` and keep password field empty.
     - Now, set a new password.
     - Turn `wifi` interface ON from `Network` > `Interfaces
-* [**prefab prerequisites**](intro.md#prerequisites)
+* [**prefab prerequisites**](../README.md#Prerequisites)
 * [**ZeroTier**](https://www.zerotier.com/) Network ID and Token
 
 ## install
