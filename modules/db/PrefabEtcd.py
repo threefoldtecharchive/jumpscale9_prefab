@@ -48,11 +48,54 @@ class PrefabEtcd(app):
     def install(self):
         if self.doneCheck("install"):
             return
-        url = "https://github.com/coreos/etcd/releases/download/v3.2.4/etcd-v3.2.4-linux-amd64.tar.gz"
-        from IPython import embed
-        print("DEBUG NOW install etcd")
-        embed()
-        raise RuntimeError("stop debug here")
+
+        url = "https://github.com/coreos/etcd/releases/download/v3.3.4/etcd-v3.3.4-linux-amd64.tar.gz"
+        dest = j.sal.fs.getTmpDirPath()
+        try:
+            expanded = self.prefab.core.file_download(url, dest, expand=True, minsizekb=0)
+            self.prefab.core.file_copy(j.sal.fs.joinPaths(expanded, 'etcd'), j.dirs.BINDIR)
+            self.prefab.core.file_copy(j.sal.fs.joinPaths(expanded, 'etcdctl'), j.dirs.BINDIR)
+        finally:
+            self.prefab.core.dir_remove(dest)
+
+        self.doneSet("install")
+
+    def build_flist(self, hub_instance=None):
+        """
+        build a flist for etcd
+
+        This method builds and optionally upload the flist to the hub
+
+        :param hub_instance: instance name of the zerohub client to use to upload the flist, defaults to None
+        :param hub_instance: str, optional
+        :raises j.exceptions.Input: raised if the zerohub client instance does not exist in the config manager
+        :return: path to the tar.gz created
+        :rtype: str
+        """
+
+        if not self.isInstalled():
+            self.install()
+
+        self.logger.info("building flist")
+        build_dir = j.sal.fs.getTmpDirPath()
+        tarfile = '/tmp/etcd-3.3.4.tar.gz'
+        bin_dir = j.sal.fs.joinPaths(build_dir, 'bin')
+        self.prefab.core.dir_ensure(bin_dir)
+        self.prefab.core.file_copy(j.sal.fs.joinPaths(j.dirs.BINDIR, 'etcd'), bin_dir)
+        self.prefab.core.file_copy(j.sal.fs.joinPaths(j.dirs.BINDIR, 'etcdctl'), bin_dir)
+
+        self.prefab.core.run('tar czf {} -C {} .'.format(tarfile, build_dir))
+
+        if hub_instance:
+            if not j.clients.zerohub.exists(hub_instance):
+                raise j.exceptions.Input("hub instance %s does not exists, can't upload to the hub" % hub_instance)
+            hub = j.clients.zerohub.get(hub_instance)
+            hub.authentificate()
+            self.logger.info("uploading flist to the hub")
+            hub.upload(tarfile)
+            self.logger.info("uploaded at https://hub.gig.tech/%s/etcd-3.3.4.flist", hub.config.data['username'])
+
+        return tarfile
 
     def start(self, host=None, peers=None):
         self.prefab.system.process.kill("etcd")
