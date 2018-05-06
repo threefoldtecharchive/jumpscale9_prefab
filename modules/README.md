@@ -1,18 +1,15 @@
-## Prefab Modules
-This is the package hosting all the components of prefab
-
-## Steps of creating prefab module
+# How to add new module to prefab
 1- Find a suitable subpackage to put your module in.
    apps, db, ...
    
 2- Create a class for you component, make it inherit from PrefabApp
 You can get PrefabApp like this
 
-```
+```python
 from js9 import j
-app = j.tools.prefab._getBaseAppClass()
+base = j.tools.prefab._getBaseClass()
 
-class PrefabModule(app):
+class PrefabModule(base):
   #rest of the code
 ```
 
@@ -33,13 +30,8 @@ class PrefabModule(app):
  - access your module under the package containing it
 
 This example of how to access redis module in prefab 
-```
+```python
 # js9
-[Wed14 15:13] - Application.py      :109 :j.application                  - INFO     - ***Application started***: jsshell
-^[[APython 3.5.2 (default, Sep 14 2017, 22:51:06) 
-Type 'copyright', 'credits' or 'license' for more information
-IPython 6.1.0 -- An enhanced Interactive Python. Type '?' for help.
-
 In [1]: prefab = j.tools.prefab.local
 
 In [2]: prefab.db.redis  

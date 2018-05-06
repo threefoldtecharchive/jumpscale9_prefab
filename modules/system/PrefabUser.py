@@ -79,10 +79,14 @@ class PrefabUser(base):
         """
         assert name is not None or uid is not None, "check: either `uid` or `name` should be given"
         assert name is None or uid is None, "check: `uid` and `name` both given, only one should be provided"
-        if name is not None:
-            _, d, _ = self.prefab.core.run("getent passwd | egrep '^%s:' ; true" % (name))
-        elif uid is not None:
-            _, d, _ = self.prefab.core.run("getent passwd | egrep '^.*:.*:%s:' ; true" % (uid))
+        if "LEDE" in self.prefab.platformtype.osname:
+            cmd = "grep -w '^%s' /etc/passwd" % (name)
+            _, d, _ = self.prefab.core.run(cmd)
+        else:
+            if name is not None:
+                _, d, _ = self.prefab.core.run("getent passwd | egrep '^%s:' ; true" % (name))
+            elif uid is not None:
+                _, d, _ = self.prefab.core.run("getent passwd | egrep '^.*:.*:%s:' ; true" % (uid))
         results = {}
         s = None
         if d:

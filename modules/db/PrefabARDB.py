@@ -73,18 +73,19 @@ class PrefabARDB(app):
         if self.doneCheck("buildardb", reset):
             return
 
-        if self.prefab.platformtype.isMac:
-            storageEngine = "rocksdb"
-            # self.prefab.system.package.install("boost")
-
         # Default packages needed
         packages = ["wget", "bzip2"]
 
-        # ForestDB
-        packages += ["git-core", "cmake", "libsnappy-dev", "g++"]
-
-        # RocksDB
-        packages += ["libbz2-dev"]
+        if self.prefab.platformtype.isMac:
+            storageEngine = "rocksdb"
+            # ForestDB
+            packages += ["git", "cmake", "libsnappy-dev", "gcc48"]
+            # self.prefab.system.package.install("boost")
+        else:
+            # ForestDB
+            packages += ["git", "cmake", "libsnappy-dev", "g++"]
+            # RocksDB
+            packages += ["libbz2-dev"]
 
         # PerconaFT
         packages += ["unzip"]
@@ -110,7 +111,7 @@ class PrefabARDB(app):
             cp ardb.conf $BUILDDIRARDB/
             """
         C = C.replace("$storageEngine", storageEngine)
-        self.prefab.core.run(self.replace(C))
+        self.prefab.core.execute_bash(self.replace(C))
 
         self.doneSet("buildardb")
 

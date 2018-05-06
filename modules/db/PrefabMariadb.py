@@ -32,7 +32,11 @@ class PrefabMariadb(app):
         self.doneSet("install")
 
         if start:
-            self.start()
+            try:
+                self.start()
+            except Exception:
+                j.logger.get().warning("MySql didn't started, maybe it's "
+                        "already running or the port 3306 is used by other service")
 
     def start(self):
         """Start mariadb
@@ -77,25 +81,28 @@ class PrefabMariadb(app):
             dbname=dbname, sqlfile=sqlfile)
         self.prefab.core.run(cmd)
 
-    def user_create(self, username):
+    def user_create(self, username, password=''):
         """creates user with no rights
 
         Arguments:
             username   {string} -- username to be created
+            password   {string} -- if provided will be the creted user password
         """
-
-        cmd = 'echo "CREATE USER {username}" | mysql'.format(username=username)
+        if password:
+            password = "IDENTIFIED BY '{password}'".format(password=password)
+        cmd = 'echo "CREATE USER {username}@localhost {password}"| mysql'.format(username=username, password=password)
         self.prefab.core.run(cmd, die=False)
 
-    def admin_create(self, username):
+    def admin_create(self, username, password=''):
         """creates user with all rights
 
         Arguments:
             username   {string} -- username to be created
+            password   {string} -- if provided will be the creted user password
         """
 
-        self.user_create(username)
-        cmd = 'echo "GRANT ALL PRIVILEGES ON *.* TO {username}@localhost WITH GRANT OPTION;" | mysql'.format(
+        self.user_create(username, password=password)
+        cmd = 'echo "GRANT ALL PRIVILEGES ON *.* TO \'{username}\'@\'localhost\' WITH GRANT OPTION;" | mysql'.format(
             username=username)
         self.prefab.core.run(cmd, die=False)
 
@@ -106,7 +113,8 @@ class PrefabMariadb(app):
             dbname {string} -- database name that query will run against
             sql    {string} -- sql query to be run
         """
-
+        if not dbname:
+            dbname = ''
         cmd = 'mysql -e "{}" {}'.format(sql, dbname)
         self.prefab.core.run(cmd)
 

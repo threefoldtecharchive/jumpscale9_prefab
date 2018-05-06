@@ -36,30 +36,29 @@ sudo mv -f /usr/bin/openssl_ /usr/bin/openssl
 class PrefabOpenSSL(base):
 
     def _init(self):
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/openssl/")
-        self.CODEDIRL = self.core.replace("$CODEDIR/github/openssl/openssl/")
+        self.BUILDDIRL = self.core.replace("$BUILDDIR/openssl")
+        self.CODEDIRL = self.core.replace("$BUILDDIR/code/openssl")
 
     def reset(self):
         base.reset(self)
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
 
-    def build(self, destpath="", reset=False):
+    def build(self, reset=False):
         """
-        @param destpath, if '' then will be $TMPDIR/build/openssl
+        js9 'j.tools.prefab.local.lib.openssl.build();print(j.tools.prefab.local.lib.openssl.BUILDDIRL)'
         """
 
         if self.doneCheck("build") and not reset:
             return
-        self.prefab.system.package.ensure('build-essential')
+        self.prefab.system.base.development(python=False)
         url = "https://github.com/openssl/openssl.git"
-        cpath = self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable", reset=reset, ssh=False)
-
-        assert cpath.rstrip("/") == self.CODEDIRL.rstrip("/")
+        self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable",dest=self.CODEDIRL, reset=False, ssh=False)
 
         if not self.doneGet("compile") or reset:
             C = """
             set -ex
+            mkdir -p $BUILDDIRL
             cd $CODEDIRL
             # ./config
             ./Configure $target shared enable-ec_nistp_64_gcc_128 no-ssl2 no-ssl3 no-comp --openssldir=$BUILDDIRL --prefix=$BUILDDIRL
@@ -67,12 +66,17 @@ class PrefabOpenSSL(base):
             make install
             rm -rf $BUILDDIRL/share
             rm -rf $BUILDDIRL/private
+            echo "**BUILD DONE**"
             """
             if self.prefab.core.isMac:
                 C = C.replace("$target", "darwin64-x86_64-cc")
             else:
                 C = C.replace("$target", "linux-generic64")
-            self.prefab.core.run(self.replace(C))
+
+            self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.replace(C))
+            self.logger.info("compile openssl")
+            self.logger.debug(C)                
+            self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)
             self.doneSet("compile")
             self.logger.info("BUILD DONE")
         else:

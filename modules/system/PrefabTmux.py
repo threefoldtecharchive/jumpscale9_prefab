@@ -11,7 +11,9 @@ class PrefabTmux(base):
         @param name is name of session
         @screens is list with nr of screens required in session and their names (is [$screenname,...])
         """
-        self.prefab.bash.locale_check()        
+        if "LEDE" not in self.prefab.platformtype.osname:
+            self.prefab.bash.locale_check()
+
         # if 'ubuntu' in j.core.platformtype.myplatform.platformtypes:
         if not self.prefab.core.command_check("tmux"):
             self.prefab.system.package.install("tmux")
@@ -86,7 +88,7 @@ class PrefabTmux(base):
                 message="cmd cannot be empty", level=1, source="", tags="", msgpub="")
 
         self.createWindow(sessionname, screenname, cmd=cmd, user=tmuxuser)
-        pane = self._getPane(sessionname, screenname, user=tmuxuser)
+        pane = self._pane_get(sessionname, screenname, user=tmuxuser)
         env = os.environ.copy()
         env.pop('TMUX', None)
 
@@ -179,7 +181,7 @@ class PrefabTmux(base):
 
         return rc, out
 
-    def getSessions(self, user=None):
+    def session_gets(self, user=None):
         cmd = 'tmux list-sessions -F "#{session_name}"'
         if user:
             cmd = "sudo -u %s -i %s" % (user, cmd)
@@ -198,12 +200,13 @@ class PrefabTmux(base):
         if err:
             return None
         for line in out.split():
-            pid, windowname = line.split(';')
-            if windowname == name:
-                return int(pid)
+            if ";" in line:
+                pid, windowname = line.split(';')
+                if windowname == name:
+                    return int(pid)
         return None
 
-    def getWindows(self, session, attemps=5, user=None):
+    def window_gets(self, session, attemps=5, user=None):
         result = dict()
 
         cmd = 'tmux list-windows -F "#{window_index}:#{window_name}" -t "%s"' % session
@@ -214,14 +217,15 @@ class PrefabTmux(base):
         if rc != 0:
             return result
         for line in out.split():
-            idx, name = line.split(':', 1)
-            result[int(idx)] = name
+            if ":" in line:
+                idx, name = line.split(':', 1)
+                result[int(idx)] = name
         return result
 
     def createWindow(self, session, name, user=None, cmd=None):
-        if session not in self.getSessions(user=user):
+        if session not in self.session_gets(user=user):
             return self.createSession(session, [name], user=user, returnifexists=False)
-        windows = self.getWindows(session, user=user)
+        windows = self.window_gets(session, user=user)
         if name not in list(windows.values()):
             cmd = "tmux new-window -t '%s:' -n '%s'" % (session, name)
             if user:
@@ -230,7 +234,7 @@ class PrefabTmux(base):
             self.prefab.core.run(cmd, showout=False, profile=True)
 
     def logWindow(self, session, name, filename, user=None):
-        pane = self._getPane(session, name, user=user)
+        pane = self._pane_get(session, name, user=user)
         if pane:
             cmd = "tmux pipe-pane -t '%s' 'cat >> \"%s\"'" % (pane, filename)
             if user:
@@ -238,13 +242,13 @@ class PrefabTmux(base):
             self.prefab.core.run(cmd, showout=False, profile=True)
 
     def windowExists(self, session, name, user=None):
-        if session in self.getSessions(user=user):
-            if name in list(self.getWindows(session, user=user).values()):
+        if session in self.session_gets(user=user):
+            if name in list(self.window_gets(session, user=user).values()):
                 return True
         return False
 
-    def _getPane(self, session, name, user=None):
-        windows = self.getWindows(session, user=user)
+    def _pane_get(self, session, name, user=None):
+        windows = self.window_gets(session, user=user)
         remap = dict([(win, idx) for idx, win in list(windows.items())])
         if name not in remap:
             return None
@@ -253,7 +257,7 @@ class PrefabTmux(base):
 
     def killWindow(self, session, name, user=None):
         try:
-            pane = self._getPane(session, name, user=user)
+            pane = self._pane_get(session, name, user=user)
         except KeyError:
             return  # window does nt exist
         cmd = "tmux kill-window -t '%s'" % pane
@@ -277,7 +281,7 @@ class PrefabTmux(base):
 
     def attachSession(self, sessionname, windowname=None, user=None):
         if windowname:
-            pane = self._getPane(sessionname, windowname, user=user)
+            pane = self._pane_get(sessionname, windowname, user=user)
             cmd = "tmux select-window -t '%s'" % pane
             if user:
                 cmd = "sudo -u %s -i %s" % (user, cmd)

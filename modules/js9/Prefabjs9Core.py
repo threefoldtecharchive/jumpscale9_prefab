@@ -6,11 +6,12 @@ app = j.tools.prefab._getBaseAppClass()
 class Prefabjs9Core(app):
     NAME = 'js9'
 
-    def install(self, reset=False, branch='master', full_installation=False):
+    def install(self, reset=False, branch='development', full=False):
         """Install js9 core
         Keyword Arguments:
             reset {bool} -- force install if js9core was already installed (default: {False})
             branch {string} -- branch from which js9core will be installed (default: {'master'})
+            full {bool} -- False for production installs and True for development installs
         Example:
             j.tools.prefab.local.js9.js9Core.install()
 
@@ -21,38 +22,39 @@ class Prefabjs9Core(app):
         if self.doneCheck("install", reset):
             return
 
-        self.prefab.system.base.development()
+        if full:
+            self.prefab.system.base.development()
+        else:
+            self.prefab.system.base.install()
 
-        self.bashtools()
+        self.bashtools(branch)
 
         self._base()
 
         self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
 
         self.logger.info("js9_install")
-        if full_installation:
-            self.core.run(
-                "export JS9BRANCH=%s;ZInstall_host_js9_full" % branch, profile=True)
-        else:
-            self.core.run(
-                "export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
 
-        self.prefab.runtimes.pip.install("Cython,asyncssh,numpy,tarantool")
+        self.core.run("export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
 
+        
         self.doneSet("install")
 
-    def bashtools(self, reset=False):
+    def bashtools(self, branch='master', reset=False):
 
         if self.doneCheck("bashtools", reset):
             return
 
         S = """
         echo "INSTALL BASHTOOLS"
-        curl https://raw.githubusercontent.com/Jumpscale/bash/master/install.sh?$RANDOM > /tmp/install.sh
+        curl https://raw.githubusercontent.com/Jumpscale/bash/{}/install.sh?$RANDOM > /tmp/install.sh
         bash /tmp/install.sh
-        """
+        """.format(branch)
 
         self.core.execute_bash(S)
+        path = j.sal.fs.joinPaths(j.dirs.CODEDIR, 'github', 'jumpscale', 'bash', 'zlibs.sh')
+        self.prefab.bash.profileJS.addInclude(path)
+        self.prefab.bash.profileJS.save()
 
         self.doneSet("bashtools")
 

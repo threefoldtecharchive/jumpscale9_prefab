@@ -7,7 +7,11 @@ class PrefabZerotier(base):
 
     def _init(self):
         self.BUILDDIRL = self.core.replace("$BUILDDIR/zerotier/")
-        self.CLI = j.sal.fs.joinPaths(self.prefab.core.dir_paths['BINDIR'], 'zerotier-cli')
+        if "LEDE" in self.prefab.platformtype.osname:
+            self.CLI = 'zerotier-cli'
+        else:
+            self.CLI = j.sal.fs.joinPaths(self.prefab.core.dir_paths['BINDIR'], 'zerotier-cli')
+
 
     def reset(self):
         super().reset()
@@ -16,10 +20,17 @@ class PrefabZerotier(base):
         self.doneDelete("build")
 
     def build(self, reset=False, install=True):
+
         if reset:
             self.reset()
 
         if self.doneGet("build") and not reset:
+            return
+
+        if "LEDE" in self.prefab.platformtype.osname:
+            self.prefab.core.run("opkg update")
+            self.prefab.core.run("opkg install zerotier")
+            self.doneSet("build")
             return
 
         if self.prefab.core.isMac:
@@ -47,6 +58,8 @@ class PrefabZerotier(base):
     def install(self):
         if not self.doneGet("build"):
             self.build(install=False)
+        if "LEDE" in self.prefab.platformtype.osname:
+            return
         bindir = self.prefab.core.dir_paths['BINDIR']
         self.prefab.core.dir_ensure(bindir)
         for item in self.prefab.core.find(j.sal.fs.joinPaths(self.BUILDDIRL, 'usr/sbin')):
@@ -62,20 +75,26 @@ class PrefabZerotier(base):
         pm = self.prefab.system.processmanager.get()
         pm.stop('zerotier-one')
 
-    def join_network(self, network_id):
+    def network_join(self, network_id, config_path=None, zerotier_client=None):
         """
-        join the netowrk identied by network_id
+        join the netowrk identied by network_id and authorize it into the network if a zerotier_client would be given
         """
-        cmd = '{cli} join {id}'.format(cli=self.CLI, id=network_id)
+        switches = self._get_switches(config_path)
+        cmd = '{cli} {switches}join {id}'.format(cli=self.CLI, switches=switches, id=network_id)
         rc, out, err = self.prefab.core.run(cmd, die=False)
         if rc != 0 or out.find('OK') == -1:
             raise j.exceptions.RuntimeError("error while joinning network: \n{}".format(err))
+        if zerotier_client:
+            machine_address = self.get_zerotier_machine_address()
+            zerotier_client.client.network.updateMember(address=machine_address, id=network_id,
+                                                    data={"config": {"authorized": True}})
 
-    def leave_network(self, network_id):
+    def network_leave(self, network_id, config_path=None):
         """
         leave the netowrk identied by network_id
         """
-        cmd = '{cli} leave {id}'.format(cli=self.CLI, id=network_id)
+        switches = self._get_switches(config_path)
+        cmd = '{cli} {switches}leave {id}'.format(cli=self.CLI, switches=switches, id=network_id)
         rc, out, _ = self.prefab.core.run(cmd, die=False)
         if rc != 0 or out.find('OK') == -1:
             error_msg = "error while joinning network: "
@@ -85,7 +104,7 @@ class PrefabZerotier(base):
                 error_msg += out
             raise j.exceptions.RuntimeError(error_msg)
 
-    def list_networks(self):
+    def networks_list(self, config_path=None):
         """
         list all joined networks.
         return a list of dict
@@ -99,7 +118,8 @@ class PrefabZerotier(base):
             'ips': ,
         }
         """
-        cmd = '{cli} listnetworks'.format(cli=self.CLI)
+        switches = self._get_switches(config_path)
+        cmd = '{cli} {switches}listnetworks'.format(cli=self.CLI, switches=switches)
         rc, out, _ = self.prefab.core.run(cmd, die=False)
         if rc != 0:
             raise j.exceptions.RuntimeError(out)
@@ -124,7 +144,25 @@ class PrefabZerotier(base):
 
         return networks
 
-    def list_peers(self):
+    def get_network_interface_name(self, network_id, config_path=None):
+        """
+        Get the zerotier network interface device name.
+        """
+        for net in self.networks_list(config_path=config_path):
+            if net['network_id'] == network_id:
+                return net['dev']
+        raise KeyError("Network connection with id %s was not found!" % network_id)
+    
+    def get_zerotier_machine_address(self, config_path=None):
+        """
+        Get the zerotier machine address.
+        """
+        switches = self._get_switches(config_path)
+        cmd = '{cli} {switches}info'.format(cli=self.CLI, switches=switches)
+        _, out, _ = self.prefab.core.run(cmd)
+        return out.split()[2]
+
+    def peers_list(self, config_path=None):
         """
         list connected peers.
         return a list of dict
@@ -136,7 +174,8 @@ class PrefabZerotier(base):
             'role': ,
         }
         """
-        cmd = '{cli} listpeers'.format(cli=self.CLI)
+        switches = self._get_switches(config_path)
+        cmd = '{cli} {switches}listpeers'.format(cli=self.CLI, switches=switches)
         rc, out, _ = self.prefab.core.run(cmd, die=False)
         if rc != 0:
             raise j.exceptions.RuntimeError(out)
@@ -158,3 +197,30 @@ class PrefabZerotier(base):
             peers.append(peer)
 
         return peers
+
+
+    def network_name_get(self, network_id, config_path=None):
+        """"gets a network name with ip
+        
+        Arguments:
+            network_id {string} -- network id to look for
+        
+        Raises:
+            RuntimeError -- if there is no networks with the given id
+        
+        Returns:
+            string -- network name
+        """
+
+        networks = self.networks_list(config_path=config_path)
+        for network in networks:
+            if network['network_id'] == network_id:
+                return network['name']
+        raise RuntimeError("no networks found with id {}, make sure that you properly joined this network".format(network_id))
+    
+    def _get_switches(self, config_path=None):
+        switches = ''
+        if config_path:
+            switches += "-D%s " % config_path
+        return switches
+        

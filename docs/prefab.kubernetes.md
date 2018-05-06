@@ -8,7 +8,7 @@ available methods include but are not limited to:
 
 ```python
 c = j.tools.prefab.local
-c.virtualization.install_base()
+c.virtualization.kubernetes.install_base()
 ```
  - Another more abstract method is used to deploy the entire cluster installing both master and minions (or masters as minions using the unsafe flag) and setting up flannel.
  P.s Make sure to clean your known hosts from any conflicting identities
@@ -16,13 +16,13 @@ c.virtualization.install_base()
 c = j.tools.prefab.local
 c1 = j.tools.prefab.get('<machineip1>')
 c2 = j.tools.prefab.get('<machineip2>')
-config, join_line = c.virtualization.multihost_install([c1, c2])
+config, join_line = c.virtualization.kubernetes.multihost_install([c1, c2])
 ```
 
  - It is also easy to add another minion node using the join_line returned from the multihost_install using another method the install minion.
  ```
  c3 = j.tools.prefab.get('<machineip3>')
- c3.virtualization.install_minion(join_line)
+ c3.virtualization.kubernetes.install_minion(join_line)
  ```
 
 ```

@@ -21,31 +21,38 @@ Examples for methods in `core`:
 - **run**: run a command
 
   ```python
-  prefab.run('ls')
-  prefab.run('false', die=False) //it won't raise an error
+  prefab.core.run('ls')
+  prefab.core.run('false', die=False) #it won't raise an error
   ```
 
 - **run_script**: run a script
 
   ```python
-  prefab.run_script('cd /\npwd')
+  prefab.core.run_script('cd /\npwd')
   ```
 
-- **sudo**: run a command using sudo
+- **replace**: replace following args (when jumpscale installed it will take the args from there)
 
-  ```python
-  prefab.sudo('apt-get  install httpie')
-  ```
+    
 
-- **args_replace**: replace arguments inside commands and paths such as `$BINDIR`, `$hostname`, `$CODEDIR`, `$TMPDIR`
+    ```
+    - CODEDIR
+    - HOSTCFGDIR
+    - LOGDIR
+    - BUILDDIR
+    - BINDIR
+    - TEMPLATEDIR
+    - LIBDIR
+    - DATADIR
+    - BASEDIR
+    - HOMEDIR
+    - BASEDIRJS
+    - VARDIR
+    - HOSTDIR
+    - JSAPPSDIR
+    - CFGDIR
+    - TMPDIR
 
-  ```python
-  prefab.arg_replace('$BINDIR/python -c "print(1)"')
-  ```
-
-```
-!!!
-title = "Prefab.core"
-date = "2017-04-08"
-tags = []
-```
+    uses http://mustache.github.io/ syntax
+    {{varname}}
+    ```

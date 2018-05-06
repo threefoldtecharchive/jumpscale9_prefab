@@ -38,7 +38,7 @@ class PrefabPostgresql(app):
         self.doneSet('build')
 
     def _group_exists(self, groupname):
-        return groupname in open("/etc/group").read()
+        return groupname in self.prefab.core.file_read("/etc/group")
 
     def install(self, reset=False, start=False, port=5432, beta=False):
         if self.doneCheck("install", reset):

@@ -12,7 +12,7 @@ class PrefabAtYourService(base):
         )
         self.repo_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["CODEDIR"], 'github/jumpscale/ays9/')
 
-    def configure(self, production=False, organization='', restart=True, host=None, port=None):
+    def configure(self, production=False, organization='', restart=True, host='127.0.0.1', port=5000):
         jwt_key = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n27MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny66+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv"
         ays_config = {
             'production': production,
@@ -20,8 +20,8 @@ class PrefabAtYourService(base):
                 'jwt_key': jwt_key,
                 'organization': organization
             },
-            'host': '127.0.0.1',
-            'port': 5000
+            'host': host,
+            'port': port
         }
         rediskwargs = j.core.db.config_get('unixsocket')
         if not rediskwargs['unixsocket']:
@@ -29,16 +29,11 @@ class PrefabAtYourService(base):
             rediskwargs = {'host': dbkwargs['host'], 'port': dbkwargs['port']}
         ays_config.update({'redis': rediskwargs})
 
-        if host is not None:
-            ays_config.update({'host': host})
-        if port is not None:
-            ays_config.update({'port': port})
-
         self.executor.state.configSet('ays', ays_config, save=True)
         if restart:
             self.stop()
             self.start()
-        
+
     def configure_portal(self, ays_url='http://localhost:5000', ays_console_url='', portal_name='main', restart=True):
         """Configure AYS in portal
 
@@ -81,7 +76,7 @@ class PrefabAtYourService(base):
             r'baseUri: .*',
             r'baseUri: %s' % url,
             raml
-            )
+        )
         self.prefab.core.file_write(raml_path, raml)
 
     def get_code(self, branch):
@@ -150,7 +145,12 @@ class PrefabAtYourService(base):
             self.logger.warning('AYS is not installed. Installing it...')
             self.install()
 
-        cfg = self.executor.state.configGet('ays', {})
+        try:
+            j.core.state.configGet('ays')
+        except j.exceptions.Input:
+            self.logger.warning('AYS has not been configured. Will start with default host:127.0.0.1 and port:5000')
+
+        cfg = self.executor.state.configGet('ays', {'host': '127.0.0.1', 'port': 5000}, set=True)
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,
                                                                                       host=cfg['host'], port=cfg['port'], log=log)
         if dev:
