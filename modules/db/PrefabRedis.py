@@ -42,8 +42,7 @@ class PrefabRedis(app):
             rm -f /usr/local/bin/redis-server
             rm -f /usr/local/bin/redis-cli
             """
-
-            C = self.prefab.bash.profileJS.replace(C)
+            C = self.prefab.core.replace(C)
             C = self.replace(C)
             self.prefab.core.run(C)
 
@@ -118,7 +117,7 @@ class PrefabRedis(app):
             ping_cmd = '%s/redis-cli -s %s ' % (path, unixsocket)
         else:
             raise j.exceptions.RuntimeError("can't connect to redis")
-        
+
         ping_cmd = self.replace(ping_cmd)
         if password is not None and password.strip():
             ping_cmd += ' -a %s ' % password
