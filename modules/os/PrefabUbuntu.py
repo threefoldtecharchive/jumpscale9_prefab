@@ -130,7 +130,7 @@ iface ens4 inet dhcp
             chroot.write_file('/tmp/ztkey', ZEROTIERKEY)
             chroot.execute('apt-key add /tmp/ztkey')
             chroot.execute('apt-get update')
-            chroot.execute('apt-get install -y --allow-unauthenticated --no-install-recommends mc openssh-server linux-generic wget zerotier-one ca-certificates curl')
+            chroot.execute('apt-get install -y --allow-unauthenticated --no-install-recommends mc openssh-server linux-generic wget zerotier-one ca-certificates curl acpid')
             chroot.execute('update-initramfs -u')
             kernel = j.sal.fs.getBaseName(self.prefab.core.find('{}/boot'.format(chroot.path), False, './vmlinuz-*')[0])
             initrd = j.sal.fs.getBaseName(self.prefab.core.find('{}/boot'.format(chroot.path), False, './initrd.img-*')[0])

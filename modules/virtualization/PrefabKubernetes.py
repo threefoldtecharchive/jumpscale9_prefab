@@ -377,7 +377,7 @@ class PrefabKubernetes(app):
         # exchange keys to allow for ssh and scp from the init node to the other
         pub_key = init_node.core.file_read(init_node.system.ssh.keygen()).strip()
         for node in nodes[1:]:
-            node.executor.sshclient.ssh_authorize('root', pub_key)
+            node.executor.sshclient.ssh_authorize('root', pubkey=pub_key)
             _, user, _ = init_node.core.run('whoami', showout=False)
             init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
 
