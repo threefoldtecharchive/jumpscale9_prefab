@@ -16,7 +16,7 @@ class PrefabMattermost(app):
         self.prefab.db.mariadb._create_db("mattermost")
         self.prefab.db.mariadb.admin_create('mmuser', dbpass)
         self.prefab.runtimes.golang.get("github.com/gigforks/mattermost-server")
-        self.prefab.tools.git.pullRepo("https://github.com/gigforks/mattermost-webapp.git", branch="master", dest="%s/src/github.com/mattermost/mattermost-webapp" % self.GOPATH)
+        self.prefab.tools.git.pullRepo("https://github.com/gigforks/mattermost-webapp.git", branch="master", dest="%s/src/github.com/gigforks/mattermost-webapp" % self.GOPATH)
         root_path = "%s/src/github.com/gigforks" % self.GOPATH
         self.prefab.core.run('cp {rootpath}/mattermost-server/config/default.json {rootpath}/mattermost-server/config/config.json'.format(rootpath=root_path))
         self.prefab.core.run("sed -i 's/dockerhost/localhost/g' %s/mattermost-server/config/config.json" % root_path)
@@ -52,10 +52,10 @@ class PrefabMattermost(app):
             reset {bool} -- force build if True (default: {False})
         """
         self.build(dbpass)
-        self.prefab.core.run('cp -r %s/src/github.com/mattermost/mattermost-server/dist/mattermost /opt/' % self.GOPATH)
+        self.prefab.core.run('cp -r %s/src/github.com/gigforks/mattermost-server/dist/mattermost /opt/' % self.GOPATH)
         self.prefab.core.run('cp %s/bin/platform /opt/mattermost/bin' % self.GOPATH)
         self.prefab.core.dir_ensure('/opt/mattermost/client')
-        self.prefab.core.run('cp -r %s/src/github.com/mattermost/mattermost-webapp/dist/* /opt/mattermost/client' % self.GOPATH)
+        self.prefab.core.run('cp -r %s/src/github.com/gigforks/mattermost-webapp/dist/* /opt/mattermost/client' % self.GOPATH)
         self.prefab.core.dir_ensure('/opt/mattermost/bin/plugins')
         self.prefab.core.dir_ensure('/opt/mattermost/bin/data')
         if start:
