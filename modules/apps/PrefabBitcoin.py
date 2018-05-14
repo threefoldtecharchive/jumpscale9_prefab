@@ -30,10 +30,15 @@ class PrefabBitcoin(app):
         self.doneSet('build')
 
 
-    def install(self):
+    def install(self, reset=False):
 
+        if self.doneGet('install') and reset is False:
+            return
+    
         cmd = self.replace('cp {}/bin/* $BINDIR/'.format(self.EXTRACTED_FILEPATH))
         self.prefab.core.run(cmd)
 
         cmd = self.replace('cp {}/lib/* $LIBDIR/'.format(self.EXTRACTED_FILEPATH))
         self.prefab.core.run(cmd)
+
+        self.doneSet('install')
