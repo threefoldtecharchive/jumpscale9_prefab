@@ -21,9 +21,13 @@ class PrefabEthereum(app):
         self.doneSet('build')
 
     def install(self, reset=False):
-        self.build()
+        """
+        Install the binaries of ethereum
+        """
         if self.doneGet('install') and reset is False:
             return
+
+        self.build(reset=reset)
         self.prefab.system.package.install("build-essential")
 
         geth_path = "{}/src/github.com/ethereum/go-ethereum".format(self.prefab.runtimes.golang.GOPATHDIR)

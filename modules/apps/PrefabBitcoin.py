@@ -31,10 +31,15 @@ class PrefabBitcoin(app):
 
 
     def install(self, reset=False):
+        """
+        Install the bitcoind binaries
+        """
 
         if self.doneGet('install') and reset is False:
             return
-    
+
+        self.build(reset=reset)
+
         cmd = self.replace('cp {}/bin/* $BINDIR/'.format(self.EXTRACTED_FILEPATH))
         self.prefab.core.run(cmd)
 
