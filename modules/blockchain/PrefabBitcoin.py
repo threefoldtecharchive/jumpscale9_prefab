@@ -1,38 +1,49 @@
-"""
-Prefab module to build/install bitcoin daemon and client
-mrCkmU5BfygP6zmLLEQfcWjph2pZ3HGZ9j
-"""
-
 from js9 import j
 
-base = j.tools.prefab._getBaseClass()
+
+app = j.tools.prefab._getBaseAppClass()
 
 
-class PrefabBitcoin(base):
-    """
-    Prefab Bitcoin class
-    """
+class PrefabBitcoin(app):
+    NAME = "bitcoind"
+
+    def _init(self):
+        self.BITCOIN_64BIT_URL = "https://bitcoin.org/bin/bitcoin-core-0.16.0/bitcoin-0.16.0-x86_64-linux-gnu.tar.gz"
+        self.DOWNLOAD_DEST = self.replace("$BUILDDIR/bitcoin-0.16.0.tar.gz")
+        self.EXTRACTED_FILEPATH = self.replace("$TMPDIR/bitcoin-0.16.0")
+
+
+    def build(self, reset=False):
+        """Get/Build the binaries of bitcoin
+        Keyword Arguments:
+            reset {bool} -- reset the build process (default: {False})
+        """
+
+        if self.doneGet('build') and reset is False:
+            return
+
+        if not self.prefab.core.file_exists(self.DOWNLOAD_DEST):
+            self.prefab.core.file_download(self.BITCOIN_64BIT_URL, self.DOWNLOAD_DEST)
+
+        self.prefab.core.file_expand(self.DOWNLOAD_DEST, "$TMPDIR")
+
+        self.doneSet('build')
+
 
     def install(self, reset=False):
         """
-        Install Bitcoin daemon and cli
-
-        @param reset: If True, installation steps will be re-done if already installed.
+        Install the bitcoind binaries
         """
-        if not reset and self.doneCheck('install'):
-            # already installed
+
+        if self.doneGet('install') and reset is False:
             return
 
-        self.prefab.bash.locale_check()
-        if self.prefab.core.isUbuntu:
-            self.prefab.system.package.mdupdate(reset=True)
-            self.prefab.system.package.install("build-essential libtool autotools-dev autoconf libssl-dev libboost-all-dev software-properties-common git")
-            self.prefab.system.package._repository_ensure_apt("ppa:bitcoin/bitcoin")
-            self.prefab.system.package._repository_ensure_apt("ppa:longsleep/golang-backports")
-            self.prefab.system.package.mdupdate(reset=True)
-            self.prefab.system.package.install("golang-go")
-            self.prefab.system.package.install("bitcoind")
-        else:
-            raise RuntimeError("Unsported platform")
+        self.build(reset=reset)
 
-        self.doneSet("install")
+        cmd = self.replace('cp {}/bin/* $BINDIR/'.format(self.EXTRACTED_FILEPATH))
+        self.prefab.core.run(cmd)
+
+        cmd = self.replace('cp {}/lib/* $LIBDIR/'.format(self.EXTRACTED_FILEPATH))
+        self.prefab.core.run(cmd)
+
+        self.doneSet('install')
