@@ -17,6 +17,7 @@ class PrefabTfChain(app):
         if self.doneGet('build') and reset is False:
             return
 
+        self.prefab.system.package.install("build-essential")
         golang = self.prefab.runtimes.golang
         golang.install()
 
@@ -35,3 +36,10 @@ class PrefabTfChain(app):
             j.sal.fs.joinPaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchainc')), profile=True)
 
         self.doneSet('build')
+
+
+    def install(self, reset=False):
+        """
+        Install the tftchain binaries
+        """
+        self.build(reset=reset)
