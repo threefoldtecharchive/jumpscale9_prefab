@@ -15,7 +15,7 @@ class PrefabMattermost(app):
         self.prefab.db.mariadb.start()
         self.prefab.db.mariadb._create_db("mattermost")
         self.prefab.db.mariadb.admin_create('mmuser', dbpass)
-        self.prefab.runtimes.golang.get("github.com/mattermost/mattermost-server")
+        self.prefab.runtimes.golang.get("github.com/mattermost/mattermost-server/cmd/...", install=False)
         self.prefab.tools.git.pullRepo("https://github.com/gigforks/mattermost-webapp.git", branch="master", dest="%s/src/github.com/mattermost/mattermost-webapp" % self.GOPATH)
         root_path = "%s/src/github.com/mattermost" % self.GOPATH
         self.prefab.core.run('cd %s/mattermost-server && git remote add gigforks https://github.com/gigforks/mattermost-server' % root_path,
