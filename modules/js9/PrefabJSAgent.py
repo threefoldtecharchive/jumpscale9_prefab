@@ -23,7 +23,7 @@ class PrefabJSAgent(app):
             return
 
         self.prefab.core.dir_ensure('$JSAPPSDIR')
-        self.prefab.core.file_link('$CODEDIR/github/jumpscale/jumpscale_core9/apps/jsagent', '$JSAPPSDIR/jsagent')
+        self.prefab.core.file_link('$CODEDIR/github/jumpscale/core9/apps/jsagent', '$JSAPPSDIR/jsagent')
         if start is True:
             self.start(gid, ctrl_addr, ctrl_port, ctrl_passwd)
 

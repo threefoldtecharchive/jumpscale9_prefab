@@ -134,7 +134,11 @@ class PrefabCaddy(app):
 
         self.stop()  # will also kill
 
-        cmd = self.replace("$BINDIR/caddy")
+        if self.prefab.platformtype.isMac:
+            cmd = "caddy"
+        else:
+            cmd = self.replace("$BINDIR/caddy")
+
         if agree:
             agree = " -agree"
 

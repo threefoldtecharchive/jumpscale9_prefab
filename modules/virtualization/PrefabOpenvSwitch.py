@@ -5,7 +5,7 @@ app = j.tools.prefab._getBaseAppClass()
 
 # TODO: *3 see if this works on packet, net
 
-# make sure you use the trick we used in jumpscale/jumpscale_core9/lib/JumpScale/tools/prefab/systemservices/PrefabFW.py
+# make sure you use the trick we used in jumpscale/core9/lib/JumpScale/tools/prefab/systemservices/PrefabFW.py
 #   : setRuleset...   here we use a python script to make sure we set & set back to original if it doesn't work
 
 # can we use j.sal.openvswitch & i saw there is already an .executor in,
