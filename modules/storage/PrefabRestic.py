@@ -9,7 +9,10 @@ class PrefabRestic(app):
 
     def _init(self):
         self.BUILDDIR = self.core.replace("$BUILDDIR/restic")
-        self.CODEDIR = self.core.replace("$GOPATHDIR/src/github.com/restic/restic")
+
+    @property
+    def CODEDIR(self):
+        return "{}/src/github.com/restic/restic".format(self.prefab.runtimes.golang.GOPATH)
 
     def reset(self):
         """
@@ -76,13 +79,13 @@ class ResticRepository:
         return self.prefab.core.file_exists(test_file)
 
     def _run(self, cmd, env=None, die=True, showout=True):
-        env = {
+        env_vars = {
             'RESTIC_REPOSITORY': self.path,
             'RESTIC_PASSWORD': self.__password
         }
         if env:
-            env.update(env)
-        return self.prefab.core.run(cmd=cmd, env=env, die=die, showout=showout)
+            env_vars.update(env)
+        return self.prefab.core.run(cmd=cmd, env=env_vars, die=die, showout=showout)
 
     def initRepository(self):
         """
@@ -123,7 +126,7 @@ class ResticRepository:
         _, out, _ = self._run(cmd, showout=False)
 
         snapshots = []
-        for line in out.splitlines()[2:]:
+        for line in out.splitlines()[2:-2]:
             ss = list(self._chunk(line))
 
             snapshot = {
