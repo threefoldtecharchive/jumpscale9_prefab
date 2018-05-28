@@ -38,6 +38,7 @@ class PrefabMattermost(app):
 
         self.prefab.system.package.mdupdate()
         self.prefab.system.package.ensure('git-core')
+        self.prefab.system.package.ensure('postfix')
         self.prefab.system.package.ensure('gcc')
         self.prefab.system.package.ensure('make')
         self.prefab.runtimes.golang.install()
