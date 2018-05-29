@@ -55,34 +55,40 @@ class PrefabRestic(app):
 
         self.doneSet("install")
 
-    def getRepository(self, path, password):
+    def getRepository(self, path, password, repo_env=None):
         """
+        @param repo_env (dict) sets needed environemnt params to create/use repo
         @return ResticRepository object. If the repo doesn't exist yet, it will
                 be created and initialized
         """
-        return ResticRepository(path, password, self.prefab)
+        return ResticRepository(path, password, self.prefab, repo_env)
 
 
 class ResticRepository:
     """This class represent a restic repository used for backup"""
 
-    def __init__(self, path, password, prefab):
+    def __init__(self, path, password, prefab, repo_env=None):
         self.path = path
         self.__password = password
+        self.repo_env = repo_env
         self.prefab = prefab
 
         if not self._exists():
             self.initRepository()
 
     def _exists(self):
-        test_file = j.sal.fs.joinPaths(self.path, 'config')
-        return self.prefab.core.file_exists(test_file)
+        rc, _, _ = self._run('$BINDIR/restic snapshots > /dev/null', die=False)
+        if rc > 0:
+            return False
+        return True
 
     def _run(self, cmd, env=None, die=True, showout=True):
         env_vars = {
             'RESTIC_REPOSITORY': self.path,
             'RESTIC_PASSWORD': self.__password
         }
+        if self.repo_env:
+            env_vars.update(self.repo_env)
         if env:
             env_vars.update(env)
         return self.prefab.core.run(cmd=cmd, env=env_vars, die=die, showout=showout)
