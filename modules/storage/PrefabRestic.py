@@ -9,6 +9,8 @@ class PrefabRestic(app):
 
     def _init(self):
         self.BUILDDIR = self.core.replace("$BUILDDIR/restic")
+        self.DOWNLOAD_DEST = '{}/linux_amd64.bz2'.format(self.BUILDDIR)
+        self.FILE_NAME = '{}/linux_amd64'.format(self.BUILDDIR)
 
     @property
     def CODEDIR(self):
@@ -21,6 +23,19 @@ class PrefabRestic(app):
         super().reset()
         self.core.dir_remove(self.BUILDDIR)
         self.core.dir_remove(self.CODEDIR)
+
+    def quick_install(self, install=True, reset=False):
+        if reset is False and (self.isInstalled() or self.doneGet('quick_install')):
+            return
+        if not self.prefab.core.file_exists(self.DOWNLOAD_DEST):
+            self.prefab.core.file_download('https://github.com/restic/restic/releases/download/v0.9.0/restic_0.9.0_linux_amd64.bz2', self.DOWNLOAD_DEST)
+        self.prefab.core.file_expand(self.DOWNLOAD_DEST)
+        self.prefab.core.run('chmod +x {}'.format(self.FILE_NAME))
+
+        self.doneSet("quick_install")
+
+        if install:
+            self.install(source=self.FILE_NAME)
 
     def build(self, install=True, reset=False):
         if reset is False and (self.isInstalled() or self.doneGet('build')):
@@ -43,7 +58,7 @@ class PrefabRestic(app):
         if install:
             self.install()
 
-    def install(self, reset=False):
+    def install(self, source=None, reset=False):
         """
         download, install, move files to appropriate places, and create relavent configs
         """
@@ -51,7 +66,10 @@ class PrefabRestic(app):
         if self.doneGet("install") and not reset:
             return
 
-        self.prefab.core.file_copy(self.CODEDIR + '/restic', '$BINDIR')
+        if source:
+            self.prefab.core.file_copy(self.FILE_NAME, '$BINDIR/restic' )
+        else:
+            self.prefab.core.file_copy(self.CODEDIR + '/restic', '$BINDIR')
 
         self.doneSet("install")
 
