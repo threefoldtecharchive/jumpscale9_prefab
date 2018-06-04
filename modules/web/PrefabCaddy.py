@@ -27,7 +27,7 @@ class PrefabCaddy(app):
         # if not self.core.isUbuntu:
         #     raise j.exceptions.RuntimeError("only ubuntu supported")
 
-        if self.doneGet('build') and reset is False:
+        if self.doneCheck('build', reset):
             return
 
         self.prefab.system.base.install(upgrade=True)
@@ -47,9 +47,10 @@ class PrefabCaddy(app):
         """
         will build if required & then install binary on right location
         """
+        self.build(plugins=plugins, reset=reset)
 
-        if not reset and not self.doneGet('build'):
-            self.build(plugins=plugins, reset=reset)
+        if self.doneCheck('install', reset):
+            return
 
         self.prefab.core.file_copy('/opt/go_proj/bin/caddy', '$BINDIR/caddy')
         self.prefab.bash.profileDefault.addPath(self.prefab.core.dir_paths['BINDIR'])

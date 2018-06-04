@@ -161,7 +161,6 @@ class PrefabCoreDns(app):
         rewrite:rewrite
         dnssec:dnssec
         autopath:autopath
-        reverse:reverse
         template:template
         hosts:hosts
         route53:route53
