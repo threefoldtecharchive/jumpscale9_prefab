@@ -84,9 +84,9 @@ class PrefabUser(base):
             _, d, _ = self.prefab.core.run(cmd)
         else:
             if name is not None:
-                _, d, _ = self.prefab.core.run("getent passwd | egrep '^%s:' ; true" % (name))
+                _, d, _ = self.prefab.core.run("getent passwd | egrep '^%s:'" % (name), die=False)
             elif uid is not None:
-                _, d, _ = self.prefab.core.run("getent passwd | egrep '^.*:.*:%s:' ; true" % (uid))
+                _, d, _ = self.prefab.core.run("getent passwd | egrep '^.*:.*:%s:'" % (uid), die=False)
         results = {}
         s = None
         if d:

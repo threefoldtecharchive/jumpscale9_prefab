@@ -10,7 +10,10 @@ class PrefabMattermost(app):
     def GOPATH(self):
         return self.prefab.runtimes.golang.GOPATH
 
-    def build(self, dbpass):
+    def build(self, dbpass, reset=False):
+        if self.doneCheck('build', reset):
+            return
+
         self._installDeps()
         self.prefab.db.mariadb.start()
         self.prefab.db.mariadb._create_db("mattermost")
@@ -28,6 +31,8 @@ class PrefabMattermost(app):
         self.prefab.core.run("sed -i 's/mattermost_test/mattermost/g' %s/mattermost-server/config/config.json" % (root_path))
         self.prefab.core.run("cd %s/mattermost-webapp && make package" % root_path)
         self.prefab.core.run("cd %s/mattermost-server && make build && make package" % root_path)
+
+        self.doneSet('build')
 
     def _installDeps(self):
         """Install mattermost deps
@@ -56,6 +61,9 @@ class PrefabMattermost(app):
         Keyword Arguments:
             reset {bool} -- force build if True (default: {False})
         """
+        if self.doneCheck('install', reset):
+            return
+
         self.build(dbpass)
         self.prefab.core.run('cp -r %s/src/github.com/mattermost/mattermost-server/dist/mattermost /opt/' % self.GOPATH)
         self.prefab.core.run('cp %s/bin/platform /opt/mattermost/bin' % self.GOPATH)
@@ -63,6 +71,8 @@ class PrefabMattermost(app):
         self.prefab.core.run('cp -r %s/src/github.com/mattermost/mattermost-webapp/dist/* /opt/mattermost/client' % self.GOPATH)
         self.prefab.core.dir_ensure('/opt/mattermost/bin/plugins')
         self.prefab.core.dir_ensure('/opt/mattermost/bin/data')
+
+        self.doneSet('install')
         if start:
             self.start()
 
