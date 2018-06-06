@@ -109,9 +109,6 @@ class PrefabDockerCompose(app):
 
         return prefabdockerobj
 
-    def getDocker(self, name):
-        pass
-
 
 class Prefabdockerobj:
 

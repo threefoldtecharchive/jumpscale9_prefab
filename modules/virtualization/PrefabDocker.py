@@ -46,7 +46,7 @@ class PrefabDocker(app):
                 #     self.prefab.core.run(C)
             self.prefab.system.package.install(
                 'apt-transport-https,linux-image-extra-$(uname -r),linux-image-extra-virtual,software-properties-common')
-            _,release,_ = self.prefab.core.run('echo $(lsb_release -cs)')
+            _, release, _ = self.prefab.core.run('echo $(lsb_release -cs)')
             if int(branch.split('.')[0]) > 1:
                 self.prefab.core.run('curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -')
                 self.prefab.core.run("add-apt-repository 'deb [arch=amd64] https://download.docker.com/linux/ubuntu %s stable'" % release)
@@ -90,7 +90,7 @@ class PrefabDocker(app):
         @param running,, if false will return names of all available containers otherwise only running containers
         """
         args = "" if running else "-a "
-        _ ,out,_ = self.prefab.core.run('''docker ps %s--format="{{.Names}}"''' % args, replaceArgs=False)
+        _, out, _ = self.prefab.core.run('''docker ps %s--format="{{.Names}}"''' % args, replaceArgs=False)
         if not out:
             return []
         return out.split('\n')
@@ -150,9 +150,6 @@ class PrefabDocker(app):
         # ON DOCKER HOST (which is current prefab)
 
         return prefabdockerobj
-
-    def getDocker(self, name):
-        pass
 
 
 class Prefabdockerobj:
