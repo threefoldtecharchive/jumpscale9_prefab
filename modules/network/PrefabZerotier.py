@@ -47,6 +47,13 @@ class PrefabZerotier(base):
 
         cmd = "cd {code} && DESTDIR={build} make one".format(code=codedir, build=self.BUILDDIRL)
         self.prefab.core.run(cmd)
+        if self.prefab.core.isMac:
+            cmd = "cd {code} && make install-mac-tap".format(code=codedir, build=self.BUILDDIRL)
+            bindir = self.prefab.core.dir_paths['BINDIR']
+            self.prefab.core.dir_ensure(bindir)
+            for item in ['zerotier-cli', 'zerotier-idtool', 'zerotier-one']:
+                self.prefab.core.file_copy('{code}/{item}'.format(code=codedir, item=item), bindir+'/')
+            return
         self.prefab.core.dir_ensure(self.BUILDDIRL)
         cmd = "cd {code} && DESTDIR={build} make install".format(code=codedir, build=self.BUILDDIRL)
         self.prefab.core.run(cmd)
@@ -62,6 +69,10 @@ class PrefabZerotier(base):
             return
         bindir = self.prefab.core.dir_paths['BINDIR']
         self.prefab.core.dir_ensure(bindir)
+
+        if self.prefab.core.isMac:
+            return
+
         for item in self.prefab.core.find(j.sal.fs.joinPaths(self.BUILDDIRL, 'usr/sbin')):
             self.prefab.core.file_copy(item, bindir + '/')
 
