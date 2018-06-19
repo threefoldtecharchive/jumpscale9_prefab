@@ -29,7 +29,7 @@ class PrefabMattermost(app):
         self.prefab.core.run("sed -i 's/dockerhost/localhost/g' %s/mattermost-server/config/config.json" % root_path)
         self.prefab.core.run("sed -i 's/mostest/%s/g' %s/mattermost-server/config/config.json" % (dbpass, root_path))
         self.prefab.core.run("sed -i 's/mattermost_test/mattermost/g' %s/mattermost-server/config/config.json" % (root_path))
-        self.prefab.core.run("cd %s/mattermost-webapp && make package" % root_path)
+        self.prefab.core.run("cd %s/mattermost-webapp && make package" % root_path, timeout=2000)
         self.prefab.core.run("cd %s/mattermost-server && make build && make package" % root_path)
 
         self.doneSet('build')
