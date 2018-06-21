@@ -7,41 +7,34 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabTFChain(app):
     NAME = "tfchain"
 
-    def build(self, reset=False):
-        """Get/Build the binaries of tfchain (tfchaid and tfchainc)
-
-        Keyword Arguments:
-            reset {bool} -- reset the build process (default: {False})
-        """
-
+    def build(self, branch=None,tag=None, revision=None, reset=False):
         if self.doneGet('build') and reset is False:
             return
-
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install("git")
         golang = self.prefab.runtimes.golang
         golang.install()
-
-        dir_location = 'github.com/threefoldfoundation/tfchain'
-        self.prefab.runtimes.golang.get(dir_location, die=False)
-        dir_location = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH,
-                                                  'src',
-                                                  dir_location, 'cmd')
-
-        cmd = 'cd {} && go build -ldflags "-linkmode external -extldflags -static" -o {}'
-        self.prefab.core.run(cmd.format(
-            self.prefab.core.joinpaths(dir_location, 'tfchaind'),
-            j.sal.fs.joinPaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchaind')), profile=True)
-        self.prefab.core.run(cmd.format(
-            self.prefab.core.joinpaths(dir_location, 'tfchainc'),
-            j.sal.fs.joinPaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchainc')), profile=True)
+        GOPATH = golang.GOPATH
+        url = 'github.com/threefoldfoundation'
+        path = '%s/src/%s/tfchain' % (GOPATH, url)
+        pullurl = 'https://%s/tfchain.git' % url
+        dest = self.prefab.tools.git.pullRepo(pullurl,
+                                              branch=branch,
+                                              tag=tag,
+                                              revision=revision,
+                                              dest=path,
+                                              ssh=False)
+        cmd = 'cd {} && make install'.format(dest)
+        self.prefab.core.run(cmd)
 
         self.doneSet('build')
-    
+
     def install(self, reset=False):
         if self.doneGet('install') and reset is False:
             return
-        
+
         tfchaindpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchaind')
-        tfchaincpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchainc') 
+        tfchaincpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchainc')
 
         self.prefab.core.file_copy(tfchaindpath, "$BINDIR/")
         self.prefab.core.file_copy(tfchaincpath, "$BINDIR/")
