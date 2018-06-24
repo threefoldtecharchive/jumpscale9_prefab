@@ -29,10 +29,12 @@ class PrefabTFChain(app):
 
         self.doneSet('build')
 
-    def install(self, reset=False):
+    def install(self, branch=None,tag=None, revision=None, reset=False):
+        # if branch, tag, revision = None it will build form master
         if self.doneGet('install') and reset is False:
             return
 
+        self.build(branch=branch,tag=tag, revision=revision, reset=reset)
         tfchaindpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchaind')
         tfchaincpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchainc')
 
