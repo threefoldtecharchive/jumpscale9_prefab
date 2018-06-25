@@ -17,6 +17,7 @@ class PrefabPortal(base):
             mongodbip="127.0.0.1",
             mongoport=27017,
             production=True,
+            public_url='',
             client_id='',
             client_secret='',
             scope_organization='',
@@ -28,6 +29,7 @@ class PrefabPortal(base):
         :param mongodbip: mongodb ip to which portal will connect ; default -> "127.0.0.1"
         :param mongoport: mongodb port to which portal will connect ; default -> 27017
         :param production: production flag; default -> True
+        :param public_url: specify portal public url
         :param client_id: itsyou.online client_id/organization
         :param client_secret: itsyou.online client_secret
         :param scope_organization: itsyou.online organization that the user should be member of
@@ -37,6 +39,7 @@ class PrefabPortal(base):
 
         cfg = self.prefab.executor.state.configGet('portal')
         cfg[name]['production'] = production
+        cfg[name]['public_url'] = public_url
 
         if production:
             if not (client_id and client_secret and scope_organization and redirect_address):
