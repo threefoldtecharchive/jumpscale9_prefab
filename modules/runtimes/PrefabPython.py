@@ -176,10 +176,15 @@ class PrefabPython(base):
 
         if self.include_js9:
             self._pipAll(reset=reset)
+            self._install_portal(self.JS9_BRANCH)
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
         self.logger.info(msg)
+
+    def _install_portal(self, branch):
+        self.prefab.web.portal.install(start=False, branch=branch)
+        self.prefab.web.zrobotportal.install()
 
     def _pipAll(self, reset=False):
         """
