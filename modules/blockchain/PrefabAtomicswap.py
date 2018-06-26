@@ -18,14 +18,16 @@ class PrefabAtomicswap(app):
 
         cmds = """
             cd $TMPDIR
-            git clone https://github.com/JimberSoftware/AtomicExchange
+            rm -rf atomicswap
+            git clone https://github.com/ahussein/atomicswap.git
         """
         self.core.run(cmds)
         self.doneSet('build')
 
-    def install(self):
+    def install(self, reset=False):
+        self.build(reset=reset)
         cmds = """
-            cp $TMPDIR/AtomicExchange/cryptoDocker/btcatomicswap $BINDIR/
+            cp $TMPDIR/atomicswap/cmd/btcatomicswap/btcatomicswap $BINDIR/
         """
         self.core.run(cmds)
         self.doneSet('install')
