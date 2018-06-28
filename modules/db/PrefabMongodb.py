@@ -60,7 +60,7 @@ class PrefabMongodb(app):
         if self.isStarted() and not reset:
             return
         self.prefab.core.dir_ensure('$VARDIR/data/mongodb')
-        cmd = "$BINDIR/mongod --dbpath '$VARDIR/data/mongodb'"
+        cmd = "mongod --dbpath '$VARDIR/data/mongodb'"
         self.prefab.system.process.kill("mongod")
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name="mongod", cmd=cmd, env={}, path="", autostart=True)

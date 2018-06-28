@@ -184,7 +184,8 @@ class PrefabPython(base):
 
     def _install_portal(self, branch):
         self.prefab.web.portal.install(start=False, branch=branch)
-        self.prefab.web.zrobotportal.install()
+        dest_robot_portal = self.prefab.core.dir_paths['JSAPPSDIR'] + '0-robot-portal'
+        self.prefab.web.zrobotportal.install(dest=dest_robot_portal, start_portal=False)
 
     def _pipAll(self, reset=False):
         """
@@ -197,6 +198,7 @@ class PrefabPython(base):
         git+https://github.com/Jumpscale/core9@{0}
         git+https://github.com/Jumpscale/lib9@{0}
         git+https://github.com/Jumpscale/prefab9@{0}
+        git+https://github.com/Jumpscale/portal9@{0}
         git+https://github.com/zero-os/0-robot@{0}
         git+https://github.com/rivine/recordchain@master
         git+https://github.com/zero-os/0-hub#egg=zerohub&subdirectory=client

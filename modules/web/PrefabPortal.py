@@ -89,12 +89,6 @@ class PrefabPortal(base):
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
 
-        # install the dependencies if required
-        self.getcode(branch=branch)
-        self.installDeps(reset=reset, name=name)
-
-        # pull repo with required branch ; then link dirs and files in required places
-        self.linkCode(name=name)
         portal_config_path = '%s/github/jumpscale/portal9/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
         portal_config_data = self.prefab.core.file_read(portal_config_path)
         portal_config_data = portal_config_data.format(name=name, port=port, ip=ip)
@@ -103,6 +97,13 @@ class PrefabPortal(base):
         cfg = self.prefab.executor.state.configGet('portal', defval=portal_config['portal'], set=True)
         cfg[name] = portal_config['portal'][name]
         self.prefab.executor.state.configSet('portal', cfg)
+
+        # install the dependencies if required
+        self.installDeps(reset=reset, name=name)
+
+        # pull repo with required branch ; then link dirs and files in required places
+        self.getcode(branch=branch)
+        self.linkCode(name=name)
 
         if start:
             self.start(name=name)
