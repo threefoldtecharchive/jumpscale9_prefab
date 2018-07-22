@@ -207,6 +207,7 @@ class PrefabPython(base):
         # we need to pull 0-robot and recordchain repo first to fix issue with the generate function that is called during the installations
         j.clients.git.pullGitRepo(url='https://github.com/zero-os/0-robot', branch=self.JS9_BRANCH)
         j.clients.git.pullGitRepo(url='https://github.com/rivine/recordchain', branch='master')
+        j.clients.git.pullGitRepo(url='https://github.com/Jumpscale/portal9', branch=self.JS9_BRANCH)
         self._pip(C, reset=reset)
 
         # self.sandbox(deps=False)
