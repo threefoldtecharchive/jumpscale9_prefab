@@ -121,7 +121,7 @@ class Prefabdockerobj:
         self.prefabDockerHost = prefabDockerHost
         self.prefab = None
 
-    def execute(self, cmds, die=True, checkok=None, async=False, showout=True, timeout=0, env={}):
+    def execute(self, cmds, die=True, checkok=None, async_=False, showout=True, timeout=0, env={}):
         return self.prefabDockerHost.core.run(
             "docker exec %s bash -c '%s'" %
             (self.name,
