@@ -44,7 +44,7 @@ class PrefabElectrum(app):
             return
 
         base_dir = self.build(branch=branch,tag=tag, revision=revision, reset=reset)
-        electrum_bin_path = self.prefab.core.joinpaths(base_dir, 'electrum')
+        electrum_bin_path = self.prefab.core.joinpaths(base_dir, 'electrum', 'electrum')
 
         self.prefab.core.file_copy(electrum_bin_path, "$BINDIR/")
 
