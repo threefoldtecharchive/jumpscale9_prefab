@@ -24,7 +24,7 @@ class PrefabTFChain(app):
                                               revision=revision,
                                               dest=path,
                                               ssh=False)
-        cmd = 'cd {} && make install'.format(dest)
+        cmd = 'cd {} && make install-std'.format(dest)
         self.prefab.core.run(cmd)
 
         self.doneSet('build')
