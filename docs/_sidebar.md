@@ -1,0 +1,23 @@
+* [Home](/docs/)
+
+----
+
+* [prefab.apps](/docs/prefab.apps.md)
+* [prefab.bash](/docs/prefab.bash.md)
+* [prefab.btrfs](/docs/prefab.btrfs.md)
+* [prefab.build](/docs/prefab.build.md)
+* [prefab.core](/docs/prefab.core.md)
+* [prefab.development](/docs/prefab.development.md)
+* [prefab.group](/docs/prefab.group.md)
+* [prefab.kubernetes](/docs/prefab.kubernetes.md)
+* [prefab.kvm](/docs/prefab.kvm.md)
+* [prefab.mattermost](/docs/prefab.mattermost.md)
+* [prefab.net](/docs/prefab.net.md)
+* [prefab.package](/docs/prefab.package.md)
+* [prefab.processmanager](/docs/prefab.processmanager.md)
+* [prefab.ssh](/docs/prefab.ssh.md)
+* [prefab.systemservices](/docs/prefab.systemservices.md)
+* [prefab.tarantool](/docs/prefab.tarantool.md)
+* [prefab.tmux](/docs/prefab.tmux.md)
+* [prefab.virtualization](/docs/prefab.virtualization.md)
+* [prefab.zeroboot](/docs/prefab.zeroboot.md)
