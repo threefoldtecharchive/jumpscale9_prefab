@@ -1,5 +1,5 @@
 from js9 import j
-
+import json
 base = j.tools.prefab._getBaseClass()
 
 
@@ -130,26 +130,24 @@ class PrefabZerotier(base):
         }
         """
         switches = self._get_switches(config_path)
-        cmd = '{cli} {switches}listnetworks'.format(cli=self.CLI, switches=switches)
+        cmd = '{cli} -j {switches}listnetworks'.format(cli=self.CLI, switches=switches)
         rc, out, _ = self.prefab.core.run(cmd, die=False)
         if rc != 0:
             raise j.exceptions.RuntimeError(out)
-
-        lines = out.splitlines()
-        if len(lines) < 2:
+        lines = json.loads(out)
+        if len(lines) < 1:
             return {}
 
         networks = []
-        for line in out.splitlines()[1:]:
-            ss = line.split(' ')
+        for line in lines:
             network = {
-                'network_id': ss[2],
-                'name': ss[3],
-                'mac': ss[4],
-                'status': ss[5],
-                'type': ss[6],
-                'dev': ss[7],
-                'ips': ss[8].split(','),
+                'network_id': line['id'],
+                'name': line['name'],
+                'mac': line['mac'],
+                'status': line['status'],
+                'type': line['type'],
+                'dev': line['portDeviceName'],    
+                'ips': line['assignedAddresses'],
             }
             networks.append(network)
 
