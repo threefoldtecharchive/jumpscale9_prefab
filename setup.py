@@ -56,7 +56,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'JumpScale9>=9.4.0-rc4',
-        'paramiko>=1.15.3,<2.2',  # for parallel-ssh
+        'paramiko>=2.2.3',  # for parallel-ssh
         'asyncssh>=1.9.0',
         'pymongo>=3.4.0',
     ],
