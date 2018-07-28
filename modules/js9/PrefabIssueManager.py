@@ -7,7 +7,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabIssueManager(base):
 
     def _init(self):
-        self.code_dir = '/opt/code/github/jumpscale/issue_manager'
+        self.code_dir = '/opt/code/github/threefoldtech/jumpscale_issue_manager'
         self._logger = j.logger.get('j.prefab.issuemanager')
 
     def install(self):

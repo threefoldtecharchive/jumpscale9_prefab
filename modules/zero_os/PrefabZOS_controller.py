@@ -51,7 +51,7 @@ class PrefabZOS_controller(app):
         # file copy
         self.prefab.core.dir_remove("$TEMPLATEDIR/cfg/controller/extensions")
 
-        jumpscript_folfer = "%s/github/jumpscale/core9/apps/agentcontroller/jumpscripts" % self.prefab.core.dir_paths[
+        jumpscript_folfer = "%s/github/threefoldtech/jumpscale_core9/apps/agentcontroller/jumpscripts" % self.prefab.core.dir_paths[
             "CODEDIR"]
         if self.prefab.core.dir_exists(jumpscript_folfer):
             self.prefab.core.file_copy(jumpscript_folfer + "/jumpscale",

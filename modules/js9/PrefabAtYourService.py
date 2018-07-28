@@ -10,7 +10,7 @@ class PrefabAtYourService(base):
             self.prefab.core.dir_paths["JSAPPSDIR"],
             "atyourservice"
         )
-        self.repo_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["CODEDIR"], 'github/jumpscale/ays9/')
+        self.repo_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["CODEDIR"], 'github/threefoldtech/jumpscale_ays9/')
 
     def configure(self, production=False, organization='', restart=True, host='127.0.0.1', port=5000):
         jwt_key = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n27MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny66+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv"

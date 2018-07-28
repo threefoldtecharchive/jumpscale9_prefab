@@ -191,7 +191,7 @@ class PrefabPython(base):
         """
         js9 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
         """
-        # needs at least items from /JS8/code/github/jumpscale/core9/install/dependencies.py
+        # needs at least items from /JS8/code/github/threefoldtech/jumpscale_core9/install/dependencies.py
         if self.doneCheck("pipall", reset):
             return
         C = """

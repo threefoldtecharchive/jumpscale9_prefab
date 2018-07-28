@@ -9,7 +9,7 @@ def _post_install(libname, libpath):
 
     # add this plugin to the config
     c = j.core.state.configGet('plugins', defval={})
-    c[libname] = "%s/github/jumpscale/prefab9/JumpScale9Prefab" % j.dirs.CODEDIR
+    c[libname] = "%s/github/threefoldtech/jumpscale_prefab9/JumpScale9Prefab" % j.dirs.CODEDIR
     j.core.state.configSet('plugins', c)
     j.tools.jsloader.generate()
 
