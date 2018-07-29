@@ -60,6 +60,7 @@ Awqahjkq87yxOYYTnJmr2OZtQuFboymfMhNqj3G2DYmZ/ZIXXPgwHx0fnd3R0Q==
 
 
 class PrefabChroot(base):
+
     def __init__(self, prefab):
         self.prefab = prefab
         self.path = '/tmp/{}'.format(j.data.idgenerator.generateGUID())
@@ -142,9 +143,8 @@ initrd: /boot/{}
             chroot.execute('echo "root:{}" | chpasswd'.format(passwd))
         tarfile = '/tmp/ubuntu-{}.tar.gz'.format(dist)
         self.prefab.core.dir_remove('{}/var/apt/cache/archives'.format(chroot.path))
-        self.prefab.core.run('tar czf {} -C {} .'.format(tarfile, chroot.path))
+        self.prefab.core.run('tar czpf {} -C {} .'.format(tarfile, chroot.path))
         if jwt:
             self.prefab.core.run('curl -b "caddyoauth={}" -F file=@{} https://hub.gig.tech/api/flist/me/upload'.format(jwt, tarfile))
         self.prefab.core.dir_remove(chroot.path)
         return tarfile
-
