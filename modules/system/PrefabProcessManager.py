@@ -1,6 +1,6 @@
 
 from ProcessManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 

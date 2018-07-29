@@ -1,8 +1,8 @@
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
-from JumpScale9Lib.sal.dnsmasq.Dnsmasq import DNSMasq
+from JumpscaleLib.sal.dnsmasq.Dnsmasq import DNSMasq
 
 
 class PrefabDNSMasq(base,DNSMasq):

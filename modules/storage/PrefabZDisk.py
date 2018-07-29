@@ -1,5 +1,5 @@
 import os.path
-from js9 import j
+from jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 

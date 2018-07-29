@@ -1,23 +1,23 @@
-from js9 import j
+from jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 
 
-class Prefabjs9Core(app):
-    NAME = 'js9'
+class PrefabJumpscaleCore(app):
+    NAME = 'jumpscale'
 
     def install(self, reset=False, branch='development', full=False):
-        """Install js9 core
+        """Install jumpscale core
         Keyword Arguments:
-            reset {bool} -- force install if js9core was already installed (default: {False})
-            branch {string} -- branch from which js9core will be installed (default: {'master'})
+            reset {bool} -- force install if jumpscalecore was already installed (default: {False})
+            branch {string} -- branch from which jumpscalecore will be installed (default: {'master'})
             full {bool} -- False for production installs and True for development installs
         Example:
-            j.tools.prefab.local.js9.js9Core.install()
+            j.tools.prefab.local.jumpscale.jumpscaleCore.install()
 
             or from bash
 
-            js9_prefab local 'js9.js9core.install(reset=True)'
+            js_prefab local 'jumpscale.jumpscalecore.install(reset=True)'
         """
         if self.doneCheck("install", reset):
             return
@@ -33,9 +33,9 @@ class Prefabjs9Core(app):
 
         self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
 
-        self.logger.info("js9_install")
+        self.logger.info("jumpscale_install")
 
-        self.core.run("export JS9BRANCH=%s;ZInstall_host_js9" % branch, profile=True)
+        self.core.run("export JUMPSCALEBRANCH=%s;ZInstall_host_jumpscale" % branch, profile=True)
 
         
         self.doneSet("install")

@@ -1,5 +1,5 @@
 
-from js9 import j
+from jumpscale import j
 import os
 import time
 

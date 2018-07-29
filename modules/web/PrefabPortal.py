@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import time
 import os
 import pytoml
@@ -161,7 +161,7 @@ class PrefabPortal(base):
     def getcode(self, branch='master'):
         self.logger.info("Get portal code on branch:'%s'" % branch)
         if branch == "":
-            branch = os.environ.get('JS9BRANCH')
+            branch = os.environ.get('JUMPSCALEBRANCH')
         self.prefab.tools.git.pullRepo(
             "https://github.com/Jumpscale/portal9.git", branch=branch, ignorelocalchanges=False)
 

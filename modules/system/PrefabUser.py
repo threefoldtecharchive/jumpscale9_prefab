@@ -1,5 +1,5 @@
 
-from js9 import j
+from jumpscale import j
 
 try:
     import fcrypt as crypt

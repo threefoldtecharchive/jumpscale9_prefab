@@ -5,11 +5,11 @@ import os
 
 
 def _post_install(libname, libpath):
-    from js9 import j
+    from jumpscale import j
 
     # add this plugin to the config
     c = j.core.state.configGet('plugins', defval={})
-    c[libname] = "%s/github/threefoldtech/jumpscale_prefab9/JumpScale9Prefab" % j.dirs.CODEDIR
+    c[libname] = "%s/github/threefoldtech/jumpscale_prefab/JumpscalePrefab" % j.dirs.CODEDIR
     j.core.state.configSet('plugins', c)
     j.tools.jsloader.generate()
 
@@ -45,17 +45,17 @@ except ImportError:
 
 
 setup(
-    name='JumpScale9Prefab',
+    name='JumpscalePrefab',
     version='9.4.0-rc4',
     description='Automation framework for cloud workloads remote sal, sal= system abstraction layer',
     long_description=long_description,
-    url='https://github.com/Jumpscaler/prefab9',
+    url='https://github.com/Jumpscaler/prefab',
     author='GreenItGlobe',
     author_email='info@gig.tech',
     license='Apache',
     packages=find_packages(),
     install_requires=[
-        'JumpScale9>=9.4.0-rc4',
+        'Jumpscale>=9.4.0-rc4',
         'paramiko>=2.2.3',  # for parallel-ssh
         'asyncssh>=1.9.0',
         'pymongo>=3.4.0',

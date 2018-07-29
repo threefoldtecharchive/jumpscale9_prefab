@@ -1,5 +1,5 @@
 
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -13,7 +13,7 @@ class PrefabZOS_js(base):
             return True
         return False
 
-    def jumpscale9(self, rw=False, reset=False):
+    def jumpscale(self, rw=False, reset=False):
         """
         install jumpscale, will be done as sandbox
 
@@ -59,7 +59,7 @@ class PrefabZOS_js(base):
         self.prefab.core.execute_bash(C)
 
         """
-        install jumpscale9 sandbox in read or readwrite mode
+        install jumpscale sandbox in read or readwrite mode
         """
         C = """
             set -ex
@@ -75,12 +75,12 @@ class PrefabZOS_js(base):
         start = j.data.time.epoch
         timeout = 30
         while start + timeout > j.data.time.epoch:
-            if not self.prefab.core.file_exists('/opt/jumpscale9/bin/jspython'):
+            if not self.prefab.core.file_exists('/opt/jumpscale/bin/jspython'):
                 time.sleep(2)
             else:
-                self.prefab.core.file_link('/opt/jumpscale9/bin/jspython', '/usr/local/bin/jspython')
-                self.prefab.core.file_link('/opt/jumpscale9/bin/js', '/usr/local/bin/js')
-                self.prefab.bash.include('/opt/jumpscale9/env.sh')
+                self.prefab.core.file_link('/opt/jumpscale/bin/jspython', '/usr/local/bin/jspython')
+                self.prefab.core.file_link('/opt/jumpscale/bin/js', '/usr/local/bin/js')
+                self.prefab.bash.include('/opt/jumpscale/env.sh')
                 break
 
         self.logger.info(

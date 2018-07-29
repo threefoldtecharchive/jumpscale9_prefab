@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import re
 
 base = j.tools.prefab._getBaseClass()
@@ -69,7 +69,7 @@ class PrefabAtYourService(base):
             url {string} -- desired ays console api binding (default: {"http://localhost:5000"})
         """
 
-        raml_path = "$JSAPPSDIR/atyourservice/JumpScale9AYS/ays/server/apidocs/api.raml"
+        raml_path = "$JSAPPSDIR/atyourservice/JumpscaleAYS/ays/server/apidocs/api.raml"
         raml = self.prefab.core.file_read(raml_path)
 
         raml = re.sub(
@@ -81,7 +81,7 @@ class PrefabAtYourService(base):
 
     def get_code(self, branch):
         if not branch:
-            branch = self.prefab.bash.env.get('JS9BRANCH', 'master')
+            branch = self.prefab.bash.env.get('JUMPSCALEBRANCH', 'master')
         self.logger.info("Get ays code on branch:'%s'" % branch)
         self.prefab.tools.git.pullRepo("https://github.com/Jumpscale/ays9.git", branch=branch)
 
@@ -114,19 +114,19 @@ class PrefabAtYourService(base):
             branch {String} -- branch name
         """
         self.prefab.core.dir_ensure(self.base_dir)
-        server_dir = j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/')
+        server_dir = j.sal.fs.joinPaths(self.base_dir, 'JumpscaleAYS/ays/server/')
         self.prefab.core.dir_ensure(server_dir)
         self.get_code(branch)
         self.install_pip_package()
         # link apidocs and index.html
         self.prefab.core.file_link(
-            j.sal.fs.joinPaths(self.repo_dir, 'JumpScale9AYS/ays/server/apidocs'),
+            j.sal.fs.joinPaths(self.repo_dir, 'JumpscaleAYS/ays/server/apidocs'),
             j.sal.fs.joinPaths(server_dir, 'apidocs')
         )
 
         self.prefab.core.file_link(
-            j.sal.fs.joinPaths(self.repo_dir, 'JumpScale9AYS/ays/server/index.html'),
-            j.sal.fs.joinPaths(self.base_dir, 'JumpScale9AYS/ays/server/index.html')
+            j.sal.fs.joinPaths(self.repo_dir, 'JumpscaleAYS/ays/server/index.html'),
+            j.sal.fs.joinPaths(self.base_dir, 'JumpscaleAYS/ays/server/index.html')
         )
 
         self.prefab.core.file_link(

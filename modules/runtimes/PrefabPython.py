@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -9,8 +9,8 @@ class PrefabPython(base):
         self.logger_enable()
         self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
         self.CODEDIRL = self.core.replace("$BUILDDIR/code/python3/")
-        self.JS9_BRANCH = None
-        self.include_js9 = None
+        self.JUMPSCALE_BRANCH = None
+        self.include_jumpscale = None
 
     def reset(self):
         base.reset(self)
@@ -18,9 +18,9 @@ class PrefabPython(base):
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
 
-    def build(self, js9_branch='development', include_js9=True, reset=False):
+    def build(self, jumpscale_branch='development', include_jumpscale=True, reset=False):
         """
-        js9 'j.tools.prefab.local.runtimes.python.build(reset=False)'
+        js_shell 'j.tools.prefab.local.runtimes.python.build(reset=False)'
 
 
         will build python and install all pip's inside the builded directory
@@ -33,8 +33,8 @@ class PrefabPython(base):
         if self.doneCheck("build", reset):
             return
 
-        self.JS9_BRANCH = js9_branch
-        self.include_js9 = include_js9
+        self.JUMPSCALE_BRANCH = jumpscale_branch
+        self.include_jumpscale = include_jumpscale
         self.prefab.system.base.development(python=False)  # make sure all required components are there
 
         if not self.doneGet("compile") or reset:
@@ -106,7 +106,7 @@ class PrefabPython(base):
 
         will make sure we add env scripts to it as well as add all the required pip modules
 
-        js9 'j.tools.prefab.local.runtimes.python._package(reset=True)'
+        js_shell 'j.tools.prefab.local.runtimes.python._package(reset=True)'
         """
 
         C = """
@@ -148,7 +148,7 @@ class PrefabPython(base):
         export LC_ALL=en_US.UTF-8
         export LANG=en_US.UTF-8
 
-        export PS1="JS9: "
+        export PS1="JUMPSCALE: "
 
         """
         self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C)
@@ -174,9 +174,9 @@ class PrefabPython(base):
         else:
             self.prefab.system.package.ensure("capnp")
 
-        if self.include_js9:
+        if self.include_jumpscale:
             self._pipAll(reset=reset)
-            self._install_portal(self.JS9_BRANCH)
+            self._install_portal(self.JUMPSCALE_BRANCH)
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
@@ -189,25 +189,25 @@ class PrefabPython(base):
 
     def _pipAll(self, reset=False):
         """
-        js9 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
+        js_shell 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
         """
-        # needs at least items from /JS8/code/github/threefoldtech/jumpscale_core9/install/dependencies.py
+        # needs at least items from /JS8/code/github/threefoldtech/jumpscale_core/install/dependencies.py
         if self.doneCheck("pipall", reset):
             return
         C = """
-        git+https://github.com/Jumpscale/core9@{0}
-        git+https://github.com/Jumpscale/lib9@{0}
-        git+https://github.com/Jumpscale/prefab9@{0}
+        git+https://github.com/Jumpscale/core@{0}
+        git+https://github.com/Jumpscale/lib@{0}
+        git+https://github.com/Jumpscale/prefab@{0}
         git+https://github.com/Jumpscale/portal9@{0}
         git+https://github.com/zero-os/0-robot@{0}
         git+https://github.com/rivine/recordchain@master
         git+https://github.com/zero-os/0-hub#egg=zerohub&subdirectory=client
-        """.format(self.JS9_BRANCH)
+        """.format(self.JUMPSCALE_BRANCH)
 
         # we need to pull 0-robot and recordchain repo first to fix issue with the generate function that is called during the installations
-        j.clients.git.pullGitRepo(url='https://github.com/zero-os/0-robot', branch=self.JS9_BRANCH)
+        j.clients.git.pullGitRepo(url='https://github.com/zero-os/0-robot', branch=self.JUMPSCALE_BRANCH)
         j.clients.git.pullGitRepo(url='https://github.com/rivine/recordchain', branch='master')
-        j.clients.git.pullGitRepo(url='https://github.com/Jumpscale/portal9', branch=self.JS9_BRANCH)
+        j.clients.git.pullGitRepo(url='https://github.com/Jumpscale/portal9', branch=self.JUMPSCALE_BRANCH)
         self._pip(C, reset=reset)
 
         # self.sandbox(deps=False)

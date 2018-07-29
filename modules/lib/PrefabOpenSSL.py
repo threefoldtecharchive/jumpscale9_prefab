@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -46,7 +46,7 @@ class PrefabOpenSSL(base):
 
     def build(self, reset=False):
         """
-        js9 'j.tools.prefab.local.lib.openssl.build();print(j.tools.prefab.local.lib.openssl.BUILDDIRL)'
+        js_shell 'j.tools.prefab.local.lib.openssl.build();print(j.tools.prefab.local.lib.openssl.BUILDDIRL)'
         """
 
         if self.doneCheck("build") and not reset:

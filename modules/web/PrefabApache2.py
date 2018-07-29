@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import textwrap
 
 app = j.tools.prefab._getBaseAppClass()
@@ -59,7 +59,7 @@ class PrefabApache2(app):
         installscript = """cd {httpdir} &&  make install""".format(httpdir=httpdir)
         self.prefab.core.run(installscript)
 
-        # COPY APACHE BINARIES to /opt/jumpscale9/bin
+        # COPY APACHE BINARIES to /opt/jumpscale/bin
         self.prefab.core.file_copy("$JSAPPSDIR/apache2/bin/*", '$BINDIR/')
 
     def configure(self):

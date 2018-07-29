@@ -1,7 +1,7 @@
-from js9 import j
-from JumpScale9Prefab.PrefabBase import *
+from jumpscale import j
+from JumpscalePrefab.PrefabBase import *
 
-from JumpScale9Prefab.PrefabLoader import PrefabLoader
+from JumpscalePrefab.PrefabLoader import PrefabLoader
 
 JSBASE = j.application.jsbase_get_class()
 
@@ -84,7 +84,7 @@ class PrefabRootClassFactory(JSBASE):
 
         or if used without executor then will be the local one
         """
-        from JumpScale9Prefab.PrefabRootClass import PrefabRootClass
+        from JumpscalePrefab.PrefabRootClass import PrefabRootClass
 
         if usecache and executor.id in self.prefabs_instance:
             return self.prefabs_instance[executor.id]

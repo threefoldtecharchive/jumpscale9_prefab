@@ -3,7 +3,7 @@ Prefab module to install electrum wallet
 """
 
 
-from js9 import j
+from jumpscale import j
 
 
 app = j.tools.prefab._getBaseAppClass()

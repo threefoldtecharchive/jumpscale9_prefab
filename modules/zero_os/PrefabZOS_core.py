@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 # TODO: needs to be checked how this needs to be used, maybe no longer relevant in line to the building we do now
 

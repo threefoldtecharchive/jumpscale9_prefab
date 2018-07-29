@@ -1,5 +1,5 @@
-from js9 import j
-from JumpScale9Prefab.PrefabFactory import PrefabApp
+from jumpscale import j
+from JumpscalePrefab.PrefabFactory import PrefabApp
 
 
 class PrefabBtrfsProgs(PrefabApp):
