@@ -59,7 +59,7 @@
     - ProxyClassic
     - Tools
     - VRouter
-    - ZeroBoot
+    - zero_boot
     - Zerotier
 - [prefab.os](prefab.os.md)
     - Ubuntu

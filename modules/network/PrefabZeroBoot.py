@@ -8,7 +8,7 @@ base = j.tools.prefab._getBaseClass()
 ZEROTIER_FIREWALL_ZONE_REGEX = re.compile(r"^firewall\.@zone\[(\d+)\]\.name='zerotier'$")
 FORWARDING_FIREWALL_REGEX = re.compile(r"^firewall\.@forwarding\[(\d+)\].*?('\w+')?$")
 
-class PrefabZeroBoot(base):
+class Prefabzero_boot(base):
 
     def install(self, network_id, token, reset=False):
         if not reset and self.doneCheck("install"):
