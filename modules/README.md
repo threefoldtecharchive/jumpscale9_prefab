@@ -6,7 +6,7 @@
 You can get PrefabApp like this
 
 ```python
-from js9 import j
+from jumpscale import j
 base = j.tools.prefab._getBaseClass()
 
 class PrefabModule(base):
@@ -22,7 +22,7 @@ class PrefabModule(base):
    
 4- You should override any function when you want to add some custom logic to it
 
-5- run ```js9_init``` to load the new module to jumpscale
+5- run ```js_init``` to load the new module to jumpscale
 
 6- to test 
  - Open jumpscale shell 
@@ -31,7 +31,7 @@ class PrefabModule(base):
 
 This example of how to access redis module in prefab 
 ```python
-# js9
+# jumpscale
 In [1]: prefab = j.tools.prefab.local
 
 In [2]: prefab.db.redis  

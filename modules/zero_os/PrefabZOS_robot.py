@@ -1,7 +1,7 @@
 """
 Module to install 0-robot
 """
-from js9 import j
+from jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 

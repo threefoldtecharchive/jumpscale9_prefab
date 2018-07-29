@@ -32,13 +32,13 @@
     - RocksDB
     - Tarantool
     - TIDB
-- [prefab.js9](prefab.js9.md)
+- [prefab.jumpscale](prefab.jumpscale.md)
     - AtYourService
     - Cockpit
     - Crm
     - IssueManager
     - js8Core
-    - js9Core
+    - jumpscaleCore
     - JSAgent
     - Sandbox
 - [prefab.lib](prefab.lib.md)
@@ -59,7 +59,7 @@
     - ProxyClassic
     - Tools
     - VRouter
-    - ZeroBoot
+    - zero_boot
     - Zerotier
 - [prefab.os](prefab.os.md)
     - Ubuntu

@@ -24,7 +24,7 @@ import os
 import sys
 import pystache
 
-from js9 import j
+from jumpscale import j
 # import pygments.lexers
 # from pygments.formatters import get_formatter_by_name
 
@@ -903,7 +903,7 @@ class PrefabCore(base):
     # =============================================================================
 
     def getNetworkInfoGenrator(self):
-        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
+        from Jumpscale.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
         exitcode, output, err = self.run("ip a", showout=False)
         for m in IPBLOCKS.finditer(output):
             block = m.group('block')
@@ -911,7 +911,7 @@ class PrefabCore(base):
 
     @property
     def networking_info(self):
-        from JumpScale9.tools.nettools.NetTools import getNetworkInfo
+        from Jumpscale.tools.nettools.NetTools import getNetworkInfo
         if not self._networking_info:
             all_info = list()
             for device in getNetworkInfo():
@@ -1266,8 +1266,8 @@ class PrefabCore(base):
         script = self.replace(script)
         script = j.data.text.strip(script)
 
-        if script.find("from js9 import j") == -1:
-            script = "from js9 import j\n\n%s" % script
+        if script.find("from jumpscale import j") == -1:
+            script = "from jumpscale import j\n\n%s" % script
 
         return self.execute_script(script, die=die, profile=profile, interpreter="jspython", tmux=tmux,
                                    replace=replace, showout=showout)

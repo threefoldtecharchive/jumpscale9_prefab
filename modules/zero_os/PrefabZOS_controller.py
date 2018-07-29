@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 
 app = j.tools.prefab._getBaseAppClass()
@@ -51,7 +51,7 @@ class PrefabZOS_controller(app):
         # file copy
         self.prefab.core.dir_remove("$TEMPLATEDIR/cfg/controller/extensions")
 
-        jumpscript_folfer = "%s/github/jumpscale/core9/apps/agentcontroller/jumpscripts" % self.prefab.core.dir_paths[
+        jumpscript_folfer = "%s/github/threefoldtech/jumpscale_core/apps/agentcontroller/jumpscripts" % self.prefab.core.dir_paths[
             "CODEDIR"]
         if self.prefab.core.dir_exists(jumpscript_folfer):
             self.prefab.core.file_copy(jumpscript_folfer + "/jumpscale",
@@ -87,12 +87,12 @@ class PrefabZOS_controller(app):
 
         cfgDir = self.prefab.core.dir_paths['JSCFGDIR']
         cfg["events"]["python_path"] = self.prefab.core.joinpaths(
-            cfgDir, "/controller/extensions:/opt/jumpscale9/lib")
+            cfgDir, "/controller/extensions:/opt/jumpscale/lib")
         cfg['events']['enabled'] = True
         cfg["processor"]["python_path"] = self.prefab.core.joinpaths(
-            cfgDir, "/controller/extensions:/opt/jumpscale9/lib")
+            cfgDir, "/controller/extensions:/opt/jumpscale/lib")
         cfg["jumpscripts"]["python_path"] = self.prefab.core.joinpaths(
-            cfgDir, "/controller/extensions:/opt/jumpscale9/lib")
+            cfgDir, "/controller/extensions:/opt/jumpscale/lib")
         cfg["jumpscripts"]["settings"]["jumpscripts_path"] = self.prefab.core.joinpaths(
             cfgDir, "/controller/jumpscripts")
         C = j.data.serializer.toml.dumps(cfg)

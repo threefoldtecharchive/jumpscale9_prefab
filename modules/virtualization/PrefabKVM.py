@@ -1,5 +1,5 @@
 
-from js9 import j
+from jumpscale import j
 from kvm.Machines import Machines
 from kvm.Disks import Disks
 from kvm.StoragePools import StoragePools

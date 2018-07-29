@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -19,7 +19,7 @@ class PrefabZOS_stor_client(base):
 
     def build(self,python_build=False):
         """
-        js9 'j.tools.prefab.local.zero_os.zos_stor_client.build()'
+        js_shell 'j.tools.prefab.local.zero_os.zos_stor_client.build()'
         """
         self.prefab.tools.git.pullRepo('https://github.com/maxux/lib0stor', dest=self.CODEDIRL)
         self.prefab.core.run('cd {}; git submodule init; git submodule update'.format(self.CODEDIRL))

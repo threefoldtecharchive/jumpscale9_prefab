@@ -1,5 +1,5 @@
 import urllib3
-from js9 import j
+from jumpscale import j
 
 
 base = j.tools.prefab._getBaseClass()
@@ -37,8 +37,8 @@ class PrefabCapacity(base):
         capacity_flist = self._capacity_start()
         to_merge = [
             'gig-bootable/ubuntu:16.04.flist',
-            'abdelrahman_hussein_1/capacity_checker_js9.flist',
-            'zaibon/js9_sandbox.flist',
+            'abdelrahman_hussein_1/capacity_checker_jumpscale.flist',
+            'zaibon/js_sandbox.flist',
             capacity_flist,
         ]
 

@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import os
 import textwrap
 
@@ -73,7 +73,7 @@ class PrefabTendermint(app):
         Stops tendermint 
         """
 
-        # FIXME: https://github.com/Jumpscale/prefab9/issues/61 (process
+        # FIXME: https://github.com/Jumpscale/prefab/issues/61 (process
         # doesn't get killed only the pane.)
         # use self.stop_all for now
         pm = self.prefab.system.processmanager.get()

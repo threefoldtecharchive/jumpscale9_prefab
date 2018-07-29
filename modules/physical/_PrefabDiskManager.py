@@ -1,8 +1,8 @@
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
-# from JumpScale9Lib.sal.disklayout.DiskManager import DiskManager
+# from JumpscaleLib.sal.disklayout.DiskManager import DiskManager
 raise NotImplemented()
 
 

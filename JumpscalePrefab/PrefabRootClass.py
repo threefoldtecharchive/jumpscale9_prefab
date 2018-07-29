@@ -1,7 +1,7 @@
 
-from js9 import j
+from jumpscale import j
 
-from JumpScale9Prefab.PrefabCore import PrefabCore
+from JumpscalePrefab.PrefabCore import PrefabCore
 
 JSBASE = j.application.jsbase_get_class()
 
