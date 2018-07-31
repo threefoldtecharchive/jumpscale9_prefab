@@ -20,9 +20,9 @@ class PrefabZOS_db(app):
             self.prefab.system.package.mdupdate()
             self.prefab.system.package.install('build-essential')
 
-        path = self.prefab.tools.git.pullRepo('https://github.com/rivine/0-db')
-        self.prefab.core.run("cd %s; git reset --hard HEAD~10 && git pull"%path)
-        self.prefab.core.run("cd %s; git checkout compaction"%path)
+        path = self.prefab.tools.git.pullRepo('https://github.com/threefoldtech/0-db')
+        # self.prefab.core.run("cd %s; git reset --hard HEAD~10 && git pull"%path)
+        self.prefab.core.run("cd %s; git checkout development"%path)
 
         make = "make" if debug else "make release"
         self.prefab.core.run("cd %s && make clean && %s" % (path, make))
@@ -45,13 +45,11 @@ class PrefabZOS_db(app):
 
         pm = self.prefab.system.processmanager.get()
         cmdline = "$BINDIR/zdb --listen %s --port %s --index %s --data %s --mode %s" % (host, port, index, data, mode)
-
         if adminsecret is not "":
             cmdline += " --admin %s" % adminsecret
 
         if verbose:
             cmdline += " -v"
-
         pm.ensure('%s_0db' % instance, cmd=cmdline)
 
     def stop(self, instance='main'):
