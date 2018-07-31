@@ -105,7 +105,7 @@ class PrefabTmux(base):
             cmd = "%s %s" % (cwd, cmd)
 
         # catch if error
-        cmd = "echo **START**;%s && echo **OK** || echo **ERROR**" % cmd
+        cmd = "echo '**START**' ; %s && echo '**OK**' || echo '**ERROR**'" % cmd
 
         if user != "root":
             cmd = "su -c \"%s\" %s" % (cmd, user)
