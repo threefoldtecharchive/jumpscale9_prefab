@@ -3,15 +3,22 @@ sudo: enabled
 dist: trusty
 group: edge
 
-# whitelist master/development branch only		
-branches:		
-  only:		
+# whitelist master/development branch only
+branches:
+  only:
     - master
     - development
 
 python:
   - "3.5"
 
-install: ./.travis_ci/prepare.sh
+before_install:
+  - sudo apt-get install -y python3.5 python3.5-dev
+  - sudo rm -f /usr/bin/python
+  - sudo rm -f /usr/bin/python3
+  - sudo ln -s /usr/bin/python3.5 /usr/bin/python
+  - sudo ln -s /usr/bin/python3.5 /usr/bin/python3
 
-script: ./run_tests.sh
+install: sudo ./.travis_ci/prepare.sh
+
+script: sudo ./run_tests.sh
