@@ -1,4 +1,4 @@
-![travis](https://travis-ci.org/Jumpscale/prefab.svg?branch=master)
+[![Build Status](https://travis-ci.org/threefoldtech/jumpscale_prefab.svg?branch=development)](https://travis-ci.org/threefoldtech/jumpscale_prefab)
 
 # Prefab
 
