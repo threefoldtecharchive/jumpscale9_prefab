@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import json
 
 j.logger.loggers_level_set(20)
@@ -22,7 +22,7 @@ def upload(prefab):
     zhub_client = j.clients.zhub.get()
     zhub_client.authenticate()
     sources = ['gig-official-apps/ubuntu1604-for-js.flist',
-                'abdelrahman_hussein_1/capacity_checker_js9.flist', 
+                'abdelrahman_hussein_1/capacity_checker_js9.flist',
                 '{}/js9_sandbox.flist'.format(zhub_client.config.data['username'])]
     target = 'js9_sandbox_full.flist'
     url = '{}/flist/me/merge/{}'.format(zhub_client.api.base_url, target)

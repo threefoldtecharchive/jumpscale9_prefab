@@ -3,7 +3,7 @@ This script will create an flist that contains the required services to run the
 Jumpscale Descentralized Exchange
 """
 
-from js9 import j
+from jumpscale import j
 from time import sleep
 from jose.jwt import get_unverified_claims
 import json

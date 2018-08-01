@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 cl=j.clients.openvcloud.get(instance="test")
 space=cl.space_get()
@@ -17,5 +17,5 @@ from IPython import embed;embed(colors='Linux')
 
 
 # j.tools.sandboxer.python.do()
-# if self.core.isMac: 
+# if self.core.isMac:
 #     #build one on openvcloud

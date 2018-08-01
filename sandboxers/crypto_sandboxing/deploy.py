@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import threading
 import re
 from pssh.exceptions import ConnectionErrorException, SessionError
