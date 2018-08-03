@@ -176,7 +176,7 @@ class PrefabPython(base):
 
         if self.include_jumpscale:
             self._pipAll(reset=reset)
-            self._install_portal(self.JUMPSCALE_BRANCH)
+            # self._install_portal(self.JUMPSCALE_BRANCH)
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
