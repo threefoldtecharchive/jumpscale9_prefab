@@ -9,7 +9,7 @@ def build(prefab):
     """
     Build sandboxed js9
     """
-    prefab.core.run("js9 'j.tools.sandboxer.python.do(reset=True)'", timeout=1800)
+    prefab.core.run("js_shell 'j.tools.sandboxer.python.do(reset=True)'", timeout=1800)
 
 
 def upload(prefab):
