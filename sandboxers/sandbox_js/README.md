@@ -1,4 +1,4 @@
-# ACTIVE DEVELOPMENT CONTINUES IN: 
+# ACTIVE DEVELOPMENT CONTINUES IN:
 # https://github.com/threefoldtech
 
 # sandbox
@@ -109,7 +109,7 @@ Then you need to make sure that the zero-hub client is configured correclty
 ```python
 iyo_client = j.clients.itsyouonline.get('main')
 zhub_data = {'token_': iyo_client.jwt, 'username': <iyo_username>,'url': 'https://hub.gig.tech/api'}
-zhub_client = j.clients.zerohub.get(data=zhub_data)
+zhub_client = j.clients.zhub.get(data=zhub_data)
 zhub_client.config.save()
 ```
 

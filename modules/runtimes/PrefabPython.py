@@ -176,7 +176,7 @@ class PrefabPython(base):
 
         if self.include_jumpscale:
             self._pipAll(reset=reset)
-            self._install_portal(self.JUMPSCALE_BRANCH)
+            # self._install_portal(self.JUMPSCALE_BRANCH)
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
@@ -195,19 +195,15 @@ class PrefabPython(base):
         if self.doneCheck("pipall", reset):
             return
         C = """
-        git+https://github.com/Jumpscale/core@{0}
-        git+https://github.com/Jumpscale/lib@{0}
-        git+https://github.com/Jumpscale/prefab@{0}
-        git+https://github.com/Jumpscale/portal9@{0}
-        git+https://github.com/zero-os/0-robot@{0}
-        git+https://github.com/rivine/recordchain@master
-        git+https://github.com/zero-os/0-hub#egg=zerohub&subdirectory=client
+        git+https://github.com/threefoldtech/jumpscale_core@{0}#egg=core
+        git+https://github.com/threefoldtech/jumpscale_lib@{0}
+        git+https://github.com/threefoldtech/jumpscale_prefab@{0}
+        git+https://github.com/threefoldtech/0-robot@{0}
+        git+https://threefoldtech/0-hub#egg=zerohub&subdirectory=client
         """.format(self.JUMPSCALE_BRANCH)
 
         # we need to pull 0-robot and recordchain repo first to fix issue with the generate function that is called during the installations
-        j.clients.git.pullGitRepo(url='https://github.com/zero-os/0-robot', branch=self.JUMPSCALE_BRANCH)
-        j.clients.git.pullGitRepo(url='https://github.com/rivine/recordchain', branch='master')
-        j.clients.git.pullGitRepo(url='https://github.com/Jumpscale/portal9', branch=self.JUMPSCALE_BRANCH)
+        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH)
         self._pip(C, reset=reset)
 
         # self.sandbox(deps=False)
