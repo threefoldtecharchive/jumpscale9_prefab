@@ -50,8 +50,8 @@ setup(
     description='Automation framework for cloud workloads remote sal, sal= system abstraction layer',
     long_description=long_description,
     url='https://github.com/Jumpscaler/prefab',
-    author='GreenItGlobe',
-    author_email='info@gig.tech',
+    author='ThreeFoldTech',
+    author_email='info@threefold.tech',
     license='Apache',
     packages=find_packages(),
     install_requires=[
