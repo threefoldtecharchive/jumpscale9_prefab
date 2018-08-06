@@ -113,22 +113,10 @@ class PrefabNet(base):
                     ips.append(ip)
             return ips
 
-    def getInfo(self, device=None):
-        """
-        returns network info like
 
-        [{'cidr': 8, 'ip': ['127.0.0.1'], 'mac': '00:00:00:00:00:00', 'name': 'lo'},
-         {'cidr': 24,
-          'ip': ['192.168.0.105'],
-          'mac': '80:ee:73:a9:19:05',
-          'name': 'enp2s0'},
-         {'cidr': 0, 'ip': [], 'mac': '80:ee:73:a9:19:06', 'name': 'enp3s0'},
-         {'cidr': 16,
-          'ip': ['172.17.0.1'],
-          'mac': '02:42:97:63:e6:ba',
-          'name': 'docker0'}]
-
-        """
+    def _getNetworkInfoLinux(self):
+        
+        #TODO:*1 need to implement ipv6
 
         IPBLOCKS = re.compile("(^|\n)(?P<block>\d+:.*?)(?=(\n\d+)|$)", re.S)
         IPMAC = re.compile("^\s+link/\w+\s+(?P<mac>(\w+:){5}\w{2})", re.M)
@@ -165,8 +153,91 @@ class PrefabNet(base):
                 return nic
             res.append(nic)
 
+        return res
+
+    def _getNetworkInfoOSX(self):
+        
+        #TODO: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
+        #TODO: has not been tested nor finished
+        
+        
+        exitcode, output, err = j.sal.process.execute("ifconfig", showout=False)
+        state="start"
+        interfaces = []
+        result = {'name': ''} #starting one
+        for line in output.split("\n"):
+            line_strip = line.strip()
+            if line.strip()=="":
+                continue
+            if line[0] is not " ":
+                if line.startswith("lo"):
+                    continue
+                state = "block"                
+                if result["name"] is not "":
+                    interfaces.append(result)
+                result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': []}
+
+                if "BROADCAST" in line:
+                    #then ok network to parse
+                    result["name"]=line.split(":",1)[0].strip()
+                    state = "block"
+                    
+                continue
+
+            if state == "block":
+                if line_strip.startswith("ether"):
+                    result["mac"] = line_strip.split(" ",1)[1].strip()
+                elif line_strip.startswith("inet6"):                    
+                    ip6 = line_strip[6:].split("prefixlen",1)[0].strip()
+                    if ip6 not in result["ip6"]:
+                        result["ip6"].append(ip6)
+                elif line_strip.startswith("inet "):                    
+                    ip = line_strip[5:].split("netmask",1)[0].strip()     
+                    line0 = line_strip.split("netmask",1)[1].strip()
+                    mask = line0.split("broadcast",1)[0].strip()     
+                    if ip not in result["ip"]:
+                        result["ip"].append(ip)
+                    if ip not in result["ip"]:
+                        result["ip"].append(ip)
+                elif line_strip.startswith("status"):
+                    if "active" in line:
+                        result["active"]=True
+
+                
+                
+
+        #check if last one has good result, if yes add
+        if result["name"] is not "":
+            interfaces.append(result)            
+
+    def getInfo(self, device=None):
+        """
+        returns network info like
+
+        [{'cidr': 8, 'ip': ['127.0.0.1'], 'mac': '00:00:00:00:00:00', 'name': 'lo'},
+         {'cidr': 24,
+          'ip': ['192.168.0.105'],
+          'ip6': ['...','...],
+          'mac': '80:ee:73:a9:19:05',
+          'name': 'enp2s0'},
+         {'cidr': 0, 'ip': [], 'mac': '80:ee:73:a9:19:06', 'name': 'enp3s0'},
+         {'cidr': 16,
+          'ip': ['172.17.0.1'],
+          'mac': '02:42:97:63:e6:ba',
+          'name': 'docker0'}]
+
+        """
+        if p.platformtype.isLinux:
+            return self._getNetworkInfoLinux()
+        elif p.platformtype.isLinux:
+            return self._getNetworkInfoOSX()
+        else:
+            raise RuntimeError("not implemented")
+
+
         if device is not None:
-            raise j.exceptions.RuntimeError("could not find device")
+            raise j.exceptions.RuntimeError("not implemented") #TODO:
+
         return res
 
     def getNetObject(self, device):
