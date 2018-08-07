@@ -113,18 +113,30 @@ class PrefabNet(base):
                     ips.append(ip)
             return ips
 
+    def _getNetworkInfoLinux(self, device=None):
+        """
+        returns network info like
 
-    def _getNetworkInfoLinux(self):
-        
-        #TODO:*1 need to implement ipv6
+        [{'cidr': 8, 'ip': ['127.0.0.1'], 'mac': '00:00:00:00:00:00', 'name': 'lo'},
+         {'cidr': 24,
+          'ip': ['192.168.0.105'],
+          'mac': '80:ee:73:a9:19:05',
+          'name': 'enp2s0'},
+         {'cidr': 0, 'ip': [], 'mac': '80:ee:73:a9:19:06', 'name': 'enp3s0'},
+         {'cidr': 16,
+          'ip': ['172.17.0.1'],
+          'mac': '02:42:97:63:e6:ba',
+          'name': 'docker0'}]
 
+        """
+       
         IPBLOCKS = re.compile("(^|\n)(?P<block>\d+:.*?)(?=(\n\d+)|$)", re.S)
         IPMAC = re.compile("^\s+link/\w+\s+(?P<mac>(\w+:){5}\w{2})", re.M)
         IPIP = re.compile(r"\s+?inet\s(?P<ip>(\d+\.){3}\d+)/(?P<cidr>\d+)", re.M)
         IPNAME = re.compile("^\d+: (?P<name>.*?)(?=:)", re.M)
 
         def parseBlock(block):
-            result = {'ip': [], 'cidr': [], 'mac': '', 'name': ''}
+            result = {'ip': [],'ipv6': [], 'cidr': [], 'mac': '', 'name': ''}
             for rec in (IPMAC, IPNAME):
                 match = rec.search(block)
                 if match:
@@ -133,6 +145,9 @@ class PrefabNet(base):
                 for m in mrec.finditer(block):
                     for key, value in list(m.groupdict().items()):
                         result[key].append(value)
+            _,IPV6,_=self.prefab.core.run("ifconfig %s |  awk '/inet6/{print $2}'"% result['name'], showout=False)
+            for ipv6 in IPV6.split('\n'):
+                result['ipv6'].append(ipv6)
             if j.data.types.list.check(result['cidr']):
                 if len(result['cidr']) == 0:
                     result['cidr'] = 0
@@ -153,15 +168,17 @@ class PrefabNet(base):
                 return nic
             res.append(nic)
 
+        if device is not None:
+            raise j.exceptions.RuntimeError("could not find device")
         return res
-
+        
     def _getNetworkInfoOSX(self):
         
         #TODO: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
         #TODO: has not been tested nor finished
         
         
-        exitcode, output, err = j.sal.process.execute("ifconfig", showout=False)
+        _, output, _ = j.sal.process.execute("ifconfig", showout=False)
         state="start"
         interfaces = []
         result = {'name': ''} #starting one
@@ -171,19 +188,14 @@ class PrefabNet(base):
                 continue
             if line[0] is not " ":
                 if line.startswith("lo"):
-                    continue
-                state = "block"                
-                if result["name"] is not "":
-                    interfaces.append(result)
-                result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': []}
+                    continue               
 
                 if "BROADCAST" in line:
                     #then ok network to parse
+                    result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': []}
                     result["name"]=line.split(":",1)[0].strip()
                     state = "block"
                     
-                continue
-
             if state == "block":
                 if line_strip.startswith("ether"):
                     result["mac"] = line_strip.split(" ",1)[1].strip()
@@ -200,16 +212,14 @@ class PrefabNet(base):
                     if ip not in result["ip"]:
                         result["ip"].append(ip)
                 elif line_strip.startswith("status"):
-                    if "active" in line:
+                    if "inactive" in line:
+                        result["active"]=False
+                    else:
                         result["active"]=True
-
-                
-                
-
-        #check if last one has good result, if yes add
-        if result["name"] is not "":
-            interfaces.append(result)            
-
+                    interfaces.append(result)
+                             
+        return interfaces
+        
     def getInfo(self, device=None):
         """
         returns network info like
@@ -227,18 +237,16 @@ class PrefabNet(base):
           'name': 'docker0'}]
 
         """
-        if p.platformtype.isLinux:
+        if j.core.platformtype.myplatform.isLinux:
             return self._getNetworkInfoLinux()
-        elif p.platformtype.isLinux:
+        elif j.core.platformtype.myplatform.isMac:
             return self._getNetworkInfoOSX()
         else:
             raise RuntimeError("not implemented")
 
 
         if device is not None:
-            raise j.exceptions.RuntimeError("not implemented") #TODO:
-
-        return res
+            raise j.exceptions.RuntimeError("not implemented")
 
     def getNetObject(self, device):
         n = self.getInfo(device)
@@ -312,3 +320,4 @@ class PrefabNet(base):
         self.logger.info(pscript)
 
         self.prefab.core.execute_bash(content=pscript, die=True, interpreter="python3", tmux=True)
+        
