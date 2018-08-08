@@ -107,11 +107,11 @@ class PrefabPackage(base):
     def install(self, package, reset=False):
         """
         """
-        
+
         # bring to list of packages
         if j.data.types.list.check(package) == False and package.find(",") != -1:
             package = [item.strip() for item in package.split(",")]
-        elif j.data.types.list.check(package) == False and  package.find("\n") != -1:
+        elif j.data.types.list.check(package) == False and package.find("\n") != -1:
             package = [item.strip() for item in package.split("\n")]
         elif not j.data.types.list.check(package):
             package = [package]
@@ -120,23 +120,19 @@ class PrefabPackage(base):
 
         cmd = "set -ex\n"
 
-        todo=[]
+        todo = []
         for package in packages:
 
             key = "install_%s" % package
             if self.doneCheck(key, reset):
                 continue
             todo.append(package)
-            print("+ install: %s"%package)
+            print("+ install: %s" % package)
 
             self.logger.info("prepare to install:%s" % package)
 
             if self.prefab.core.isUbuntu:
-                # cmd = 'DEBIAN_FRONTEND=noninteractive; apt-get -q --yes install '
-                # if allow_unauthenticated:
-                #     cmd += ' --allow-unauthenticated '
-                # cmd += package
-                cmd += "%s install %s -y\n" % (CMD_APT_GET, package)
+                cmd += "%s install %s\n" % (CMD_APT_GET, package)
 
             elif self.prefab.core.isAlpine:
                 cmd = "apk add %s \n" % package
@@ -169,7 +165,7 @@ class PrefabPackage(base):
                 if "wget" == package:
                     package = "%s --enable-iri" % package
 
-                cmd += "brew install %s || brew upgrade  %s\n" % (package,package)
+                cmd += "brew install %s || brew upgrade  %s\n" % (package, package)
 
             elif self.prefab.core.isCygwin:
                 if package in ["run", "net-tools"]:
@@ -204,7 +200,7 @@ class PrefabPackage(base):
             #         self.doneSet(key)
             #         return out
 
-        if len(todo)>0:
+        if len(todo) > 0:
             print(cmd)
             self.core.execute_bash(cmd)
 
