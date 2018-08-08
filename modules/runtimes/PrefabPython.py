@@ -203,7 +203,7 @@ class PrefabPython(base):
         """.format(self.JUMPSCALE_BRANCH)
 
         # we need to pull 0-robot and recordchain repo first to fix issue with the generate function that is called during the installations
-        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH)
+        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
         self._pip(C, reset=reset)
 
         # self.sandbox(deps=False)
