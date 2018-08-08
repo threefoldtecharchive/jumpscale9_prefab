@@ -184,8 +184,8 @@ class PrefabSSH(base):
                 ret = True
         else:
             # Make sure that .ssh directory exists, see #42
-            self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode="700")
-            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode=0o600, sudo=True)
+            self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode='700')
+            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode='600', sudo=True)
             ret = False
 
         self.prefab.core.sudomode = sudomode
