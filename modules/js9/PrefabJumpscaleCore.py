@@ -27,42 +27,28 @@ class PrefabJumpscaleCore(app):
         else:
             self.prefab.system.base.install()
 
-        self.bashtools(branch)
-
-        self._base()
+        self.bashtools(branch, with_deps=full)
 
         self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
 
         self.logger.info("jumpscale_install")
 
-        self.core.run("export JUMPSCALEBRANCH=%s;ZInstall_host_jumpscale" % branch, profile=True)
-
-        
         self.doneSet("install")
 
-    def bashtools(self, branch='master', reset=False):
+    def bashtools(self, branch='master', reset=False, with_deps=False):
 
         if self.doneCheck("bashtools", reset):
             return
 
         S = """
         echo "INSTALL BASHTOOLS"
-        curl https://raw.githubusercontent.com/Jumpscale/bash/{}/install.sh?$RANDOM > /tmp/install.sh
-        bash /tmp/install.sh
+        curl https://raw.githubusercontent.com/threefoldtech/jumpscale_core/{}/install.sh?$RANDOM > /tmp/install_jumpscale.sh
+        bash /tmp/install_jumpscale.sh
         """.format(branch)
 
-        self.core.execute_bash(S)
-        path = j.sal.fs.joinPaths(j.dirs.CODEDIR, 'github', 'jumpscale', 'bash', 'zlibs.sh')
-        self.prefab.bash.profileJS.addInclude(path)
-        self.prefab.bash.profileJS.save()
+        env = None
+        if with_deps:
+            env = {'JSFULL': '1'}
+        self.core.execute_bash(S, env=env)
 
         self.doneSet("bashtools")
-
-    def _base(self, reset=False):
-
-        if self.doneCheck("base", reset):
-            return
-
-        self.core.run("ZInstall_host_base", profile=True)
-
-        self.doneSet("base")
