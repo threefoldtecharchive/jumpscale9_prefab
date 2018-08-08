@@ -84,10 +84,10 @@ class PrefabUbuntuContainer(base):
 
             if ssh_autostart is True:
                 chroot.write_file('/.startup.toml', _startup)
-                chroot.execute("sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config")
+                chroot.execute("sed -i \'s/#PermitRootLogin prohibit-password/PermitRootLogin yes/g\' /etc/ssh/sshd_config")
 
         tarfile = '/tmp/ubuntu-{}.tar.gz'.format(dist)
-        self.prefab.core.dir_remove('{}/var/apt/cache/archives'.format(chroot.path))
+        self.prefab.core.dir_remove('{}/var/cache/apt/archives'.format(chroot.path))
         self.prefab.core.run('tar czpf {} -C {} --exclude tmp --exclude dev --exclude sys --exclude proc .'.format(tarfile, chroot.path))
 
         if jwt:
