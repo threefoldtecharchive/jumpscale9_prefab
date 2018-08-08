@@ -79,7 +79,7 @@ Once you have funds in both wallets then you can start using the atomicswap tool
 Atomicswap is a method that allows two users from two different chains to exchange funds after agreeing of the amount from each cryptocurrency.
 A more detailed description and example of the atomicswap process can be found here: [https://github.com/rivine/rivine/blob/master/doc/atomicswap/atomicswap.md#theory]
 We support atomicswap between TFT and BTC and we provide a JS9 SAL that make it very easy to to automate the atomicswap process.
-You can check how to use the atomicswap SAL using the documentation here: [https://github.com/Jumpscale/lib9/tree/atomicswap/JumpScale9Lib/tools/atomicswap]
+You can check how to use the atomicswap SAL using the documentation here: [https://github.com/Jumpscale/lib9/tree/atomicswap/Jumpscale9Lib/tools/atomicswap]
 
 
 # Creating a Jumpscale Decentralized Exchange(DEX) flist
