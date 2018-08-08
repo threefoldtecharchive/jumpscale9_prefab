@@ -136,7 +136,7 @@ class PrefabNet(base):
         IPNAME = re.compile("^\d+: (?P<name>.*?)(?=:)", re.M)
 
         def parseBlock(block):
-            result = {'ip': [],'ipv6': [], 'cidr': [], 'mac': '', 'name': ''}
+            result = {'ip': [],'ip6': [], 'cidr': [], 'mac': '', 'name': ''}
             for rec in (IPMAC, IPNAME):
                 match = rec.search(block)
                 if match:
@@ -147,7 +147,7 @@ class PrefabNet(base):
                         result[key].append(value)
             _,IPV6,_=self.prefab.core.run("ifconfig %s |  awk '/inet6/{print $2}'"% result['name'], showout=False)
             for ipv6 in IPV6.split('\n'):
-                result['ipv6'].append(ipv6)
+                result['ip6'].append(ipv6)
             if j.data.types.list.check(result['cidr']):
                 if len(result['cidr']) == 0:
                     result['cidr'] = 0
