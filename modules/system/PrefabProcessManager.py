@@ -13,7 +13,7 @@ class PrefabProcessManager(base):
     @property
     def logger(self):
         if self._logger is None:
-            self._logger = j.logger.get("processManagerfactory")
+            self._logger = j.logging.get("processManagerfactory")
         return self._logger
 
     def systemdOK(self):

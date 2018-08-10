@@ -10,7 +10,7 @@ class PrefabGit(base):
     @property
     def logger(self):
         if self._logger is None:
-            self._logger = j.logger.get("prefab.git")
+            self._logger = j.logging.get("prefab.git")
         return self._logger
 
     def build(self):

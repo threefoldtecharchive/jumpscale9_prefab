@@ -6,7 +6,7 @@ farmer_id = os.environ.get('FARMER_ID')
 if not farmer_id:
     print("can't find FARMER ID in environment, exiting")
 
-logger = j.logger.get('zbundle_capacity')
+logger = j.logging.get('zbundle_capacity')
 
 try:
     while True:
