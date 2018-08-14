@@ -1112,8 +1112,7 @@ class PrefabCore(base):
             self.executor.debug = debug
 
         if profile:
-            # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             # next will check if profile path exists, if not will put it
             cmd0 = cmd
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
@@ -1203,7 +1202,7 @@ class PrefabCore(base):
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
         if profile:
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             # next will check if profile path exists, if not will put it
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
                 ppath, ppath, ppath, cmd)
