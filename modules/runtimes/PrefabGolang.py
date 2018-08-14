@@ -56,14 +56,14 @@ class PrefabGolang(app):
             return
         if self.prefab.core.isMac:
             if old is False:
-                downl = "https://storage.googleapis.com/golang/go1.9.4.darwin-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.10.3.darwin-amd64.tar.gz"
             else:
-                downl = "https://storage.googleapis.com/golang/go1.8.7.darwin-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.8.7.darwin-amd64.tar.gz"
         elif "ubuntu" in self.prefab.platformtype.platformtypes:
             if old is False:
-                downl = "https://storage.googleapis.com/golang/go1.9.4.linux-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz"
             else:
-                downl = "https://storage.googleapis.com/golang/go1.8.7.linux-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.8.7.linux-amd64.tar.gz"
         else:
             raise j.exceptions.RuntimeError("platform not supported")
 
