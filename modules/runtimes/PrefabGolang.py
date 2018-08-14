@@ -45,7 +45,9 @@ class PrefabGolang(app):
     def isInstalled(self):
         rc, out, err = self.prefab.core.run(
             "go version", die=False, showout=False, profile=True)
-        if rc > 0 or "1.9" not in out:
+        if rc > 0 or "1.10.3" not in out :
+            return False
+        elif rc > 0 or "1.8.7" not in out :
             return False
         if self.doneGet("install") == False:
             return False
