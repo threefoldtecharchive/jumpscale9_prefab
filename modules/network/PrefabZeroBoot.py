@@ -10,7 +10,7 @@ FORWARDING_FIREWALL_REGEX = re.compile(r"^firewall\.@forwarding\[(\d+)\].*?('\w+
 
 class PrefabZeroBoot(base):
 
-    def install(self, network_id, token, reset=False):
+    def install(self, network_id, token, zos_version='v.1.4.1', zos_args='', reset=False):
         if not reset and self.doneCheck("install"):
             return
         # update zerotier config
@@ -59,7 +59,9 @@ class PrefabZeroBoot(base):
         self.prefab.core.run("tar -xzf /opt/storage/pxe.tar.gz -C /opt/storage")
         self.prefab.core.run("cp -r /opt/storage/pxe/* /opt/storage")
         self.prefab.core.run("rm -rf /opt/storage/pxe")
-        self.prefab.core.run('sed "s|a84ac5c10a670ca3|%s|g" /opt/storage/pxelinux.cfg/default' % network_id)
+        self.prefab.core.run('sed -i "s|a84ac5c10a670ca3|%s/%s|g" /opt/storage/pxelinux.cfg/default' % (network_id,
+                                                                                                        zos_args))
+        self.prefab.core.run('sed -i "s|zero-os-master|%s|g" /opt/storage/pxelinux.cfg/default' % zos_version)
 
         # this is needed to make sure that network name is ready
         for _ in range(12):
