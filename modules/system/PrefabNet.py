@@ -1,6 +1,6 @@
 
 from jumpscale import j
-import netaddr
+from netaddr import IPAddress
 import re
 
 base = j.tools.prefab._getBaseClass()
@@ -192,7 +192,7 @@ class PrefabNet(base):
 
                 if "BROADCAST" in line:
                     #then ok network to parse
-                    result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': []}
+                    result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': [], 'cidr': [] }
                     result["name"]=line.split(":",1)[0].strip()
                     state = "block"
                     
@@ -207,6 +207,9 @@ class PrefabNet(base):
                     ip = line_strip[5:].split("netmask",1)[0].strip()     
                     line0 = line_strip.split("netmask",1)[1].strip()
                     mask = line0.split("broadcast",1)[0].strip()     
+                    cidr = IPAddress(mask).netmask_bits()
+                    if cidr not in result["cidr"]:
+                        result["cidr"].append(cidr)
                     if ip not in result["ip"]:
                         result["ip"].append(ip)
                     if ip not in result["ip"]:
