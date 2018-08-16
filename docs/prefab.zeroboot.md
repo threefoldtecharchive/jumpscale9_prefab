@@ -28,5 +28,5 @@ sshclient.execute(cmd="opkg update")
 sshclient.execute(cmd="opkg install bash openssh-sftp-server openssl-util coreutils-base64 tmux")
 # Use the zero_boot prefab to configure the router
 prefab = sshclient.prefab 
-prefab.network.zero_boot.install('<zerotier_network_id>', '<zerotier_token>')
+prefab.network.zero_boot.install(network_id='<zerotier_network_id>', token='<zerotier_token>', zos_version='<zos_version>', zos_args='<zos_args>')
 ```
