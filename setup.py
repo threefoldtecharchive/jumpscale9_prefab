@@ -11,7 +11,7 @@ def _post_install(libname, libpath):
     c = j.core.state.configGet('plugins', defval={})
     c[libname] = "%s/github/threefoldtech/jumpscale_prefab/JumpscalePrefab" % j.dirs.CODEDIR
     j.core.state.configSet('plugins', c)
-    j.tools.jsloader.generate()
+    j.tools.loader.generate()
 
 
 class install(_install):
