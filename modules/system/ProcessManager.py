@@ -9,6 +9,7 @@ base = j.tools.prefab._getBaseClass()
 class ProcessManagerBase(base):
 
     def __init__(self, executor, prefab):
+        super().__init__()
         self.startupfile = "%s/startup.sh" % j.dirs.VARDIR
         self.executor = executor
         self.prefab = prefab
