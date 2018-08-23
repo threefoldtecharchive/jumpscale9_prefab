@@ -22,7 +22,7 @@ class PrefabTmux(base):
         #     self.logger.info("DEBUG NOW sdsd")
         #     embed()
         #     raise RuntimeError("stop debug here")
-        #     raise j.exceptions.RuntimeError(message="only support ubuntu", level=1, source="", tags="", msgpub="")
+        #     raise j.exceptions.RuntimeError(message="only support ubuntu")
         if returnifexists:
             return
         if killifexists:
@@ -85,7 +85,7 @@ class PrefabTmux(base):
 
         if cmd.strip() is "":
             raise j.exceptions.Input(
-                message="cmd cannot be empty", level=1, source="", tags="", msgpub="")
+                message="cmd cannot be empty")
 
         self.createWindow(sessionname, screenname, cmd=cmd, user=tmuxuser)
         pane = self._pane_get(sessionname, screenname, user=tmuxuser)

@@ -26,8 +26,7 @@ class PrefabCockroachDB(app):
         tarpaths = self.prefab.core.find(
             "$TMPDIR", recursive=False, pattern="*cockroach*.tgz", type='f')
         if len(tarpaths) == 0:
-            raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (
-                url, self.replace("$TMPDIR")), level=1, source="", tags="", msgpub="")
+            raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (url, self.replace("$TMPDIR")))
         tarpath = tarpaths[0]
         self.prefab.core.file_expand(tarpath, "$TMPDIR")
 

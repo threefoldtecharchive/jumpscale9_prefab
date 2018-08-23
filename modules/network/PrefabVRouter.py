@@ -21,7 +21,7 @@ class PrefabVRouter(base):
     def check(self):
         if self._check is False:
             if not self.prefab.platformtype.myplatform.startswith("ubuntu"):
-                raise j.exceptions.Input(message="only support ubuntu for now", level=1, source="", tags="", msgpub="")
+                raise j.exceptions.Input(message="only support ubuntu for now")
         self._check = "OK"
 
     @property
@@ -149,7 +149,7 @@ class PrefabVRouter(base):
         #     for item in self.prefab.system.net.ips:
         #         if not item.startswith(iprange):
         #             return iprange
-        # raise j.exceptions.Input(message="Cannot find free dmz iprange", level=1, source="", tags="", msgpub="")
+        # raise j.exceptions.Input(message="Cannot find free dmz iprange")
 
     def dhcpServer(self, interfaces=[]):
         """
