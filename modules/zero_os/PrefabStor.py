@@ -42,7 +42,7 @@ for key in keys:
 
 self.logger.info(json.dumps(data))
 
-        """ % (root, j.data.serializer.json.dumps(keys))
+        """ % (root, j.data.serializers.json.dumps(keys))
 
     # check consistancy and expirations of files
     def check(self, root, keys):
@@ -124,7 +124,7 @@ self.logger.info(json.dumps(data))
 
         self.logger.info(json.dumps(data))
 
-        """ % (root, j.data.serializer.json.dumps(keys))
+        """ % (root, j.data.serializers.json.dumps(keys))
 
     # get metadata of a set of keys
     def getMetadata(self, root, keys):
@@ -164,7 +164,7 @@ self.logger.info(json.dumps(data))
 
         self.logger.info(tmpfile)
 
-        """ % (root, j.data.serializer.json.dumps(keys))
+        """ % (root, j.data.serializers.json.dumps(keys))
 
     # set metadata for a set of keys
     def setMetadata(self, root, keys, metadata):
@@ -193,7 +193,7 @@ self.logger.info(json.dumps(data))
 
         self.logger.info(json.dumps(data))
 
-        """ % (root, j.data.serializer.json.dumps(keys), j.data.serializer.json.dumps(metadata))
+        """ % (root, j.data.serializers.json.dumps(keys), j.data.serializers.json.dumps(metadata))
 
     def tarball(self, root, keys, target):
         return """
@@ -220,7 +220,7 @@ os.unlink(item)
 
 self.logger.info(targ)
 
-        """ % (root, j.data.serializer.json.dumps(keys), target)
+        """ % (root, j.data.serializers.json.dumps(keys), target)
 
 
 base = j.tools.prefab._getBaseClass()
@@ -255,7 +255,7 @@ class PrefabStor(base):
         if self._config is None:
             path = j.sal.fs.joinPaths(self.root, "config.yaml")
             if self.prefab.core.file_exists(path):
-                self._config = j.data.serializer.yaml.load(self.prefab.file_read(self.root, "config.yaml"))
+                self._config = j.data.serializers.yaml.load(self.prefab.file_read(self.root, "config.yaml"))
 
         return self._config
 
@@ -263,7 +263,7 @@ class PrefabStor(base):
     def config(self, key, value):
         self.config  # populate if it doesn't exist
         self._config[key] = value
-        serialized = j.data.serializer.dumps(self._config)
+        serialized = j.data.serializers.dumps(self._config)
         path = j.sal.fs.joinPaths(self.root, "config.yaml")
         self.prefab.core.file_write(path, serialized)
 
@@ -378,7 +378,7 @@ class StorSpace(object):
 
             if self.prefab.core.file_exists(path):
                 yaml = self.prefab.core.file_read(path)
-                self._config = j.data.serializer.yaml.loads(yaml)
+                self._config = j.data.serializers.yaml.loads(yaml)
 
         return self._config
     '''
@@ -391,7 +391,7 @@ class StorSpace(object):
         pass
 
     def configCommit(self):
-        yaml = j.data.serializer.yaml.dumps(self.config)
+        yaml = j.data.serializers.yaml.dumps(self.config)
         path = j.sal.fs.joinPaths(self.path, "config.yaml")
         self.prefab.core.file_write(path, yaml)
     '''
@@ -439,7 +439,7 @@ class StorSpace(object):
             # NOTE: metadata are saved in json because code executed
             # on remote side does probably not have yaml parser installed
             # json parser in python should be able out-of-box
-            md = j.data.serializer.json.dumps(metadata)
+            md = j.data.serializers.json.dumps(metadata)
             self.prefab.core.file_write(self.metadataFile(filepath), md)
         '''
 
@@ -528,7 +528,7 @@ class StorSpace(object):
         """
         script = self.stor.scripts.exists(self.spacepath, keys)
         data = self.prefab.core.execute_python(script, showout=False)[1]
-        return j.data.serializer.json.loads(data)
+        return j.data.serializers.json.loads(data)
 
     def get(self, key, dest, chmod=None, chown=None):
         """
@@ -570,7 +570,7 @@ class StorSpace(object):
         script = self.stor.scripts.check(self.spacepath, keys)
         data = self.prefab.core.execute_python(script)[1]
 
-        return j.data.serializer.json.loads(data)
+        return j.data.serializers.json.loads(data)
 
     '''
     def getMetadata(self, keys):
@@ -580,7 +580,7 @@ class StorSpace(object):
         script = self.stor.scripts.getMetadata(self.path, keys)
         data = self.prefab.core.execute_python(script)[1]
 
-        return j.data.serializer.json.loads(self.getResponse(data))
+        return j.data.serializers.json.loads(self.getResponse(data))
 
     def setMetadata(self, keys, metadata):
         """

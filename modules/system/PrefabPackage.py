@@ -159,7 +159,7 @@ class PrefabPackage(base):
 
                 # rc,out=self.prefab.core.run("brew info --json=v1 %s"%package,showout=False,die=False)
                 # if rc==0:
-                #     info=j.data.serializer.json.loads(out)
+                #     info=j.data.serializers.json.loads(out)
                 #     return #means was installed
 
                 if "wget" == package:

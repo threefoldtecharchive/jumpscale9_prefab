@@ -48,7 +48,7 @@ class PrefabAydoStor(app):
             'listen_addr': addr,
             'store_root': backend,
         }
-        content = j.data.serializer.toml.dumps(config)
+        content = j.data.serializers.toml.dumps(config)
         self.prefab.core.dir_ensure('$TEMPLATEDIR/cfg/stor', recursive=True)
         self.prefab.core.file_write("$TEMPLATEDIR/cfg/stor/config.toml", content)
 

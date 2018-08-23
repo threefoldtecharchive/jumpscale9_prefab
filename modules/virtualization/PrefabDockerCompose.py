@@ -95,7 +95,7 @@ class PrefabDockerCompose(app):
         self.prefab.core.run(cmd, profile=True)
         cmd = "jsdocker list --name {name} --parsable".format(name=name)
         _, out, _ = self.prefab.core.run(cmd, profile=True)
-        info = j.data.serializer.json.loads(out)
+        info = j.data.serializers.json.loads(out)
 
         port = info[0]["port"]
         _, out, _ = self.prefab.core.run("docker inspect ahah | grep \"IPAddress\"|  cut -d '\"' -f 4 ")

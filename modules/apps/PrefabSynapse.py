@@ -100,7 +100,7 @@ class PrefabSynapse(app):
 
         config_file_path = "{}/homeserver.yaml".format(self.server_path)
         config_data = self.prefab.core.file_read(config_file_path)
-        config_data = j.data.serializer.yaml.loads(config_data)
+        config_data = j.data.serializers.yaml.loads(config_data)
         config_data['url_preview_enabled'] = True
         config_data['url_preview_ip_range_blacklist'] = ['127.0.0.0/8']
         config_data["database"] = {
@@ -124,15 +124,15 @@ MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n2
 -----END PUBLIC KEY-----"""
         }
         config_data["enable_registration"] = True
-        config_data = j.data.serializer.yaml.dumps(config_data)
+        config_data = j.data.serializers.yaml.dumps(config_data)
         self.prefab.core.file_write(config_file_path, config_data)
 
         # Edit config file of the riot client to refer to our own matrix
         config_file_path = "{}/config.sample.json".format(self.client_path)
         config_data = self.prefab.core.file_read(config_file_path)
-        config_data = j.data.serializer.json.loads(config_data)
+        config_data = j.data.serializers.json.loads(config_data)
         config_data["default_hs_url"] = "https://{}".format(domain)
-        config_data = j.data.serializer.json.dumps(config_data)
+        config_data = j.data.serializers.json.dumps(config_data)
         self.prefab.core.file_write("{}/config.json".format(self.client_path), config_data)
 
         # Create admin user

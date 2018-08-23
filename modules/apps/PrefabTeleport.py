@@ -118,7 +118,7 @@ class PrefabTeleport(app):
         if key_path and cert_path:
             self.CONFIG['proxy_service']['https_key_file'] = key_path
             self.CONFIG['proxy_service']['https_cert_file'] = cert_path 
-        self.prefab.core.file_write('/etc/teleport.yaml', j.data.serializer.yaml.dumps(self.CONFIG))
+        self.prefab.core.file_write('/etc/teleport.yaml', j.data.serializers.yaml.dumps(self.CONFIG))
 
     def apply_trusted_cluster(self, name, token, web_proxy_addr, tunnel_addr):
         """
@@ -139,7 +139,7 @@ class PrefabTeleport(app):
         trusted_cluster_config['spec'] = spec
         trusted_cluster_config['metadata'] = {'name': name}
         self.prefab.core.file_write('$TMPDIR/cluster_%s.yaml' %
-                                    name, j.data.serializer.yaml.dumps(trusted_cluster_config))
+                                    name, j.data.serializers.yaml.dumps(trusted_cluster_config))
         self.prefab.core.run('tctl create $TMPDIR/cluster_%s.yaml' % name)
 
     @property
@@ -178,7 +178,7 @@ class PrefabTeleport(app):
         }
         self.GITHUB_DATA['spec'] = spec
         self.GITHUB_DATA['metadata']['name'] = name
-        self.prefab.core.file_write('$TMPDIR/github.yaml', j.data.serializer.yaml.dumps(self.GITHUB_DATA))
+        self.prefab.core.file_write('$TMPDIR/github.yaml', j.data.serializers.yaml.dumps(self.GITHUB_DATA))
         timer = 20
         while not self.prefab.core.file_exists("/var/lib/teleport/host_uuid"):
             timer -= 1

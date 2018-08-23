@@ -35,10 +35,10 @@ class PrefabS3Scality(app):
         )
 
         content = self.prefab.core.file_read('$JSAPPSDIR/S3/package.json')
-        pkg = j.data.serializer.json.loads(content)
+        pkg = j.data.serializers.json.loads(content)
         pkg['scripts']['start_location'] = cmd
 
-        content = j.data.serializer.json.dumps(pkg, indent=True)
+        content = j.data.serializers.json.dumps(pkg, indent=True)
         self.prefab.core.file_write('$JSAPPSDIR/S3/package.json', content)
 
         if start:

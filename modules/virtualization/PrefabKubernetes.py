@@ -357,7 +357,7 @@ class PrefabKubernetes(app):
             init_node.executor.dir_paths['HOMEDIR'])
         endpoints = ''.join(['  - https://%s:2379\n' % ip for ip in nodes_ip])
         dns_names = [node.core.hostname for node in nodes]
-        external_ips = j.data.serializer.yaml.dumps(external_ips + dns_names)
+        external_ips = j.data.serializers.yaml.dumps(external_ips + dns_names)
         kube_init_yaml = KUBE_INIT.format(node_ip=nodes_ip[0], flannel_subnet=kube_cidr, endpoints=endpoints,
                                           service_subnet=service_subnet, external_ips=external_ips)
 
@@ -457,7 +457,7 @@ class PrefabKubernetes(app):
                 "name": "system:nodes"
             }]
         }
-        init_node.core.file_write('$TMPDIR/system_node_config.yaml', j.data.serializer.yaml.dumps(system_node_config))
+        init_node.core.file_write('$TMPDIR/system_node_config.yaml', j.data.serializers.yaml.dumps(system_node_config))
 
         if unsafe:
             # if unsafe  comppletly remove role master from the cluster
@@ -467,7 +467,7 @@ class PrefabKubernetes(app):
             )
         else:
             # write patch file used later on to register the nodes as masters
-            init_node.core.file_write('$TMPDIR/master.yaml', j.data.serializer.yaml.dumps(node_json))
+            init_node.core.file_write('$TMPDIR/master.yaml', j.data.serializers.yaml.dumps(node_json))
 
         for index, master in enumerate(nodes[1:]):
             # send certs from init node to the rest of the master nodes

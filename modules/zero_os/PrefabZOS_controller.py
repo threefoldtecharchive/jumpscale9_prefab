@@ -79,7 +79,7 @@ class PrefabZOS_controller(app):
 
         # edit config
         C = self.prefab.core.file_read('$JSCFGDIR/controller/agentcontroller.toml')
-        cfg = j.data.serializer.toml.loads(C)
+        cfg = j.data.serializers.toml.loads(C)
 
         listen = cfg['listen']
         for addr in listen_addr:
@@ -95,7 +95,7 @@ class PrefabZOS_controller(app):
             cfgDir, "/controller/extensions:/opt/jumpscale/lib")
         cfg["jumpscripts"]["settings"]["jumpscripts_path"] = self.prefab.core.joinpaths(
             cfgDir, "/controller/jumpscripts")
-        C = j.data.serializer.toml.dumps(cfg)
+        C = j.data.serializers.toml.dumps(cfg)
 
         self.prefab.core.file_write('$JSCFGDIR/controller/agentcontroller.toml', C, replaceArgs=True)
 

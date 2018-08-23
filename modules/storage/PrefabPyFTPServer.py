@@ -69,7 +69,7 @@ class PrefabPyFTPServer(base):
             authorizer = "    from pyftpdlib.authorizers import UnixAuthorizer"
         else:
             authorizer = ""
-            configmodel = j.data.serializer.yaml.loads(config)
+            configmodel = j.data.serializers.yaml.loads(config)
             for key, obj in configmodel.items():
                 self.prefab.storage.btrfs.subvolumeCreate(j.sal.fs.joinPaths(root, key))
                 for user, obj2 in obj.items():

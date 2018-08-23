@@ -38,7 +38,7 @@ class PrefabNodeJS(app):
             "npm version", die=False, showout=False)
         if rc > 0:
             return False
-        installedDict = j.data.serializer.yaml.loads(out)
+        installedDict = j.data.serializers.yaml.loads(out)
         if "npm" not in installedDict or "node" not in installedDict:
             return False
         if j.data.text.strToVersionInt(installedDict["npm"]) < 5000000:

@@ -136,7 +136,7 @@ class PrefabDocker(app):
         # FIXME: cannot find g8core is included to the output
         #out = out.replace("cannot find g8core\n","")
 
-        info = j.data.serializer.json.loads(out)
+        info = j.data.serializers.json.loads(out)
 
         port = info[0]["port"]
         #host = info[0]["host"]

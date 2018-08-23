@@ -67,7 +67,7 @@ class PrefabSynapsebot(app):
             "admins": admins,
             "user": bot_user
         }
-        config_data = j.data.serializer.json.dumps(config_data)
+        config_data = j.data.serializers.json.dumps(config_data)
         self.prefab.core.file_write(config_file_path, config_data)
 
     def start(self):

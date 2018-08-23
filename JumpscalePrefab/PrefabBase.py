@@ -114,7 +114,7 @@ class PrefabBase(JSBASE):
 
         if done will return : True
         """
-        reset = j.data.serializer.fixType(reset, False)
+        reset = j.data.serializers.fixType(reset, False)
         if reset is False and self.doneGet(cat):
             return True
         return False
@@ -154,7 +154,7 @@ class PrefabApp(PrefabBase):
 
     #     if done will return : True
     #     """
-    #     reset = j.data.serializer.fixType(reset, False)
+    #     reset = j.data.serializers.fixType(reset, False)
     #     if reset is False and self.isInstalled() and self.doneGet(cat):
     #         return True
     #     return False

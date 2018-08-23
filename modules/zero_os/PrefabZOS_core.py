@@ -84,7 +84,7 @@ class PrefabZOS_core(app):
         # manipulate config file
         sourcepath = '$TEMPLATEDIR/cfg/agent'
         C = self.prefab.core.file_read("%s/g8os.toml" % sourcepath)
-        cfg = j.data.serializer.toml.loads(C)
+        cfg = j.data.serializers.toml.loads(C)
         # Ubuntu: /optvar/cfg
         cfgdir = self.prefab.core.dir_paths['JSCFGDIR']
         cfg["main"]["message_ID_file"] = self.prefab.core.joinpaths(cfgdir, "/agent/.mid")
@@ -105,7 +105,7 @@ class PrefabZOS_core(app):
         extension["js_daemon"]["cwd"] = jumpscript_path
         extension["js_daemon"]["env"]["JUMPSCRIPTS_HOME"] = self.prefab.core.joinpaths(cfgdir, "/agent/jumpscripts/")
         cfg["logging"]["db"]["address"] = self.prefab.core.joinpaths(cfgdir, "/agent/logs")
-        C = j.data.serializer.toml.dumps(cfg)
+        C = j.data.serializers.toml.dumps(cfg)
 
         self.prefab.core.file_write("$JSCFGDIR/agent/g8os.toml", C, replaceArgs=True)
 
