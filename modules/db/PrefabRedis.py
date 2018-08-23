@@ -58,8 +58,7 @@ class PrefabRedis(app):
             C = self.replace(C)
             self.prefab.core.run(C)
         else:
-            raise j.exceptions.NotImplemented(
-                message="only ubuntu supported for building redis", level=1, source="", tags="", msgpub="")
+            raise j.exceptions.NotImplemented(message="only ubuntu supported for building redis")
 
         self.doneSet("build")
 
