@@ -62,7 +62,7 @@ class PrefabNodeJS(app):
 
             url = 'https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2'
             cdest = self.prefab.core.file_download(
-                url, expand=True, overwrite=False, to="$TMPDIR/phantomjs",removeTopDir=True,deletedest=True)
+                url, expand=True, overwrite=False, to="$TMPDIR/phantomjs", removeTopDir=True, deletedest=True)
 
             self.core.run("mv %s/bin/phantomjs /opt/bin/phantomjs" % cdest)
             self.core.run("rm -rf %s" % cdest)
@@ -77,24 +77,24 @@ class PrefabNodeJS(app):
 
         self.doneSet("phantomjs")
 
-    def npm_install(self, name,global_=True,reset=False):
+    def npm_install(self, name, global_=True, reset=False):
         """
         @PARAM cmdname is the optional cmd name which will be used to put in path of the env (as alias to the name)
         """
-        self.logger.info("npm install:%s"%name)
-        key="npm_%s"%name
+        self.logger.info("npm install:%s" % name)
+        key = "npm_%s" % name
         if self.doneGet(key) and not reset:
             return
 
         if global_:
             if self.prefab.core.isMac:
-                sudo="sudo "
+                sudo = "sudo "
             else:
-                sudo=""
-            cmd = "cd /tmp;%snpm install -g %s --unsafe-perm=true --allow-root"%(sudo,name)
+                sudo = ""
+            cmd = "cd /tmp;%snpm install -g %s --unsafe-perm=true --allow-root" % (sudo, name)
         else:
             cmd = "cd %s;npm i %s" % (self.NODE_PATH, name)
-        
+
         self.prefab.core.run(cmd)
 
         # cmdpath = "%s/nodejs_modules/node_modules/%s/bin/%s" % (
@@ -114,7 +114,6 @@ class PrefabNodeJS(app):
         #                      name, overwriteTarget=True)
 
         self.doneSet(key)
-                             
 
     def install(self, reset=False):
         """
@@ -139,8 +138,7 @@ class PrefabNodeJS(app):
                 version, version)
 
         else:
-            raise j.exceptions.Input(
-                message="only support ubuntu & mac", level=1, source="", tags="", msgpub="")
+            raise j.exceptions.Input(message="only support ubuntu & mac")
 
         cdest = self.prefab.core.file_download(
             url, expand=True, overwrite=False, to="$TMPDIR/node")
