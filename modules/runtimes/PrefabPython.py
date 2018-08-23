@@ -182,10 +182,10 @@ class PrefabPython(base):
         msg = self.replace(msg)
         self.logger.info(msg)
 
-    def _install_portal(self, branch):
-        self.prefab.web.portal.install(start=False, branch=branch)
-        dest_robot_portal = self.prefab.core.dir_paths['JSAPPSDIR'] + '/0-robot-portal'
-        self.prefab.web.zrobotportal.install(dest=dest_robot_portal, start_portal=False)
+    # def _install_portal(self, branch):
+    #     self.prefab.web.portal.install(start=False, branch=branch)
+    #     dest_robot_portal = self.prefab.core.dir_paths['JSAPPSDIR'] + '/0-robot-portal'
+    #     self.prefab.web.zrobotportal.install(dest=dest_robot_portal, start_portal=False)
 
     def _pipAll(self, reset=False):
         """

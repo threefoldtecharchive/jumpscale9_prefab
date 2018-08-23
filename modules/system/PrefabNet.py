@@ -174,14 +174,14 @@ class PrefabNet(base):
         
     def _getNetworkInfoOSX(self):
         
-        #TODO: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
+        #IMPORTANT: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
         #TODO: has not been tested nor finished
         
         
         _, output, _ = j.sal.process.execute("ifconfig", showout=False)
         state="start"
         interfaces = []
-        result = {'name': ''} #starting one
+        result = {} #starting one
         for line in output.split("\n"):
             line_strip = line.strip()
             if line.strip()=="":
@@ -192,11 +192,16 @@ class PrefabNet(base):
 
                 if "BROADCAST" in line:
                     #then ok network to parse
+                    # print("foundblock:%s"%line)
                     result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': [], 'cidr': [] }
                     result["name"]=line.split(":",1)[0].strip()
                     state = "block"
+                    interfaces.append(result)
+                    continue
                     
             if state == "block":
+                # if result["name"].startswith("vbox"):
+                #     import pudb; pudb.set_trace()
                 if line_strip.startswith("ether"):
                     result["mac"] = line_strip.split(" ",1)[1].strip()
                 elif line_strip.startswith("inet6"):                    
@@ -219,7 +224,11 @@ class PrefabNet(base):
                         result["active"]=False
                     else:
                         result["active"]=True
-                    interfaces.append(result)
+
+        if result is not {}:
+            interfaces.append(result)
+
+        # print(j.data.serializer.json.dumps(interfaces,True,True))
                              
         return interfaces
         
