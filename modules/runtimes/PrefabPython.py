@@ -9,8 +9,8 @@ class PrefabPython(base):
         self.logger_enable()
         self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
         self.CODEDIRL = self.core.replace("$BUILDDIR/code/python3/")
-        self.JUMPSCALE_BRANCH = None
-        self.include_jumpscale = None
+        self.JUMPSCALE_BRANCH = "development"
+        self.include_jumpscale = True
 
     def reset(self):
         base.reset(self)
@@ -128,6 +128,8 @@ class PrefabPython(base):
         export CFLAGS="-I$CPATH/"
         export CPPFLAGS="-I$CPATH/"
         export LDFLAGS="-L$LIBRARY_PATH/"
+        
+        find . -name \*.pyc -delete
 
         """
         C = self.replace(C)
@@ -149,6 +151,8 @@ class PrefabPython(base):
         export LANG=en_US.UTF-8
 
         export PS1="JUMPSCALE: "
+        
+        find . -name \*.pyc -delete
 
         """
         self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C)
@@ -175,8 +179,10 @@ class PrefabPython(base):
             self.prefab.system.package.ensure("capnp")
 
         if self.include_jumpscale:
-            self._pipAll(reset=reset)
+            self._include_jumpscale(reset=reset)
             # self._install_portal(self.JUMPSCALE_BRANCH)
+
+        self._pip_all(reset=reset)
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
@@ -187,24 +193,34 @@ class PrefabPython(base):
     #     dest_robot_portal = self.prefab.core.dir_paths['JSAPPSDIR'] + '/0-robot-portal'
     #     self.prefab.web.zrobotportal.install(dest=dest_robot_portal, start_portal=False)
 
-    def _pipAll(self, reset=False):
+    def _pip_all(self,reset=False):
+        """
+        get required pips from github/threefoldtech/jumpscale_core/install/dependencies.py
+        :param reset:
+        :return:
+        """
+        # pip3 install 'git+https://github.com/spesmilo/electrum.git@3.2.2'
+
+    def _include_jumpscale(self, reset=False):
         """
         js_shell 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
         """
-        # needs at least items from /JS8/code/github/threefoldtech/jumpscale_core/install/dependencies.py
+        # needs at least items from /JS8/code/
         if self.doneCheck("pipall", reset):
             return
-        C = """
-        git+https://github.com/threefoldtech/jumpscale_core@{0}#egg=core
-        git+https://github.com/threefoldtech/jumpscale_lib@{0}
-        git+https://github.com/threefoldtech/jumpscale_prefab@{0}
-        git+https://github.com/threefoldtech/0-robot@{0}
-        git+https://threefoldtech/0-hub#egg=zerohub&subdirectory=client
-        """.format(self.JUMPSCALE_BRANCH)
+        # C = """
+        # git+https://github.com/threefoldtech/jumpscale_core@{0}#egg=core
+        # git+https://github.com/threefoldtech/jumpscale_lib@{0}
+        # git+https://github.com/threefoldtech/jumpscale_prefab@{0}
+        # git+https://github.com/threefoldtech/0-robot@{0}
+        # git+https://threefoldtech/0-hub#egg=zerohub&subdirectory=client
+        # """.format(self.JUMPSCALE_BRANCH)
 
         # we need to pull 0-robot and recordchain repo first to fix issue with the generate function that is called during the installations
         j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
         self._pip(C, reset=reset)
+
+        self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
 
         # self.sandbox(deps=False)
         self.doneSet("pipall")
@@ -221,4 +237,3 @@ class PrefabPython(base):
                 self.prefab.core.run(self.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
 
-        self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client

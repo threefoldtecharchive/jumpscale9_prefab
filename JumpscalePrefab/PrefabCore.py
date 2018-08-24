@@ -698,8 +698,8 @@ class PrefabCore(base):
 
         if replaceInContent:
             content = self.replace(content)
-        self.executor.file_write(
-            path=path, content=content, mode=mode, owner=owner, group=group, append=append, sudo=sudo)
+        self.executor.file_write(path=path, content=content, mode=mode,
+                                 owner=owner, group=group, append=append, sudo=sudo, showout=showout)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -1163,7 +1163,8 @@ class PrefabCore(base):
             content = self.replace(content)
         content = j.data.text.strip(content)
 
-        self.logger.info("RUN SCRIPT:\n%s" % content)
+        if showout:
+            self.logger.info("RUN SCRIPT:\n%s" % content)
 
         if content[-1] != "\n":
             content += "\n"

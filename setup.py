@@ -5,6 +5,11 @@ import os
 
 
 def _post_install(libname, libpath):
+
+    if "PBASE" in os.environ:
+        #this means we are in build directory, no need to do following
+        return
+
     from jumpscale import j
 
     # add this plugin to the config

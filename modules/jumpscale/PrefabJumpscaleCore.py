@@ -27,8 +27,7 @@ class PrefabJumpscaleCore(app):
         else:
             self.prefab.system.base.install()
 
-        self.prefab.runtimes.pip._ensure()  # make sure pip get's installed
-        import pudb; pudb.set_trace()
+        self.prefab.runtimes.pip.package_install("zerotier")  # will also make sure pip3 is installed
 
         self._install(branch, with_deps=full)
 
