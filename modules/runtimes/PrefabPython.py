@@ -102,16 +102,16 @@ class PrefabPython(base):
 
             self.doneSet("compile")
 
-        self._package(reset=reset)
+        self._pip_env_install(reset=reset)
 
         return self.BUILDDIRL
 
-    def _package(self, reset=False):
+    def _pip_env_install(self, reset=False):
         """
 
         will make sure we add env scripts to it as well as add all the required pip modules
 
-        js_shell 'j.tools.prefab.local.runtimes.python._package(reset=True)'
+        js_shell 'j.tools.prefab.local.runtimes.python._pip_env_install(reset=True)'
         """
 
         C = """
@@ -175,7 +175,6 @@ class PrefabPython(base):
             """
             C = self.replace(C)
             self.prefab.core.file_write("%s/pip3build.sh" % self.BUILDDIRL, C)
-            from IPython import embed; embed()
             self.prefab.core.run("cd %s;bash pip3build.sh" % self.BUILDDIRL)
         self.doneSet("pip3install")
 
