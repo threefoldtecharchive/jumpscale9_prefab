@@ -95,6 +95,9 @@ class PrefabPython(base):
             self.logger.debug(C)
             self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True)  # makes it easy to test & make changes where required
 
+            from IPython import embed; embed()
+            s
+
             self.doneSet("compile")
 
         self._package(reset=reset)
@@ -129,7 +132,8 @@ class PrefabPython(base):
         export CPPFLAGS="-I$CPATH/"
         export LDFLAGS="-L$LIBRARY_PATH/"
         
-        find . -name \*.pyc -delete
+        find $PBASE -name \*.pyc -delete
+        find $PBASE/code/github/threefoldtech -name \*.pyc -delete
 
         """
         C = self.replace(C)
@@ -152,7 +156,8 @@ class PrefabPython(base):
 
         export PS1="JUMPSCALE: "
         
-        find . -name \*.pyc -delete
+        find $PBASE -name \*.pyc -delete
+        find $PBASE/code/github/threefoldtech -name \*.pyc -delete
 
         """
         self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C)
@@ -195,19 +200,39 @@ class PrefabPython(base):
 
     def _pip_all(self,reset=False):
         """
-        get required pips from github/threefoldtech/jumpscale_core/install/dependencies.py
-        :param reset:
-        :return:
+        install pips which are not part of the jumpscale installs yet
         """
-        # pip3 install 'git+https://github.com/spesmilo/electrum.git@3.2.2'
+        C="""
+        git+https://github.com/spesmilo/electrum.git@3.2.2
+        """
+
+        self._pip(C)
 
     def _include_jumpscale(self, reset=False):
         """
-        js_shell 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
+        js_shell 'j.tools.prefab.local.runtimes.python._include_jumpscale(reset=False)'
         """
-        # needs at least items from /JS8/code/
         if self.doneCheck("pipall", reset):
             return
+
+        todo=[]
+        todo.append("https://github.com/threefoldtech/jumpscale_core")
+        todo.append("https://github.com/threefoldtech/jumpscale_lib")
+        todo.append("https://github.com/threefoldtech/jumpscale_prefab")
+        todo.append("https://github.com/threefoldtech/digital_me")
+        todo.append("https://github.com/threefoldtech/0-robot")
+        todo.append("https://github.com/threefoldtech/0-templates")
+        todo.append("https://github.com/threefoldtech/digital_me_recipes")
+
+        for item in todo:
+            path = j.clients.git.getContentPathFromURLorPath(item)
+            if j.sal.fs.exists("%s/setup.py"%path):
+                C = "set -e;cd $BUILDDIRL;source envbuild.sh;cd %s;pip3 install -e . --trusted-host pypi.python.org" % path
+                self.prefab.core.run(self.replace(C), shell=True)
+
+        self._pip_all()
+
+
         # C = """
         # git+https://github.com/threefoldtech/jumpscale_core@{0}#egg=core
         # git+https://github.com/threefoldtech/jumpscale_lib@{0}
@@ -217,13 +242,13 @@ class PrefabPython(base):
         # """.format(self.JUMPSCALE_BRANCH)
 
         # we need to pull 0-robot and recordchain repo first to fix issue with the generate function that is called during the installations
-        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
-        self._pip(C, reset=reset)
-
-        self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
-
-        # self.sandbox(deps=False)
-        self.doneSet("pipall")
+        # j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
+        # self._pip(C, reset=reset)
+        #
+        # self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
+        #
+        # # self.sandbox(deps=False)
+        # self.doneSet("pipall")
 
     # need to do it here because all runs in the sandbox
     def _pip(self, pips, reset=False):
@@ -233,7 +258,7 @@ class PrefabPython(base):
                 continue
             # cannot use prefab functionality because would not be sandboxed
             if not self.doneGet("pip3_%s" % item) or reset:
-                C = "set -ex;cd $BUILDDIRL;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
+                C = "set -e;cd $BUILDDIRL;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
                 self.prefab.core.run(self.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
 
