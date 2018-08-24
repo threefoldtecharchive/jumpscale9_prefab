@@ -132,7 +132,10 @@ class PrefabPackage(base):
             self.logger.info("prepare to install:%s" % package)
 
             if self.prefab.core.isUbuntu:
-                cmd += "%s install %s\n" % (CMD_APT_GET, package)
+                if "rsync" in package:
+                    cmd +="DEBIAN_FRONTEND=noninteractive apt-get -q --yes --allow-downgrades install %s\n"%package
+                else:
+                    cmd += "%s install %s\n" % (CMD_APT_GET, package)
 
             elif self.prefab.core.isAlpine:
                 cmd = "apk add %s \n" % package
@@ -202,7 +205,15 @@ class PrefabPackage(base):
 
         if len(todo) > 0:
             print(cmd)
-            self.core.execute_bash(cmd)
+            #sometimes firsttime it fails, we don't know yet why, try to do one more time
+            try:
+                self.core.execute_bash(cmd)
+            except Exception as e:
+                print("could not install:\n%s"%cmd)
+                print("error was:%s"%e)
+                print("will try one more time.")
+                self.core.execute_bash(cmd)
+
 
         for package in todo:
             key = "install_%s," % package

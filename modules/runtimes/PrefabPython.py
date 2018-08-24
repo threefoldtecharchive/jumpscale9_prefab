@@ -135,7 +135,7 @@ class PrefabPython(base):
         export LDFLAGS="-L$LIBRARY_PATH/"
         
         find $PBASE -name \*.pyc -delete
-        find $PBASE/code/github/threefoldtech -name \*.pyc -delete
+        find $PBASE/code/github/threefoldtech -name \*.pyc -delete 2>&1 > /dev/null || echo
 
         """
         C = self.replace(C)
@@ -159,7 +159,7 @@ class PrefabPython(base):
         export PS1="JUMPSCALE: "
         
         find $PBASE -name \*.pyc -delete
-        find $PBASE/code/github/threefoldtech -name \*.pyc -delete
+        find $PBASE/code/github/threefoldtech -name \*.pyc -delete 2>&1 > /dev/null || echo
 
         """
         self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C)
@@ -175,6 +175,7 @@ class PrefabPython(base):
             """
             C = self.replace(C)
             self.prefab.core.file_write("%s/pip3build.sh" % self.BUILDDIRL, C)
+            from IPython import embed; embed()
             self.prefab.core.run("cd %s;bash pip3build.sh" % self.BUILDDIRL)
         self.doneSet("pip3install")
 

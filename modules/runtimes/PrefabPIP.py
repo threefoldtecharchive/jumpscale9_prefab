@@ -60,7 +60,7 @@ class PrefabPIP(base):
         package can be list or comma separated list of packages as well
 
         '''
-        self.ensure()
+        self._ensure()
         packages = j.data.text.getList(package, "str")
 
         cmd = ""

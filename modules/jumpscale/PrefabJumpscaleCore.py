@@ -51,6 +51,10 @@ class PrefabJumpscaleCore(app):
         if with_deps:
             env = {'JSFULL': '1'}
 
-        self.core.execute_bash(script=S, env=env)
+        try:
+            self.core.execute_bash(script=S, env=env)
+        except Exception as e:
+            print ("JUMPSCALE INSTALL FAILED, WILL TRY AGAIN (1 more time)")
+            self.core.execute_bash(script=S, env=env)
 
         self.doneSet("jsinstall")
