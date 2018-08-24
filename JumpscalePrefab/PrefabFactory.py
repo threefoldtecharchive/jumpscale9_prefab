@@ -29,18 +29,27 @@ class PrefabRootClassFactory(JSBASE):
     def _getBaseAppClass(self):
         return PrefabApp
 
-    def reset(self, prefab):
-        """
-        reset remove the prefab instance passed in argument from the cache.
-        """
-        if prefab.executor.id in self.prefabs_instance:
-            del self.prefabs_instance[prefab.executor.id]
+    # def reset(self, prefab):
+    #     """
+    #     reset remove the prefab instance passed in argument from the cache.
+    #     """
+    #     if prefab.executor.id in self.prefabs_instance
+    #         del self.prefabs_instance[prefab.executor.id]
 
-    def resetAll(self):
+    def reset(self):
         """
         reset cache of prefab instances
+        reset all caches & done state's
+        js_shell "j.tools.prefab.reset()"
         """
+        self.local
+        for key,p in self.prefabs_instance.items():
+            #reset full state
+            p.executor._state._configState = {}
+            p.executor._state.configSave()
+            p.cache.reset()
         self.prefabs_instance = {}
+
 
     def get_pubkey(self, keyname=''):
         if keyname == '':

@@ -13,17 +13,22 @@ class PrefabPython(base):
         self.include_jumpscale = True
 
     def reset(self):
+        """
+        is a quite serious reset, to make sure we really install everything required
+        """
+        j.tools.prefab.reset()
         base.reset(self)
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
+        self.prefab.system.package.reset()
 
     def build(self, jumpscale_branch='development', include_jumpscale=True, reset=False):
         """
-        js_shell 'j.tools.prefab.local.runtimes.python.build(reset=False)'
+        js_shell 'j.tools.prefab.local.runtimes.python.build(reset=True)'
 
 
-        will build python and install all pip's inside the builded directory
+        will build python and install all pip's inside the build directory
 
         """
 
@@ -94,9 +99,6 @@ class PrefabPython(base):
             self.logger.info("compile python3")
             self.logger.debug(C)
             self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True)  # makes it easy to test & make changes where required
-
-            from IPython import embed; embed()
-            s
 
             self.doneSet("compile")
 
@@ -208,11 +210,11 @@ class PrefabPython(base):
 
         self._pip(C)
 
-    def _include_jumpscale(self, reset=False):
+    def _include_jumpscale(self, reset=True):
         """
         js_shell 'j.tools.prefab.local.runtimes.python._include_jumpscale(reset=False)'
         """
-        if self.doneCheck("pipall", reset):
+        if self.doneCheck("_include_jumpscale", reset):
             return
 
         todo=[]
@@ -248,7 +250,7 @@ class PrefabPython(base):
         # self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
         #
         # # self.sandbox(deps=False)
-        # self.doneSet("pipall")
+        # self.doneSet("_include_jumpscale")
 
     # need to do it here because all runs in the sandbox
     def _pip(self, pips, reset=False):
