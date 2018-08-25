@@ -82,6 +82,7 @@ class PrefabPython(base):
                 C = """
 
                 apt install wget gcc make -y
+                mkdir -p {builddir} 
 
                 set -ex
                 cd {codedir}
@@ -145,7 +146,7 @@ class PrefabPython(base):
         export PBASE=`pwd`
 
         export PATH=$PBASE/bin:/usr/local/bin:/usr/bin
-        export PYTHONPATH=$PBASE/lib/python.zip:$PBASE/lib:$PBASE/lib/python3.6:$PBASE/lib/python3.6/lib-dynload:$PBASE/bin
+        export PYTHONPATH=$PBASE/lib/pythonbin:$PBASE/lib:$PBASE/lib/python3.6:$PBASE/lib/python3.6/lib-dynload:$PBASE/bin
         export PYTHONHOME=$PBASE
 
         export LIBRARY_PATH="$PBASE/bin:$PBASE/lib"
@@ -216,6 +217,9 @@ class PrefabPython(base):
         """
         if self.doneCheck("_include_jumpscale", reset):
             return
+
+        j.sal.fs.createDir("%s/lib/pythonbin" % self.BUILDDIRL)
+        j.sal.fs.writeFile("%s/lib/pythonbin/__init__.py" % self.BUILDDIRL,"")  #touch for init
 
         todo=[]
         todo.append("https://github.com/threefoldtech/jumpscale_core")
