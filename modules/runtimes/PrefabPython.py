@@ -70,9 +70,8 @@ class PrefabPython(base):
                 C = self.replace(C)
 
             else:
-
+                self.prefab.core.run('apt-get install zlib1g-dev libncurses5-dev libbz2-dev liblzma-dev libsqlite3-dev libreadline-dev libssl-dev libsnappy-dev -y')
                 # on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
-                self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev,libsnappy-dev')
 
                 C = """
 
