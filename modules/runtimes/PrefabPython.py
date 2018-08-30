@@ -9,21 +9,26 @@ class PrefabPython(base):
         self.logger_enable()
         self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
         self.CODEDIRL = self.core.replace("$BUILDDIR/code/python3/")
-        self.JUMPSCALE_BRANCH = None
-        self.include_jumpscale = None
+        self.JUMPSCALE_BRANCH = "development"
+        self.include_jumpscale = True
 
     def reset(self):
+        """
+        is a quite serious reset, to make sure we really install everything required
+        """
+        j.tools.prefab.reset()
         base.reset(self)
         self.core.dir_remove(self.BUILDDIRL)
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
+        self.prefab.system.package.reset()
 
     def build(self, jumpscale_branch='development', include_jumpscale=True, reset=False):
         """
-        js_shell 'j.tools.prefab.local.runtimes.python.build(reset=False)'
+        js_shell 'j.tools.prefab.local.runtimes.python.build(reset=True)'
 
 
-        will build python and install all pip's inside the builded directory
+        will build python and install all pip's inside the build directory
 
         """
 
@@ -70,12 +75,14 @@ class PrefabPython(base):
                 C = self.replace(C)
 
             else:
-                self.prefab.core.run('apt-get install zlib1g-dev libncurses5-dev libbz2-dev liblzma-dev libsqlite3-dev libreadline-dev libssl-dev libsnappy-dev -y')
+
                 # on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
+                self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev,libsnappy-dev')
 
                 C = """
 
                 apt install wget gcc make -y
+                mkdir -p {builddir} 
 
                 set -ex
                 cd {codedir}
@@ -96,16 +103,16 @@ class PrefabPython(base):
 
             self.doneSet("compile")
 
-        self._package(reset=reset)
+        self._pip_env_install(reset=reset)
 
         return self.BUILDDIRL
 
-    def _package(self, reset=False):
+    def _pip_env_install(self, reset=False):
         """
 
         will make sure we add env scripts to it as well as add all the required pip modules
 
-        js_shell 'j.tools.prefab.local.runtimes.python._package(reset=True)'
+        js_shell 'j.tools.prefab.local.runtimes.python._pip_env_install(reset=True)'
         """
 
         C = """
@@ -114,7 +121,7 @@ class PrefabPython(base):
 
         export PBASE=`pwd`
 
-        export OPENSSLPATH=$(brew --prefix openssl)
+        export OPENSSLPATH={}
 
         export PATH=$PATH:$OPENSSLPATH/bin:/usr/local/bin:/usr/bin:/bin
 
@@ -127,8 +134,11 @@ class PrefabPython(base):
         export CFLAGS="-I$CPATH/"
         export CPPFLAGS="-I$CPATH/"
         export LDFLAGS="-L$LIBRARY_PATH/"
+        
+        find $PBASE -name \*.pyc -delete
+        find $PBASE/code/github/threefoldtech -name \*.pyc -delete 2>&1 > /dev/null || echo
 
-        """
+        """.format("(brew --prefix openssl)" if self.core.isMac else "(which openssl)")
         C = self.replace(C)
         self.prefab.core.file_write("%s/envbuild.sh" % self.BUILDDIRL, C)
 
@@ -136,7 +146,7 @@ class PrefabPython(base):
         export PBASE=`pwd`
 
         export PATH=$PBASE/bin:/usr/local/bin:/usr/bin
-        export PYTHONPATH=$PBASE/lib/python.zip:$PBASE/lib:$PBASE/lib/python3.6:$PBASE/lib/python3.6/lib-dynload:$PBASE/bin
+        export PYTHONPATH=$PBASE/lib/pythonbin:$PBASE/lib:$PBASE/lib/python3.6:$PBASE/lib/python3.6/lib-dynload:$PBASE/bin
         export PYTHONHOME=$PBASE
 
         export LIBRARY_PATH="$PBASE/bin:$PBASE/lib"
@@ -148,6 +158,9 @@ class PrefabPython(base):
         export LANG=en_US.UTF-8
 
         export PS1="JUMPSCALE: "
+        
+        find $PBASE -name \*.pyc -delete
+        find $PBASE/code/github/threefoldtech -name \*.pyc -delete 2>&1 > /dev/null || echo
 
         """
         self.prefab.core.file_write("%s/env.sh" % self.BUILDDIRL, C)
@@ -174,39 +187,76 @@ class PrefabPython(base):
             self.prefab.system.package.ensure("capnp")
 
         if self.include_jumpscale:
-            self._pipAll(reset=reset)
+            self._include_jumpscale(reset=reset)
             # self._install_portal(self.JUMPSCALE_BRANCH)
+
+        self._pip_all(reset=reset)
 
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
         self.logger.info(msg)
 
-    def _install_portal(self, branch):
-        self.prefab.web.portal.install(start=False, branch=branch)
-        dest_robot_portal = self.prefab.core.dir_paths['JSAPPSDIR'] + '/0-robot-portal'
-        self.prefab.web.zrobotportal.install(dest=dest_robot_portal, start_portal=False)
+    # def _install_portal(self, branch):
+    #     self.prefab.web.portal.install(start=False, branch=branch)
+    #     dest_robot_portal = self.prefab.core.dir_paths['JSAPPSDIR'] + '/0-robot-portal'
+    #     self.prefab.web.zrobotportal.install(dest=dest_robot_portal, start_portal=False)
 
-    def _pipAll(self, reset=False):
+    def _pip_all(self,reset=False):
         """
-        js_shell 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
+        install pips which are not part of the jumpscale installs yet
         """
-        # needs at least items from /JS8/code/github/threefoldtech/jumpscale_core/install/dependencies.py
-        if self.doneCheck("pipall", reset):
+        C="""
+        git+https://github.com/spesmilo/electrum.git@3.2.2
+        """
+
+        self._pip(C)
+
+    def _include_jumpscale(self, reset=True):
+        """
+        js_shell 'j.tools.prefab.local.runtimes.python._include_jumpscale(reset=False)'
+        """
+        if self.doneCheck("_include_jumpscale", reset):
             return
-        C = """
-        git+https://github.com/threefoldtech/jumpscale_core@{0}#egg=core
-        git+https://github.com/threefoldtech/jumpscale_lib@{0}
-        git+https://github.com/threefoldtech/jumpscale_prefab@{0}
-        git+https://github.com/threefoldtech/0-robot@{0}
-        git+https://threefoldtech/0-hub#egg=zerohub&subdirectory=client
-        """.format(self.JUMPSCALE_BRANCH)
+
+        self.core.dir_ensure("%s/lib/pythonbin" % self.BUILDDIRL)
+        self.core.file_write("%s/lib/pythonbin/__init__.py" % self.BUILDDIRL,"")  #touch for init
+
+        todo=[]
+        todo.append("https://github.com/threefoldtech/jumpscale_core")
+        todo.append("https://github.com/threefoldtech/jumpscale_lib")
+        todo.append("https://github.com/threefoldtech/jumpscale_prefab")
+        todo.append("https://github.com/threefoldtech/digital_me")
+        todo.append("https://github.com/threefoldtech/0-robot")
+        todo.append("https://github.com/threefoldtech/0-templates")
+        todo.append("https://github.com/threefoldtech/digital_me_recipes")
+
+        for item in todo:
+            #TODO this is super ugly. We need to implement this in prefabGit
+            cmd = "js_shell 'print(j.clients.git.getContentPathFromURLorPath(\"%s\"))'"% item
+            _,path,_ = self.core.run(cmd)
+            if self.core.file_exists("%s/setup.py"%path):
+                C = "set -e;cd $BUILDDIRL;source envbuild.sh;cd %s;pip3 install -e . --trusted-host pypi.python.org" % path
+                self.prefab.core.run(self.replace(C), shell=True)
+
+        self._pip_all()
+
+
+        # C = """
+        # git+https://github.com/threefoldtech/jumpscale_core@{0}#egg=core
+        # git+https://github.com/threefoldtech/jumpscale_lib@{0}
+        # git+https://github.com/threefoldtech/jumpscale_prefab@{0}
+        # git+https://github.com/threefoldtech/0-robot@{0}
+        # git+https://threefoldtech/0-hub#egg=zerohub&subdirectory=client
+        # """.format(self.JUMPSCALE_BRANCH)
 
         # we need to pull 0-robot and recordchain repo first to fix issue with the generate function that is called during the installations
-        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
-        self._pip(C, reset=reset)
-
-        # self.sandbox(deps=False)
-        self.doneSet("pipall")
+        # j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
+        # self._pip(C, reset=reset)
+        #
+        # self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
+        #
+        # # self.sandbox(deps=False)
+        # self.doneSet("_include_jumpscale")
 
     # need to do it here because all runs in the sandbox
     def _pip(self, pips, reset=False):
@@ -216,8 +266,7 @@ class PrefabPython(base):
                 continue
             # cannot use prefab functionality because would not be sandboxed
             if not self.doneGet("pip3_%s" % item) or reset:
-                C = "set -ex;cd $BUILDDIRL;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
+                C = "set -e;cd $BUILDDIRL;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
                 self.prefab.core.run(self.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
 
-        self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
