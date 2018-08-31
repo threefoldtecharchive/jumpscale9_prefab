@@ -8,8 +8,6 @@ class PrefabIssueManager(base):
 
     def _init(self):
         self.code_dir = '/opt/code/github/threefoldtech/jumpscale_issue_manager'
-        print (dir(j))
-        print (type(j))
         self._logger = j.logging.get('j.prefab.issuemanager')
 
     def install(self):
