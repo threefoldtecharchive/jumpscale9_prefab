@@ -118,129 +118,80 @@ class PrefabPackage(base):
 
         packages = [item for item in package if item.strip() != ""]
 
-        cmd = "set -ex\n"
+        if len(packages)>1:
+            for package in packages:
+                self.install(package=package,reset=reset)
+            return
+        else:
+            package = packages[0]
 
-        todo = []
-        for package in packages:
+        key = "install_%s" % package
+        if self.doneCheck(key, reset):
+            return
 
-            key = "install_%s" % package
-            if self.doneCheck(key, reset):
-                continue
-            todo.append(package)
-            print("+ install: %s" % package)
+        self.logger.info("prepare to install:%s" % package)
 
-            self.logger.info("prepare to install:%s" % package)
-
-            if self.prefab.core.isUbuntu:
-                cmd += "%s install %s\n" % (CMD_APT_GET, package)
-
-            elif self.prefab.core.isAlpine:
-                cmd = "apk add %s \n" % package
-
-            elif self.prefab.core.isArch:
-                if package.startswith("python3"):
-                    package = "extra/python"
-
-                # ignore
-                for unsupported in ["libpython3.5-dev", "libffi-dev", "build-essential", "libpq-dev", "libsqlite3-dev"]:
-                    if unsupported in package:
-                        package = 'devel'
-
-                cmd = "pacman -S %s  --noconfirm\n" % package
-
-            elif self.prefab.core.isMac:
-                for unsupported in ["libpython3.4-dev", "python3.4-dev", "libpython3.5-dev", "python3.5-dev",
-                                    "libffi-dev", "libssl-dev", "make", "build-essential", "libpq-dev", "libsqlite3-dev"]:
-                    if 'libsnappy-dev' in package or 'libsnappy1v5' in package:
-                        package = 'snappy'
-
-                    if unsupported in package:
-                        continue
-
-                # rc,out=self.prefab.core.run("brew info --json=v1 %s"%package,showout=False,die=False)
-                # if rc==0:
-                #     info=j.data.serializer.json.loads(out)
-                #     return #means was installed
-
-                if "wget" == package:
-                    package = "%s --enable-iri" % package
-
-                cmd += "brew install %s || brew upgrade  %s\n" % (package, package)
-
-            elif self.prefab.core.isCygwin:
-                if package in ["run", "net-tools"]:
-                    return
-
-                installed = self.prefab.core.run(
-                    "apt-cyg list&")[1].splitlines()
-                if package in installed:
-                    return  # means was installed
-
-                cmd = "apt-cyg install %s\n" % package
+        if self.prefab.core.isUbuntu:
+            if "rsync" in package:
+                cmd ="DEBIAN_FRONTEND=noninteractive apt-get -q --yes --allow-downgrades install %s\n"%package
             else:
-                raise j.exceptions.RuntimeError(
-                    "could not install:%s, platform not supported" % package)
+                cmd = "%s install %s\n" % (CMD_APT_GET, package)
 
-            # mdupdate = False
-            # while True:
-            #     rc, out, err = self.prefab.core.run(cmd, die=False)
+        elif self.prefab.core.isAlpine:
+            cmd = "apk add %s \n" % package
 
-            #     if rc > 0:
-            #         if mdupdate is True:
-            #             raise j.exceptions.RuntimeError(
-            #                 "Could not install:'%s' \n%s" % (package, out))
+        elif self.prefab.core.isArch:
+            if package.startswith("python3"):
+                package = "extra/python"
 
-            #         if out.find("not found") != -1 or out.find("failed to retrieve some files") != -1:
-            #             self.mdupdate()
-            #             mdupdate = True
-            #             continue
-            #         raise j.exceptions.RuntimeError(
-            #             "Could not install:%s %s" % (package, err))
-            #     if rc == 0:
-            #         self.doneSet(key)
-            #         return out
+            # ignore
+            for unsupported in ["libpython3.5-dev", "libffi-dev", "build-essential", "libpq-dev", "libsqlite3-dev"]:
+                if unsupported in package:
+                    package = 'devel'
 
-        if len(todo) > 0:
-            print(cmd)
+            cmd = "pacman -S %s  --noconfirm\n" % package
+
+        elif self.prefab.core.isMac:
+            for unsupported in ["libpython3.4-dev", "python3.4-dev", "libpython3.5-dev", "python3.5-dev",
+                                "libffi-dev", "libssl-dev", "make", "build-essential", "libpq-dev", "libsqlite3-dev"]:
+                if 'libsnappy-dev' in package or 'libsnappy1v5' in package:
+                    package = 'snappy'
+
+                if unsupported in package:
+                    continue
+
+
+            if "wget" == package:
+                package = "%s --enable-iri" % package
+
+            cmd = "brew install %s || brew upgrade  %s\n" % (package, package)
+
+        elif self.prefab.core.isCygwin:
+            if package in ["run", "net-tools"]:
+                return
+
+            installed = self.prefab.core.run(
+                "apt-cyg list&")[1].splitlines()
+            if package in installed:
+                return  # means was installed
+
+            cmd = "apt-cyg install %s\n" % package
+        else:
+            raise j.exceptions.RuntimeError(
+                "could not install:%s, platform not supported" % package)
+
+        try:
+            self.logger.debug(cmd)
+            self.core.execute_bash(cmd)
+        except Exception as e:
+            print("could not install:\n%s"%cmd)
+            print("error was:%s"%e)
+            print("will try one more time.")
             self.core.execute_bash(cmd)
 
-        for package in todo:
-            key = "install_%s," % package
-            self.doneSet(key)
 
-    # def multiInstall(self, packagelist, allow_unauthenticated=False, reset=False):
-    #     """
-    #     @param packagelist is text file and each line is name of package
-    #     can also be list
-
-    #     e.g.
-    #         # python
-    #         mongodb
-
-    #     @param runid, if specified actions will be used to execute
-    #     """
-    #     # previous_run = self.prefab.core.runmode
-    #     # try:
-    #     #     self.prefab.core.runmode = True
-
-    #     if j.data.types.string.check(packagelist):
-    #         packages = packagelist.strip().splitlines()
-    #     elif j.data.types.list.check(packagelist):
-    #         packages = packagelist
-    #     else:
-    #         raise j.exceptions.Input(
-    #             'packagelist should be string or a list. received a %s' % type(packagelist))
-
-    #     to_install = []
-    #     for dep in packages:
-    #         dep = dep.strip()
-    #         if dep is None or dep == "" or dep[0] == '#':
-    #             continue
-    #         to_install.append(dep)
-
-    #     for package in to_install:
-    #         self.install(
-    #             package, allow_unauthenticated=allow_unauthenticated, reset=reset)
+        key = "install_%s," % package
+        self.doneSet(key)
 
     def start(self, package):
         if self.prefab.core.isArch or self.prefab.core.isUbuntu or self.prefab.core.isMac:

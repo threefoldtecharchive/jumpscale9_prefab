@@ -27,21 +27,22 @@ class PrefabJumpscaleCore(app):
         else:
             self.prefab.system.base.install()
 
-        self.bashtools(branch, with_deps=full)
+        self.prefab.runtimes.pip.package_install("zerotier")  # will also make sure pip3 is installed
 
-        self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
+        self._install(branch, with_deps=full)
+
 
         self.logger.info("jumpscale_install")
 
         self.doneSet("install")
 
-    def bashtools(self, branch='master', reset=False, with_deps=False):
+    def _install(self, branch='development', reset=False, with_deps=False):
 
-        if self.doneCheck("bashtools", reset):
+        if self.doneCheck("jsinstall", reset):
             return
 
         S = """
-        echo "INSTALL BASHTOOLS"
+        echo "INSTALL JUMPSCALE"
         curl https://raw.githubusercontent.com/threefoldtech/jumpscale_core/{}/install.sh?$RANDOM > /tmp/install_jumpscale.sh
         bash /tmp/install_jumpscale.sh
         """.format(branch)
@@ -49,6 +50,11 @@ class PrefabJumpscaleCore(app):
         env = None
         if with_deps:
             env = {'JSFULL': '1'}
-        self.core.execute_bash(S, env=env)
 
-        self.doneSet("bashtools")
+        try:
+            self.core.execute_bash(script=S, env=env)
+        except Exception as e:
+            print ("JUMPSCALE INSTALL FAILED, WILL TRY AGAIN (1 more time)")
+            self.core.execute_bash(script=S, env=env)
+
+        self.doneSet("jsinstall")

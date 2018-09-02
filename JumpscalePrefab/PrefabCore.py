@@ -698,8 +698,8 @@ class PrefabCore(base):
 
         if replaceInContent:
             content = self.replace(content)
-        self.executor.file_write(
-            path=path, content=content, mode=mode, owner=owner, group=group, append=append, sudo=sudo)
+        self.executor.file_write(path=path, content=content, mode=mode,
+                                 owner=owner, group=group, append=append, sudo=sudo, showout=showout)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -1163,7 +1163,8 @@ class PrefabCore(base):
             content = self.replace(content)
         content = j.data.text.strip(content)
 
-        self.logger.info("RUN SCRIPT:\n%s" % content)
+        if showout:
+            self.logger.info("RUN SCRIPT:\n%s" % content)
 
         if content[-1] != "\n":
             content += "\n"
@@ -1249,8 +1250,17 @@ class PrefabCore(base):
 
         return rc, out
 
-    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
+    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True,
+                     showout=True,env={}):
         script = script.replace("\\\"", "\"")
+        if env is not {} and env is not None:
+            pre=""
+            for key,val in env.items():
+                pre+="export %s = %s"%(key,val)
+            script="%s\n%s"%(pre,script)
+
+        print(script)
+
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)
 

@@ -79,7 +79,7 @@ class PrefabUbuntuContainer(base):
             chroot.write_file('/etc/resolv.conf', 'nameserver 8.8.8.8')
             chroot.execute('mkdir /var/run/sshd')
             chroot.execute('apt-get update')
-            chroot.execute('apt-get install -y --allow-unauthenticated --no-install-recommends build-essential git vim mc openssh-server linux-generic wget ca-certificates curl')
+            chroot.execute('apt-get install -y --allow-unauthenticated --no-install-recommends build-essential git vim mc openssh-server linux-generic wget ca-certificates curl rsync')
             chroot.execute('echo "root:{}" | chpasswd'.format(passwd))
 
             if ssh_autostart is True:

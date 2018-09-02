@@ -39,8 +39,8 @@ class PrefabSandbox(base):
         if not j.sal.fs.exists("%s/bin/python" % base):
             j.sal.fs.symlink("%s/bin/python3" % base,"%s/bin/python3.5" % base)
 
-        j.tools.sandboxer.sandboxLibs("%s/lib" % base, recursive=True)
-        j.tools.sandboxer.sandboxLibs("%s/bin" % base, recursive=True)
+        j.tools.sandboxer.libs_sandbox("%s/lib" % base, recursive=True)
+        j.tools.sandboxer.libs_sandbox("%s/bin" % base, recursive=True)
         """
         self.logger.info("start sandboxing")
         self.prefab.core.execute_jumpscript(sandbox_script)

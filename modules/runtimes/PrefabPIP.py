@@ -10,13 +10,20 @@ class PrefabPIP(base):
     # PIP PYTHON PACKAGE MANAGER
     # -----------------------------------------------------------------------------
 
-    def ensure(self, reset=False):
+    def _ensure(self, reset=False):
 
         # python should already be requirement, do not install !! (despiegk)
         # self.prefab.system.package.install('python3.5')
         # self.prefab.system.package.install('python3-pip')
 
+
         if self.doneCheck("ensure", reset):
+            return
+
+        if self.prefab.platformtype.isUbuntu and self.prefab.platformtype.osversion=='18.04':
+            #get-pip does not work
+            self.prefab.system.package.install("python3-pip")
+            self.doneSet("ensure")
             return
 
         tmpdir = self.replace("$TMPDIR")
@@ -34,21 +41,26 @@ class PrefabPIP(base):
 
         self.doneSet("ensure")
 
-    def packageUpgrade(self, package):
-        '''
-        The "package" argument, defines the name of the package that will be upgraded.
-        '''
-        # self.prefab.core.set_sudomode()
-        self.prefab.core.run('pip3 install --upgrade %s' % (package))
+    # def package_upgrade(self, package):
+    #     '''
+    #     The "package" argument, defines the name of the package that will be upgraded.
+    #     '''
+    #     self._ensure()
+    #     # self.prefab.core.set_sudomode()
+    #     self.prefab.core.run('pip3 install --upgrade %s' % (package))
 
     def install(self, package=None, upgrade=True, reset=False):
+        self.logger.warning("do no use install, use package_install")
+        return self.package_install(package,upgrade,reset)
+
+    def package_install(self, package=None, upgrade=True, reset=False):
         '''
         The "package" argument, defines the name of the package that will be installed.
 
         package can be list or comma separated list of packages as well
 
         '''
-        self.ensure()
+        self._ensure()
         packages = j.data.text.getList(package, "str")
 
         cmd = ""
@@ -75,7 +87,7 @@ class PrefabPIP(base):
         for package in todo:
             self.doneSet("pip_%s" % package)
 
-    def packageRemove(self, package):
+    def package_remove(self, package):
         '''
         The "package" argument, defines the name of the package that will be ensured.
         The argument "r" referes to the requirements file that will be used by pip and
@@ -85,42 +97,42 @@ class PrefabPIP(base):
         if not self.doneGet("pip_remove_%s" % package):
             return self.prefab.core.run('pip3 uninstall %s' % (package))
             self.doneSet("pip_remove_%s" % package)
-
-    def multiInstall(self, packagelist, upgrade=True, reset=False):
-        """
-        @param packagelist is text file and each line is name of package
-        can also be list
-
-        e.g.
-            # influxdb
-            # ipdb
-            # ipython
-            # ipython-genutils
-            itsdangerous
-            Jinja2
-            # marisa-trie
-            MarkupSafe
-            mimeparse
-            mongoengine
-
-        if doneCheckMethod!=None:
-            it will ask for each pip if done or not to that method, if it returns true then already done
-
-        """
-        if j.data.types.string.check(packagelist):
-            packages = packagelist.split("\n")
-        elif j.data.types.list.check(packagelist):
-            packages = packagelist
-        else:
-            raise j.exceptions.Input(
-                'packagelist should be string or a list. received a %s' % type(packagelist))
-
-        to_install = []
-        for dep in packages:
-            dep = dep.strip()
-            if dep is None or dep == "" or dep[0] == '#':
-                continue
-            to_install.append(dep)
-
-        for item in to_install:
-            self.install(item, reset=reset)
+    #
+    # def multiInstall(self, packagelist, upgrade=True, reset=False):
+    #     """
+    #     @param packagelist is text file and each line is name of package
+    #     can also be list
+    #
+    #     e.g.
+    #         # influxdb
+    #         # ipdb
+    #         # ipython
+    #         # ipython-genutils
+    #         itsdangerous
+    #         Jinja2
+    #         # marisa-trie
+    #         MarkupSafe
+    #         mimeparse
+    #         mongoengine
+    #
+    #     if doneCheckMethod!=None:
+    #         it will ask for each pip if done or not to that method, if it returns true then already done
+    #
+    #     """
+    #     if j.data.types.string.check(packagelist):
+    #         packages = packagelist.split("\n")
+    #     elif j.data.types.list.check(packagelist):
+    #         packages = packagelist
+    #     else:
+    #         raise j.exceptions.Input(
+    #             'packagelist should be string or a list. received a %s' % type(packagelist))
+    #
+    #     to_install = []
+    #     for dep in packages:
+    #         dep = dep.strip()
+    #         if dep is None or dep == "" or dep[0] == '#':
+    #             continue
+    #         to_install.append(dep)
+    #
+    #     for item in to_install:
+    #         self.install(item, reset=reset)
