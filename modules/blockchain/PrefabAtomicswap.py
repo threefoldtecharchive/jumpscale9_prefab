@@ -19,7 +19,7 @@ class PrefabAtomicswap(app):
         cmds = """
             cd $TMPDIR
             rm -rf atomicswap
-            git clone https://github.com/ahussein/atomicswap.git
+            git clone https://github.com/threefoldgrid/atomicswap.git
         """
         self.core.run(cmds)
         self.doneSet('build')
