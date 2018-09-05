@@ -121,7 +121,7 @@ class PrefabPython(base):
 
         export PBASE=`pwd`
 
-        export OPENSSLPATH=$(brew --prefix openssl)
+        export OPENSSLPATH={}
 
         export PATH=$PATH:$OPENSSLPATH/bin:/usr/local/bin:/usr/bin:/bin
 
@@ -138,7 +138,7 @@ class PrefabPython(base):
         find $PBASE -name \*.pyc -delete
         find $PBASE/code/github/threefoldtech -name \*.pyc -delete 2>&1 > /dev/null || echo
 
-        """
+        """.format("(brew --prefix openssl)" if self.core.isMac else "(which openssl)")
         C = self.replace(C)
         self.prefab.core.file_write("%s/envbuild.sh" % self.BUILDDIRL, C)
 
@@ -218,8 +218,8 @@ class PrefabPython(base):
         if self.doneCheck("_include_jumpscale", reset):
             return
 
-        j.sal.fs.createDir("%s/lib/pythonbin" % self.BUILDDIRL)
-        j.sal.fs.writeFile("%s/lib/pythonbin/__init__.py" % self.BUILDDIRL,"")  #touch for init
+        self.core.dir_ensure("%s/lib/pythonbin" % self.BUILDDIRL)
+        self.core.file_write("%s/lib/pythonbin/__init__.py" % self.BUILDDIRL,"")  #touch for init
 
         todo=[]
         todo.append("https://github.com/threefoldtech/jumpscale_core")
@@ -231,8 +231,10 @@ class PrefabPython(base):
         todo.append("https://github.com/threefoldtech/digital_me_recipes")
 
         for item in todo:
-            path = j.clients.git.getContentPathFromURLorPath(item)
-            if j.sal.fs.exists("%s/setup.py"%path):
+            #TODO this is super ugly. We need to implement this in prefabGit
+            cmd = "js_shell 'print(j.clients.git.getContentPathFromURLorPath(\"%s\"))'"% item
+            _,path,_ = self.core.run(cmd)
+            if self.core.file_exists("%s/setup.py"%path):
                 C = "set -e;cd $BUILDDIRL;source envbuild.sh;cd %s;pip3 install -e . --trusted-host pypi.python.org" % path
                 self.prefab.core.run(self.replace(C), shell=True)
 
