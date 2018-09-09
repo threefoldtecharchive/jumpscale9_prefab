@@ -1,6 +1,6 @@
 
 import time
-from jumpscale import j
+from Jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 OPENSSL = """

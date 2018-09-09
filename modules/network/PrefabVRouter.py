@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 import os
 import time
 
@@ -90,7 +90,7 @@ class PrefabVRouter(base):
         self.check()
         C = C.replace("$iface", self.wirelessInterfaceNonDefGW)
         C = C.replace("$range", self.freeNetworkRangeDMZ)
-        C = j.data.text.strip(C)
+        C = j.core.text.strip(C)
         I = self.prefab.core.file_read("/etc/network/interfaces")
         OUT = ""
         state = ""

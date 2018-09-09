@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 
@@ -177,4 +177,4 @@ class PrefabCoreDns(app):
         whoami:whoami
         on:github.com/mholt/caddy/onevent
         """
-        return j.data.text.strip(plugins)
+        return j.core.text.strip(plugins)

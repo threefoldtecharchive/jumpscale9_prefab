@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 import re
 
 base = j.tools.prefab._getBaseClass()
@@ -36,7 +36,7 @@ class PrefabNS(base):
         f02::1              ip6-allnodes
         ff02::2             ip6-allrouters
         """
-        C = j.data.text.strip(C)
+        C = j.core.text.strip(C)
         res = self.hostfile_get()
         for item in remove:
             if item in res:

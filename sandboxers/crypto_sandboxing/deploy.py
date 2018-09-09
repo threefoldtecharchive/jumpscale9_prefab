@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 import threading
 import re
 from pssh.exceptions import ConnectionErrorException, SessionError

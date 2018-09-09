@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 import json
 
 j.logger.loggers_level_set(20)

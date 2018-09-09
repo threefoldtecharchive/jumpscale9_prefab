@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 
 base = j.tools.prefab._getBaseAppClass()
 
@@ -24,7 +24,7 @@ class PrefabCelery(base):
             from celery import Celery
             app = Celery('{name}', broker='{back}', backend='{back}')
             """.format(back=broker, name=appname)
-            content = j.data.text.strip(content)
+            content = j.core.text.strip(content)
             self.prefab.core.dir_ensure(parent)
             self.prefab.core.file_write(path, content)
         cmd = 'celery -A {module} {cmd} --broker={broker}'.format(module=module, cmd=cmd, broker=broker)

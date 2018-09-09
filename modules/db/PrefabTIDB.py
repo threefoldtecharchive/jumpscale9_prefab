@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 from time import sleep
 
 app = j.tools.prefab._getBaseAppClass()

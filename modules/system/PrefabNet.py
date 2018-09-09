@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 import netaddr
 import re
 
@@ -313,7 +313,7 @@ class PrefabNet(base):
         if rc>0 or rc2>0:
             raise RuntimeError("Could not set interface file, something went wrong, previous situation restored.")
         """
-        pscript = j.data.text.strip(pscript)
+        pscript = j.core.text.strip(pscript)
         pscript = pscript.replace("$ifacefile", ifacefile)
         pscript = pscript.replace("$pinghost", pinghost)
 

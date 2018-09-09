@@ -7,7 +7,7 @@ The test will do the following:
 3. Collect and report errors
 """
 
-from jumpscale import j
+from Jumpscale import j
 import multiprocessing as mp
 import logging
 import traceback

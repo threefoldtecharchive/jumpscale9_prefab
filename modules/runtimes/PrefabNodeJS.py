@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 
@@ -41,10 +41,10 @@ class PrefabNodeJS(app):
         installedDict = j.data.serializers.yaml.loads(out)
         if "npm" not in installedDict or "node" not in installedDict:
             return False
-        if j.data.text.strToVersionInt(installedDict["npm"]) < 5000000:
+        if j.core.text.strToVersionInt(installedDict["npm"]) < 5000000:
             self.logger.info("npm too low version, need to install.")
             return False
-        if j.data.text.strToVersionInt(installedDict["node"]) < 7000000:
+        if j.core.text.strToVersionInt(installedDict["node"]) < 7000000:
             self.logger.info("node too low version, need to install.")
             return False
 

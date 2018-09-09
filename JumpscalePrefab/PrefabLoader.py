@@ -6,7 +6,7 @@ import inspect
 import json
 
 GEN_START = """
-from jumpscale import j
+from Jumpscale import j
 """
 
 GEN = """

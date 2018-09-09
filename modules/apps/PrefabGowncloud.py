@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 import textwrap
 import re
 app = j.tools.prefab._getBaseAppClass()

@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 import json
 base = j.tools.prefab._getBaseClass()
 

@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 
 
 base = j.tools.prefab._getBaseClass()
@@ -126,7 +126,7 @@ class PrefabPyFTPServer(base):
         if __name__ == '__main__':
             main()
         """
-        C = j.data.text.strip(C)
+        C = j.core.text.strip(C)
 
         C = C.replace("$port", str(port))
         C = C.replace("$authorizers", authorizer)

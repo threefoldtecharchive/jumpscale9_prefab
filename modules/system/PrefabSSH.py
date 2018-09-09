@@ -1,5 +1,5 @@
 from grp import getgrgid
-from jumpscale import j
+from Jumpscale import j
 import netaddr
 
 

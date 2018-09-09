@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 import inspect
 
 JSBASE = j.application.jsbase_get_class()
@@ -21,7 +21,7 @@ class PrefabBase(JSBASE):
         pass
 
     def replace(self, txt, args={}):
-        txt = j.data.text.strip(txt)
+        txt = j.core.text.strip(txt)
         for item in self.__dict__.keys():
             if item == item.upper():
                 txt = txt.replace("$%s" % item, self.__dict__[item])

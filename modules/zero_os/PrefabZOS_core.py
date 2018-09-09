@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 
 # TODO: needs to be checked how this needs to be used, maybe no longer relevant in line to the building we do now
 

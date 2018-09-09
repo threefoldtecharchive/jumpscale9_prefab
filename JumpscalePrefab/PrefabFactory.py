@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 from JumpscalePrefab.PrefabBase import *
 
 from JumpscalePrefab.PrefabLoader import PrefabLoader

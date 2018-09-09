@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 import time
 
 base = j.tools.prefab._getBaseClass()

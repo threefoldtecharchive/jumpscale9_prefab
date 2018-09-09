@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 import time
 
 base = j.tools.prefab._getBaseClass()
@@ -78,7 +78,7 @@ class PrefabBase(base):
         libtool
         pkg-config
         """
-        C=j.data.text.strip(C)
+        C=j.core.text.strip(C)
 
         if self.core.isMac:
             C+="libffi\n"

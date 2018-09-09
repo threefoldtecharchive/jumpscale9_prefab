@@ -24,7 +24,7 @@ import os
 import sys
 import pystache
 
-from jumpscale import j
+from Jumpscale import j
 # import pygments.lexers
 # from pygments.formatters import get_formatter_by_name
 
@@ -98,7 +98,7 @@ class PrefabCore(base):
         args are additional arguments in dict form
 
         """
-        text = j.data.text.strip(text)
+        text = j.core.text.strip(text)
         # for backwards compatibility
         if "$" in text:
             for key, var in self.dir_paths.items():
@@ -694,7 +694,7 @@ class PrefabCore(base):
         path = self.replace(location)
 
         if strip:
-            content = j.data.text.strip(content)
+            content = j.core.text.strip(content)
 
         if replaceInContent:
             content = self.replace(content)
@@ -1162,7 +1162,7 @@ class PrefabCore(base):
 
         if replace:
             content = self.replace(content)
-        content = j.data.text.strip(content)
+        content = j.core.text.strip(content)
 
         self.logger.info("RUN SCRIPT:\n%s" % content)
 
@@ -1264,10 +1264,10 @@ class PrefabCore(base):
         execute a jumpscript(script as content) in a remote tmux command, the stdout will be returned
         """
         script = self.replace(script)
-        script = j.data.text.strip(script)
+        script = j.core.text.strip(script)
 
-        if script.find("from jumpscale import j") == -1:
-            script = "from jumpscale import j\n\n%s" % script
+        if script.find("from Jumpscale import j") == -1:
+            script = "from Jumpscale import j\n\n%s" % script
 
         return self.execute_script(script, die=die, profile=profile, interpreter="jspython", tmux=tmux,
                                    replace=replace, showout=showout)

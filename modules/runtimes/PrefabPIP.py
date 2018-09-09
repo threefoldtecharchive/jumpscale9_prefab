@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -49,7 +49,7 @@ class PrefabPIP(base):
 
         '''
         self.ensure()
-        packages = j.data.text.getList(package, "str")
+        packages = j.core.text.getList(package, "str")
 
         cmd = ""
 

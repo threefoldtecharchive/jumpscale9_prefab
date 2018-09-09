@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 import os
 import time
 
@@ -89,7 +89,7 @@ class PrefabProxyClassic(base):
 
             """
         CONFIG = CONFIG.replace("$port", str(port))
-        CONFIG = j.data.text.strip(CONFIG)
+        CONFIG = j.core.text.strip(CONFIG)
 
         if forward:
             self.installCacheProxy(force=False)
@@ -167,7 +167,7 @@ class PrefabProxyClassic(base):
 
             """
 
-        USERACTION = j.data.text.strip(USERACTION)
+        USERACTION = j.core.text.strip(USERACTION)
 
         self.prefab.core.file_write("/etc/privoxy/user.action", USERACTION)
 

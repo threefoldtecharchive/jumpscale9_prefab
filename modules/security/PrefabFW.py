@@ -1,5 +1,5 @@
 
-from jumpscale import j
+from Jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -93,7 +93,7 @@ class PrefabFW(base):
 
 
         """
-        pscript = j.data.text.strip(pscript)
+        pscript = j.core.text.strip(pscript)
         pscript = pscript.replace("$ruleset", ruleset)
         pscript = pscript.replace("$pinghost", pinghost)
 

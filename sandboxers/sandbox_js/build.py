@@ -1,4 +1,4 @@
-from jumpscale import j
+from Jumpscale import j
 
 cl=j.clients.openvcloud.get(instance="test")
 space=cl.space_get()

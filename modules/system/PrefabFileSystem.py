@@ -1,6 +1,6 @@
 import uuid
 import time
-from jumpscale import j
+from Jumpscale import j
 import Jumpscale
 
 base = j.tools.prefab._getBaseClass()
