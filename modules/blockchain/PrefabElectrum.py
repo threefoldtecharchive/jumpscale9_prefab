@@ -73,7 +73,7 @@ class PrefabElectrum(app):
             raise RuntimeError("Port {} already in use by process {}".format(rpcport, process_name))
         # not running
         if not process_name:
-            base_cmd = 'electrum --testnet -D {}'.format(electrum_dir)
+            base_cmd = 'electrum{} -D {}'.format(' --testnet' if testnet else '', electrum_dir)
             cmds = [
                     '{} setconfig rpcuser {}'.format(base_cmd, rpcuser),
                     '{} setconfig rpcpassword {}'.format(base_cmd, rpcpass),
