@@ -35,7 +35,7 @@ class PrefabElectrum(app):
         self.doneSet('build')
         return dest
 
-    def install(self, branch=None,tag=None, revision=None, reset=False):
+    def install(self, branch=None,tag="3.2.2", revision=None, reset=False):
         """
         Installs the electrum binary to the correct location
         """
@@ -44,7 +44,9 @@ class PrefabElectrum(app):
             return
 
         base_dir = self.build(branch=branch,tag=tag, revision=revision, reset=reset)
-        electrum_bin_path = self.prefab.core.joinpaths(base_dir, 'electrum', 'electrum')
+        electrum_bin_path = self.prefab.core.joinpaths(base_dir, 'electrum')
+        if not j.sal.fs.isFile(electrum_bin_path):
+            electrum_bin_path = self.prefab.core.joinpaths(electrum_bin_path, 'electrum')
 
         self.prefab.core.file_copy(electrum_bin_path, "$BINDIR/")
 
