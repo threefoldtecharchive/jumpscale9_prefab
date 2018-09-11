@@ -1,7 +1,7 @@
 from Jumpscale import j
 import inspect
 
-JSBASE = j.application.jsbase_get_class()
+JSBASE = j.application.JSBaseClass
 class PrefabBase(JSBASE):
 
     def __init__(self, executor, prefab):
@@ -39,7 +39,7 @@ class PrefabBase(JSBASE):
 
     def cacheReset(self):
         self.executor.cache.reset()
-        j.data.cache.reset(self.id)
+        j.core.cache.reset(self.id)
 
     def reset(self):
         self.executor.state.stateSet(self.classname, {})

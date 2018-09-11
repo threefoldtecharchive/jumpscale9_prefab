@@ -3,7 +3,7 @@ from Jumpscale import j
 
 from JumpscalePrefab.PrefabCore import PrefabCore
 
-JSBASE = j.application.jsbase_get_class()
+JSBASE = j.application.JSBaseClass
 
 
 class PrefabRootClass(JSBASE):

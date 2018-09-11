@@ -48,7 +48,7 @@ import pystache
 class PrefabCat():
     pass
 
-JSBASE = j.application.jsbase_get_class()
+JSBASE = j.application.JSBaseClass
 class PrefabLoader(JSBASE):
 
     def __init__(self):
