@@ -13,7 +13,7 @@ class ProcessManagerBase(base):
         self.startupfile = "%s/startup.sh" % j.dirs.VARDIR
         self.executor = executor
         self.prefab = prefab
-        self._logger = j.logging.get('j.prefab.system.processmanager')
+        self._logger = j.logger.get('j.prefab.system.processmanager')
 
     def exists(self, name):
         return name in self.list()

@@ -8,7 +8,7 @@ class PrefabIssueManager(base):
 
     def _init(self):
         self.code_dir = '/opt/code/github/threefoldtech/jumpscale_issue_manager'
-        self._logger = j.logging.get('j.prefab.issuemanager')
+        self._logger = j.logger.get('j.prefab.issuemanager')
 
     def install(self):
         j.clients.git.pullGitRepo(url='git@github.com:Jumpscale/issue_manager.git')
