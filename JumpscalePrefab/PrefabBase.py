@@ -125,7 +125,7 @@ class PrefabBase(JSBASE):
     @property
     def cache(self):
         if self._cache is None:
-            self._cache = j.data.cache.get("prefab" + self.id + self.classname, reset=True, expiration=600)  # 10 min
+            self._cache = j.core.cache.get("prefab" + self.id + self.classname, reset=True, expiration=600)  # 10 min
         return self._cache
 
 
