@@ -47,15 +47,13 @@ class PrefabBase(JSBASE):
 
     @property
     def done(self):
-        if "done" not in self.config:
-            self.config["done"] = {}
-        return self.config["done"]
+        return self.state.stateGet("done",{},True)
 
     def doneReset(self):
         """
         resets the remembered items which are done
         """
-        self.reset()
+        self.state.stateSet("done",{},save=True)
 
 
     def doneSet(self, key):
@@ -63,6 +61,7 @@ class PrefabBase(JSBASE):
             self.logger.debug(
                 "info: Canot do doneset:%s because readonly" % key)
             return False
+        done = self.done
         # bring to list of keys
         if key.find(",") != -1:
             key = [item.strip() for item in key.split(",")]
@@ -73,19 +72,18 @@ class PrefabBase(JSBASE):
         for item in key:
             if item.strip() == "":
                 continue
-            self.done[item] = True
-        self.executor._config_changed = True
-        self.configSave()
+            done[item] = True
+        self.state.stateSet("done",done,save=True)
         return True
 
     def doneDelete(self, key):
         if self.executor.readonly:
-            self.logger.debug(
-                "info: Canot do doneDelete:%s because readonly" % key)
+            self.logger.debug("info: Canot do doneDelete:%s because readonly" % key)
             return False
-        self.done[key] = False
-        self.executor._config_changed = True
-        self.configSave()
+        done = self.done
+        if key in done:
+            del (done[key])
+        self.state.stateSet("done",done,save=True)
         return True
 
     def doneGet(self, key):
@@ -98,21 +96,21 @@ class PrefabBase(JSBASE):
             self.logger.debug("donecheck, not set:%s:False" % (key))
             return False
 
-    def doneCheck(self, cat, reset=False):
-        """
-        specify category to test against
-        if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
-
-        will call doneGet and take reset into account
-
-        reset can be 1, "1", True, ...
-
-        if done will return : True
-        """
-        reset = j.data.serializers.fixType(reset, False)
-        if reset is False and self.doneGet(cat):
-            return True
-        return False
+    # def doneCheck(self, cat, reset=False):
+    #     """
+    #     specify category to test against
+    #     if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
+    #
+    #     will call doneGet and take reset into account
+    #
+    #     reset can be 1, "1", True, ...
+    #
+    #     if done will return : True
+    #     """
+    #     reset = j.data.serializers.fixType(reset, False)
+    #     if reset is False and self.doneGet(cat):
+    #         return True
+    #     return False
 
     @property
     def classname(self):
