@@ -55,7 +55,7 @@ class PrefabZOS_stor_client(base):
             BUILDENV=self.replace(BUILDENV)
 
             if self.core.isMac:
-                self.prefab.system.base.development(python=False)    
+                self.prefab.system.installbase.development(python=False)
 
                 C = """
                 export LIBRARY_PATH="/usr/lib:/usr/local/lib"

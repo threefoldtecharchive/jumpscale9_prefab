@@ -7,6 +7,10 @@ JSBASE = j.application.JSBaseClass
 
 
 class PrefabRootClass(JSBASE):
+    """
+    there is one instance created per executor
+    this is the root of the prefab
+    """
 
     def __init__(self, executor):
         JSBASE.__init__(self)
@@ -34,6 +38,6 @@ class PrefabRootClass(JSBASE):
         return self._bash
 
     def __str__(self):
-        return "prefab:%s" % repr(self.executor)
+        return "prefab_rootobj:%s" % repr(self.executor)
 
     __repr__ = __str__

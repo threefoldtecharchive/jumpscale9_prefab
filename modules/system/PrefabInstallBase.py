@@ -5,7 +5,7 @@ import time
 base = j.tools.prefab._getBaseClass()
 
 
-class PrefabBase(base):
+class PrefabInstallBase(base):
     """
     the base for any install
     """

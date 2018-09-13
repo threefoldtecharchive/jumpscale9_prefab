@@ -16,7 +16,7 @@ class PrefabEthereum(app):
         if self.doneGet('build') and reset is False:
             return
 
-        self.prefab.system.base.install(upgrade=True)
+        self.prefab.system.installbase.install(upgrade=True)
         self.prefab.runtimes.golang.install()
         self.doneSet('build')
 

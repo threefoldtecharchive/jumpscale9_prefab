@@ -8,17 +8,27 @@ class PrefabBase(JSBASE):
         JSBASE.__init__(self)
         self._classname = ""
         self.executor = executor
-        self.executor.dir_paths
+        self.state = executor.state
+        self.config = self.state.config
         self.prefab = prefab
         self._initenvDone = False
+        self._logger = None
         self.env = self.executor.env
 
         if self.classname != 'PrefabCore':
             self.core = prefab.core
+
         self._init()
 
+    @property
+    def logger(self):
+        if self._logger is None:
+            self._logger = j.logger.get(self.classname)
+        return self._logger
+
     def _init(self):
-        pass
+        pass #NEEDS TO REMAIN EMPTY BECAUSE IS USED AT HIGHER LEVEL LAYER
+
 
     def replace(self, txt, args={}):
         txt = j.core.text.strip(txt)
@@ -28,18 +38,7 @@ class PrefabBase(JSBASE):
         txt = self.core.replace(txt, args=args)
         return txt
 
-    @property
-    def config(self):
-        """
-        """
-        return self.executor.state.stateGet(self.classname, {}, set=True)
 
-    def configSave(self):
-        self.executor.state.stateSet(self.classname, self.config)
-
-    def cacheReset(self):
-        self.executor.cache.reset()
-        j.core.cache.reset(self.id)
 
     def reset(self):
         self.executor.state.stateSet(self.classname, {})
@@ -129,6 +128,13 @@ class PrefabBase(JSBASE):
     def id(self):
         return self.executor.id
 
+    @property
+    def cache(self):
+        if self._cache is None:
+            self._cache = j.data.cache.get("prefab" + self.id + self.classname, reset=True, expiration=600)  # 10 min
+        return self._cache
+
+
     def __str__(self):
         return "%s:%s" % (self.classname, self.executor.id)
 
@@ -186,8 +192,7 @@ class PrefabBaseLoader(JSBASE):
         self.prefab = prefab
         myClassName = str(self.__class__).split(".")[-1].split("'")[0]
         localdir = j.sal.fs.getDirName(inspect.getsourcefile(self.__class__))
-        classes = [j.sal.fs.getBaseName(
-            item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
+        classes = [j.sal.fs.getBaseName(item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
         for className in classes:
             # import the class
             exec("from JumpscalePrefab.%s.Prefab%s import *" %

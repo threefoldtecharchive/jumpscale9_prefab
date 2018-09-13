@@ -30,7 +30,7 @@ class PrefabCaddy(app):
         if self.doneCheck('build', reset):
             return
 
-        self.prefab.system.base.install(upgrade=True)
+        self.prefab.system.installbase.install(upgrade=True)
         golang = self.prefab.runtimes.golang
         golang.install()
 

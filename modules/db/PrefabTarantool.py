@@ -18,7 +18,7 @@ class PrefabTarantool(app):
         if self.doneCheck("install", reset):
             return
 
-        self.prefab.system.base.development() 
+        self.prefab.system.installbase.development()
 
         if self.core.isMac:
             # cmd="brew install tarantool"
@@ -69,7 +69,7 @@ class PrefabTarantool(app):
                 #                                    'python-msgpack,python-yaml,python-argparse,'
                 #                                    'python-six,python-gevent,luarocks')
 
-                #should be mainly done in self.prefab.system.base.development() 
+                #should be mainly done in self.prefab.system.installbase.development()
                 self.prefab.system.package.install('build-essential,cmake,coreutils,sed,libreadline-dev,'
                                                    'libncurses5-dev,libyaml-dev,libssl-dev,libcurl4-openssl-dev,'
                                                    'libunwind-dev,luarocks')

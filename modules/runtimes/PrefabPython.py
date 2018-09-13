@@ -35,7 +35,7 @@ class PrefabPython(base):
 
         self.JUMPSCALE_BRANCH = jumpscale_branch
         self.include_jumpscale = include_jumpscale
-        self.prefab.system.base.development(python=False)  # make sure all required components are there
+        self.prefab.system.installbase.development(python=False)  # make sure all required components are there
 
         if not self.doneGet("compile") or reset:
             self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, branch="3.6", reset=False, ssh=False)

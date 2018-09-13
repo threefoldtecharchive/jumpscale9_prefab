@@ -1,48 +1,50 @@
 from Jumpscale import j
-import os
+
 import sys
-import importlib
 import inspect
-import json
 
-GEN_START = """
-from Jumpscale import j
-"""
+# import os
+# import importlib
+# import json
 
-GEN = """
-{{#locationsubserror}}
-{{classname}}=JSBase
-{{/locationsubserror}}
-
-class {{jname}}:
-
-    def __init__(self):
-        {{#locationsubs}}
-        self._{{name}} = None
-        {{/locationsubs}}
-
-    {{#locationsubs}}
-    @property
-    def {{name}}(self):
-        if self._{{name}}is None:
-            # print("PROP:{{name}}")
-            from {{importlocation}} import {{classname}} as {{classname}}
-            self._{{name}} = {{classname}}()
-        return self._{{name}}
-
-    {{/locationsubs}}
-
-{{#locationsubs}}
-if not hasattr(j.{{jname}},"{{name}}"):
-    j.{{jname}}._{{name}} = None
-    j.{{jname}}.__class__.{{name}} = {{jname}}.{{name}}
-{{/locationsubs}}
-
-
- """
-
-
-import pystache
+# GEN_START = """
+# from Jumpscale import j
+# """
+#
+# GEN = """
+# {{#locationsubserror}}
+# {{classname}}=JSBase
+# {{/locationsubserror}}
+#
+# class {{jname}}:
+#
+#     def __init__(self):
+#         {{#locationsubs}}
+#         self._{{name}} = None
+#         {{/locationsubs}}
+#
+#     {{#locationsubs}}
+#     @property
+#     def {{name}}(self):
+#         if self._{{name}}is None:
+#             # print("PROP:{{name}}")
+#             from {{importlocation}} import {{classname}} as {{classname}}
+#             self._{{name}} = {{classname}}()
+#         return self._{{name}}
+#
+#     {{/locationsubs}}
+#
+# {{#locationsubs}}
+# if not hasattr(j.{{jname}},"{{name}}"):
+#     j.{{jname}}._{{name}} = None
+#     j.{{jname}}.__class__.{{name}} = {{jname}}.{{name}}
+# {{/locationsubs}}
+#
+#
+#  """
+#
+#
+# import pystache
 
 
 class PrefabCat():

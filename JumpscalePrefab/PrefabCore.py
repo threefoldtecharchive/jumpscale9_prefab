@@ -549,7 +549,7 @@ class PrefabCore(base):
 
     @property
     def hostname(self):
-        return self.executor.stateOnSystem["hostname"]
+        return self.executor.state_on_system["hostname"]
 
     @hostname.setter
     def hostname(self, val):

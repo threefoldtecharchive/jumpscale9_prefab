@@ -23,9 +23,9 @@ class PrefabJumpscaleCore(app):
             return
 
         if full:
-            self.prefab.system.base.development()
+            self.prefab.system.installbase.development()
         else:
-            self.prefab.system.base.install()
+            self.prefab.system.installbase.install()
 
         self.bashtools(branch, with_deps=full)
 

@@ -51,7 +51,7 @@ class PrefabOpenSSL(base):
 
         if self.doneCheck("build") and not reset:
             return
-        self.prefab.system.base.development(python=False)
+        self.prefab.system.installbase.development(python=False)
         url = "https://github.com/openssl/openssl.git"
         self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable",dest=self.CODEDIRL, reset=False, ssh=False)
 
