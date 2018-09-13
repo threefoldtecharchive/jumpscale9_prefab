@@ -56,11 +56,7 @@ class PrefabBase(JSBASE):
         resets the remembered items which are done
         """
         self.reset()
-        # if "done" in self.config:
-        #     self.config.pop("done")
-        # if not self.executor.readonly:
-        #     # this will make sure it gets set remotely
-        #     self.configSet("done", {})
+
 
     def doneSet(self, key):
         if self.executor.readonly:
