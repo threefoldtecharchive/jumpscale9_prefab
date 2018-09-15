@@ -96,21 +96,21 @@ class PrefabBase(JSBASE):
             self.logger.debug("donecheck, not set:%s:False" % (key))
             return False
 
-    # def doneCheck(self, cat, reset=False):
-    #     """
-    #     specify category to test against
-    #     if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
-    #
-    #     will call doneGet and take reset into account
-    #
-    #     reset can be 1, "1", True, ...
-    #
-    #     if done will return : True
-    #     """
-    #     reset = j.data.serializers.fixType(reset, False)
-    #     if reset is False and self.doneGet(cat):
-    #         return True
-    #     return False
+    def doneCheck(self, cat, reset=False):
+        """
+        specify category to test against
+        if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
+
+        will call doneGet and take reset into account
+
+        reset can be 1, "1", True, ...
+
+        if done will return : True
+        """
+        reset = j.data.serializers.fixType(reset, False)
+        if reset is False and self.doneGet(cat):
+            return True
+        return False
 
     @property
     def classname(self):
