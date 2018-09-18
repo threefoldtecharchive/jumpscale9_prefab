@@ -347,8 +347,8 @@ class PrefabPackage(base):
             self._apt_get('remove ' + package)
             if autoclean:
                 self._apt_get("autoclean")
-        elif self.isMac:
-            self.prefab.core.run("brew remove %s" % package)
+        elif self.prefab.core.isMac:
+            self.prefab.core.run("brew remove %s 2>&1 > /dev/null|echo """ % package)
 
     def __repr__(self):
         return "prefab.system.package:%s:%s" % (self.executor.addr, self.executor.port)
