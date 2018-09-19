@@ -47,19 +47,18 @@ class PrefabBase(JSBASE):
 
     @property
     def done(self):
-        return self.state.stateGet("done",{},True)
+        return self.state.stateGet(self.classname,{},True)
 
     def doneReset(self):
         """
         resets the remembered items which are done
         """
-        self.state.stateSet("done",{},save=True)
+        self.state.stateSet(self.classname,{},save=True)
 
 
     def doneSet(self, key):
         if self.executor.readonly:
-            self.logger.debug(
-                "info: Canot do doneset:%s because readonly" % key)
+            self.logger.debug("info: Canot do doneset:%s because readonly" % key)
             return False
         done = self.done
         # bring to list of keys
@@ -73,7 +72,7 @@ class PrefabBase(JSBASE):
             if item.strip() == "":
                 continue
             done[item] = True
-        self.state.stateSet("done",done,save=True)
+        self.state.stateSet(self.classname,done,save=True)
         return True
 
     def doneDelete(self, key):
@@ -83,7 +82,7 @@ class PrefabBase(JSBASE):
         done = self.done
         if key in done:
             del (done[key])
-        self.state.stateSet("done",done,save=True)
+        self.state.stateSet(self.classname,done,save=True)
         return True
 
     def doneGet(self, key):

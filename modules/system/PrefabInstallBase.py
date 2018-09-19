@@ -43,6 +43,8 @@ class PrefabInstallBase(base):
             sudo
             net-tools
             python3
+            python3-distutils
+            python3-psutil
             """
 
         C += """
@@ -56,8 +58,7 @@ class PrefabInstallBase(base):
         """
         self.prefab.system.package.install(C)
 
-        self.prefab.bash.profileJS.addPath(j.sal.fs.joinPaths(
-            self.prefab.core.dir_paths["BASEDIR"], "bin"))
+        self.prefab.bash.profileJS.addPath(j.sal.fs.joinPaths(self.prefab.core.dir_paths["BASEDIR"], "bin"))
         self.prefab.bash.profileJS.save()
 
         if upgrade:
