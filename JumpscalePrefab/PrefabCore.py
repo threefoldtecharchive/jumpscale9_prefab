@@ -1250,8 +1250,15 @@ class PrefabCore(base):
 
         return rc, out
 
-    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
+    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True,env={}):
         script = script.replace("\\\"", "\"")
+
+        if env !={} and env!=None:
+            script0=""
+            for key,val in env.items():
+                script0+="export %s=%s\n"%(key,val)
+            script="%s\n\n%s"%(script0,script)
+
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)
 

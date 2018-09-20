@@ -53,8 +53,8 @@ class PrefabPIP(base):
 
         cmd = ""
 
+        todo = []
         for package in packages:
-            todo = []
             if reset or not self.doneGet("pip_%s" % package):
                 todo.append(package)
                 if self.prefab.core.isArch:

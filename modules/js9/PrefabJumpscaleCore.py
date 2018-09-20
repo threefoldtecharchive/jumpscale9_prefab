@@ -6,7 +6,7 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabJumpscaleCore(app):
     NAME = 'jumpscale'
 
-    def install(self, reset=False, branch='development', full=False):
+    def install(self, reset=False, branch='development_simple', full=False):
         """Install jumpscale core
         Keyword Arguments:
             reset {bool} -- force install if jumpscalecore was already installed (default: {False})
@@ -27,28 +27,23 @@ class PrefabJumpscaleCore(app):
         else:
             self.prefab.system.installbase.install()
 
-        self.bashtools(branch, with_deps=full)
-
-        self.prefab.runtimes.pip.doneSet("ensure")  # pip is installed in above
-
-        self.logger.info("jumpscale_install")
-
-        self.doneSet("install")
-
-    def bashtools(self, branch='master', reset=False, with_deps=False):
-
-        if self.doneCheck("bashtools", reset):
-            return
+        self.prefab.runtimes.pip.ensure()
 
         S = """
-        echo "INSTALL BASHTOOLS"
+        echo "INSTALL JUMPSCALE"
         curl https://raw.githubusercontent.com/threefoldtech/jumpscale_core/{}/install.sh?$RANDOM > /tmp/install_jumpscale.sh
         bash /tmp/install_jumpscale.sh
         """.format(branch)
 
         env = None
-        if with_deps:
+        if full:
             env = {'JSFULL': '1'}
         self.core.execute_bash(S, env=env)
 
-        self.doneSet("bashtools")
+        assert self.core.run("js_shell 'j.tools.console.echo(\"1\")'")[1]=='1'
+
+        self.logger.info("jumpscale_install")
+
+        self.doneSet("install")
+
+
