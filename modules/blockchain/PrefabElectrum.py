@@ -48,6 +48,7 @@ class PrefabElectrum(app):
         if not j.sal.fs.isFile(electrum_bin_path):
             electrum_bin_path = self.prefab.core.joinpaths(electrum_bin_path, 'electrum')
 
+        self.prefab.core.dir_ensure( "$BINDIR")
         self.prefab.core.file_copy(electrum_bin_path, "$BINDIR/")
 
         self.doneSet('install')
