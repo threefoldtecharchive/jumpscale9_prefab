@@ -1,9 +1,8 @@
-# How to add new module to prefab
+# How to add a new module to prefab
 1- Find a suitable subpackage to put your module in.
    apps, db, ...
    
-2- Create a class for you component, make it inherit from PrefabApp
-You can get PrefabApp like this
+2- Create a class for your component, let it inherit from PrefabApp
 
 ```python
 from Jumpscale import j
