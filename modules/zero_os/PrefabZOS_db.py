@@ -50,6 +50,7 @@ class PrefabZOS_db(app):
 
         if verbose:
             cmdline += " -v"
+        print(cmdline)
         pm.ensure('%s_0db' % instance, cmd=cmdline)
 
     def stop(self, instance='main'):
