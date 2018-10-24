@@ -60,7 +60,7 @@ class PrefabGolang(app):
                 downl = "https://dl.google.com/go/go1.8.7.darwin-amd64.tar.gz"
         elif "ubuntu" in self.prefab.platformtype.platformtypes:
             if old is False:
-                downl = "https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz"
+                downl = "https://storage.googleapis.com/golang/go1.11.1.linux-amd64.tar.gz"
             else:
                 downl = "https://dl.google.com/go/go1.8.7.linux-amd64.tar.gz"
         else:
