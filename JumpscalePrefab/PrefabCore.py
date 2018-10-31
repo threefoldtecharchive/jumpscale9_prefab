@@ -675,6 +675,7 @@ class PrefabCore(base):
         @param dest, if empty then will be same as source very usefull when using e.g. $CODEDIR
 
         """
+        raise RuntimeError("use self.prefab.network.tools.download")
         if dest == "":
             dest = source
         dest = j.dirs.replace_txt_dir_vars(dest)
