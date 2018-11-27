@@ -1133,8 +1133,7 @@ class PrefabCore(base):
             rc, out, err = self.executor.execute(
                 cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
         else:
-            rc, out, err = self.executor.executeRaw(
-                cmd, die=die, showout=showout)
+            rc, out, err = self.executor.executeRaw(cmd, die=die, showout=showout)
         # If command fails and die is true, raise error
         if rc > 0 and die:
             raise j.exceptions.RuntimeError('%s, %s' % (cmd, err))

@@ -43,6 +43,10 @@ class PrefabGit(base):
         else:
             dest = self.replace(dest)
 
+        if reset:
+            self.prefab.core.dir_remove(dest)
+
+
         self.prefab.core.dir_ensure(j.sal.fs.getParent(dest))
 
         parsed_url = urllib3.util.parse_url(url)

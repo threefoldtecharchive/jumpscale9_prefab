@@ -7,29 +7,42 @@ class PrefabCapnp(app):
 
     NAME = "capnp"
 
-    def install(self, reset=False):
+    def build(self, reset=False):
         """
         install capnp
+
+        js_shell 'j.tools.prefab.local.lib.capnp.build(reset=True)'
+
         """
 
-        if reset is False and self.isInstalled():
+        if self.doneGet('capnp') and not reset:
             return
 
-        self.prefab.system.package.mdupdate()
-        self.prefab.system.package.install(['curl', 'make', 'g++', 'python-dev'])
+        # self.prefab.system.package.mdupdate()
+        self.prefab.system.installbase.development()
+        if self.prefab.core.isUbuntu:
+            self.prefab.system.package.install('g++')
 
-        #@TODO: *2 use git checkout on tag like we do for ARDB
+        url="https://capnproto.org/capnproto-c++-0.6.1.tar.gz"
+        dest = self.replace("$BUILDDIR/capnproto")
+        self.prefab.core.createDir(dest)
+        self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
+                    expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
 
-        # c++ deps libs
         script = """
-        cd $TMPDIR
-        curl -O https://capnproto.org/capnproto-c++-0.5.3.tar.gz
-        tar zxf capnproto-c++-0.5.3.tar.gz
-        cd capnproto-c++-0.5.3
+        cd $BUILDDIR/capnproto
         ./configure
         make -j6 check
-        sudo make install
+        make install
         """
         self.prefab.core.run(script)
-        # install python pacakge
+
+        self.doneSet('capnp')
+
+
+    def install(self):
+        self.build()
         self.prefab.runtimes.pip.multiInstall(['cython', 'setuptools', 'pycapnp'], upgrade=True)
+
+
+        self.doneSet('capnp')

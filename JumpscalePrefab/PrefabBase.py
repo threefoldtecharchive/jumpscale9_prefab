@@ -42,7 +42,7 @@ class PrefabBase(JSBASE):
 
     def reset(self):
         self.executor.state.stateSet(self.classname, {})
-        self.cacheReset()
+        self.doneReset()
         self._init()
 
     @property

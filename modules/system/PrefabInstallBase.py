@@ -66,9 +66,15 @@ class PrefabInstallBase(base):
 
         self.doneSet("install")
 
-    def development(self,reset=False,python=True):
+    def development(self,reset=False,python=False):
         """
         install all components required for building (compiling)
+
+        to use e.g.
+            self.prefab.system.installbase.development()
+        or
+            js_shell 'j.tools.prefab.local.system.installbase.development(reset=True)'
+
         """
 
         C = """
@@ -78,20 +84,32 @@ class PrefabInstallBase(base):
         autoconf
         libtool
         pkg-config
+        curl
         """
         C=j.core.text.strip(C)
 
         if self.core.isMac:
+
+            if  not self.doneGet("xcode_install"):
+                self.prefab.core.run("xcode-select --install", die=False, showout=True)
+                cmd="sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /"
+                self.prefab.core.run(cmd, die=False, showout=True)
+                self.doneSet("xcode_install")
+
+
             C+="libffi\n"
             C+="automake\n"
+            C+="pcre\n"
+            C+="xz\n"
+            C+="openssl\n"
+            C+="zlib\n"
         else:
             C+="libffi-dev\n"
             C+="build-essential\n"
             C+="libsqlite3-dev\n"
             C+="libpq-dev\n"
-        
-        if python:
-            C+="python3-dev\n"
+            if python:
+                C+="python3-dev\n"
 
         self.install()
         if self.doneCheck("development", reset):

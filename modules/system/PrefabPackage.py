@@ -125,6 +125,7 @@ class PrefabPackage(base):
 
             key = "install_%s" % package
             if self.doneCheck(key, reset):
+                self.logger.info("package:%s already installed"%package)
                 continue
             todo.append(package)
             print("+ install: %s" % package)
