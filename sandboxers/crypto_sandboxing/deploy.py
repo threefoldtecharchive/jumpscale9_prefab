@@ -236,7 +236,7 @@ def create_blockchain_zos_vms(zos_node_name='main', sshkeyname=None):
             btc_node_prefab = j.tools.prefab.getFromSSH(addr=zos_node_name, port=btc_node_data['ports'][0]['source'])
             break
         except (ConnectionErrorException, SessionError) as ex:
-            j.clients.sshkey.key_load(sshkey.path)
+            j.clients.sshkey.key_load(sshkey.path, duration=None)
             time.sleep(30)
             timeout -= 30
 
