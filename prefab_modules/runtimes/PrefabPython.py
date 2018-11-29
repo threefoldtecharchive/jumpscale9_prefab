@@ -10,7 +10,7 @@ class PrefabPython(base):
         self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
         self.CODEDIRL = self.core.replace("$BUILDDIR/code/python3/")
         self.OPENSSLPATH = self.core.replace("$BUILDDIR/openssl")
-        self.JUMPSCALE_BRANCH = "development_960"
+        self.JUMPSCALE_BRANCH = "development_961"
 
     def reset(self):
         base.reset(self)

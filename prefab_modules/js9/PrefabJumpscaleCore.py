@@ -6,7 +6,7 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabJumpscaleCore(app):
     NAME = 'jumpscale'
 
-    def install(self, reset=False, branch='development_960', full=False):
+    def install(self, reset=False, branch='development_961', full=False):
         """Install jumpscale core
         Keyword Arguments:
             reset {bool} -- force install if jumpscalecore was already installed (default: {False})
