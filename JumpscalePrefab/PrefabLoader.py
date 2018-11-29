@@ -70,7 +70,7 @@ class PrefabLoader(JSBASE):
         """
 
         path = j.sal.fs.getDirName(inspect.getsourcefile(self.__class__))
-        path = j.sal.fs.joinPaths(j.sal.fs.getParent(path), "modules")
+        path = j.sal.fs.joinPaths(j.sal.fs.getParent(path), "prefab_modules")
 
         if moduleList is None:
             moduleList = self.moduleList
