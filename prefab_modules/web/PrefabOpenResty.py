@@ -78,12 +78,15 @@ class PrefabOpenResty(app):
         if start:
             self.start()
 
-    def build(self, install=True):
+    def build(self, reset=False):
         """
         js_shell 'j.tools.prefab.local.web.openresty.build()'
         :param install:
         :return:
         """
+        if self.doneCheck("build") and not reset:
+            return
+
         self.prefab.bash.locale_check()
 
         if self.prefab.core.isUbuntu:
@@ -110,21 +113,42 @@ class PrefabOpenResty(app):
             self.prefab.core.run(C)
 
         else:
+            #build with system openssl, no need to include custom build
+            # j.tools.prefab.local.lib.openssl.build()
+
             url="https://openresty.org/download/openresty-1.13.6.2.tar.gz"
             dest = self.replace("$BUILDDIR/openresty")
             self.prefab.core.createDir(dest)
-            # dest = self.replace("$BUILDDIR/openresty")
             self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
                         expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
             C="""
-            ./configure -j2 --with-ipv6 
-            make -j2
+            cd $BUILDDIR/openresty
+            mkdir -p /sandbox/var/pid
+            mkdir -p /sandbox/var/log
+            ./configure \
+                --with-cc-opt="-I/usr/local/opt/openssl/include/ -I/usr/local/opt/pcre/include/" \
+                --with-ld-opt="-L/usr/local/opt/openssl/lib/ -L/usr/local/opt/pcre/lib/" \
+                --prefix="/sandbox/openresty" \
+                --sbin-path="/sandbox/bin/openresty" \
+                --modules-path="/sandbox/lib" \
+                --pid-path="/sandbox/var/pid/openresty.pid" \
+                --error-log-path="/sandbox/var/log/openresty.log" \
+                --lock-path="/sandbox/var/nginx.lock" \
+                --conf-path="/sandbox/cfg/openresty.cfg" \
+                -j8
+            make -j8
+            make install
+            rm -rf $BUILDDIR/openresty
+            
+            ln -s /sandbox/openresty/luajit/bin/luajit /sandbox/bin/lua
+            
             """
-            j.shell()
-            raise j.exceptions.NotImplemented(message="only ubuntu supported for building openresty")
+            C = self.prefab.core.replace(C)
+            C = self.replace(C)
+            self.prefab.core.run(C)
 
-        if install:
-            self.install()
+        self.doneSet("build")
+
 
 
 
