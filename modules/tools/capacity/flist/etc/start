@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export HOME=/root
+source /env.sh
+
+mkdir -p /root/.ssh
+mkdir -p /opt/code/org/local/config
+ssh-keygen -f /root/.ssh/id_rsa -N ''
+
+js_config init -s -p /opt/code/org/local/config -k /root/.ssh/id_rsa
+
+echo "registring farmer with ID: $FARMER_ID"
+python3.6 /etc/register_capacity.py

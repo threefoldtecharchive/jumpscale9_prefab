@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import time
 import os
 import pytoml
@@ -17,6 +17,7 @@ class PrefabPortal(base):
             mongodbip="127.0.0.1",
             mongoport=27017,
             production=True,
+            public_url='',
             client_id='',
             client_secret='',
             scope_organization='',
@@ -28,6 +29,7 @@ class PrefabPortal(base):
         :param mongodbip: mongodb ip to which portal will connect ; default -> "127.0.0.1"
         :param mongoport: mongodb port to which portal will connect ; default -> 27017
         :param production: production flag; default -> True
+        :param public_url: specify portal public url
         :param client_id: itsyou.online client_id/organization
         :param client_secret: itsyou.online client_secret
         :param scope_organization: itsyou.online organization that the user should be member of
@@ -37,6 +39,7 @@ class PrefabPortal(base):
 
         cfg = self.prefab.executor.state.configGet('portal')
         cfg[name]['production'] = production
+        cfg[name]['public_url'] = public_url
 
         if production:
             if not (client_id and client_secret and scope_organization and redirect_address):
@@ -67,7 +70,7 @@ class PrefabPortal(base):
             cfg[name][key] = value
         self.prefab.executor.state.configSet('portal', cfg)
 
-    def install(self, start=True, branch='master', reset=False, name="main", port='8200', ip='127.0.0.1'):
+    def install(self, start=True, branch='development', reset=False, name="main", port='8200', ip='127.0.0.1'):
         """
         grafanaip and port should be the external ip of the machine
         Portal install will only install the portal and libs. No spaces but the system ones will be add by default.
@@ -86,13 +89,7 @@ class PrefabPortal(base):
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
 
-        # install the dependencies if required
-        self.getcode(branch=branch)
-        self.installDeps(reset=reset, name=name)
-
-        # pull repo with required branch ; then link dirs and files in required places
-        self.linkCode(name=name)
-        portal_config_path = '%s/github/jumpscale/portal9/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
+        portal_config_path = '%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
         portal_config_data = self.prefab.core.file_read(portal_config_path)
         portal_config_data = portal_config_data.format(name=name, port=port, ip=ip)
         portal_config = pytoml.loads(portal_config_data)
@@ -100,6 +97,13 @@ class PrefabPortal(base):
         cfg = self.prefab.executor.state.configGet('portal', defval=portal_config['portal'], set=True)
         cfg[name] = portal_config['portal'][name]
         self.prefab.executor.state.configSet('portal', cfg)
+
+        # install the dependencies if required
+        self.installDeps(reset=reset, name=name)
+
+        # pull repo with required branch ; then link dirs and files in required places
+        self.getcode(branch=branch)
+        self.linkCode(name=name)
 
         if start:
             self.start(name=name)
@@ -148,7 +152,7 @@ class PrefabPortal(base):
             self.prefab.runtimes.pip.install('python-snappy')
 
         cmd = """
-            cd {CODEDIR}/github/jumpscale/portal9
+            cd {CODEDIR}/github/threefoldtech/jumpscale_portal_classic
             pip3 install -e . -U
             """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
         self.prefab.core.execute_bash(cmd)
@@ -157,7 +161,7 @@ class PrefabPortal(base):
     def getcode(self, branch='master'):
         self.logger.info("Get portal code on branch:'%s'" % branch)
         if branch == "":
-            branch = os.environ.get('JS9BRANCH')
+            branch = os.environ.get('JUMPSCALEBRANCH')
         self.prefab.tools.git.pullRepo(
             "https://github.com/Jumpscale/portal9.git", branch=branch, ignorelocalchanges=False)
 
@@ -168,16 +172,16 @@ class PrefabPortal(base):
         self.prefab.core.dir_ensure(self.portal_dir)
 
         CODE_DIR = self.prefab.core.dir_paths["CODEDIR"]
-        self.prefab.core.file_link("%s/github/jumpscale/portal9/jslib" % CODE_DIR,
+        self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/jslib" % CODE_DIR,
                                     '%s/jslib' % self.portal_dir)
         self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, 'portalbase'))
-        self.prefab.core.file_link("%s/github/jumpscale/portal9/apps/portalbase/system" % CODE_DIR,
+        self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/system" % CODE_DIR,
                                     '%s/portalbase/system' % self.portal_dir)
-        self.prefab.core.file_link("%s/github/jumpscale/portal9/apps/portalbase/wiki" % CODE_DIR,
+        self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/wiki" % CODE_DIR,
                                     '%s/portalbase/wiki' % self.portal_dir)
-        self.prefab.core.file_link("%s/github/jumpscale/portal9/apps/portalbase/macros" %
+        self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/macros" %
                                     CODE_DIR, '%s/portalbase/macros' % self.portal_dir)
-        self.prefab.core.file_link("%s/github/jumpscale/portal9/apps/portalbase/templates" %
+        self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/templates" %
                                     CODE_DIR, '%s/portalbase/templates' % self.portal_dir)
 
         self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, name))
@@ -189,13 +193,13 @@ class PrefabPortal(base):
         self.prefab.core.file_copy(
             j.sal.fs.joinPaths(
                 CODE_DIR,
-                'github/jumpscale/portal9/apps/portalbase/portal_start.py'),
+                'github/threefoldtech/jumpscale_portal_classic/apps/portalbase/portal_start.py'),
             j.sal.fs.joinPaths(self.portal_dir, name))
         self.prefab.core.file_copy("%s/jslib/old/images" % self.portal_dir,
                                     "%s/jslib/old/elfinder" % self.portal_dir, recursive=True)
         # link spaces
         spaces = j.tools.prefab.local.core.find(
-            '$CODEDIR/github/jumpscale/portal9/apps/portalbase/',
+            '$CODEDIR/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/',
             recursive=True,
             pattern='*.space',
             type='d')

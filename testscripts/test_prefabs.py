@@ -7,7 +7,7 @@ The test will do the following:
 3. Collect and report errors
 """
 
-from js9 import j
+from jumpscale import j
 import multiprocessing as mp
 import logging
 import traceback

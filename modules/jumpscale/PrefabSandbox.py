@@ -1,6 +1,6 @@
 
 
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -27,7 +27,7 @@ class PrefabSandbox(base):
         paths.append("/usr/local/lib/python3.5/dist-packages")
 
         excludeFileRegex=["-tk/", "/lib2to3", "-34m-", ".egg-info","lsb_release"]
-        excludeDirRegex=["/JumpScale", "\.dist-info", "config-x86_64-linux-gnu", "pygtk"]
+        excludeDirRegex=["/Jumpscale", "\.dist-info", "config-x86_64-linux-gnu", "pygtk"]
 
         dest = j.sal.fs.joinPaths(prefab.core.dir_paths['base'], 'lib')
 
@@ -39,8 +39,8 @@ class PrefabSandbox(base):
         if not j.sal.fs.exists("%s/bin/python" % base):
             j.sal.fs.symlink("%s/bin/python3" % base,"%s/bin/python3.5" % base)
 
-        j.tools.sandboxer.sandboxLibs("%s/lib" % base, recursive=True)
-        j.tools.sandboxer.sandboxLibs("%s/bin" % base, recursive=True)
+        j.tools.sandboxer.libs_sandbox("%s/lib" % base, recursive=True)
+        j.tools.sandboxer.libs_sandbox("%s/bin" % base, recursive=True)
         """
         self.logger.info("start sandboxing")
         self.prefab.core.execute_jumpscript(sandbox_script)
@@ -62,8 +62,8 @@ class PrefabSandbox(base):
         self.prefab.core.execute_jumpscript(dedupe_script)
 
         copy_script = """
-        j.sal.fs.removeDirTree("$out/$name/jumpscale9/")
-        j.sal.fs.copyDirTree("/opt/jumpscale9/","$out/$name/jumpscale9",deletefirst=True,ignoredir=['.egg-info', '.dist-info','__pycache__'],ignorefiles=['.egg-info',"*.pyc"])
+        j.sal.fs.removeDirTree("$out/$name/jumpscale/")
+        j.sal.fs.copyDirTree("/opt/jumpscale/","$out/$name/jumpscale",deletefirst=True,ignoredir=['.egg-info', '.dist-info','__pycache__'],ignorefiles=['.egg-info',"*.pyc"])
         j.sal.fs.removeIrrelevantFiles("$out")
         """
         copy_script = copy_script.replace("$name", name)

@@ -1,31 +1,44 @@
-from js9 import j
+from jumpscale import j
 
 
 app = j.tools.prefab._getBaseAppClass()
 
 
 class PrefabAtomicswap(app):
-    NAME = "btcatomicswap"
+    NAME = "atomicswap"
 
-    def build(self, reset=False):
-        """Get/Build the binaries of AtomicExchange
-        Keyword Arguments:
-            reset {bool} -- reset the build process (default: {False})
-        """
-
+    def build(self, branch=None,tag=None, revision=None, reset=False):
         if self.doneGet('build') and reset is False:
             return
+        self.prefab.system.package.mdupdate()
+        self.prefab.system.package.install("git")
+        golang = self.prefab.runtimes.golang
+        golang.install()
+        GOPATH = golang.GOPATH
+        url = 'github.com/rivine'
+        path = '%s/src/%s/atomicswap' % (GOPATH, url)
+        pullurl = 'https://%s/atomicswap.git' % url
+        dest = self.prefab.tools.git.pullRepo(pullurl,
+                                              branch=branch,
+                                              tag=tag,
+                                              revision=revision,
+                                              dest=path,
+                                              ssh=False)
+        cmd = 'cd {} && make install'.format(dest)
+        self.prefab.core.run(cmd)
 
-        cmds = """
-            cd $TMPDIR
-            git clone https://github.com/JimberSoftware/AtomicExchange
-        """
-        self.core.run(cmds)
         self.doneSet('build')
 
-    def install(self):
-        cmds = """
-            cp $TMPDIR/AtomicExchange/cryptoDocker/btcatomicswap $BINDIR/
-        """
-        self.core.run(cmds)
+    def install(self, branch=None,tag='v0.1.0', revision=None, reset=False):
+        # if branch, tag, revision = None it will build form master
+        if self.doneGet('install') and reset is False:
+            return
+
+        self.build(branch=branch,tag=tag, revision=revision, reset=reset)
+        tfchaindpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'btcatomicswap')
+        tfchaincpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'ethatomicswap')
+
+        self.prefab.core.file_copy(tfchaindpath, "$BINDIR/")
+        self.prefab.core.file_copy(tfchaincpath, "$BINDIR/")
+
         self.doneSet('install')

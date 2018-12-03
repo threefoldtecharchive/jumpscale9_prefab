@@ -1,5 +1,5 @@
 
-from js9 import j
+from jumpscale import j
 # import os
 
 
@@ -45,25 +45,24 @@ class PrefabGolang(app):
     def isInstalled(self):
         rc, out, err = self.prefab.core.run(
             "go version", die=False, showout=False, profile=True)
-        if rc > 0 or "1.9" not in out:
-            return False
-        if self.doneGet("install") == False:
-            return False
-        return True
+        if rc==0 and self.doneGet("install") == True:
+            if any(x in out for x in ['1.10.3','1.8.7']):
+                return True
+        return False
 
     def install(self, reset=False, old=False):
         if reset is False and self.isInstalled():
             return
         if self.prefab.core.isMac:
             if old is False:
-                downl = "https://storage.googleapis.com/golang/go1.9.4.darwin-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.10.3.darwin-amd64.tar.gz"
             else:
-                downl = "https://storage.googleapis.com/golang/go1.8.7.darwin-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.8.7.darwin-amd64.tar.gz"
         elif "ubuntu" in self.prefab.platformtype.platformtypes:
             if old is False:
-                downl = "https://storage.googleapis.com/golang/go1.9.4.linux-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz"
             else:
-                downl = "https://storage.googleapis.com/golang/go1.8.7.linux-amd64.tar.gz"
+                downl = "https://dl.google.com/go/go1.8.7.linux-amd64.tar.gz"
         else:
             raise j.exceptions.RuntimeError("platform not supported")
 

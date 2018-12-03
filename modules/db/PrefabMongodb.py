@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 from time import sleep
 
 
@@ -41,7 +41,7 @@ class PrefabMongodb(app):
                 "$TMPDIR", recursive=False, pattern="*mongodb*.tgz", type='f')
             if len(tarpaths) == 0:
                 raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (
-                    url, self.replace("$TMPDIR")), level=1, source="", tags="", msgpub="")
+                    url, self.replace("$TMPDIR")))
             tarpath = tarpaths[0]
             self.prefab.core.file_expand(tarpath, "$TMPDIR")
 
@@ -60,7 +60,7 @@ class PrefabMongodb(app):
         if self.isStarted() and not reset:
             return
         self.prefab.core.dir_ensure('$VARDIR/data/mongodb')
-        cmd = "$BINDIR/mongod --dbpath '$VARDIR/data/mongodb'"
+        cmd = "mongod --dbpath '$VARDIR/data/mongodb'"
         self.prefab.system.process.kill("mongod")
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name="mongod", cmd=cmd, env={}, path="", autostart=True)

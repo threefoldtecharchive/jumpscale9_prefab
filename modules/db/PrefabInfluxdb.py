@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 
 app = j.tools.prefab._getBaseAppClass()
@@ -27,10 +27,14 @@ class PrefabInfluxdb(app):
             C = """
             set -ex
             cd $TMPDIR
-            wget https://dl.influxdata.com/influxdb/releases/influxdb-0.13.0_linux_amd64.tar.gz
-            tar xvfz influxdb-0.13.0_linux_amd64.tar.gz
-            cp influxdb-0.13.0-1/usr/bin/influxd $BINDIR/influxd
-            cp influxdb-0.13.0-1/etc/influxdb/influxdb.conf $TEMPLATEDIR/cfg/influxdb/influxdb.conf"""
+            wget https://dl.influxdata.com/influxdb/releases/influxdb-1.6.0-static_linux_amd64.tar.gz
+            tar xvfz influxdb-1.6.0-static_linux_amd64.tar.gz
+            cp influxdb-1.6.0-1/influxd $BINDIR/influxd
+            cp influxdb-1.6.0-1/influx $BINDIR/influx
+            cp influxdb-1.6.0-1/influx_inspect $BINDIR/influx_inspect
+            cp influxdb-1.6.0-1/influx_stress $BINDIR/influx_stress
+            cp influxdb-1.6.0-1/influx_tsm $BINDIR/influx_tsm
+            cp influxdb-1.6.0-1/influxdb.conf $TEMPLATEDIR/cfg/influxdb/influxdb.conf"""
             self.prefab.core.run(C, profile=True)
         else:
             raise RuntimeError("cannot install, unsuported platform")
@@ -47,13 +51,11 @@ class PrefabInfluxdb(app):
         cfg['meta']['dir'] = self.replace("$VARDIR/data/influxdb/meta")
         cfg['data']['dir'] = self.replace("$VARDIR/data/influxdb/data")
         cfg['data']['wal-dir'] = self.replace("$VARDIR/data/influxdb/wal")
-        self.prefab.core.dir_ensure('$JSCFGDIR/influxdb')
-        self.prefab.core.file_write(
-            '$JSCFGDIR/influxdb/influxdb.conf', j.data.serializer.toml.dumps(cfg))
-        cmd = "%s -config $JSCFGDIR/influxdb/influxdb.conf" % (binPath)
+        self.prefab.core.dir_ensure('$CFGDIR/influxdb')
+        self.prefab.core.file_write('$CFGDIR/influxdb/influxdb.conf', j.data.serializer.toml.dumps(cfg))
+        cmd = "%s -config $CFGDIR/influxdb/influxdb.conf" % (binPath)
         cmd = self.replace(cmd)
-        self.prefab.core.file_write(
-            "$BINDIR/start_influxdb.sh", cmd, 777, replaceArgs=True)
+        self.prefab.core.file_write("$BINDIR/start_influxdb.sh", cmd, mode=0o777)
 
         if start:
             self.start()
@@ -63,8 +65,7 @@ class PrefabInfluxdb(app):
 
     def start(self):
         binPath = self.prefab.bash.cmdGetPath('influxd')
-        cmd = "%s -config $JSCFGDIR/influxdb/influxdb.conf" % (binPath)
+        cmd = "%s -config $CFGDIR/influxdb/influxdb.conf" % (binPath)
         self.prefab.system.process.kill("influxdb")
         pm = self.prefab.system.processmanager.get()
-        pm.ensure(
-            "influxdb", cmd=cmd, env={}, path="")
+        pm.ensure("influxdb", cmd=cmd, env={}, path="")

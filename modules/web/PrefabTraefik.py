@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 
 app = j.tools.prefab._getBaseAppClass()
@@ -56,7 +56,7 @@ class PrefabTraefik(app):
         return False
 
     def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{CFGDIR}}/caddy.cfg",
-                  logdir="{{LOGDIR}}/caddy/log", email='info@greenitglobe.com', port=8000):
+                  logdir="{{LOGDIR}}/caddy/log", email='info@threefold.tech', port=8000):
         """
         @param caddyconfigfile
             template args available DATADIR, LOGDIR, WWWROOTDIR, PORT, TMPDIR, EMAIL ... (using mustasche)

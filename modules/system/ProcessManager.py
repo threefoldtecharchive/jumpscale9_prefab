@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import time
 import re
 
@@ -318,7 +318,7 @@ class PrefabTmuxec(ProcessManagerBase):
         if name in self.list():
             pid = self.prefab.system.tmux.getPid('main', name)
             # make sure to get all child processes of the pane and kill them first.
-            # FIXES: https://github.com/Jumpscale/prefab9/issues/61
+            # FIXES: https://github.com/Jumpscale/prefab/issues/61
             rc, out, err = self.prefab.core.run("pgrep -P {pid}".format(pid=pid), die=False)
             if rc == 0 and out:
                 pidstokill = [l.strip() for l in out.splitlines()]

@@ -24,7 +24,7 @@ import os
 import sys
 import pystache
 
-from js9 import j
+from jumpscale import j
 # import pygments.lexers
 # from pygments.formatters import get_formatter_by_name
 
@@ -698,8 +698,8 @@ class PrefabCore(base):
 
         if replaceInContent:
             content = self.replace(content)
-        self.executor.file_write(
-            path=path, content=content, mode=mode, owner=owner, group=group, append=append, sudo=sudo)
+        self.executor.file_write(path=path, content=content, mode=mode,
+                                 owner=owner, group=group, append=append, sudo=sudo, showout=showout)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -903,7 +903,7 @@ class PrefabCore(base):
     # =============================================================================
 
     def getNetworkInfoGenrator(self):
-        from JumpScale9.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
+        from Jumpscale.tools.nettools.NetTools import parseBlock, IPBLOCKS, IPMAC, IPIP, IPNAME
         exitcode, output, err = self.run("ip a", showout=False)
         for m in IPBLOCKS.finditer(output):
             block = m.group('block')
@@ -911,7 +911,7 @@ class PrefabCore(base):
 
     @property
     def networking_info(self):
-        from JumpScale9.tools.nettools.NetTools import getNetworkInfo
+        from Jumpscale.tools.nettools.NetTools import getNetworkInfo
         if not self._networking_info:
             all_info = list()
             for device in getNetworkInfo():
@@ -1112,8 +1112,7 @@ class PrefabCore(base):
             self.executor.debug = debug
 
         if profile:
-            # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             # next will check if profile path exists, if not will put it
             cmd0 = cmd
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
@@ -1164,7 +1163,8 @@ class PrefabCore(base):
             content = self.replace(content)
         content = j.data.text.strip(content)
 
-        self.logger.info("RUN SCRIPT:\n%s" % content)
+        if showout:
+            self.logger.info("RUN SCRIPT:\n%s" % content)
 
         if content[-1] != "\n":
             content += "\n"
@@ -1203,7 +1203,7 @@ class PrefabCore(base):
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
         if profile:
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             # next will check if profile path exists, if not will put it
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
                 ppath, ppath, ppath, cmd)
@@ -1250,8 +1250,17 @@ class PrefabCore(base):
 
         return rc, out
 
-    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True):
+    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True,
+                     showout=True,env={}):
         script = script.replace("\\\"", "\"")
+        if env is not {} and env is not None:
+            pre=""
+            for key,val in env.items():
+                pre+="export %s = %s"%(key,val)
+            script="%s\n%s"%(pre,script)
+
+        print(script)
+
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)
 
@@ -1266,8 +1275,8 @@ class PrefabCore(base):
         script = self.replace(script)
         script = j.data.text.strip(script)
 
-        if script.find("from js9 import j") == -1:
-            script = "from js9 import j\n\n%s" % script
+        if script.find("from jumpscale import j") == -1:
+            script = "from jumpscale import j\n\n%s" % script
 
         return self.execute_script(script, die=die, profile=profile, interpreter="jspython", tmux=tmux,
                                    replace=replace, showout=showout)

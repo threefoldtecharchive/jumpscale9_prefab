@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 
@@ -14,8 +14,8 @@ class PrefabZeroaccess(app):
         if self.doneCheck('build', reset):
             return
 
-        # Install jumpscale9
-        self.prefab.js9.js9core.install()
+        # Install jumpscale
+        self.prefab.jumpscale.jumpscalecore.install()
 
         # Clone the repository
         self.prefab.tools.git.pullRepo(self.git_url, dest=self.zeroaccess_dir)

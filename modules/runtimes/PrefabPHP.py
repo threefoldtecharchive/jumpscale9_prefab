@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import textwrap
 from copy import deepcopy
 app = j.tools.prefab._getBaseAppClass()

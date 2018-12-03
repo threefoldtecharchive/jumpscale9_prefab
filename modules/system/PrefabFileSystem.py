@@ -1,7 +1,7 @@
 import uuid
 import time
-from js9 import j
-import JumpScale9
+from jumpscale import j
+import Jumpscale
 
 base = j.tools.prefab._getBaseClass()
 

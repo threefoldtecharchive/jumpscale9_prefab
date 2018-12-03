@@ -1,6 +1,6 @@
-# prefab.network.zeroboot
+# prefab.network.zero_boot
 
-The `prefab.network.zeroboot` module should be used to bootstrap a router with zerotier configurations
+The `prefab.network.zero_boot` module should be used to bootstrap a router with zerotier configurations
 
 ## prerequisites
 
@@ -26,7 +26,7 @@ sshclient = j.clients.ssh.get(instance='<instance_name>')
 # Install prefab requirements
 sshclient.execute(cmd="opkg update")
 sshclient.execute(cmd="opkg install bash openssh-sftp-server openssl-util coreutils-base64 tmux")
-# Use the zeroboot prefab to configure the router
+# Use the zero_boot prefab to configure the router
 prefab = sshclient.prefab 
-prefab.network.zeroboot.install('<zerotier_network_id>', '<zerotier_token>')
+prefab.network.zero_boot.install(network_id='<zerotier_network_id>', token='<zerotier_token>', zos_version='<zos_version>', zos_args='<zos_args>')
 ```

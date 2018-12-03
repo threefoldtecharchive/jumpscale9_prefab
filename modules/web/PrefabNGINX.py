@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import os
 import textwrap
 from time import sleep
@@ -195,7 +195,7 @@ class PrefabNGINX(app):
 
         else:
             raise j.exceptions.NotImplemented(
-                message="only ubuntu supported for building nginx", level=1, source="", tags="", msgpub="")
+                message="only ubuntu supported for building nginx")
 
         if install:
             self.install()

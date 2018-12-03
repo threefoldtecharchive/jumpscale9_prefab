@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -16,7 +16,7 @@ class PrefabLibffi(base):
 
     def build(self, reset=False):
         """
-        js9 'j.tools.prefab.local.lib.libffi.build(reset=True)'
+        js_shell 'j.tools.prefab.local.lib.libffi.build(reset=True)'
         """
         if reset:
             self.reset()

@@ -1,8 +1,8 @@
-![travis](https://travis-ci.org/Jumpscale/prefab9.svg?branch=master)
+[![Build Status](https://travis-ci.org/threefoldtech/jumpscale_prefab.svg?branch=development)](https://travis-ci.org/threefoldtech/jumpscale_prefab)
 
 # Prefab
 
-Prefab is a tool to automate installations and configurations on a remote or local machine using [Jumpscale executor](https://github.com/Jumpscale/core9/tree/master/docs)
+Prefab is a tool to automate installations and configurations on a remote or local machine using [Jumpscale executor](https://github.com/Jumpscale/core/tree/master/docs)
 
 
 Prefab makes it easy to automate server installations and create configuration recipes by wrapping common administrative tasks, such as installing packages and creating users and groups, writing files, upload, download files, etc. in Python functions.
@@ -14,7 +14,7 @@ In the following sections **agent machine** will be used to refer to the machine
 
 ## Prerequisites
 - on Agent machine
-    - [Jumpscale](https://github.com/Jumpscale/core9)
+    - [Jumpscale](https://github.com/Jumpscale/core)
 - on Target machine
     - bash
     - openssh-sftp-server
@@ -28,7 +28,7 @@ In the following sections **agent machine** will be used to refer to the machine
 Normally Prefab is installed with jumpscale, However you can install it using pip like this
 
 ```
-pip3 install git+https://github.com/Jumpscale/prefab9@master
+pip3 install git+https://github.com/Jumpscale/prefab@master
 ```
 ## Usage
 

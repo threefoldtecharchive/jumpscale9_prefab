@@ -1,6 +1,6 @@
 
-from js9 import j
-import netaddr
+from jumpscale import j
+from netaddr import IPAddress
 import re
 
 base = j.tools.prefab._getBaseClass()
@@ -113,7 +113,7 @@ class PrefabNet(base):
                     ips.append(ip)
             return ips
 
-    def getInfo(self, device=None):
+    def _getNetworkInfoLinux(self, device=None):
         """
         returns network info like
 
@@ -129,14 +129,14 @@ class PrefabNet(base):
           'name': 'docker0'}]
 
         """
-
+       
         IPBLOCKS = re.compile("(^|\n)(?P<block>\d+:.*?)(?=(\n\d+)|$)", re.S)
         IPMAC = re.compile("^\s+link/\w+\s+(?P<mac>(\w+:){5}\w{2})", re.M)
         IPIP = re.compile(r"\s+?inet\s(?P<ip>(\d+\.){3}\d+)/(?P<cidr>\d+)", re.M)
         IPNAME = re.compile("^\d+: (?P<name>.*?)(?=:)", re.M)
 
         def parseBlock(block):
-            result = {'ip': [], 'cidr': [], 'mac': '', 'name': ''}
+            result = {'ip': [],'ip6': [], 'cidr': [], 'mac': '', 'name': ''}
             for rec in (IPMAC, IPNAME):
                 match = rec.search(block)
                 if match:
@@ -145,6 +145,9 @@ class PrefabNet(base):
                 for m in mrec.finditer(block):
                     for key, value in list(m.groupdict().items()):
                         result[key].append(value)
+            _,IPV6,_=self.prefab.core.run("ifconfig %s |  awk '/inet6/{print $2}'"% result['name'], showout=False)
+            for ipv6 in IPV6.split('\n'):
+                result['ip6'].append(ipv6)
             if j.data.types.list.check(result['cidr']):
                 if len(result['cidr']) == 0:
                     result['cidr'] = 0
@@ -168,6 +171,94 @@ class PrefabNet(base):
         if device is not None:
             raise j.exceptions.RuntimeError("could not find device")
         return res
+        
+    def _getNetworkInfoOSX(self):
+        
+        #IMPORTANT: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
+        #TODO: has not been tested nor finished
+        
+        
+        _, output, _ = j.sal.process.execute("ifconfig", showout=False)
+        state="start"
+        interfaces = []
+        result = {} #starting one
+        for line in output.split("\n"):
+            line_strip = line.strip()
+            if line.strip()=="":
+                continue
+            if line[0] is not " ":
+                if line.startswith("lo"):
+                    continue               
+
+                if "BROADCAST" in line:
+                    #then ok network to parse
+                    # print("foundblock:%s"%line)
+                    result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': [], 'cidr': [] }
+                    result["name"]=line.split(":",1)[0].strip()
+                    state = "block"
+                    interfaces.append(result)
+                    continue
+                    
+            if state == "block":
+                # if result["name"].startswith("vbox"):
+                #     import pudb; pudb.set_trace()
+                if line_strip.startswith("ether"):
+                    result["mac"] = line_strip.split(" ",1)[1].strip()
+                elif line_strip.startswith("inet6"):                    
+                    ip6 = line_strip[6:].split("prefixlen",1)[0].strip()
+                    if ip6 not in result["ip6"]:
+                        result["ip6"].append(ip6)
+                elif line_strip.startswith("inet "):                    
+                    ip = line_strip[5:].split("netmask",1)[0].strip()     
+                    line0 = line_strip.split("netmask",1)[1].strip()
+                    mask = line0.split("broadcast",1)[0].strip()     
+                    cidr = IPAddress(mask).netmask_bits()
+                    if cidr not in result["cidr"]:
+                        result["cidr"].append(cidr)
+                    if ip not in result["ip"]:
+                        result["ip"].append(ip)
+                    if ip not in result["ip"]:
+                        result["ip"].append(ip)
+                elif line_strip.startswith("status"):
+                    if "inactive" in line:
+                        result["active"]=False
+                    else:
+                        result["active"]=True
+
+        if result is not {}:
+            interfaces.append(result)
+
+        # print(j.data.serializer.json.dumps(interfaces,True,True))
+                             
+        return interfaces
+        
+    def getInfo(self, device=None):
+        """
+        returns network info like
+
+        [{'cidr': 8, 'ip': ['127.0.0.1'], 'mac': '00:00:00:00:00:00', 'name': 'lo'},
+         {'cidr': 24,
+          'ip': ['192.168.0.105'],
+          'ip6': ['...','...],
+          'mac': '80:ee:73:a9:19:05',
+          'name': 'enp2s0'},
+         {'cidr': 0, 'ip': [], 'mac': '80:ee:73:a9:19:06', 'name': 'enp3s0'},
+         {'cidr': 16,
+          'ip': ['172.17.0.1'],
+          'mac': '02:42:97:63:e6:ba',
+          'name': 'docker0'}]
+
+        """
+        if j.core.platformtype.myplatform.isLinux:
+            return self._getNetworkInfoLinux()
+        elif j.core.platformtype.myplatform.isMac:
+            return self._getNetworkInfoOSX()
+        else:
+            raise RuntimeError("not implemented")
+
+
+        if device is not None:
+            raise j.exceptions.RuntimeError("not implemented")
 
     def getNetObject(self, device):
         n = self.getInfo(device)
@@ -241,3 +332,4 @@ class PrefabNet(base):
         self.logger.info(pscript)
 
         self.prefab.core.execute_bash(content=pscript, die=True, interpreter="python3", tmux=True)
+        

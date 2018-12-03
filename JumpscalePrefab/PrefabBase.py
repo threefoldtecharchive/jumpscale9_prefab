@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import inspect
 
 JSBASE = j.application.jsbase_get_class()
@@ -190,7 +190,7 @@ class PrefabBaseLoader(JSBASE):
             item)[6:-3] for item in j.sal.fs.listFilesInDir(localdir, filter="Prefab*")]
         for className in classes:
             # import the class
-            exec("from JumpScale9Prefab.%s.Prefab%s import *" %
+            exec("from JumpscalePrefab.%s.Prefab%s import *" %
                  (myClassName, className))
             # attach the class to this class
             do = "self.%s=Prefab%s(self.executor,self.prefab)" % (

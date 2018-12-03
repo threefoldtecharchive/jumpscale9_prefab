@@ -1,5 +1,5 @@
 
-from js9 import j
+from jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
@@ -14,8 +14,7 @@ class PrefabFW(base):
     def fw_type(self):
         if self._fw_type is None:
             if self.prefab.core.isMac:
-                raise j.exceptions.Input(message="cannot enable fw, mac  not supported ",
-                                         level=1, source="", tags="", msgpub="")
+                raise j.exceptions.Input(message="cannot enable fw, mac  not supported ")
 
                 if self.prefab.bash.cmdGetPath("nft", die=False) is not False:
                     self._fw_type = "nft"

@@ -1,5 +1,5 @@
 from grp import getgrgid
-from js9 import j
+from jumpscale import j
 import netaddr
 
 
@@ -138,12 +138,12 @@ class PrefabSSH(base):
         user.
 
         @param user username to which authorization should be performed
-        @param key public ssh key to authorize
+        @param key public ssh key to authorize (is the full text !!!)
         @param kwargs extra settings for this authorization. See https://www.ssh.com/ssh/authorized_keys/openssh
           E.g. setting command option is done by adding the following kwarg: command='"/bin/myscript.sh"
           E.g. setting no-agent-forwarding is done by adding the following kwarg: no-agent-forwarding=True
         """
-
+        
         def add_newline(content):
             if content and content[-1] != "\n":
                 content += "\n"
@@ -157,7 +157,8 @@ class PrefabSSH(base):
         d = self.prefab.system.user.check(user, need_passwd=False)
         if d is None:
             raise j.exceptions.RuntimeError("did not find user:%s" % user)
-        group = getgrgid(d["gid"]).gr_name
+        # group = getgrgid(d["gid"]).gr_name #GAVE THE WRONG ANSWER, THINK WE CAN PUT ON ROOT BY DEFAULT
+        group = "root"
         keyf = d["home"] + "/.ssh/authorized_keys"
         key = add_newline(key)
         ret = None
@@ -183,8 +184,8 @@ class PrefabSSH(base):
                 ret = True
         else:
             # Make sure that .ssh directory exists, see #42
-            self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode="700")
-            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode=0o600, sudo=True)
+            self.prefab.core.dir_ensure(j.sal.fs.getDirName(keyf), owner=user, group=group, mode='700')
+            self.prefab.core.file_write(keyf, line, owner=user, group=group, mode='600', sudo=True)
             ret = False
 
         self.prefab.core.sudomode = sudomode

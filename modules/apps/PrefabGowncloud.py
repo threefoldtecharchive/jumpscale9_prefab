@@ -1,4 +1,4 @@
-from js9 import j
+from jumpscale import j
 import textwrap
 import re
 app = j.tools.prefab._getBaseAppClass()

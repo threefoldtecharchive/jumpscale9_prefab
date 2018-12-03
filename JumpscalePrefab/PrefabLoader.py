@@ -1,4 +1,4 @@
-from JumpScale9 import j
+from Jumpscale import j
 import os
 import sys
 import importlib
@@ -6,7 +6,7 @@ import inspect
 import json
 
 GEN_START = """
-from js9 import j
+from jumpscale import j
 """
 
 GEN = """
