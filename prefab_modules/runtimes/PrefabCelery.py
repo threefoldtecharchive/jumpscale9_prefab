@@ -8,7 +8,7 @@ class PrefabCelery(base):
     def install(self):
         self.prefab.runtimes.pip.install('celery[redis]')
         self.prefab.runtimes.pip.install('flower')
-        j.clients.redis.core_start()
+        j.clients.redis.core_get()
 
     def start(self, cmd, path="$JSAPPSDIR/celery/tasks.py", broker='redis://localhost:6379', appname='celery'):
         """

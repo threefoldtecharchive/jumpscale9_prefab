@@ -66,8 +66,10 @@ class PrefabARDB(app):
         self.prefab.core.run(self.replace(C))
         self.doneSet("buildforestdb")
 
-    def buildARDB(self, reset=False, storageEngine="forestdb"):
+    def build(self, reset=False, storageEngine="forestdb"):
         """
+        js_shell 'j.tools.prefab.local.db.ardb.build()'
+
         @param storageEngine rocksdb or forestdb
         """
         if self.doneCheck("buildardb", reset):

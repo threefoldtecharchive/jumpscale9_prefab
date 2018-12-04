@@ -18,7 +18,7 @@ class PrefabPython(base):
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
 
-    def build(self, jumpscale_branch='development', include_jumpscale=True, reset=False,tag="v3.6.7"):
+    def build(self, reset=False,tag="v3.6.7"):
         """
         js_shell 'j.tools.prefab.local.runtimes.python.build(reset=False)'
         js_shell 'j.tools.prefab.local.runtimes.python.build(reset=True)'
@@ -36,8 +36,6 @@ class PrefabPython(base):
         if self.doneCheck("build", reset):
             return
 
-        self.JUMPSCALE_BRANCH = jumpscale_branch
-        self.include_jumpscale = include_jumpscale
         self.prefab.system.installbase.development(python=False)  # make sure all required components are there
 
         if not self.doneGet("compile") or reset:
@@ -197,11 +195,6 @@ class PrefabPython(base):
         msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
         msg = self.replace(msg)
         self.logger.info(msg)
-
-    def _install_portal(self, branch):
-        self.prefab.web.portal.install(start=False, branch=branch)
-        dest_robot_portal = self.prefab.core.dir_paths['JSAPPSDIR'] + '/0-robot-portal'
-        self.prefab.web.zrobotportal.install(dest=dest_robot_portal, start_portal=False)
 
     def _pipAll(self, reset=False):
         """
