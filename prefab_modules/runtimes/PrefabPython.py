@@ -229,6 +229,7 @@ class PrefabPython(base):
         'requests>=2.12.0',
         'future>=0.15.0',
         'watchdog',
+        'netstr',
         'msgpack-python',
         'npyscreen',
         'pyyaml',
