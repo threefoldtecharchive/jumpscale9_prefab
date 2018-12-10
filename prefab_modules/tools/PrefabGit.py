@@ -28,7 +28,7 @@ class PrefabGit(base):
         self.prefab.core.run('cd {} && make install'.format(path))
 
     def pullRepo(self, url, dest=None, login=None, passwd=None, depth=None,
-                 ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh=False):
+                 ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh=False, timeout=600):
 
         """
         ssh = if True will build ssh url, if "auto" or "first" will check if there is ssh-agent available & keys are loaded,

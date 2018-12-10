@@ -37,11 +37,8 @@ class PrefabPython(base):
             return
 
         self.prefab.system.installbase.development(python=False)  # make sure all required components are there
-
+        self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag=tag, reset=reset, ssh=False, timeout=20000)
         if not self.doneGet("compile") or reset:
-
-            self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag=tag,reset=True, ssh=False)
-
             if self.core.isMac:
                 # clue to get it finally working was in https://stackoverflow.com/questions/46457404/how-can-i-compile-python-3-6-2-on-macos-with-openssl-from-homebrew
 
@@ -67,15 +64,7 @@ class PrefabPython(base):
                 make -j12 EXTRATESTOPTS=--list-tests install
                 """
                 C = self.replace(C)
-
             else:
-
-                # self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag="3.7.1",
-                #                            reset=False, ssh=False)
-
-                self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag="v3.6.7",reset=True, ssh=False)
-
-
                 # on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
                 self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev,libsnappy-dev')
 
