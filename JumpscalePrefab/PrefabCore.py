@@ -23,6 +23,7 @@ import hashlib
 import os
 import sys
 import pystache
+import time
 
 from Jumpscale import j
 # import pygments.lexers
@@ -540,11 +541,15 @@ class PrefabCore(base):
         """
         return in kb
         """
-
+        if  self.executor.type =="local":
+            return j.sal.fs.fileSize(path)
+        # print("du -Lck %s" % path)
         rc, out, err = self.run("du -Lck %s" % path, showout=False)
         if rc != 0:
             raise j.exceptions.RuntimeError("Failed to define size of path '%s' \nerror: %s" % (path, err))
         res = out.split("\n")[-1].split("\t")[0].split(" ")[0]
+        print(out)
+        # j.shell()
         return int(res)
 
     @property

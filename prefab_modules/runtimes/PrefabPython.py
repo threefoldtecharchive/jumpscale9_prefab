@@ -37,6 +37,9 @@ class PrefabPython(base):
             return
 
         self.prefab.system.installbase.development(python=False)  # make sure all required components are there
+
+
+
         self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag=tag, reset=reset, ssh=False, timeout=20000)
         if not self.doneGet("compile") or reset:
             if self.core.isMac:
@@ -49,7 +52,7 @@ class PrefabPython(base):
 
                 # export OPENSSLPATH=$(brew --prefix openssl)
                 
-                export OPENSSLPATH=$OPENSSLPATH
+                # export OPENSSLPATH=$OPENSSLPATH
                 
                 # export CPPFLAGS=-I/opt/X11/include
                 # export CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib"                
@@ -75,7 +78,7 @@ class PrefabPython(base):
                 set -ex
                 cd $CODEDIRL
                 
-                export OPENSSLPATH=$OPENSSLPATH
+                # export OPENSSLPATH=$OPENSSLPATH
 
                 ./configure --prefix=$BUILDDIRL --enable-optimizations  #THIS WILL MAKE SURE ALL TESTS ARE DONE, WILL TAKE LONG TIME
 
@@ -93,7 +96,7 @@ class PrefabPython(base):
             self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True)  # makes it easy to test & make changes where required
 
             #test openssl is working
-            cmd = "~/opt/var/build/python3/bin/python3 -c 'import ssl'"
+            cmd = "source /sandbox/env.sh;/sandbox/var/build/python3/bin/python3 -c 'import ssl'"
             rc,out,err=self.prefab.core.run(cmd,die=False)
             if rc>0:
                 raise RuntimeError("SSL was not included well\n%s"%err)
@@ -185,134 +188,121 @@ class PrefabPython(base):
         msg = self.replace(msg)
         self.logger.info(msg)
 
+    def pips_list(self,level=0):
+        """
+        level0 is only the most basic
+        1 in the middle
+        2 is all pips
+        """
+        C="""
+        asyncssh>=1.9.0
+        pystache
+        blosc>=1.5.1
+        Brotli>=0.6.0
+        certifi
+        click>=6.6
+        colored-traceback>=0.2.2
+        colorlog>=2.10.0
+        cryptocompare
+        cryptography>=2.2.0
+        cson>=0.7 *
+        Cython **
+        dnslib
+        dnspython>=1.15.0 **
+        docker>=3 **
+        ed25519>=1.4
+        etcd3>=0.7.0 **
+        fakeredis
+        Flask-Inputs>=0.2.0 **
+        Flask>=0.12.2 **
+        future>=0.15.0
+        gevent >= 1.2.2
+        gevent-websocket *
+        gipc
+        GitPython>=2.1.1
+        graphene>=2.0 *
+        grequests>=0.3.0
+        html2text **
+        httplib2>=0.9.2
+        influxdb>=4.1.0 **
+        ipcalc>=1.99.0
+        ipython<6.5.0>=6.0.0
+        itsdangerous>=0.24 *
+        Jinja2>=2.9.6
+        jsonschema>=2.5.1 *
+        libtmux>=0.7.1
+        msgpack-python>=0.4.8
+        netaddr>=0.7.19
+        netifaces>=0.10.6
+        netstr
+        npyscreen
+        ovh>=0.4.7 *
+        packet-python>=1.37 *
+        parallel_ssh>=1.4.0
+        paramiko>=2.2.3
+        path.py>=10.3.1
+        peewee>=2.9.2
+        Pillow>=4.1.1 *
+        psutil>=5.4.3
+        psycopg2>=2.7.1 *
+        pudb>=2017.1.2
+        pyblake2>=0.9.3
+        pycapnp>=0.5.12  
+        pycountry *
+        PyGithub>=1.34
+        pymongo>=3.4.0 **
+        pymux>=0.13
+        pynacl>=1.2.1
+        pyOpenSSL>=17.0.0
+        pypandoc>=1.3.3 **
+        pyserial>=3.0
+        pystache>=0.5.4 **
+        python-dateutil>=2.5.3
+        python-jose>=2.0.1 *
+        pytoml>=0.1.2
+        pyyaml
+        redis>=2.10.5
+        requests>=2.13.0
+        six>=1.10.0
+        #SQLAlchemy>=1.1.9 **
+        ssh2-python *
+        toml>=0.9.2
+        Unidecode>=0.04.19
+        uvloop>=0.8.0 *
+        watchdog>=0.8.3
+        zerotier>=1.1.2 *
+                
+        """
+        res=[]
+        for line in j.core.text.strip(C).split("\n"):
+            if level==0 and line.find("*")!=-1:
+                continue
+            elif level==1 and line.find("**")!=-1:
+                continue
+            pip=line.strip()
+            if pip.startswith("#"):
+                continue
+            pip=pip.replace("*","").replace("*","").strip()
+            if pip=="":
+                continue
+            res.append(pip)
+        return res
+
     def _pipAll(self, reset=False):
         """
         js_shell 'j.tools.prefab.local.runtimes.python._pipAll(reset=False)'
         """
-        # needs at least items from /JS8/code/github/threefoldtech/jumpscale_core/install/dependencies.py
+
         if self.doneCheck("pipall", reset):
             return
 
         #need to build right version of capnp
         self.prefab.lib.capnp.build()
 
-        C="""
-        #CORE
-        'certifi',
-        'Cython',
-        'GitPython>=2.1.1',
-        'click>=6.6',
-        'colored_traceback',
-        'colorlog>=2.10.0',
-        'httplib2>=0.9.2',
-        'ipython<6.5.0,>=6.0.0',
-        'jinja2',
-        'libtmux>=0.7.1',
-        'netaddr>=0.7.18',
-        'path.py>=10.3.1',
-        'pystache>=0.5.4',
-        'python-dateutil>=2.5.3',
-        'pytoml>=0.1.2',
-        'toml',
-        'redis>=2.10.5',
-        'requests>=2.12.0',
-        'future>=0.15.0',
-        'watchdog',
-        'netstr',
-        'msgpack-python',
-        'npyscreen',
-        'pyyaml',
-        'pyserial>=3.0'
-        'docker>=3',
-        'fakeredis',
-        'ssh2-python',
-        'parallel_ssh>=1.4.0',
-        'psutil>=5.0.1',
-        'Unidecode>=0.04.19',  
-        #LIB
-        'Brotli>=0.6.0',
-        'Jinja2>=2.9.6',
-        'Pillow>=4.1.1',
-        'PyGithub>=1.34',
-        # 'SQLAlchemy>=1.1.9',
-        'colored-traceback>=0.2.2',
-        'colorlog>=2.10.0',
-        'cson>=0.7',
-        'docker>=2.2.1',
-        'gevent>=1.2.1',
-        'grequests>=0.3.0',
-        'influxdb>=4.1.0',
-        'msgpack-python>=0.4.8',
-        'netaddr>=0.7.19',
-        'netifaces>=0.10.5',
-        'ovh>=0.4.7',
-        'paramiko>=2.2.3',
-        'path.py>=10.3.1',
-        'peewee>=2.9.2',
-        'psycopg2>=2.7.1',
-        'pudb>=2017.1.2',
-        'cryptography>=2.2.0',
-        'pyOpenSSL>=17.0.0',
-        'pyblake2>=0.9.3',
-        'pymux>=0.13',
-        # 'pypandoc>=1.3.3',
-        'redis>=2.10.5',
-        'requests>=2.13.0',
-        'toml>=0.9.2',
-        # 'uvloop>=0.8.0',
-        'watchdog>=0.8.3',
-        'dnspython>=1.15.0',
-        'etcd3>=0.7.0',
-        'zerotier>=1.1.2',
-        'packet-python>=1.37',
-        'blosc>=1.5.1',
-        'pynacl>=1.2.1',
-        'ipcalc>=1.99.0',
-        'ed25519>=1.4',
-        'python-jose>=1.3.2',
-        'html2text'      
-        #DIGITALME
-        'Jinja2>=2.9.6',
-        'gevent>=1.2.1',
-        'gevent-websocket',
-        'grequests>=0.3.0',
-        'peewee>=2.9.2',
-        'pudb>=2017.1.2',
-        'redis>=2.10.5',
-        'requests>=2.13.0',
-        'toml>=0.9.2',
-        'watchdog>=0.8.3',
-        'dnspython>=1.15.0',
-        'zerotier>=1.1.2',
-        'blosc>=1.5.1',
-        'pynacl>=1.1.2',
-        'ipcalc>=1.99.0',
-        'ed25519>=1.4',
-        'python-jose>=1.3.2',
-        'gipc',
-        'cryptocompare',
-        'dnslib',
-        'pycountry',
-        'graphene>=2.0',                
-        #PREFAB
-        'asyncssh>=1.9.0',
-        'pymongo>=3.4.0',  
-         #ZROBOT
-        'Flask>=0.12.2',
-        'Flask-Inputs>=0.2.0',         
-        'itsdangerous>=0.24',
-        'jsonschema>=2.5.1',
-        'six>=1.10.0',
-        'python-jose>=2.0.1',
-        'gevent >= 1.2.2',
-        'psutil>=5.4.3',
-        'prometheus_client>=0.1.1',
-        'netifaces>=0.10.6',
-        'msgpack-python>=0.4.8',   
-        'pycapnp>=0.5.12',                   
-        """
+        #list comes from /sandbox/code/github/threefoldtech/jumpscale_core/install/InstallTools.py
 
-        self._pip(C)
+
+        self._pip(self.pips_list(3))
 
         if not self.core.isMac:
             self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
@@ -321,27 +311,10 @@ class PrefabPython(base):
         # self.sandbox(deps=False)
         self.doneSet("pipall")
 
-    def _jumpscale(self):
-        C = """
-        git+https://github.com/threefoldtech/jumpscale_core@{0}#egg=core
-        git+https://github.com/threefoldtech/jumpscale_lib@{0}
-        git+https://github.com/threefoldtech/jumpscale_prefab@{0}
-        git+https://github.com/threefoldtech/0-robot@{0}
-        git+https://threefoldtech/0-hub#egg=zerohub&subdirectory=client
-        """.format(self.JUMPSCALE_BRANCH)
-        # we need to pull 0-robot repo first to fix issue with the generate function that is called during the installations ???
-        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
-        self._pip(C)
-
 
     # need to do it here because all runs in the sandbox
     def _pip(self, pips, reset=False):
-        for item in pips.split("\n"):
-            item = item.strip().strip(",").strip("'").strip("\"").strip()
-            if item == "":
-                continue
-            if item.startswith("#"):
-                continue
+        for item in pips:
             item = "'%s'"%item
             # cannot use prefab functionality because would not be sandboxed
             if not self.doneGet("pip3_%s" % item) or reset:

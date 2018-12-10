@@ -27,7 +27,7 @@ class PrefabCapnp(app):
         dest = self.replace("$BUILDDIR/capnproto")
         self.prefab.core.createDir(dest)
         self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
-                    expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
+                    expand=True, minsizekb=900, removeTopDir=True, deletedest=True)
 
         script = """
         cd $BUILDDIR/capnproto
