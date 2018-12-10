@@ -1214,8 +1214,7 @@ class PrefabCore(base):
                 self.logger.info(out)
         else:
             cmd = cmd + " 2>&1 || echo **ERROR**"
-            rc, out, err = self.executor.executeRaw(
-                cmd, showout=showout, die=False)
+            rc, out, err = self.executor.executeRaw(cmd, showout=showout, die=False)
             out = out.rstrip().rstrip("\t")
             lastline = out.split("\n")[-1]
             if lastline.find("**ERROR**") != -1:
@@ -1226,9 +1225,6 @@ class PrefabCore(base):
             else:
                 self.logger.info(out)
                 rc = 998
-            # out = self.file_read(outfile)
-            # out = self._clean(out)
-            # self.file_unlink(outfile)
             out = out.replace("**OK**", "")
             out = out.replace("**ERROR**", "")
             out = out.strip()
@@ -1238,7 +1234,7 @@ class PrefabCore(base):
         if rc > 0:
             msg = "Could not execute script:\n%s\n" % content
             if rc == 998:
-                msg += "error in output, was expecting **ERROR** or **OK** at end of esecution of script\n"
+                msg += "error in output, was expecting **ERROR** or **OK** at end of execution of script\n"
                 msg += "lastline is:'%s'" % lastline
             msg += "Out:\n%s\n" % out
             if err.strip() != "":
