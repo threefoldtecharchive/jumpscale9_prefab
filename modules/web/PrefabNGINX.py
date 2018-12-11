@@ -194,7 +194,8 @@ class PrefabNGINX(app):
             self.prefab.core.run(C)
 
         else:
-            raise j.exceptions.NotImplemented(message="only ubuntu supported for building nginx")
+            raise j.exceptions.NotImplemented(
+                message="only ubuntu supported for building nginx")
 
         if install:
             self.install()

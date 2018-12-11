@@ -1,7 +1,6 @@
 from Jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
-
 SUPPORTED_MODE = ['user', 'seq', 'direct']
 
 
@@ -23,7 +22,7 @@ class PrefabZOS_db(app):
         path = self.prefab.tools.git.pullRepo('https://github.com/threefoldtech/0-db')
         # self.prefab.core.run("cd %s; git reset --hard HEAD~10 && git pull"%path)
         self.prefab.core.run("cd %s; git checkout development" % path)
-
+        self.prefab.core.run("cd %s; git pull" % path)
         make = "make" if debug else "make release"
         self.prefab.core.run("cd %s && make clean && %s" % (path, make))
 
@@ -39,7 +38,8 @@ class PrefabZOS_db(app):
         if start:
             self.start()
 
-    def start(self, instance='main', host='localhost', port=9900, index="/tmp/zdb-index", data="/tmp/zdb-data", mode='user', verbose=True, adminsecret=""):
+    def start(self, instance='main', host='localhost', port=9900, index="/tmp/zdb-index", data="/tmp/zdb-data",
+              mode='user', verbose=True, adminsecret=""):
         if mode not in SUPPORTED_MODE:
             raise ValueError("mode %s is not supported" % mode)
 

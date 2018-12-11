@@ -190,7 +190,7 @@ def create_blockchain_zos_vms(zos_node_name='main', sshkeyname=None):
             zos_node_name, tft_node_data['ports'][0]['source']))
 
     # add /opt/bin to the path
-    tft_node_prefab.core.run('echo "export PATH=/opt/bin:$PATH" >> /root/.bash_profile', profile=False, showout=False)
+    tft_node_prefab.core.run('echo "export PATH=/opt/bin:$PATH" >> /root/.profile_js', profile=False, showout=False)
 
     start_blockchains(tft_node_prefab, tft_node_name)
     print('Initializing TFT wallet')
@@ -251,7 +251,7 @@ def create_blockchain_zos_vms(zos_node_name='main', sshkeyname=None):
             zos_node_name, btc_node_data['ports'][0]['source']))
 
     # add /opt/bin to the path
-    btc_node_prefab.core.run('echo "export PATH=/opt/bin:$PATH" >> /root/.bash_profile', profile=False, showout=False)
+    btc_node_prefab.core.run('echo "export PATH=/opt/bin:$PATH" >> /root/.profile_js', profile=False, showout=False)
 
     start_blockchains(btc_node_prefab, btc_node_name)
 

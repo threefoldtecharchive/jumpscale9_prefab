@@ -1,6 +1,6 @@
 
 from Jumpscale import j
-import netaddr
+from netaddr import IPAddress
 import re
 
 base = j.tools.prefab._getBaseClass()
@@ -173,10 +173,11 @@ class PrefabNet(base):
         return res
 
     def _getNetworkInfoOSX(self):
-
-        # TODO: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
-        # TODO: has not been tested nor finished
-
+        
+        #IMPORTANT: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
+        #TODO: has not been tested nor finished
+        
+        
         _, output, _ = j.sal.process.execute("ifconfig", showout=False)
         state = "start"
         interfaces = []
@@ -190,22 +191,30 @@ class PrefabNet(base):
                     continue
 
                 if "BROADCAST" in line:
-                    # then ok network to parse
-                    result = {'ip': [], 'mac': '', 'name': '', 'active': False, 'ip6': []}
-                    result["name"] = line.split(":", 1)[0].strip()
+                    #then ok network to parse
+                    # print("foundblock:%s"%line)
+                    result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': [], 'cidr': [] }
+                    result["name"]=line.split(":",1)[0].strip()
                     state = "block"
-
+                    interfaces.append(result)
+                    continue
+                    
             if state == "block":
+                # if result["name"].startswith("vbox"):
+                #     import pudb; pudb.set_trace()
                 if line_strip.startswith("ether"):
-                    result["mac"] = line_strip.split(" ", 1)[1].strip()
-                elif line_strip.startswith("inet6"):
-                    ip6 = line_strip[6:].split("prefixlen", 1)[0].strip()
+                    result["mac"] = line_strip.split(" ",1)[1].strip()
+                elif line_strip.startswith("inet6"):                    
+                    ip6 = line_strip[6:].split("prefixlen",1)[0].strip()
                     if ip6 not in result["ip6"]:
                         result["ip6"].append(ip6)
-                elif line_strip.startswith("inet "):
-                    ip = line_strip[5:].split("netmask", 1)[0].strip()
-                    line0 = line_strip.split("netmask", 1)[1].strip()
-                    mask = line0.split("broadcast", 1)[0].strip()
+                elif line_strip.startswith("inet "):                    
+                    ip = line_strip[5:].split("netmask",1)[0].strip()     
+                    line0 = line_strip.split("netmask",1)[1].strip()
+                    mask = line0.split("broadcast",1)[0].strip()     
+                    cidr = IPAddress(mask).netmask_bits()
+                    if cidr not in result["cidr"]:
+                        result["cidr"].append(cidr)
                     if ip not in result["ip"]:
                         result["ip"].append(ip)
                     if ip not in result["ip"]:
@@ -214,9 +223,13 @@ class PrefabNet(base):
                     if "inactive" in line:
                         result["active"] = False
                     else:
-                        result["active"] = True
-                    interfaces.append(result)
+                        result["active"]=True
 
+        if result is not {}:
+            interfaces.append(result)
+
+        # print(j.data.serializer.json.dumps(interfaces,True,True))
+                             
         return interfaces
 
     def getInfo(self, device=None):
@@ -311,10 +324,11 @@ class PrefabNet(base):
         if rc>0 or rc2>0:
             raise RuntimeError("Could not set interface file, something went wrong, previous situation restored.")
         """
-        pscript = j.core.text.strip(pscript)
+        pscript = j.data.text.strip(pscript)
         pscript = pscript.replace("$ifacefile", ifacefile)
         pscript = pscript.replace("$pinghost", pinghost)
 
         self.logger.info(pscript)
 
         self.prefab.core.execute_bash(content=pscript, die=True, interpreter="python3", tmux=True)
+        

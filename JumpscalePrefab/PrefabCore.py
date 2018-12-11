@@ -98,7 +98,7 @@ class PrefabCore(base):
         args are additional arguments in dict form
 
         """
-        text = j.core.text.strip(text)
+        text = j.data.text.strip(text)
         # for backwards compatibility
         if "$" in text:
             for key, var in self.dir_paths.items():
@@ -695,12 +695,12 @@ class PrefabCore(base):
         path = self.replace(location)
 
         if strip:
-            content = j.core.text.strip(content)
+            content = j.data.text.strip(content)
 
         if replaceInContent:
             content = self.replace(content)
-        self.executor.file_write(
-            path=path, content=content, mode=mode, owner=owner, group=group, append=append, sudo=sudo)
+        self.executor.file_write(path=path, content=content, mode=mode,
+                                 owner=owner, group=group, append=append, sudo=sudo, showout=showout)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
@@ -1113,8 +1113,7 @@ class PrefabCore(base):
             self.executor.debug = debug
 
         if profile:
-            # ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             # next will check if profile path exists, if not will put it
             cmd0 = cmd
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
@@ -1133,7 +1132,8 @@ class PrefabCore(base):
             rc, out, err = self.executor.execute(
                 cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
         else:
-            rc, out, err = self.executor.executeRaw(cmd, die=die, showout=showout)
+            rc, out, err = self.executor.executeRaw(
+                cmd, die=die, showout=showout)
         # If command fails and die is true, raise error
         if rc > 0 and die:
             raise j.exceptions.RuntimeError('%s, %s' % (cmd, err))
@@ -1162,9 +1162,10 @@ class PrefabCore(base):
 
         if replace:
             content = self.replace(content)
-        content = j.core.text.strip(content)
+        content = j.data.text.strip(content)
 
-        self.logger.info("RUN SCRIPT:\n%s" % content)
+        if showout:
+            self.logger.info("RUN SCRIPT:\n%s" % content)
 
         if content[-1] != "\n":
             content += "\n"
@@ -1203,7 +1204,7 @@ class PrefabCore(base):
         cmd = "cd $TMPDIR; %s" % (cmd, )
         cmd = self.replace(cmd)
         if profile:
-            ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
+            ppath = self.executor.dir_paths["HOMEDIR"] + "/.profile_js"
             # next will check if profile path exists, if not will put it
             cmd = "[ ! -e '%s' ] && touch '%s' ;source %s;%s" % (
                 ppath, ppath, ppath, cmd)
@@ -1252,12 +1253,13 @@ class PrefabCore(base):
 
     def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True, env={}):
         script = script.replace("\\\"", "\"")
+        if env is not {} and env is not None:
+            pre=""
+            for key,val in env.items():
+                pre+="export %s = %s"%(key,val)
+            script="%s\n%s"%(pre,script)
 
-        if env != {} and env != None:
-            script0 = ""
-            for key, val in env.items():
-                script0 += "export %s=%s\n" % (key, val)
-            script = "%s\n\n%s" % (script0, script)
+        print(script)
 
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)
@@ -1271,7 +1273,7 @@ class PrefabCore(base):
         execute a jumpscript(script as content) in a remote tmux command, the stdout will be returned
         """
         script = self.replace(script)
-        script = j.core.text.strip(script)
+        script = j.data.text.strip(script)
 
         if script.find("from Jumpscale import j") == -1:
             script = "from Jumpscale import j\n\n%s" % script
