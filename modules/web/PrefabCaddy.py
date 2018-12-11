@@ -129,7 +129,7 @@ class PrefabCaddy(app):
         # tcpport = int(self.getTCPPort(configpath=configpath))
 
         # TODO: *1 reload does not work yet
-        # if self.reload(configpath=configpath) == True:
+        # if self.reload(configpath=configpath) is True:
         #     self.logger.info("caddy already started, will reload")
         #     return
 

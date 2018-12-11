@@ -111,7 +111,7 @@ class PrefabPNode(base):
 
     def erase(self, keepRoot=True):
         """
-        if keepRoot == True:
+        if keepRoot is True:
             find boot/root/swap partitions and leave them untouched (check if mirror, leave too)
         clean/remove all (other) disks/partitions
         """
