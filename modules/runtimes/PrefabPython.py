@@ -18,7 +18,7 @@ class PrefabPython(base):
         self.core.dir_remove(self.CODEDIRL)
         self.prefab.runtimes.pip.reset()
 
-    def build(self, jumpscale_branch='development', include_jumpscale=True, reset=False,tag="v3.6.7"):
+    def build(self, jumpscale_branch='development', include_jumpscale=True, reset=False, tag="v3.6.7"):
         """
         js_shell 'j.tools.prefab.local.runtimes.python.build(reset=False)'
         js_shell 'j.tools.prefab.local.runtimes.python.build(reset=True)'
@@ -42,7 +42,8 @@ class PrefabPython(base):
 
         if not self.doneGet("compile") or reset:
 
-            self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag=tag,reset=True, ssh=False)
+            self.prefab.tools.git.pullRepo('https://github.com/python/cpython',
+                                           dest=self.CODEDIRL, tag=tag, reset=True, ssh=False)
 
             if self.core.isMac:
                 # clue to get it finally working was in https://stackoverflow.com/questions/46457404/how-can-i-compile-python-3-6-2-on-macos-with-openssl-from-homebrew
@@ -75,11 +76,12 @@ class PrefabPython(base):
                 # self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag="3.7.1",
                 #                            reset=False, ssh=False)
 
-                self.prefab.tools.git.pullRepo('https://github.com/python/cpython', dest=self.CODEDIRL, tag="v3.6.7",reset=True, ssh=False)
-
+                self.prefab.tools.git.pullRepo('https://github.com/python/cpython',
+                                               dest=self.CODEDIRL, tag="v3.6.7", reset=True, ssh=False)
 
                 # on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
-                self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev,libsnappy-dev')
+                self.prefab.system.package.install(
+                    'zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev,libsnappy-dev')
 
                 C = """
 
@@ -103,22 +105,22 @@ class PrefabPython(base):
 
             self.logger.info("compile python3")
             self.logger.debug(C)
-            self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True)  # makes it easy to test & make changes where required
+            # makes it easy to test & make changes where required
+            self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True)
 
-            #test openssl is working
+            # test openssl is working
             cmd = "~/opt/var/build/python3/bin/python3 -c 'import ssl'"
-            rc,out,err=self.prefab.core.run(cmd,die=False)
-            if rc>0:
-                raise RuntimeError("SSL was not included well\n%s"%err)
+            rc, out, err = self.prefab.core.run(cmd, die=False)
+            if rc > 0:
+                raise RuntimeError("SSL was not included well\n%s" % err)
 
             self.doneSet("compile")
 
-
-        self._addPIP(reset=reset,tag=tag)
+        self._addPIP(reset=reset, tag=tag)
 
         return self.BUILDDIRL
 
-    def _addPIP(self, reset=False,tag="v3.6.7"):
+    def _addPIP(self, reset=False, tag="v3.6.7"):
         """
 
         will make sure we add env scripts to it as well as add all the required pip modules
@@ -211,10 +213,10 @@ class PrefabPython(base):
         if self.doneCheck("pipall", reset):
             return
 
-        #need to build right version of capnp
+        # need to build right version of capnp
         self.prefab.lib.capnp.build()
 
-        C="""
+        C = """
         #CORE
         'certifi',
         'Cython',
@@ -347,11 +349,12 @@ class PrefabPython(base):
         git+https://threefoldtech/0-hub#egg=zerohub&subdirectory=client
         """.format(self.JUMPSCALE_BRANCH)
         # we need to pull 0-robot repo first to fix issue with the generate function that is called during the installations ???
-        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot', branch=self.JUMPSCALE_BRANCH, ssh=False)
+        j.clients.git.pullGitRepo(url='https://github.com/threefoldtech/0-robot',
+                                  branch=self.JUMPSCALE_BRANCH, ssh=False)
         self._pip(C)
 
-
     # need to do it here because all runs in the sandbox
+
     def _pip(self, pips, reset=False):
         for item in pips.split("\n"):
             item = item.strip().strip(",").strip("'").strip("\"").strip()
@@ -359,11 +362,9 @@ class PrefabPython(base):
                 continue
             if item.startswith("#"):
                 continue
-            item = "'%s'"%item
+            item = "'%s'" % item
             # cannot use prefab functionality because would not be sandboxed
             if not self.doneGet("pip3_%s" % item) or reset:
                 C = "set -ex;cd $BUILDDIRL;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
                 self.prefab.core.run(self.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
-
-

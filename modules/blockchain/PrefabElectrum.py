@@ -15,7 +15,7 @@ class PrefabElectrum(app):
     """
     NAME = "electrum"
 
-    def build(self, branch=None,tag=None, revision=None, reset=False):
+    def build(self, branch=None, tag=None, revision=None, reset=False):
         """
         Will clone the electrum repository with the specificed parameters
         """
@@ -35,7 +35,7 @@ class PrefabElectrum(app):
         self.doneSet('build')
         return dest
 
-    def install(self, branch=None,tag="3.2.2", revision=None, reset=False):
+    def install(self, branch=None, tag="3.2.2", revision=None, reset=False):
         """
         Installs the electrum binary to the correct location
         """
@@ -43,16 +43,15 @@ class PrefabElectrum(app):
         if self.doneGet('install') and reset is False:
             return
 
-        base_dir = self.build(branch=branch,tag=tag, revision=revision, reset=reset)
+        base_dir = self.build(branch=branch, tag=tag, revision=revision, reset=reset)
         electrum_bin_path = self.prefab.core.joinpaths(base_dir, 'electrum')
         if not j.sal.fs.isFile(electrum_bin_path):
             electrum_bin_path = self.prefab.core.joinpaths(electrum_bin_path, 'electrum')
 
-        self.prefab.core.dir_ensure( "$BINDIR")
+        self.prefab.core.dir_ensure("$BINDIR")
         self.prefab.core.file_copy(electrum_bin_path, "$BINDIR/")
 
         self.doneSet('install')
-
 
     def start(self, electrum_dir=None, rpcuser='user', rpcpass='pass', rpcport=7777, rpchost='localhost', testnet=False):
         """
@@ -76,11 +75,11 @@ class PrefabElectrum(app):
         if not process_name:
             base_cmd = 'electrum{} -D {}'.format(' --testnet' if testnet else '', electrum_dir)
             cmds = [
-                    '{} setconfig rpcuser {}'.format(base_cmd, rpcuser),
-                    '{} setconfig rpcpassword {}'.format(base_cmd, rpcpass),
-                    '{} setconfig rpcport {}'.format(base_cmd, rpcport),
-                    '{} setconfig rpchost {}'.format(base_cmd, rpchost),
-                    '{} daemon 1>/dev/null 2>&1 &'.format(base_cmd),
-                    ]
+                '{} setconfig rpcuser {}'.format(base_cmd, rpcuser),
+                '{} setconfig rpcpassword {}'.format(base_cmd, rpcpass),
+                '{} setconfig rpcport {}'.format(base_cmd, rpcport),
+                '{} setconfig rpchost {}'.format(base_cmd, rpchost),
+                '{} daemon 1>/dev/null 2>&1 &'.format(base_cmd),
+            ]
             for cmd in cmds:
                 self.prefab.core.run(cmd)

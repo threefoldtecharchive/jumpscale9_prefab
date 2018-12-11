@@ -16,13 +16,15 @@ import traceback
 # set the logger level
 j.logger.loggers_level_set(level='ERROR')
 
-PROCESS_TIMEOUT = 15 * 60 # 15 minutes timeout per process
+PROCESS_TIMEOUT = 15 * 60  # 15 minutes timeout per process
+
 
 class Process(mp.Process):
     """
     Wrapping the mulitprocessing Process class to be able to easily access process exception, credit to:
     https://stackoverflow.com/a/33599967
     """
+
     def __init__(self, *args, **kwargs):
         """
         Initialize process object
@@ -31,7 +33,6 @@ class Process(mp.Process):
         # create a pip between the parent and the child processes
         self._pconn, self._cconn = mp.Pipe()
         self._exception = None
-
 
     def run(self):
         """
@@ -56,7 +57,7 @@ class Process(mp.Process):
 
 
 def prefab_module(module, name):
-    print ('** starting test', name)
+    print('** starting test', name)
     for method in ['build', 'install', 'start', 'stop']:
         if hasattr(module, method):
             print("\t", method, name)
@@ -65,7 +66,6 @@ def prefab_module(module, name):
                 getattr(module, method)()
             except Exception as _:
                 raise RuntimeError('Error while running {}'.format(name))
-
 
 
 def run_in_parallel(fns):
@@ -91,6 +91,7 @@ def run_in_parallel(fns):
             errors.append('\n')
     if errors:
         raise RuntimeError('Errors: {}'.format('\n'.join(errors)))
+
 
 def run(fns):
     errors = []
@@ -123,6 +124,7 @@ def main():
 
     # run_in_parallel(to_run)
     run(to_run)
+
 
 if __name__ == '__main__':
     main()

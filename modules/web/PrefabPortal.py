@@ -43,7 +43,8 @@ class PrefabPortal(base):
 
         if production:
             if not (client_id and client_secret and scope_organization and redirect_address):
-                raise j.exceptions.Input('client_id, client_secret, scope_organization, redirect_address are mandatory for production')
+                raise j.exceptions.Input(
+                    'client_id, client_secret, scope_organization, redirect_address are mandatory for production')
 
             oauth_cfg = cfg[name]['oauth']
             oauth_cfg['client_id'] = client_id
@@ -89,7 +90,8 @@ class PrefabPortal(base):
         self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
         self.prefab.bash.profileDefault.save()
 
-        portal_config_path = '%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
+        portal_config_path = '%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/config.toml' % self.prefab.core.dir_paths[
+            "CODEDIR"]
         portal_config_data = self.prefab.core.file_read(portal_config_path)
         portal_config_data = portal_config_data.format(name=name, port=port, ip=ip)
         portal_config = pytoml.loads(portal_config_data)
@@ -113,18 +115,18 @@ class PrefabPortal(base):
     def installNodeJSLibs(self):
         self.prefab.runtimes.nodejs.install()  # will install nodejs & bower, used to build the libs if we need it
         self.prefab.runtimes.nodejs.bowerInstall(["jquery",
-                                               "flatui",
-                                               "bootstrap",
-                                               "famous",
-                                               "codemirror",
-                                               "font-awesome",
-                                               "jqplot",
-                                               "underscore",
-                                               "spin",
-                                               "moment",
-                                               "http://DlhSoft.com/Packages/DlhSoft.KanbanLibrary.zip",
-                                               "jqwidgets",
-                                               "d3"])  # , "angular-latest"])
+                                                  "flatui",
+                                                  "bootstrap",
+                                                  "famous",
+                                                  "codemirror",
+                                                  "font-awesome",
+                                                  "jqplot",
+                                                  "underscore",
+                                                  "spin",
+                                                  "moment",
+                                                  "http://DlhSoft.com/Packages/DlhSoft.KanbanLibrary.zip",
+                                                  "jqwidgets",
+                                                  "d3"])  # , "angular-latest"])
 
     def installDeps(self, reset=False, name="main"):
         """
@@ -173,16 +175,16 @@ class PrefabPortal(base):
 
         CODE_DIR = self.prefab.core.dir_paths["CODEDIR"]
         self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/jslib" % CODE_DIR,
-                                    '%s/jslib' % self.portal_dir)
+                                   '%s/jslib' % self.portal_dir)
         self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, 'portalbase'))
         self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/system" % CODE_DIR,
-                                    '%s/portalbase/system' % self.portal_dir)
+                                   '%s/portalbase/system' % self.portal_dir)
         self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/wiki" % CODE_DIR,
-                                    '%s/portalbase/wiki' % self.portal_dir)
+                                   '%s/portalbase/wiki' % self.portal_dir)
         self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/macros" %
-                                    CODE_DIR, '%s/portalbase/macros' % self.portal_dir)
+                                   CODE_DIR, '%s/portalbase/macros' % self.portal_dir)
         self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/templates" %
-                                    CODE_DIR, '%s/portalbase/templates' % self.portal_dir)
+                                   CODE_DIR, '%s/portalbase/templates' % self.portal_dir)
 
         self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, name))
 
@@ -196,7 +198,7 @@ class PrefabPortal(base):
                 'github/threefoldtech/jumpscale_portal_classic/apps/portalbase/portal_start.py'),
             j.sal.fs.joinPaths(self.portal_dir, name))
         self.prefab.core.file_copy("%s/jslib/old/images" % self.portal_dir,
-                                    "%s/jslib/old/elfinder" % self.portal_dir, recursive=True)
+                                   "%s/jslib/old/elfinder" % self.portal_dir, recursive=True)
         # link spaces
         spaces = j.tools.prefab.local.core.find(
             '$CODEDIR/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/',

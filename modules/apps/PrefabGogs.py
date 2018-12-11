@@ -23,7 +23,6 @@ class PrefabGogs(app):
     def GOPATH(self):
         return self.prefab.runtimes.golang.GOPATH
 
-
     def build(self, reset=False):
 
         if self.doneCheck("build", reset):

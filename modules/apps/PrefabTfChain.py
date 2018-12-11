@@ -19,4 +19,4 @@ class PrefabTfChain(app):
         """
         Install the tftchain binaries
         """
-        self.prefab.blockchain.tfchain.install(reset=reset) 
+        self.prefab.blockchain.tfchain.install(reset=reset)

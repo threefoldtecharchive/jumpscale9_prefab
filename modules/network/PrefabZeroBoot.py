@@ -8,6 +8,7 @@ base = j.tools.prefab._getBaseClass()
 ZEROTIER_FIREWALL_ZONE_REGEX = re.compile(r"^firewall\.@zone\[(\d+)\]\.name='zerotier'$")
 FORWARDING_FIREWALL_REGEX = re.compile(r"^firewall\.@forwarding\[(\d+)\].*?('\w+')?$")
 
+
 class PrefabZeroBoot(base):
 
     def install(self, network_id, token, zos_version='v.1.4.1', zos_args='', reset=False):
@@ -16,7 +17,7 @@ class PrefabZeroBoot(base):
         # update zerotier config
         self.prefab.network.zerotier.build(install=True, reset=reset)
 
-        # Remove sample_config 
+        # Remove sample_config
         rc, _, _ = self.prefab.core.run("uci show zerotier.sample_config", die=False)
         if rc == 0:
             self.prefab.core.run("uci delete zerotier.sample_config")
@@ -27,7 +28,7 @@ class PrefabZeroBoot(base):
             zerotier_reinit = True
         else:
             rc, out, _ = self.prefab.core.run("uci show zerotier.config", die=False)
-            zerotier_reinit = rc # rc == 1 if configuration is not present
+            zerotier_reinit = rc  # rc == 1 if configuration is not present
             if not zerotier_reinit:
                 # Check if the configuration matches our expectations
                 if not "zerotier.config.join='{}'".format(network_id) in out:
@@ -36,9 +37,9 @@ class PrefabZeroBoot(base):
             # Start zerotier at least one time to generate config files
             self.prefab.core.run("uci set zerotier.config=zerotier")
             self.prefab.core.run("uci set zerotier.config.enabled='1'")
-            self.prefab.core.run("uci set zerotier.config.interface='wan'") # restart ZT when wan status changed
-            self.prefab.core.run("uci add_list zerotier.config.join='{}'".format(network_id)) # Join zerotier network
-            self.prefab.core.run("uci set zerotier.config.secret='generate'") # Generate secret on the first start
+            self.prefab.core.run("uci set zerotier.config.interface='wan'")  # restart ZT when wan status changed
+            self.prefab.core.run("uci add_list zerotier.config.join='{}'".format(network_id))  # Join zerotier network
+            self.prefab.core.run("uci set zerotier.config.secret='generate'")  # Generate secret on the first start
             self.prefab.core.run("uci commit")
             self.prefab.core.run("/etc/init.d/zerotier enable")
             self.prefab.core.run("/etc/init.d/zerotier start")
@@ -94,7 +95,7 @@ class PrefabZeroBoot(base):
         self.add_forwarding('zerotier', 'lan')
 
         self.prefab.core.run("uci commit")
-        
+
         self.doneSet("install")
 
     def get_zerotier_firewall_zone(self):
@@ -104,7 +105,7 @@ class PrefabZeroBoot(base):
             if m:
                 return int(m.group(1))
         raise KeyError("Zerotier zone in firewall configuration was not found!")
-    
+
     def add_forwarding(self, dest, src):
         _, out, _ = self.prefab.core.run("uci show firewall")
         forwards = dict()

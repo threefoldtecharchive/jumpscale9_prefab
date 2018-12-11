@@ -36,7 +36,7 @@ class PrefabMariadb(app):
                 self.start()
             except Exception:
                 j.logger.get().warning("MySql didn't started, maybe it's "
-                        "already running or the port 3306 is used by other service")
+                                       "already running or the port 3306 is used by other service")
 
     def start(self):
         """Start mariadb

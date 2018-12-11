@@ -66,7 +66,7 @@ class PrefabInstallBase(base):
 
         self.doneSet("install")
 
-    def development(self,reset=False,python=False):
+    def development(self, reset=False, python=False):
         """
         install all components required for building (compiling)
 
@@ -86,36 +86,35 @@ class PrefabInstallBase(base):
         pkg-config
         curl
         """
-        C=j.core.text.strip(C)
+        C = j.core.text.strip(C)
 
         if self.core.isMac:
 
-            if  not self.doneGet("xcode_install"):
+            if not self.doneGet("xcode_install"):
                 self.prefab.core.run("xcode-select --install", die=False, showout=True)
-                cmd="sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /"
+                cmd = "sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /"
                 self.prefab.core.run(cmd, die=False, showout=True)
                 self.doneSet("xcode_install")
 
-
-            C+="libffi\n"
-            C+="automake\n"
-            C+="pcre\n"
-            C+="xz\n"
-            C+="openssl\n"
-            C+="zlib\n"
+            C += "libffi\n"
+            C += "automake\n"
+            C += "pcre\n"
+            C += "xz\n"
+            C += "openssl\n"
+            C += "zlib\n"
         else:
-            C+="libffi-dev\n"
-            C+="build-essential\n"
-            C+="libsqlite3-dev\n"
-            C+="libpq-dev\n"
+            C += "libffi-dev\n"
+            C += "build-essential\n"
+            C += "libsqlite3-dev\n"
+            C += "libpq-dev\n"
             if python:
-                C+="python3-dev\n"
+                C += "python3-dev\n"
 
         self.install()
         if self.doneCheck("development", reset):
-            return        
-        self.prefab.system.package.install(C)   
-        self.doneSet("development")     
+            return
+        self.prefab.system.package.install(C)
+        self.doneSet("development")
 
     def upgrade(self, reset=False, update=True):
         if self.doneCheck("upgrade", reset):

@@ -131,10 +131,12 @@ iface ens4 inet dhcp
             chroot.write_file('/tmp/ztkey', ZEROTIERKEY)
             chroot.execute('apt-key add /tmp/ztkey')
             chroot.execute('apt-get update')
-            chroot.execute('apt-get install -y --allow-unauthenticated --no-install-recommends mc openssh-server linux-generic wget zerotier-one ca-certificates curl acpid')
+            chroot.execute(
+                'apt-get install -y --allow-unauthenticated --no-install-recommends mc openssh-server linux-generic wget zerotier-one ca-certificates curl acpid')
             chroot.execute('update-initramfs -u')
             kernel = j.sal.fs.getBaseName(self.prefab.core.find('{}/boot'.format(chroot.path), False, './vmlinuz-*')[0])
-            initrd = j.sal.fs.getBaseName(self.prefab.core.find('{}/boot'.format(chroot.path), False, './initrd.img-*')[0])
+            initrd = j.sal.fs.getBaseName(self.prefab.core.find(
+                '{}/boot'.format(chroot.path), False, './initrd.img-*')[0])
             bootyaml = '''\
 kernel: /boot/{}
 initrd: /boot/{}
@@ -145,6 +147,7 @@ initrd: /boot/{}
         self.prefab.core.dir_remove('{}/var/apt/cache/archives'.format(chroot.path))
         self.prefab.core.run('tar czpf {} -C {} .'.format(tarfile, chroot.path))
         if jwt:
-            self.prefab.core.run('curl -b "caddyoauth={}" -F file=@{} https://hub.gig.tech/api/flist/me/upload'.format(jwt, tarfile))
+            self.prefab.core.run(
+                'curl -b "caddyoauth={}" -F file=@{} https://hub.gig.tech/api/flist/me/upload'.format(jwt, tarfile))
         self.prefab.core.dir_remove(chroot.path)
         return tarfile

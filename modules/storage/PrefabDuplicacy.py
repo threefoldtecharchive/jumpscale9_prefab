@@ -4,6 +4,7 @@ import textwrap
 
 app = j.tools.prefab._getBaseAppClass()
 
+
 class PrefabDuplicacy(app):
     NAME = "duplicacy"
 
@@ -43,7 +44,6 @@ class PrefabDuplicacy(app):
         """
         pass
 
-
     def stop(self, name='main'):
         """
         Stops duplicacy 
@@ -60,4 +60,3 @@ class PrefabDuplicacy(app):
         helper method to clean what this module generates.
         """
         pass
-

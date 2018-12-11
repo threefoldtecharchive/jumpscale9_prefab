@@ -27,9 +27,9 @@ class PrefabSyncthing(app):
         if self.prefab.core.file_exists('$GOPATHDIR/src/github.com/syncthing/syncthing'):
             self.prefab.core.dir_remove('$GOPATHDIR/src/github.com/syncthing/syncthing')
         dest = self.prefab.tools.git.pullRepo(url,
-                                                     dest='$GOPATHDIR/src/github.com/syncthing/syncthing',
-                                                     ssh=False,
-                                                     depth=1)
+                                              dest='$GOPATHDIR/src/github.com/syncthing/syncthing',
+                                              ssh=False,
+                                              depth=1)
 
         if version is not None:
             self.prefab.core.run("cd %s && go run build.go -version %s -no-upgrade" % (dest, version), profile=True)

@@ -3,6 +3,7 @@ import textwrap
 
 app = j.tools.prefab._getBaseAppClass()
 
+
 class PrefabMattermost(app):
     NAME = "mattermost"
 
@@ -19,16 +20,19 @@ class PrefabMattermost(app):
         self.prefab.db.mariadb._create_db("mattermost")
         self.prefab.db.mariadb.admin_create('mmuser', dbpass)
         self.prefab.runtimes.golang.get("github.com/mattermost/mattermost-server/cmd/...", install=False)
-        self.prefab.tools.git.pullRepo("https://github.com/gigforks/mattermost-webapp.git", branch="master", dest="%s/src/github.com/mattermost/mattermost-webapp" % self.GOPATH)
+        self.prefab.tools.git.pullRepo("https://github.com/gigforks/mattermost-webapp.git",
+                                       branch="master", dest="%s/src/github.com/mattermost/mattermost-webapp" % self.GOPATH)
         root_path = "%s/src/github.com/mattermost" % self.GOPATH
         self.prefab.core.run('cd %s/mattermost-server && git remote add gigforks https://github.com/gigforks/mattermost-server' % root_path,
                              profile=True)
         self.prefab.core.run('cd %s/mattermost-server && git fetch gigforks && git checkout gigforks/master' % root_path,
                              profile=True, timeout=1200)
-        self.prefab.core.run('cp {rootpath}/mattermost-server/config/default.json {rootpath}/mattermost-server/config/config.json'.format(rootpath=root_path))
+        self.prefab.core.run(
+            'cp {rootpath}/mattermost-server/config/default.json {rootpath}/mattermost-server/config/config.json'.format(rootpath=root_path))
         self.prefab.core.run("sed -i 's/dockerhost/localhost/g' %s/mattermost-server/config/config.json" % root_path)
         self.prefab.core.run("sed -i 's/mostest/%s/g' %s/mattermost-server/config/config.json" % (dbpass, root_path))
-        self.prefab.core.run("sed -i 's/mattermost_test/mattermost/g' %s/mattermost-server/config/config.json" % (root_path))
+        self.prefab.core.run(
+            "sed -i 's/mattermost_test/mattermost/g' %s/mattermost-server/config/config.json" % (root_path))
         self.prefab.core.run("cd %s/mattermost-webapp && make package" % root_path, timeout=2000)
         self.prefab.core.run("cd %s/mattermost-server && make build && make package" % root_path)
 
@@ -68,7 +72,8 @@ class PrefabMattermost(app):
         self.prefab.core.run('cp -r %s/src/github.com/mattermost/mattermost-server/dist/mattermost /opt/' % self.GOPATH)
         self.prefab.core.run('cp %s/bin/platform /opt/mattermost/bin' % self.GOPATH)
         self.prefab.core.dir_ensure('/opt/mattermost/client')
-        self.prefab.core.run('cp -r %s/src/github.com/mattermost/mattermost-webapp/dist/* /opt/mattermost/client' % self.GOPATH)
+        self.prefab.core.run(
+            'cp -r %s/src/github.com/mattermost/mattermost-webapp/dist/* /opt/mattermost/client' % self.GOPATH)
         self.prefab.core.dir_ensure('/opt/mattermost/bin/plugins')
         self.prefab.core.dir_ensure('/opt/mattermost/bin/data')
 
@@ -105,4 +110,3 @@ class PrefabMattermost(app):
         pm = self.prefab.system.processmanager.get()
         pm.stop('mattermost_%s' % name)
         self.start(name)
-

@@ -40,7 +40,8 @@ class PrefabMongodb(app):
             tarpaths = self.prefab.core.find(
                 "$TMPDIR", recursive=False, pattern="*mongodb*.tgz", type='f')
             if len(tarpaths) == 0:
-                raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (url, self.replace("$TMPDIR")))
+                raise j.exceptions.Input(message="could not download:%s, did not find in %s" %
+                                         (url, self.replace("$TMPDIR")))
             tarpath = tarpaths[0]
             self.prefab.core.file_expand(tarpath, "$TMPDIR")
 

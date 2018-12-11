@@ -12,7 +12,6 @@ class PrefabBitcoin(app):
         self.DOWNLOAD_DEST = self.replace("$BUILDDIR/bitcoin-0.16.0.tar.gz")
         self.EXTRACTED_FILEPATH = self.replace("$TMPDIR/bitcoin-0.16.0")
 
-
     def build(self, reset=False):
         """Get/Build the binaries of bitcoin
         Keyword Arguments:
@@ -28,7 +27,6 @@ class PrefabBitcoin(app):
         self.prefab.core.file_expand(self.DOWNLOAD_DEST, "$TMPDIR")
 
         self.doneSet('build')
-
 
     def install(self, reset=False):
         """

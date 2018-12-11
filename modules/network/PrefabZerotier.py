@@ -12,7 +12,6 @@ class PrefabZerotier(base):
         else:
             self.CLI = j.sal.fs.joinPaths(self.prefab.core.dir_paths['BINDIR'], 'zerotier-cli')
 
-
     def reset(self):
         super().reset()
         self.core.dir_remove(self.BUILDDIRL)
@@ -98,7 +97,7 @@ class PrefabZerotier(base):
         if zerotier_client:
             machine_address = self.get_zerotier_machine_address()
             zerotier_client.client.network.updateMember(address=machine_address, id=network_id,
-                                                    data={"config": {"authorized": True}})
+                                                        data={"config": {"authorized": True}})
 
     def network_leave(self, network_id, config_path=None):
         """
@@ -146,7 +145,7 @@ class PrefabZerotier(base):
                 'mac': line['mac'],
                 'status': line['status'],
                 'type': line['type'],
-                'dev': line['portDeviceName'],    
+                'dev': line['portDeviceName'],
                 'ips': line['assignedAddresses'],
             }
             networks.append(network)
@@ -161,7 +160,7 @@ class PrefabZerotier(base):
             if net['network_id'] == network_id:
                 return net['dev']
         raise KeyError("Network connection with id %s was not found!" % network_id)
-    
+
     def get_zerotier_machine_address(self, config_path=None):
         """
         Get the zerotier machine address.
@@ -207,16 +206,15 @@ class PrefabZerotier(base):
 
         return peers
 
-
     def network_name_get(self, network_id, config_path=None):
         """"gets a network name with ip
-        
+
         Arguments:
             network_id {string} -- network id to look for
-        
+
         Raises:
             RuntimeError -- if there is no networks with the given id
-        
+
         Returns:
             string -- network name
         """
@@ -225,11 +223,11 @@ class PrefabZerotier(base):
         for network in networks:
             if network['network_id'] == network_id:
                 return network['name']
-        raise RuntimeError("no networks found with id {}, make sure that you properly joined this network".format(network_id))
-    
+        raise RuntimeError(
+            "no networks found with id {}, make sure that you properly joined this network".format(network_id))
+
     def _get_switches(self, config_path=None):
         switches = ''
         if config_path:
             switches += "-D%s " % config_path
         return switches
-        

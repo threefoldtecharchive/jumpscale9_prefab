@@ -29,7 +29,7 @@ class PrefabLibffi(base):
         if not self.core.isMac:
             self.prefab.system.package.install('dh-autoreconf')
         url = "https://github.com/libffi/libffi.git"
-        self.prefab.tools.git.pullRepo(url, reset=False,dest=self.CODEDIRL, ssh=False)
+        self.prefab.tools.git.pullRepo(url, reset=False, dest=self.CODEDIRL, ssh=False)
 
         if not self.doneGet("compile") or reset:
             C = """
@@ -43,8 +43,8 @@ class PrefabLibffi(base):
             """
             self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.replace(C))
             self.logger.info("compile libffi")
-            self.logger.debug(C)                
-            self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)            
+            self.logger.debug(C)
+            self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)
             self.doneSet("compile")
             self.logger.info("BUILD DONE")
         else:

@@ -2,6 +2,7 @@ from Jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
+
 class PrefabTools(base):
 
     def download(
@@ -26,6 +27,6 @@ class PrefabTools(base):
         @param when multithread True then will use aria2 download tool to get multiple threads  (NOT IMPLEMENTED YET)
         @param removeTopDir : if True and there is only 1 dir in the destination then will move files away from the one dir to parent (often in tgz the top dir is not relevant)
         """
-        return self.core.file_download(url=url,to=to,overwrite=overwrite,\
-            retry=retry,timeout=timeout,login=login,passwd=passwd,minspeed=minspeed,multithread=multithread,
-            expand=expand,minsizekb=minsizekb,removeTopDir=removeTopDir)
+        return self.core.file_download(url=url, to=to, overwrite=overwrite,
+                                       retry=retry, timeout=timeout, login=login, passwd=passwd, minspeed=minspeed, multithread=multithread,
+                                       expand=expand, minsizekb=minsizekb, removeTopDir=removeTopDir)

@@ -308,7 +308,7 @@ class PrefabStor(base):
 
     def start(self):
         for key, stor in self.storagespaces.items():
-            #... create rsync & caddy config file & send to remote server
+            # ... create rsync & caddy config file & send to remote server
             pass
 
         if "httpserver" in self.config:

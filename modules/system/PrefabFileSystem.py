@@ -10,7 +10,7 @@ class PrefabFileSystem(base):
     def create(self, device, fs_type='ext4'):
         '''
         Create filesystem on a data disk
-        
+
         @fs_type (default 'ext4'): type of the new filesystem
         @device: device name (ex. /dev/vdb) 
         '''
@@ -18,7 +18,7 @@ class PrefabFileSystem(base):
         cmd = "mkfs.%s %s" % (fs_type, device)
         prefab.executor.execute(cmd)
 
-    def mount(self, mount_point, device, 
+    def mount(self, mount_point, device,
               copy=False, append_fstab=False, fs_type=None):
         '''
         Mount file system
@@ -38,7 +38,7 @@ class PrefabFileSystem(base):
 
         if copy:
             # generate random tmp folder name
-            tmp = '/mnt/tmp%s'% str(uuid.uuid4()).replace('-','')
+            tmp = '/mnt/tmp%s' % str(uuid.uuid4()).replace('-', '')
 
             # mount new filesystem in tmp mount point
             prefab.core.createDir(tmp)
@@ -46,7 +46,7 @@ class PrefabFileSystem(base):
                 prefab.executor.execute("mount %s %s" % (device, tmp))
                 try:
                     # backup data at the mount point in temporary directory
-                    prefab.executor.execute("cp -ax %s/* %s" % (mount_point, tmp))       
+                    prefab.executor.execute("cp -ax %s/* %s" % (mount_point, tmp))
                 finally:
                     # unmount the partition
                     prefab.executor.execute("umount %s" % device)
@@ -62,5 +62,3 @@ class PrefabFileSystem(base):
                 raise j.exeptions.Input('fs_type must be given')
             # append to fstab
             prefab.core.file_append("/etc/fstab", "%s\t%s\t%s\tdefaults\t0 0" % (device, mount_point, fs_type))
-
-

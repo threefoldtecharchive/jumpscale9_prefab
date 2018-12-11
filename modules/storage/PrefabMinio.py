@@ -4,6 +4,7 @@ import textwrap
 
 app = j.tools.prefab._getBaseAppClass()
 
+
 class PrefabMinio(app):
     NAME = "minio"
 
@@ -47,10 +48,10 @@ class PrefabMinio(app):
         """
         self.prefab.core.dir_ensure(datadir)
 
-        cmd = "MINIO_ACCESS_KEY={} MINIO_SECRET_KEY={} minio server --address {}:{} {}".format(miniokey, miniosecret, address, port, datadir)
+        cmd = "MINIO_ACCESS_KEY={} MINIO_SECRET_KEY={} minio server --address {}:{} {}".format(
+            miniokey, miniosecret, address, port, datadir)
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name='minio_{}'.format(name), cmd=cmd)
-
 
     def stop(self, name='main'):
         """
@@ -58,7 +59,6 @@ class PrefabMinio(app):
         """
 
         pm.stop(name='minio_{}'.format(name))
-
 
     def restart(self, name="main"):
         self.stop(name)
@@ -69,4 +69,3 @@ class PrefabMinio(app):
         helper method to clean what this module generates.
         """
         pass
-

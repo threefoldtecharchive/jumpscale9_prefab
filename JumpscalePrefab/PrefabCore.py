@@ -93,7 +93,7 @@ class PrefabCore(base):
         - JSAPPSDIR
         - CFGDIR
         - TMPDIR
-        
+
 
         args are additional arguments in dict form
 
@@ -226,7 +226,7 @@ class PrefabCore(base):
 
         cmd = "%srsync " % pre
         if keepsymlinks:
-            #-l is keep symlinks, -L follow
+            # -l is keep symlinks, -L follow
             cmd += " -rlptgo --partial %s" % excl
         else:
             cmd += " -rLptgo --partial %s" % excl
@@ -1250,14 +1250,14 @@ class PrefabCore(base):
 
         return rc, out
 
-    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True,env={}):
+    def execute_bash(self, script, die=True, profile=True, tmux=False, replace=True, showout=True, env={}):
         script = script.replace("\\\"", "\"")
 
-        if env !={} and env!=None:
-            script0=""
-            for key,val in env.items():
-                script0+="export %s=%s\n"%(key,val)
-            script="%s\n\n%s"%(script0,script)
+        if env != {} and env != None:
+            script0 = ""
+            for key, val in env.items():
+                script0 += "export %s=%s\n" % (key, val)
+            script = "%s\n\n%s" % (script0, script)
 
         return self.execute_script(script, die=die, profile=profile, interpreter="bash", tmux=tmux,
                                    replace=replace, showout=showout)

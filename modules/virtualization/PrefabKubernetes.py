@@ -124,7 +124,6 @@ class PrefabKubernetes(app):
         for node in nodes:
             node.virtualization.kubernetes.install_minion(join_line)
 
-
         self.doneSet("multihost_install")
 
         return config, join_line
@@ -380,7 +379,6 @@ class PrefabKubernetes(app):
             node.executor.sshclient.ssh_authorize('root', pubkey=pub_key)
             _, user, _ = init_node.core.run('whoami', showout=False)
             init_node.system.ssh.define_host(node.executor.sshclient.addr, user)
-
 
         # move the config to be able to use kubectl directly
         init_node.core.dir_ensure('$HOMEDIR/.kube')

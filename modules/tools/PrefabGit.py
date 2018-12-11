@@ -29,7 +29,6 @@ class PrefabGit(base):
 
     def pullRepo(self, url, dest=None, login=None, passwd=None, depth=None,
                  ignorelocalchanges=True, reset=False, branch=None, tag=None, revision=None, ssh=False):
-
         """
         ssh = if True will build ssh url, if "auto" or "first" will check if there is ssh-agent available & keys are loaded,
             if yes will use ssh (True)
@@ -45,7 +44,6 @@ class PrefabGit(base):
 
         if reset:
             self.prefab.core.dir_remove(dest)
-
 
         self.prefab.core.dir_ensure(j.sal.fs.getParent(dest))
 
@@ -67,5 +65,5 @@ class PrefabGit(base):
         self.logger.info("pull %s with depth:%s" % (url, depth))
 
         return j.clients.git.pullGitRepo(url=url, dest=dest, login=login, passwd=passwd, depth=depth,
-                                ignorelocalchanges=ignorelocalchanges, reset=reset, branch=branch, revision=revision,
-                                ssh=ssh, executor=self.executor, tag=tag)
+                                         ignorelocalchanges=ignorelocalchanges, reset=reset, branch=branch, revision=revision,
+                                         ssh=ssh, executor=self.executor, tag=tag)

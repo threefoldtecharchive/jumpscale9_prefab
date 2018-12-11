@@ -26,7 +26,8 @@ class PrefabChroot(base):
     def install_ubuntu(self, distro='xenial'):
         self.prefab.core.dir_ensure(self.path)
         self.prefab.core.command_ensure('debootstrap')
-        self.prefab.core.run('debootstrap {} {} http://ftp.belnet.be/ubuntu.com/ubuntu'.format(distro, self.path), timeout=3600)
+        self.prefab.core.run(
+            'debootstrap {} {} http://ftp.belnet.be/ubuntu.com/ubuntu'.format(distro, self.path), timeout=3600)
         sources = '''\
 deb http://archive.ubuntu.com/ubuntu/ {0} main universe multiverse restricted
 '''.format(distro)
@@ -73,13 +74,15 @@ class PrefabUbuntuContainer(base):
         chroot = PrefabChroot(self.prefab)
         chroot.install_ubuntu(dist)
         with chroot:
-            chroot.append_file('/root/.bashrc', 'export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin/:/usr/local/sbin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl')
+            chroot.append_file(
+                '/root/.bashrc', 'export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin/:/usr/local/sbin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl')
             chroot.execute('locale-gen')
             chroot.write_file('/etc/hostname', 'ubuntu')
             chroot.write_file('/etc/resolv.conf', 'nameserver 8.8.8.8')
             chroot.execute('mkdir /var/run/sshd')
             chroot.execute('apt-get update')
-            chroot.execute('apt-get install -y --allow-unauthenticated --no-install-recommends build-essential git vim mc openssh-server linux-generic wget ca-certificates curl')
+            chroot.execute(
+                'apt-get install -y --allow-unauthenticated --no-install-recommends build-essential git vim mc openssh-server linux-generic wget ca-certificates curl')
             chroot.execute('echo "root:{}" | chpasswd'.format(passwd))
 
             if ssh_autostart is True:
@@ -88,10 +91,12 @@ class PrefabUbuntuContainer(base):
 
         tarfile = '/tmp/ubuntu-{}.tar.gz'.format(dist)
         self.prefab.core.dir_remove('{}/var/cache/apt/archives'.format(chroot.path))
-        self.prefab.core.run('tar czpf {} -C {} --exclude tmp --exclude dev --exclude sys --exclude proc .'.format(tarfile, chroot.path))
+        self.prefab.core.run(
+            'tar czpf {} -C {} --exclude tmp --exclude dev --exclude sys --exclude proc .'.format(tarfile, chroot.path))
 
         if jwt:
-            self.prefab.core.run('curl -b "caddyoauth={}" -F file=@{} https://hub.gig.tech/api/flist/me/upload'.format(jwt, tarfile))
+            self.prefab.core.run(
+                'curl -b "caddyoauth={}" -F file=@{} https://hub.gig.tech/api/flist/me/upload'.format(jwt, tarfile))
 
         self.prefab.core.dir_remove(chroot.path)
         return tarfile

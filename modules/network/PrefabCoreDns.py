@@ -81,7 +81,7 @@ class PrefabCoreDns(app):
     def start(self):
         self.__init()
         cmd = "{coredns_path}/coredns -conf {path_config}".format(
-                coredns_path=self.coredns_code_dir,path_config=self.path_config)
+            coredns_path=self.coredns_code_dir, path_config=self.path_config)
         self.prefab.system.processmanager.get().ensure("coredns", cmd, wait=10, expect='53')
 
     def register_a_record(self, ns_addr, domain_name, subdomain, resolve_to=None,

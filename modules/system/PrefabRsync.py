@@ -50,7 +50,7 @@ class PrefabRsync(base):
         if install:
             self.install()
 
-    def install(self,build=False):
+    def install(self, build=False):
         if build:
             if not self.doneGet("build"):
                 self.build(install=False)
@@ -59,11 +59,10 @@ class PrefabRsync(base):
             self.prefab.core.file_copy(
                 "%s/%s/rsync" %
                 (self.BUILDDIRL,
-                self.VERSION),
+                 self.VERSION),
                 self.prefab.core.dir_paths['BINDIR'])
         else:
             self.prefab.system.package.install("rsync")
 
     def configure(self):
         self.install(build=False)
-        

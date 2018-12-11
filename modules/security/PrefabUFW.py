@@ -14,7 +14,7 @@ class PrefabUFW(base):
     @property
     def ufw_enabled(self):
         if self.prefab.core.isMac:
-            return  False        
+            return False
         if not self._ufw_enabled:
             if not self.prefab.core.isMac:
                 if self.prefab.bash.cmdGetPath("nft", die=False) is not False:
@@ -70,18 +70,18 @@ class PrefabUFW(base):
                 self._ufw_deny[ip] = "*"
 
     def allowIncoming(self, port, protocol='tcp'):
-        if self.ufw_enabled==False:
-            return 
+        if self.ufw_enabled == False:
+            return
         self.prefab.core.run("ufw allow %s/%s" % (port, protocol))
 
     def denyIncoming(self, port):
-        if self.ufw_enabled==False:
-            return 
+        if self.ufw_enabled == False:
+            return
         self.prefab.core.run("ufw deny %s" % port)
 
     def flush(self):
-        if self.ufw_enabled==False:
-            return          
+        if self.ufw_enabled == False:
+            return
         C = """
         ufw disable
         iptables --flush
@@ -94,8 +94,8 @@ class PrefabUFW(base):
         self.prefab.core.execute_bash(C)
 
     def show(self):
-        if self.ufw_enabled==False:
-            return                 
+        if self.ufw_enabled == False:
+            return
         a = self.ufw_rules_allow
         b = self.ufw_rules_deny
         self.logger.info("ALLOW")

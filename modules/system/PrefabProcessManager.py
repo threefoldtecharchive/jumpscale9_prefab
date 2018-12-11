@@ -4,6 +4,7 @@ from Jumpscale import j
 
 base = j.tools.prefab._getBaseClass()
 
+
 class PrefabProcessManager(base):
 
     def _init(self):
@@ -17,7 +18,7 @@ class PrefabProcessManager(base):
         return self._logger
 
     def systemdOK(self):
-        res =  self.prefab.core.command_check("systemctl")
+        res = self.prefab.core.command_check("systemctl")
         self.logger.info("systemd:%s" % res)
         return res
 
@@ -27,7 +28,7 @@ class PrefabProcessManager(base):
         return res
 
     def get_prefered(self):
-        #TODO : this will always return tmux, it should check other pms first
+        # TODO : this will always return tmux, it should check other pms first
         for pm in ["tmux", "systemd", "sv"]:
             if self.is_available(pm):
                 return pm
@@ -47,10 +48,10 @@ class PrefabProcessManager(base):
         Tmux: prefab.system.processmanager.get(pm='tmux') 
         Runit: prefab.system.processmanager.get(pm='sv') 
         SystemD: prefab.system.processmanager.get(pm='tmux') 
-        
+
         if pm=None, prefab will try to get your prefered process manager
             by checking what pm is available 
-        
+
         :param pm: process manager or none to let prefab select your prefered process manager, defaults to None
         :param pm: String, optional
         :return: process manager to be used

@@ -23,14 +23,11 @@ class PrefabGowncloud(app):
         self.prefab.core.file_copy("{dest}/gowncloud".format(dest=dest), "$BINDIR")
         self.doneSet('build')
 
-
     def install(self, reset=False):
         """
         Install method
         """
         return self.build()
-
-
 
     def start(
             self,

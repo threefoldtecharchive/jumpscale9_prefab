@@ -6,6 +6,7 @@ app = j.tools.prefab._getBaseAppClass()
 _NBDSERVER_CONFIG_FILE = "$BASEDIR/config/nbdserver/config.yaml"
 _DEFAULT_LOCAL_CONFIG_FILE = "./config.yaml"
 
+
 class PrefabZDisk(app):
     '''
     Manages 0-Disk over prefab
@@ -22,14 +23,14 @@ class PrefabZDisk(app):
         if self.is_installed() and not reset:
             self.logger.info("0-Disk was already installed, pass reset=True to reinstall.")
             return
-        
+
         # install dependencies
         self.prefab.system.package.install("git")
         self.prefab.runtimes.golang.install()
 
         # install 0-Disk
-        install_path =  j.sal.fs.joinPaths(self.prefab.runtimes.golang.GOPATH,\
-        "src", "github.com", "zero-os")
+        install_path = j.sal.fs.joinPaths(self.prefab.runtimes.golang.GOPATH,
+                                          "src", "github.com", "zero-os")
         self.prefab.core.dir_ensure(install_path)
         cmd = """
         cd {0}
@@ -62,9 +63,9 @@ class PrefabZDisk(app):
             and self.prefab.core.command_check('tlogserver')\
             and self.prefab.core.command_check('zeroctl')
 
-    def start_nbdserver(self, address=None, config_file=None, config_cluster=None,\
-    id=None, lbacachelimit=None, logfile=None, profile_address=None, protocol=None,\
-    tlog_priv_key=None, tlsonly="false"):
+    def start_nbdserver(self, address=None, config_file=None, config_cluster=None,
+                        id=None, lbacachelimit=None, logfile=None, profile_address=None, protocol=None,
+                        tlog_priv_key=None, tlsonly="false"):
         '''
         Starts the 0-disk\'s nbdserver
         Check the 0-Disk documentation for details of the flags
@@ -115,7 +116,7 @@ class PrefabZDisk(app):
             cmd += " --tlog-priv-key {}".format(tlog_priv_key)
         if tlsonly is not None:
             cmd += " --tlsonly {}".format(tlsonly)
-        
+
         cmd = self.replace(cmd)
 
         self.prefab.core.run(cmd)

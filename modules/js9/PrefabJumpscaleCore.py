@@ -40,10 +40,8 @@ class PrefabJumpscaleCore(app):
             env = {'JSFULL': '1'}
         self.core.execute_bash(S, env=env)
 
-        assert self.core.run("js_shell 'j.tools.console.echo(\"1\")'")[1]=='1'
+        assert self.core.run("js_shell 'j.tools.console.echo(\"1\")'")[1] == '1'
 
         self.logger.info("jumpscale_install")
 
         self.doneSet("install")
-
-

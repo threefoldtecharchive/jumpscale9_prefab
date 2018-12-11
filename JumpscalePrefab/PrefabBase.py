@@ -2,6 +2,8 @@ from Jumpscale import j
 import inspect
 
 JSBASE = j.application.JSBaseClass
+
+
 class PrefabBase(JSBASE):
 
     def __init__(self, executor, prefab):
@@ -27,8 +29,7 @@ class PrefabBase(JSBASE):
         return self._logger
 
     def _init(self):
-        pass #NEEDS TO REMAIN EMPTY BECAUSE IS USED AT HIGHER LEVEL LAYER
-
+        pass  # NEEDS TO REMAIN EMPTY BECAUSE IS USED AT HIGHER LEVEL LAYER
 
     def replace(self, txt, args={}):
         txt = j.core.text.strip(txt)
@@ -38,8 +39,6 @@ class PrefabBase(JSBASE):
         txt = self.core.replace(txt, args=args)
         return txt
 
-
-
     def reset(self):
         self.executor.state.stateSet(self.classname, {})
         self.doneReset()
@@ -47,14 +46,13 @@ class PrefabBase(JSBASE):
 
     @property
     def done(self):
-        return self.state.stateGet(self.classname,{},True)
+        return self.state.stateGet(self.classname, {}, True)
 
     def doneReset(self):
         """
         resets the remembered items which are done
         """
-        self.state.stateSet(self.classname,{},save=True)
-
+        self.state.stateSet(self.classname, {}, save=True)
 
     def doneSet(self, key):
         if self.executor.readonly:
@@ -72,7 +70,7 @@ class PrefabBase(JSBASE):
             if item.strip() == "":
                 continue
             done[item] = True
-        self.state.stateSet(self.classname,done,save=True)
+        self.state.stateSet(self.classname, done, save=True)
         return True
 
     def doneDelete(self, key):
@@ -82,7 +80,7 @@ class PrefabBase(JSBASE):
         done = self.done
         if key in done:
             del (done[key])
-        self.state.stateSet(self.classname,done,save=True)
+        self.state.stateSet(self.classname, done, save=True)
         return True
 
     def doneGet(self, key):
@@ -126,7 +124,6 @@ class PrefabBase(JSBASE):
         if self._cache is None:
             self._cache = j.core.cache.get("prefab" + self.id + self.classname, reset=True, expiration=600)  # 10 min
         return self._cache
-
 
     def __str__(self):
         return "%s:%s" % (self.classname, self.executor.id)

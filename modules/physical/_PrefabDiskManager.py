@@ -6,9 +6,9 @@ base = j.tools.prefab._getBaseClass()
 raise NotImplemented()
 
 
-class PrefabDiskManager(base,DiskManager):
+class PrefabDiskManager(base, DiskManager):
 
-    def __init__(self,executor, prefab):
+    def __init__(self, executor, prefab):
         DiskManager.__init__(self)
         base.__init__(self, executor, prefab)
 

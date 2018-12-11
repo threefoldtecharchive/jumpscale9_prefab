@@ -45,7 +45,7 @@ class PrefabAlba(base):
             'https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh', to='$TMPDIR/opam_installer.sh', minsizekb=0)
         self.prefab.core.run('sed -i "/read -p/d" $TMPDIR/opam_installer.sh')  # remove any confirmation
         self.prefab.core.run('bash $TMPDIR/opam_installer.sh $BINDIR %s' %
-                              self.ocaml_version, profile=True, shell=True)
+                             self.ocaml_version, profile=True, shell=True)
 
         cmd = 'opam init --root=%s --comp %s -a --dot-profile %s' % (
             self.opam_root, self.ocaml_version, self.prefab.bash.profilePath)
@@ -56,7 +56,7 @@ class PrefabAlba(base):
         self.prefab.core.run(
             'cd %s && git pull && git checkout b98fd1964856f0c0b022a42ec4e6fc6c7bad2e81' % janestreet, shell=True)
         self.prefab.core.run("opam repo --root=%s -k local add janestreet %s || exit 0" %
-                              (self.opam_root, janestreet), profile=True)
+                             (self.opam_root, janestreet), profile=True)
 
         cmd = "opam config env --root=%s --dot-profile %s > $TMPDIR/opam.env" % (
             self.opam_root, self.prefab.bash.profilePath)
@@ -168,9 +168,9 @@ class PrefabAlba(base):
 
     def _install_deps_sources(self):
         self.prefab.core.file_write('/etc/apt/sources.list.d/wily-universe.list',
-                                     "deb http://archive.ubuntu.com/ubuntu/ wily universe\n")
+                                    "deb http://archive.ubuntu.com/ubuntu/ wily universe\n")
         self.prefab.core.file_write('/etc/apt/sources.list.d/ovsaptrepo.list',
-                                     "deb http://apt.openvstorage.org unstable main\n")
+                                    "deb http://apt.openvstorage.org unstable main\n")
         self.prefab.system.package.mdupdate()
 
         apt_deps = """

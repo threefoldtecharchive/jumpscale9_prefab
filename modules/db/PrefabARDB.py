@@ -41,9 +41,9 @@ class PrefabARDB(app):
             return
 
         self.prefab.system.package.install(["git-core",
-                                                 "cmake",
-                                                 "libsnappy-dev",
-                                                 "g++"])
+                                            "cmake",
+                                            "libsnappy-dev",
+                                            "g++"])
 
         url = "git@github.com:couchbase/forestdb.git"
         cpath = self.prefab.tools.git.pullRepo(url, tag="v1.2", reset=reset)

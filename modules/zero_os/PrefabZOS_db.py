@@ -12,7 +12,7 @@ class PrefabZOS_db(app):
     NAME = 'db'
 
     def build(self, debug=False, start=False, install=True, reset=False):
-    
+
         if reset is False and self.isInstalled():
             return
 
@@ -22,7 +22,7 @@ class PrefabZOS_db(app):
 
         path = self.prefab.tools.git.pullRepo('https://github.com/threefoldtech/0-db')
         # self.prefab.core.run("cd %s; git reset --hard HEAD~10 && git pull"%path)
-        self.prefab.core.run("cd %s; git checkout development"%path)
+        self.prefab.core.run("cd %s; git checkout development" % path)
 
         make = "make" if debug else "make release"
         self.prefab.core.run("cd %s && make clean && %s" % (path, make))

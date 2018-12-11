@@ -31,7 +31,7 @@ class PrefabWordpress(app):
         # 3- install caddy
         self.prefab.web.caddy.install(plugins=["iyo"])
 
-        #4- nstall wp-cli
+        # 4- nstall wp-cli
         url = "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
         cli_path = "/usr/local/bin/wp"
         cli_path = self.replace(cli_path)
@@ -42,7 +42,7 @@ class PrefabWordpress(app):
             self.prefab.system.user.create(self.user)
         self.doneSet("build")
 
-    def install(self, path, url, title, admin_user, admin_password, admin_email, 
+    def install(self, path, url, title, admin_user, admin_password, admin_email,
                 db_name='wordpress', db_user='wordpress', db_password='wordpress', port=8090, plugins=None, theme=None, reset=False):
         """install 
 
@@ -63,12 +63,13 @@ class PrefabWordpress(app):
         if self.doneCheck("install", reset):
             return
         self.build(reset=reset)
-        
-        # create a database 
-        self.prefab.db.mariadb.sql_execute(None, "CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" % db_name)
+
+        # create a database
+        self.prefab.db.mariadb.sql_execute(
+            None, "CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" % db_name)
         # create a new super user for this database
         self.prefab.db.mariadb.admin_create(db_user, db_password)
-        
+
         self.prefab.core.dir_ensure(path)
         self.prefab.core.run("chown {0}:{0} {1}".format(self.user, path))
 
@@ -80,7 +81,7 @@ class PrefabWordpress(app):
            	fastcgi / /var/run/php/php7.0-fpm.sock php
         }}
         """.format(port, path)
-        self.prefab.web.caddy.add_website("wordpress",cfg)
+        self.prefab.web.caddy.add_website("wordpress", cfg)
 
         self.prefab.executor.execute("rm -rf {}/*".format(path))
         # download wordpress
@@ -95,9 +96,9 @@ class PrefabWordpress(app):
         # install wordpress
         install_command = """
         sudo -u {user} -i -- wp  --path={path} core install --url='{url}' --title='{title}' --admin_user='{admin_user}' --admin_password='{admin_password}' --admin_email='{admin_email}'
-        """.format(user=self.user, url=url, title=title, admin_user=admin_user, 
+        """.format(user=self.user, url=url, title=title, admin_user=admin_user,
                    admin_password=admin_password, admin_email=admin_email, path=path)
-        self.prefab.executor.execute(install_command) 
+        self.prefab.executor.execute(install_command)
 
         # install themes
         self.install_theme(path, theme)
@@ -117,7 +118,7 @@ class PrefabWordpress(app):
         sudo chown -R www-data:www-data {path}/wp-content
         """.format(path=path)
         self.prefab.executor.execute(cmd)
-        
+
         self.doneSet("install")
 
     def install_theme(self, path, theme):
@@ -130,10 +131,10 @@ class PrefabWordpress(app):
     def install_plugins(self, path, plugins, activate=False):
         if not plugins:
             plugins = []
-        
+
         activate_cmd = ""
         if activate:
-            activate_cmd ="--activate"
+            activate_cmd = "--activate"
 
         for plugin in plugins:
             plugins_command = """
@@ -143,7 +144,7 @@ class PrefabWordpress(app):
 
     def add_config(self, path, config):
         """add constants to wordpress config
-        
+
         Arguments:
             config {Dict} -- constances to be added
         """
@@ -153,18 +154,17 @@ class PrefabWordpress(app):
             """.format(self.user, path, item[0], item[1])
             self.prefab.core.run(command)
 
-
     def download_backup(self, path, cfg_path='/opt/cfg', dbname='wordpress'):
         """download a full packup for a wordpress website including
         1- databse dump
         2- wp files
         3- caddy configurations
-        
+
         Arguments:
             path {STRING} -- wordpress installation path
             dbname {STRING} -- databse name
         """
-        
+
         backup_path = "/tmp/backup_{}".format(str(time.time()))
         self.prefab.core.dir_ensure(backup_path)
         # export database
@@ -177,12 +177,12 @@ class PrefabWordpress(app):
         self.prefab.core.copyTree(cfg_path, backup_path + cfg_path)
 
         backup_tar_name = "/tmp/backup_{}.tar.gz".format(str(time.time()))
-        
+
         rc, _, _ = self.prefab.core.run('tar -czvf {} {}'.format(backup_tar_name, backup_path))
         if rc == 0:
             self.logger.info('Backup done successfuly')
         else:
             self.logger.info('an error happened while compressing your backup')
-        
+
         # clean up
         self.prefab.core.dir_remove(backup_path)

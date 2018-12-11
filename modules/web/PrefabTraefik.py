@@ -122,7 +122,7 @@ class PrefabTraefik(app):
         if agree:
             agree = " -agree"
 
-        print (cmd)
+        print(cmd)
 
         # self.prefab.system.processmanager.ensure(
         #     "caddy", 'ulimit -n 8192; %s -conf=%s -email=%s %s' % (cmd, args["CONFIGPATH"], args["EMAIL"], agree), wait=1)

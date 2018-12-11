@@ -69,7 +69,7 @@ class PrefabTarantool(app):
                 #                                    'python-msgpack,python-yaml,python-argparse,'
                 #                                    'python-six,python-gevent,luarocks')
 
-                #should be mainly done in self.prefab.system.installbase.development()
+                # should be mainly done in self.prefab.system.installbase.development()
                 self.prefab.system.package.install('build-essential,cmake,coreutils,sed,libreadline-dev,'
                                                    'libncurses5-dev,libyaml-dev,libssl-dev,libcurl4-openssl-dev,'
                                                    'libunwind-dev,luarocks')
@@ -113,8 +113,6 @@ class PrefabTarantool(app):
                 self.doneSet('msgpuck')
 
             self.doneSet('install')
-
-
 
     def install_luarocks_rock(self, name):
         """

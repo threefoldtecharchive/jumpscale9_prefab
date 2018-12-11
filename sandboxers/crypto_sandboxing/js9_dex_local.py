@@ -29,7 +29,7 @@ def main(prefab):
     electrum_archive_file = '/tmp/{}.tar.gz'.format(ELECTRUM_FLIST_NAME)
     prefab.core.execute_bash('cd {} && tar -czf {} .'.format(data_dir, electrum_archive_file))
 
-    zhub_data = {'token_': iyo_client.jwt_get(), 'username': username,'url': 'https://hub.gig.tech/api'}
+    zhub_data = {'token_': iyo_client.jwt_get(), 'username': username, 'url': 'https://hub.gig.tech/api'}
     zhub_client = j.clients.zhub.get(instance="main", data=zhub_data)
     if hasattr(zhub_client, 'authentificate'):
         zhub_client.authentificate()
@@ -40,15 +40,17 @@ def main(prefab):
 
     # merge the electrum flist with a base ubuntu flist and the jumpscale flist
     sources = ['gig-official-apps/ubuntu1604-for-js.flist',
-                'abdelrahman_hussein_1/js9_sandbox.flist',
-                'abdelrahman_hussein_1/ubuntu_xenial_boot.flist',
-                '{}/{}'.format(zhub_client.config.data['username'], ELECTRUM_FLIST_NAME)]
+               'abdelrahman_hussein_1/js9_sandbox.flist',
+               'abdelrahman_hussein_1/ubuntu_xenial_boot.flist',
+               '{}/{}'.format(zhub_client.config.data['username'], ELECTRUM_FLIST_NAME)]
     url = '{}/flist/me/merge/{}'.format(zhub_client.api.base_url, JS9_DEX_FLIST_NAME)
-    resp = zhub_client.api.post(uri=url, data=json.dumps(sources), headers=None, params=None, content_type='application/json')
+    resp = zhub_client.api.post(uri=url, data=json.dumps(sources), headers=None,
+                                params=None, content_type='application/json')
     if resp.status_code != 200:
         raise RuntimeError('Failed to merge sources {}. Error: {}'.format(sources, resp.text))
 
-    print("Done! New flist can be found under: {}".format('{}/{}'.format(zhub_client.config.data['username'], JS9_DEX_FLIST_NAME)))
+    print("Done! New flist can be found under: {}".format(
+        '{}/{}'.format(zhub_client.config.data['username'], JS9_DEX_FLIST_NAME)))
 
 
 if __name__ == '__main__':

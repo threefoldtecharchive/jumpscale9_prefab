@@ -13,7 +13,7 @@ class PrefabNIM(base):
         self.BUILDDIRL = self.core.replace("$BUILDDIR/nimlang/")
         self.CODEDIRL = self.core.replace("$BUILDDIR/code/nimlang/")
 
-    def build(self,reset=False):
+    def build(self, reset=False):
         """
         js_shell 'j.tools.prefab.local.runtimes.nim.build(reset=False)'
         :return:
@@ -27,11 +27,10 @@ class PrefabNIM(base):
 
         url = "https://nim-lang.org/download/nim-0.19.0.tar.xz"
 
-
         self.prefab.core.file_download(url, to=self.CODEDIRL, overwrite=False,
                                        expand=True, minsizekb=400, removeTopDir=True, deletedest=True)
 
-        C="""
+        C = """
         cd $CODEDIRL
         export LDFLAGS="-L/usr/local/opt/openssl/lib"
         export CPPFLAGS="-I/usr/local/opt/openssl/include"
@@ -43,4 +42,3 @@ class PrefabNIM(base):
         """
 
         self.core.execute_bash(self.replace(C))
-

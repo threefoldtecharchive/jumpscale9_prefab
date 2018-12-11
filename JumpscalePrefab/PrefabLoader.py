@@ -50,7 +50,10 @@ import inspect
 class PrefabCat():
     pass
 
+
 JSBASE = j.application.JSBaseClass
+
+
 class PrefabLoader(JSBASE):
 
     def __init__(self):

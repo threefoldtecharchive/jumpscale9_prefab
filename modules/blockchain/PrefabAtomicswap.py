@@ -7,7 +7,7 @@ app = j.tools.prefab._getBaseAppClass()
 class PrefabAtomicswap(app):
     NAME = "atomicswap"
 
-    def build(self, branch=None,tag=None, revision=None, reset=False):
+    def build(self, branch=None, tag=None, revision=None, reset=False):
         if self.doneGet('build') and reset is False:
             return
         self.prefab.system.package.mdupdate()
@@ -29,12 +29,12 @@ class PrefabAtomicswap(app):
 
         self.doneSet('build')
 
-    def install(self, branch=None,tag='v0.1.0', revision=None, reset=False):
+    def install(self, branch=None, tag='v0.1.0', revision=None, reset=False):
         # if branch, tag, revision = None it will build form master
         if self.doneGet('install') and reset is False:
             return
 
-        self.build(branch=branch,tag=tag, revision=revision, reset=reset)
+        self.build(branch=branch, tag=tag, revision=revision, reset=reset)
         tfchaindpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'btcatomicswap')
         tfchaincpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'ethatomicswap')
 

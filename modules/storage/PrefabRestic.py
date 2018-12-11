@@ -28,7 +28,8 @@ class PrefabRestic(app):
         if reset is False and (self.isInstalled() or self.doneGet('quick_install')):
             return
         if not self.prefab.core.file_exists(self.DOWNLOAD_DEST):
-            self.prefab.core.file_download('https://github.com/restic/restic/releases/download/v0.9.0/restic_0.9.0_linux_amd64.bz2', self.DOWNLOAD_DEST)
+            self.prefab.core.file_download(
+                'https://github.com/restic/restic/releases/download/v0.9.0/restic_0.9.0_linux_amd64.bz2', self.DOWNLOAD_DEST)
         self.prefab.core.file_expand(self.DOWNLOAD_DEST)
         self.prefab.core.run('chmod +x {}'.format(self.FILE_NAME))
 
@@ -67,7 +68,7 @@ class PrefabRestic(app):
             return
 
         if source:
-            self.prefab.core.file_copy(self.FILE_NAME, '$BINDIR/restic' )
+            self.prefab.core.file_copy(self.FILE_NAME, '$BINDIR/restic')
         else:
             self.prefab.core.file_copy(self.CODEDIR + '/restic', '$BINDIR')
 

@@ -15,7 +15,6 @@ class PrefabSmartmontools(base):
     _VERSION = "6.6"
     _REL_INSTALL_LOCATION = j.sal.fs.joinPaths("usr", "local", "sbin")
 
-
     def install(self):
         """
         Installs version 6.6 of smartmontools
@@ -26,20 +25,21 @@ class PrefabSmartmontools(base):
         if self.isInstalled():
             self.logger.info("smartctl version %s is present" % self._VERSION)
             return
-            
+
         self.logger.info("installing smartctl...")
 
         tmp_location = self.prefab.core.file_download(self._DOWNLOAD_URL, expand=True)
 
         # move downloaded binary to installation destination
-        self.core.run("mv %s %s" % (j.sal.fs.joinPaths(tmp_location, self._REL_INSTALL_LOCATION, "smartctl") , j.sal.fs.joinPaths(os.sep, self._REL_INSTALL_LOCATION)))
-        
+        self.core.run("mv %s %s" % (j.sal.fs.joinPaths(tmp_location, self._REL_INSTALL_LOCATION,
+                                                       "smartctl"), j.sal.fs.joinPaths(os.sep, self._REL_INSTALL_LOCATION)))
+
         # cleanup
         self.prefab.core.dir_remove(tmp_location)
 
         if not self.isInstalled():
             raise RuntimeError("Failed to install Smartmontools")
-    
+
     def isInstalled(self):
         """
         Checks smartctl of the correct version is installed
@@ -56,7 +56,8 @@ class PrefabSmartmontools(base):
         self.logger.debug("smartctl version '%s' found" % version)
 
         if version != self._VERSION:
-            self.logger.warning("smartctl found but was version: %s\nNeed version %s to be installed" % (version, self._VERSION))
+            self.logger.warning("smartctl found but was version: %s\nNeed version %s to be installed" %
+                                (version, self._VERSION))
             return False
-        
+
         return True

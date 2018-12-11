@@ -2,6 +2,7 @@ from Jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 
+
 class PrefabSkyDns(app):
 
     def build(self, start=True, install=True):

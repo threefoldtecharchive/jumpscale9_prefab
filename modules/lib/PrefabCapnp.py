@@ -23,11 +23,11 @@ class PrefabCapnp(app):
         if self.prefab.core.isUbuntu:
             self.prefab.system.package.install('g++')
 
-        url="https://capnproto.org/capnproto-c++-0.6.1.tar.gz"
+        url = "https://capnproto.org/capnproto-c++-0.6.1.tar.gz"
         dest = self.replace("$BUILDDIR/capnproto")
         self.prefab.core.createDir(dest)
         self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
-                    expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
+                                       expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
 
         script = """
         cd $BUILDDIR/capnproto
@@ -39,10 +39,8 @@ class PrefabCapnp(app):
 
         self.doneSet('capnp')
 
-
     def install(self):
         self.build()
         self.prefab.runtimes.pip.multiInstall(['cython', 'setuptools', 'pycapnp'], upgrade=True)
-
 
         self.doneSet('capnp')

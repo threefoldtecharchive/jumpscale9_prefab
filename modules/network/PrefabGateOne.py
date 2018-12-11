@@ -24,7 +24,7 @@ class PrefabGateOne(app):
         Installs gateone
 
         @param reset: boolean: forces the install operation.
-    
+
         """
         if reset is False and self.isInstalled():
             return
@@ -42,7 +42,6 @@ ln -s /usr/bin/python3 /usr/bin/python
         self.doneSet('install')
 
     def start(self, name="main", address="localhost", port=10443):
-
         """
         Starts gateone.
 
@@ -51,7 +50,8 @@ ln -s /usr/bin/python3 /usr/bin/python
         @param port: int: port number.
 
         """
-        cmd = "eval `ssh-agent -s` ssh-add /root/.ssh/id_rsa && gateone --address={} --port={} --disable_ssl".format(address, port)
+        cmd = "eval `ssh-agent -s` ssh-add /root/.ssh/id_rsa && gateone --address={} --port={} --disable_ssl".format(
+            address, port)
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name='gateone_{}'.format(name), cmd=cmd)
 

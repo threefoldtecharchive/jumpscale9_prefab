@@ -13,7 +13,6 @@ class PrefabOpenResty(app):
     def _init(self):
         self.BUILDDIR = self.replace("$BUILDDIR")
 
-
     def install(self, start=True):
         """
         Moving build files to build directory and copying config files
@@ -110,13 +109,13 @@ class PrefabOpenResty(app):
             self.prefab.core.run(C)
 
         else:
-            url="https://openresty.org/download/openresty-1.13.6.2.tar.gz"
+            url = "https://openresty.org/download/openresty-1.13.6.2.tar.gz"
             dest = self.replace("$BUILDDIR/openresty")
             self.prefab.core.createDir(dest)
             # dest = self.replace("$BUILDDIR/openresty")
             self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
-                        expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
-            C="""
+                                           expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
+            C = """
             ./configure -j2 --with-ipv6 
             make -j2
             """
@@ -125,8 +124,6 @@ class PrefabOpenResty(app):
 
         if install:
             self.install()
-
-
 
     def test(self):
         # host a file test can be reached

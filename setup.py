@@ -6,7 +6,7 @@ import os
 
 def _post_install(libname, libpath):
     os.environ["JSRELOAD"] = "1"
-    from Jumpscale import j 
+    from Jumpscale import j
 
 
 class install(_install):

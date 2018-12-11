@@ -12,6 +12,7 @@ class PrefabRocksDB(base):
         # install required packages to run.
         if self.doneCheck("install", reset):
             return
-        self.prefab.runtimes.pip.install('http://home.maxux.net/wheelhouse/python_rocksdb-0.6.9-cp35-cp35m-manylinux1_x86_64.whl')
+        self.prefab.runtimes.pip.install(
+            'http://home.maxux.net/wheelhouse/python_rocksdb-0.6.9-cp35-cp35m-manylinux1_x86_64.whl')
 
         self.doneSet("install")

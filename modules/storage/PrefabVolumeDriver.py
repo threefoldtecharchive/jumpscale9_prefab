@@ -16,7 +16,7 @@ class PrefabVolumeDriver(app):
 
     def _install_deps(self):
         self.prefab.core.file_write('/etc/apt/sources.list.d/ovsaptrepo.list',
-                                     'deb http://apt.openvstorage.org unstable main')
+                                    'deb http://apt.openvstorage.org unstable main')
         self.prefab.core.run(
             'echo "deb http://us.archive.ubuntu.com/ubuntu xenial main universe" >> /etc/apt/sources.list')
         self.prefab.system.package.mdupdate()

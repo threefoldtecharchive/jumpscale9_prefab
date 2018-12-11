@@ -3,6 +3,7 @@ from Jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 
+
 class PrefabVulcand(app):
 
     def build(self, reset=False):

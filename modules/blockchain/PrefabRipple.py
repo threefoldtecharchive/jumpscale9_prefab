@@ -15,9 +15,9 @@ class PrefabRipple(app):
 
         if self.doneGet('build') and reset is False:
             return
-        
+
         # rfer to: https://ripple.com/build/rippled-setup/#installing-rippled
-    
+
         self.prefab.system.package.install(['yum-utils', 'alien'])
         cmds = """
         rpm -Uvh https://mirrors.ripple.com/ripple-repo-el7.rpm

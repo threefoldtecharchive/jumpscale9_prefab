@@ -53,7 +53,7 @@ class PrefabOpenSSL(base):
             return
         self.prefab.system.installbase.development(python=False)
         url = "https://github.com/openssl/openssl.git"
-        self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable",dest=self.CODEDIRL, reset=False, ssh=False)
+        self.prefab.tools.git.pullRepo(url, branch="OpenSSL_1_1_0-stable", dest=self.CODEDIRL, reset=False, ssh=False)
 
         if not self.doneGet("compile") or reset:
             C = """
@@ -75,7 +75,7 @@ class PrefabOpenSSL(base):
 
             self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.replace(C))
             self.logger.info("compile openssl")
-            self.logger.debug(C)                
+            self.logger.debug(C)
             self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)
             self.doneSet("compile")
             self.logger.info("BUILD DONE")

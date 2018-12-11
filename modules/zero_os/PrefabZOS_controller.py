@@ -55,13 +55,13 @@ class PrefabZOS_controller(app):
             "CODEDIR"]
         if self.prefab.core.dir_exists(jumpscript_folfer):
             self.prefab.core.file_copy(jumpscript_folfer + "/jumpscale",
-                                        "$TEMPLATEDIR/cfg/controller/jumpscripts/", recursive=True)
+                                       "$TEMPLATEDIR/cfg/controller/jumpscripts/", recursive=True)
 
         self.prefab.core.file_copy("%s/extensions" % sourcepath,
-                                    "$TEMPLATEDIR/cfg/controller/extensions", recursive=True)
+                                   "$TEMPLATEDIR/cfg/controller/extensions", recursive=True)
 
         self.prefab.core.file_copy("%s/agentcontroller.toml" % sourcepath,
-                                    '$TEMPLATEDIR/cfg/controller/agentcontroller.toml')
+                                   '$TEMPLATEDIR/cfg/controller/agentcontroller.toml')
 
         if start:
             self.start(listen_addr=listen_addr)

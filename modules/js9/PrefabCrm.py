@@ -36,8 +36,6 @@ class PrefabCrm(app):
         requirements = j.sal.fs.readFile("{}/requirements.pip".format(self.crm_dir))
         self.prefab.runtimes.pip.multiInstall(requirements)
 
-
-
         # Install Caddy
         self.prefab.web.caddy.build(plugins=['iyo', 'git', 'mailout'], reset=True)
         self.prefab.web.caddy.install(reset=True)
@@ -141,7 +139,8 @@ class PrefabCrm(app):
         """
         if demo:
             cmd += "flask loadfixtures"
-        cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name, sendgrid_api_key=sendgrid_api_key, support_email=support_email)
+        cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name,
+                         sendgrid_api_key=sendgrid_api_key, support_email=support_email)
         self.prefab.core.run(cmd, profile=True)
 
         self.doneSet('configure')
@@ -155,7 +154,7 @@ class PrefabCrm(app):
             return
 
         if not self.prefab.db.postgresql.isStarted():
-                self.prefab.db.postgresql.start()
+            self.prefab.db.postgresql.start()
 
         if not self.prefab.db.redis.isStarted():
             self.prefab.db.redis.start()
@@ -170,10 +169,10 @@ class PrefabCrm(app):
         cmd += "export SUPPORT_EMAIL={support_email};"
         cmd += "export ENV=prod;export FLASK_APP=app.py;"
         cmd = cmd.format(src_dir=self.crm_dir, db_name=db_name, support_email=support_email,
-                             sendgrid_api_key=sendgrid_api_key)
+                         sendgrid_api_key=sendgrid_api_key)
         crm_cmd = cmd + "flask db upgrade; uwsgi --ini uwsgi.ini"
         mailer_cmd = cmd + "flask mailer"
-        sync_data_cmd = cmd  + "flask syncdata"
+        sync_data_cmd = cmd + "flask syncdata"
         rq_worker_cmd = cmd + "flask rq_worker"
 
         pm = self.prefab.system.processmanager.get()

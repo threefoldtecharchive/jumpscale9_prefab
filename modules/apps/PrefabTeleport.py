@@ -72,7 +72,8 @@ class PrefabTeleport(app):
         @param extra_paths,,str extra paths to copy the binaries into 
         @param version,, version of the binaries to download
         """
-        url = 'https://github.com/gravitational/teleport/releases/download/{0}/teleport-{0}-linux-amd64-bin.tar.gz'.format(version)
+        url = 'https://github.com/gravitational/teleport/releases/download/{0}/teleport-{0}-linux-amd64-bin.tar.gz'.format(
+            version)
         self.prefab.core.file_download(url, '$TMPDIR/teleport.tar.gz')
         self.prefab.core.run('tar -xzf $TMPDIR/teleport.tar.gz -C $TMPDIR')
         self.prefab.core.file_copy('$TMPDIR/teleport/teleport', '$BINDIR')
@@ -117,7 +118,7 @@ class PrefabTeleport(app):
         self.CONFIG['auth_service']['tokens'] = ['trusted_cluster:%s' % j.data.hash.sha256_string(name)]
         if key_path and cert_path:
             self.CONFIG['proxy_service']['https_key_file'] = key_path
-            self.CONFIG['proxy_service']['https_cert_file'] = cert_path 
+            self.CONFIG['proxy_service']['https_cert_file'] = cert_path
         self.prefab.core.file_write('/etc/teleport.yaml', j.data.serializers.yaml.dumps(self.CONFIG))
 
     def apply_trusted_cluster(self, name, token, web_proxy_addr, tunnel_addr):

@@ -129,14 +129,14 @@ class PrefabNet(base):
           'name': 'docker0'}]
 
         """
-       
+
         IPBLOCKS = re.compile("(^|\n)(?P<block>\d+:.*?)(?=(\n\d+)|$)", re.S)
         IPMAC = re.compile("^\s+link/\w+\s+(?P<mac>(\w+:){5}\w{2})", re.M)
         IPIP = re.compile(r"\s+?inet\s(?P<ip>(\d+\.){3}\d+)/(?P<cidr>\d+)", re.M)
         IPNAME = re.compile("^\d+: (?P<name>.*?)(?=:)", re.M)
 
         def parseBlock(block):
-            result = {'ip': [],'ip6': [], 'cidr': [], 'mac': '', 'name': ''}
+            result = {'ip': [], 'ip6': [], 'cidr': [], 'mac': '', 'name': ''}
             for rec in (IPMAC, IPNAME):
                 match = rec.search(block)
                 if match:
@@ -145,7 +145,7 @@ class PrefabNet(base):
                 for m in mrec.finditer(block):
                     for key, value in list(m.groupdict().items()):
                         result[key].append(value)
-            _,IPV6,_=self.prefab.core.run("ifconfig %s |  awk '/inet6/{print $2}'"% result['name'], showout=False)
+            _, IPV6, _ = self.prefab.core.run("ifconfig %s |  awk '/inet6/{print $2}'" % result['name'], showout=False)
             for ipv6 in IPV6.split('\n'):
                 result['ip6'].append(ipv6)
             if j.data.types.list.check(result['cidr']):
@@ -171,55 +171,54 @@ class PrefabNet(base):
         if device is not None:
             raise j.exceptions.RuntimeError("could not find device")
         return res
-        
+
     def _getNetworkInfoOSX(self):
-        
-        #TODO: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
-        #TODO: has not been tested nor finished
-        
-        
+
+        # TODO: KEEP AS STATE MACHINE, DO NOT GO TO REGEX, this is much easier to read & change
+        # TODO: has not been tested nor finished
+
         _, output, _ = j.sal.process.execute("ifconfig", showout=False)
-        state="start"
+        state = "start"
         interfaces = []
-        result = {'name': ''} #starting one
+        result = {'name': ''}  # starting one
         for line in output.split("\n"):
             line_strip = line.strip()
-            if line.strip()=="":
+            if line.strip() == "":
                 continue
             if line[0] is not " ":
                 if line.startswith("lo"):
-                    continue               
+                    continue
 
                 if "BROADCAST" in line:
-                    #then ok network to parse
-                    result = {'ip': [], 'mac': '', 'name': '', 'active':False, 'ip6': []}
-                    result["name"]=line.split(":",1)[0].strip()
+                    # then ok network to parse
+                    result = {'ip': [], 'mac': '', 'name': '', 'active': False, 'ip6': []}
+                    result["name"] = line.split(":", 1)[0].strip()
                     state = "block"
-                    
+
             if state == "block":
                 if line_strip.startswith("ether"):
-                    result["mac"] = line_strip.split(" ",1)[1].strip()
-                elif line_strip.startswith("inet6"):                    
-                    ip6 = line_strip[6:].split("prefixlen",1)[0].strip()
+                    result["mac"] = line_strip.split(" ", 1)[1].strip()
+                elif line_strip.startswith("inet6"):
+                    ip6 = line_strip[6:].split("prefixlen", 1)[0].strip()
                     if ip6 not in result["ip6"]:
                         result["ip6"].append(ip6)
-                elif line_strip.startswith("inet "):                    
-                    ip = line_strip[5:].split("netmask",1)[0].strip()     
-                    line0 = line_strip.split("netmask",1)[1].strip()
-                    mask = line0.split("broadcast",1)[0].strip()     
+                elif line_strip.startswith("inet "):
+                    ip = line_strip[5:].split("netmask", 1)[0].strip()
+                    line0 = line_strip.split("netmask", 1)[1].strip()
+                    mask = line0.split("broadcast", 1)[0].strip()
                     if ip not in result["ip"]:
                         result["ip"].append(ip)
                     if ip not in result["ip"]:
                         result["ip"].append(ip)
                 elif line_strip.startswith("status"):
                     if "inactive" in line:
-                        result["active"]=False
+                        result["active"] = False
                     else:
-                        result["active"]=True
+                        result["active"] = True
                     interfaces.append(result)
-                             
+
         return interfaces
-        
+
     def getInfo(self, device=None):
         """
         returns network info like
@@ -243,7 +242,6 @@ class PrefabNet(base):
             return self._getNetworkInfoOSX()
         else:
             raise RuntimeError("not implemented")
-
 
         if device is not None:
             raise j.exceptions.RuntimeError("not implemented")
@@ -320,4 +318,3 @@ class PrefabNet(base):
         self.logger.info(pscript)
 
         self.prefab.core.execute_bash(content=pscript, die=True, interpreter="python3", tmux=True)
-        

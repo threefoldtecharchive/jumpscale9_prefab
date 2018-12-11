@@ -57,7 +57,7 @@ class PrefabGolang(app):
         if self.prefab.core.isMac:
             self.prefab.system.package.remove("golang")
             if old is False:
-                downl= "https://storage.googleapis.com/golang/go1.10.darwin-amd64.tar.gz"
+                downl = "https://storage.googleapis.com/golang/go1.10.darwin-amd64.tar.gz"
             else:
                 downl = "https://storage.googleapis.com/golang/go1.8.7.darwin-amd64.tar.gz"
         elif "ubuntu" in self.prefab.platformtype.platformtypes:

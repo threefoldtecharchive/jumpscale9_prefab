@@ -143,7 +143,7 @@ class PrefabSSH(base):
           E.g. setting command option is done by adding the following kwarg: command='"/bin/myscript.sh"
           E.g. setting no-agent-forwarding is done by adding the following kwarg: no-agent-forwarding=True
         """
-        
+
         def add_newline(content):
             if content and content[-1] != "\n":
                 content += "\n"
