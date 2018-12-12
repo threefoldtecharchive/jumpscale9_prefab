@@ -79,7 +79,7 @@ class PrefabARDB(app):
         if self.prefab.platformtype.isMac:
             storageEngine = "rocksdb"
             # ForestDB
-            packages += ["git", "cmake", "libsnappy-dev", "gcc48"]
+            packages += ["git", "cmake", "libsnappy-dev", "gcc@4.9"]
             # self.prefab.system.package.install("boost")
         else:
             # ForestDB
