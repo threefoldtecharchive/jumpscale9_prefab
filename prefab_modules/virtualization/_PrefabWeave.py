@@ -14,7 +14,7 @@ class PrefabWeave(app):
             return
         if jumpscalePath:
             binPath = self.prefab.core.joinpaths(
-                self.prefab.core.dir_paths['BINDIR'], 'weave')
+                '{DIR_BIN}', 'weave')
         else:
             binPath = '/usr/local/bin/weave'
         self.prefab.core.dir_ensure(j.sal.fs.getParent(binPath))
@@ -22,7 +22,7 @@ class PrefabWeave(app):
         C = '''
         curl -L git.io/weave -o {binPath} && sudo chmod a+x {binPath}
         '''.format(binPath=binPath)
-        C = self.replace(C)
+        C = self.executor.replace(C)
         self.prefab.systemservices.docker.install()
         self.prefab.system.package.ensure('curl')
         self.prefab.core.execute_bash(C, profile=True)

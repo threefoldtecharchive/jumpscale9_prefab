@@ -73,15 +73,15 @@ class PrefabTeleport(app):
         @param version,, version of the binaries to download
         """
         url = 'https://github.com/gravitational/teleport/releases/download/{0}/teleport-{0}-linux-amd64-bin.tar.gz'.format(version)
-        self.prefab.core.file_download(url, '$TMPDIR/teleport.tar.gz')
-        self.prefab.core.run('tar -xzf $TMPDIR/teleport.tar.gz -C $TMPDIR')
-        self.prefab.core.file_copy('$TMPDIR/teleport/teleport', '$BINDIR')
-        self.prefab.core.file_copy('$TMPDIR/teleport/tsh', '$BINDIR')
-        self.prefab.core.file_copy('$TMPDIR/teleport/tctl', '$BINDIR')
+        self.prefab.core.file_download(url, '{DIR_TEMP}/teleport.tar.gz')
+        self.prefab.core.run('tar -xzf {DIR_TEMP}/teleport.tar.gz -C {DIR_TEMP}')
+        self.prefab.core.file_copy('{DIR_TEMP}/teleport/teleport', '{DIR_BIN}')
+        self.prefab.core.file_copy('{DIR_TEMP}/teleport/tsh', '{DIR_BIN}')
+        self.prefab.core.file_copy('{DIR_TEMP}/teleport/tctl', '{DIR_BIN}')
         for path in extra_paths:
-            self.prefab.core.file_copy('$TMPDIR/teleport/teleport', path)
-            self.prefab.core.file_copy('$TMPDIR/teleport/tsh', path)
-            self.prefab.core.file_copy('$TMPDIR/teleport/tctl', path)
+            self.prefab.core.file_copy('{DIR_TEMP}/teleport/teleport', path)
+            self.prefab.core.file_copy('{DIR_TEMP}/teleport/tsh', path)
+            self.prefab.core.file_copy('{DIR_TEMP}/teleport/tctl', path)
 
     def install(self, extra_paths=[], reset=False):
         """
@@ -94,9 +94,9 @@ class PrefabTeleport(app):
         # create the default data directory before starting:
         self.prefab.core.dir_ensure('/var/lib/teleport')
         # move binaries to correct location
-        self.prefab.core.file_copy('%s/build/teleport' % self.REPOPATH, '$BINDIR')
-        self.prefab.core.file_copy('%s/build/tsh' % self.REPOPATH, '$BINDIR')
-        self.prefab.core.file_copy('%s/build/tctl' % self.REPOPATH, '$BINDIR')
+        self.prefab.core.file_copy('%s/build/teleport' % self.REPOPATH, '{DIR_BIN}')
+        self.prefab.core.file_copy('%s/build/tsh' % self.REPOPATH, '{DIR_BIN}')
+        self.prefab.core.file_copy('%s/build/tctl' % self.REPOPATH, '{DIR_BIN}')
         for path in extra_paths:
             self.prefab.core.file_copy('%s/build/teleport' % self.REPOPATH, path)
             self.prefab.core.file_copy('%s/build/tsh' % self.REPOPATH, path)
@@ -138,9 +138,9 @@ class PrefabTeleport(app):
         }
         trusted_cluster_config['spec'] = spec
         trusted_cluster_config['metadata'] = {'name': name}
-        self.prefab.core.file_write('$TMPDIR/cluster_%s.yaml' %
+        self.prefab.core.file_write('{DIR_TEMP}/cluster_%s.yaml' %
                                     name, j.data.serializers.yaml.dumps(trusted_cluster_config))
-        self.prefab.core.run('tctl create $TMPDIR/cluster_%s.yaml' % name)
+        self.prefab.core.run('tctl create {DIR_TEMP}/cluster_%s.yaml' % name)
 
     @property
     def cluster_params(self):
@@ -178,16 +178,16 @@ class PrefabTeleport(app):
         }
         self.GITHUB_DATA['spec'] = spec
         self.GITHUB_DATA['metadata']['name'] = name
-        self.prefab.core.file_write('$TMPDIR/github.yaml', j.data.serializers.yaml.dumps(self.GITHUB_DATA))
+        self.prefab.core.file_write('{DIR_TEMP}/github.yaml', j.data.serializers.yaml.dumps(self.GITHUB_DATA))
         timer = 20
         while not self.prefab.core.file_exists("/var/lib/teleport/host_uuid"):
             timer -= 1
             time.sleep(1)
             if timer == 0:
                 raise RuntimeError("teleport could not be reached")
-        self.prefab.core.run('tctl create $TMPDIR/github.yaml')
+        self.prefab.core.run('tctl create {DIR_TEMP}/github.yaml')
 
-    def start(self, cmd="$BINDIR/teleport start", insecure=False):
+    def start(self, cmd="{DIR_BIN}/teleport start", insecure=False):
         """
         Start the teleport service.
         """

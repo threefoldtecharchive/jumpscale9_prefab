@@ -38,8 +38,8 @@ class PrefabGolang(app):
         self._init()
 
     def _init(self):
-        self.GOROOTDIR = self.prefab.core.dir_paths['BASEDIR'] + "/go"
-        self.GOPATHDIR = self.prefab.core.dir_paths['BASEDIR'] + "/go_proj"
+        self.GOROOTDIR = self.replace("{DIR_BASE}") + "/go"
+        self.GOPATHDIR = self.replace("{DIR_BASE}") + "/go_proj"
         self.GOPATH = self.GOPATHDIR  # backwards compatibility
 
     def isInstalled(self):
@@ -68,7 +68,7 @@ class PrefabGolang(app):
         else:
             raise j.exceptions.RuntimeError("platform not supported")
 
-        self.prefab.core.run(cmd=self.replace("rm -rf $GOROOTDIR"), die=True)
+        self.prefab.core.run(cmd=self.executor.replace("rm -rf $GOROOTDIR"), die=True)
         self.prefab.core.dir_ensure(self.GOROOTDIR)
         self.prefab.core.dir_ensure(self.GOPATHDIR)
 
@@ -133,8 +133,8 @@ class PrefabGolang(app):
         if self.doneGet('glide'):
             return
         self.prefab.core.file_download(
-            'https://glide.sh/get', '$TMPDIR/installglide.sh', minsizekb=4)
-        self.prefab.core.run('. $TMPDIR/installglide.sh', profile=True)
+            'https://glide.sh/get', '{DIR_TEMP}/installglide.sh', minsizekb=4)
+        self.prefab.core.run('. {DIR_TEMP}/installglide.sh', profile=True)
         self.doneSet('glide')
 
     def clean_src_path(self):

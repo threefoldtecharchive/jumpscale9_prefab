@@ -3,7 +3,7 @@ from Jumpscale import j
 
 app = j.tools.prefab._getBaseAppClass()
 
-_NBDSERVER_CONFIG_FILE = "$BASEDIR/config/nbdserver/config.yaml"
+_NBDSERVER_CONFIG_FILE = "{DIR_BASE}/config/nbdserver/config.yaml"
 _DEFAULT_LOCAL_CONFIG_FILE = "./config.yaml"
 
 class PrefabZDisk(app):
@@ -39,10 +39,10 @@ class PrefabZDisk(app):
         cd ./0-Disk
         make
 
-        cp -a bin/. $BINDIR
+        cp -a bin/. {DIR_BIN}
         """.format(install_path, branch)
 
-        cmd = self.replace(cmd)
+        cmd = self.executor.replace(cmd)
 
         self.prefab.core.run(cmd)
 
@@ -116,7 +116,7 @@ class PrefabZDisk(app):
         if tlsonly is not None:
             cmd += " --tlsonly {}".format(tlsonly)
         
-        cmd = self.replace(cmd)
+        cmd = self.executor.replace(cmd)
 
         self.prefab.core.run(cmd)
 

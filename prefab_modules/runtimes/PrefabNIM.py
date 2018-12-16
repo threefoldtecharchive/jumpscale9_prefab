@@ -10,8 +10,8 @@ class PrefabNIM(base):
 
     def _init(self):
         self.logger_enable()
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/nimlang/")
-        self.CODEDIRL = self.core.replace("$BUILDDIR/code/nimlang/")
+        self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/nimlang/")
+        self.CODEDIRL = self.core.replace("{DIR_VAR}/build/code/nimlang/")
 
     def build(self,reset=False):
         """
@@ -42,5 +42,5 @@ class PrefabNIM(base):
         ./koch tools
         """
 
-        self.core.execute_bash(self.replace(C))
+        self.core.execute_bash(self.executor.replace(C))
 

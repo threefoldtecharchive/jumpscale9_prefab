@@ -24,10 +24,10 @@ class PrefabSyncthing(app):
 
         # build
         url = "https://github.com/syncthing/syncthing.git"
-        if self.prefab.core.file_exists('$GOPATHDIR/src/github.com/syncthing/syncthing'):
-            self.prefab.core.dir_remove('$GOPATHDIR/src/github.com/syncthing/syncthing')
+        if self.prefab.core.file_exists('{DIR_BASE}/go/src/github.com/syncthing/syncthing'):
+            self.prefab.core.dir_remove('{DIR_BASE}/go/src/github.com/syncthing/syncthing')
         dest = self.prefab.tools.git.pullRepo(url,
-                                                     dest='$GOPATHDIR/src/github.com/syncthing/syncthing',
+                                                     dest='{DIR_BASE}/go/src/github.com/syncthing/syncthing',
                                                      ssh=False,
                                                      depth=1)
 
@@ -40,7 +40,7 @@ class PrefabSyncthing(app):
         # self.prefab.core.dir_ensure(self.builddir+"/bin")
 
         self.prefab.core.copyTree(
-            '$GOPATHDIR/src/github.com/syncthing/syncthing/bin',
+            '{DIR_BASE}/go/src/github.com/syncthing/syncthing/bin',
             self.builddir + "/bin",
             keepsymlinks=False,
             deletefirst=True,
@@ -71,7 +71,7 @@ class PrefabSyncthing(app):
         self.prefab.core.dir_ensure("$CFGDIR/syncthing")
         # self.prefab.core.file_write("$CFGDIR/syncthing/syncthing.xml", config)
 
-        self.prefab.core.copyTree(self.builddir + "/bin", "$BINDIR")
+        self.prefab.core.copyTree(self.builddir + "/bin", "{DIR_BIN}")
 
         self.doneSet("install")
 
@@ -85,14 +85,14 @@ class PrefabSyncthing(app):
             self.prefab.core.run("rm -rf $CFGDIR/syncthing")
 
         if self.prefab.core.dir_exists("$CFGDIR/syncthing") == False:
-            self.prefab.core.run(cmd="rm -rf $CFGDIR/syncthing;cd $BINDIR;./syncthing -generate  $CFGDIR/syncthing")
+            self.prefab.core.run(cmd="rm -rf $CFGDIR/syncthing;cd {DIR_BIN};./syncthing -generate  $CFGDIR/syncthing")
         pm = self.prefab.system.processmanager.get("tmux")
-        pm.ensure(name="syncthing", cmd="./syncthing -home  $CFGDIR/syncthing", path="$BINDIR")
+        pm.ensure(name="syncthing", cmd="./syncthing -home  $CFGDIR/syncthing", path="{DIR_BIN}")
 
     @property
     def apikey(self):
         import xml.etree.ElementTree as etree
-        tree = etree.parse(self.replace("$CFGDIR/syncthing/config.xml"))
+        tree = etree.parse(self.executor.replace("$CFGDIR/syncthing/config.xml"))
         r = tree.getroot()
         for item in r:
             if item.tag == "gui":

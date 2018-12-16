@@ -9,7 +9,7 @@ class PrefabTendermint(app):
     NAME = "tendermint"
 
     def _init(self):
-        self.BUILDDIR = self.replace("$BUILDDIR/tendermint")
+        self.BUILDDIR = self.executor.replace("{DIR_VAR}/build/tendermint")
 
     @property
     def TENDERMINTPATH(self):

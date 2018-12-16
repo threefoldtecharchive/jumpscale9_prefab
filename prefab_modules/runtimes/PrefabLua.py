@@ -9,7 +9,7 @@ class PrefabLua(base):
     NAME = "lua"
 
     def _init(self):
-        self.BUILDDIR = self.replace("$BUILDDIR")
+        self.BUILDDIR = self.executor.replace("{DIR_VAR}/build/")
 
     def build(self, reset=True):
         """
@@ -28,76 +28,117 @@ class PrefabLua(base):
 
 
         url="https://luarocks.org/releases/luarocks-3.0.4.tar.gz"
-        dest = self.replace("$BUILDDIR/luarocks")
+        dest = self.executor.replace("{DIR_VAR}/build/luarocks")
         self.prefab.core.createDir(dest)
         self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
                     expand=True, minsizekb=100, removeTopDir=True, deletedest=True)
         C="""                
-        cd $BUILDDIR/luarocks
+        cd {DIR_VAR}/build/luarocks
         ./configure --prefix=/sandbox/openresty/luarocks --with-lua=/sandbox/openresty/luajit 
         make build
         make install
-        luarocks install luaossl OPENSSL_DIR=/sandbox/var/build/openssl CRYPTO_DIR=/sandbox/var/build/openssl
-        luarocks install luasec OPENSSL_DIR=/sandbox/var/build/openssl CRYPTO_DIR=/sandbox/var/build/openssl
-        luarocks install lapis
-        luarocks install moonscript
-        luarocks install lapis-console
-        luarocks install LuaFileSystem
-        luarocks install LuaSocket 
-        luarocks install lua-geoip 
-        luarocks install lua-cjson
-        luarocks install lua-term 
-        luarocks install penlight 
-        luarocks install lpeg
-        luarocks install mediator_lua
-        luarocks install luajwt
-        # luarocks install mooncrafts
-        luarocks install inspect
-        luarocks install lua-resty-jwt
-        luarocks install lua-resty-redis-connector
-        luarocks install lua-resty-openidc
-
-        luarocks install LuaRestyRedis
-        luarocks install lua-resty-qless
         
-        luarocks install lua-capnproto
-        luarocks install lua-toml
+        cp /sandbox/var/build/luarocks/luarocks /sandbox/bin/luarocks
         
-        luarocks install lua-resty-exec
-        
-        luarocks install lua-resty-influx
-        luarocks install lua-resty-repl
-
-
-        luarocks install lua-resty-iputils
-
-        luarocks install lsqlite3 
-        
-        luarocks install bcrypt
-        luarocks install md5
-        
-        luarocks install date
-        luarocks install uuid
-        luarocks install lua-resty-cookie
-        luarocks install lua-path
-        
-        #various encryption
-        luarocks install luazen
-        
-        export LUALIB=/sandbox/openresty/lualib
-        rsync -rav /sandbox/openresty/luarocks/lib/lua/5.1/ $LUALIB/
-        rsync -rav /sandbox/openresty/luarocks/share/lua/5.1/ $LUALIB/
-        
-        #/sandbox/openresty/luajit/share/luajit-2.1.0-beta3/jit
-        
-           
         """
-        # C = self.prefab.core.replace(C)
-        C = self.replace(C)
-        print(C)
-        self.prefab.core.execute_bash(C)
+
+        self.prefab.core.execute_bash(self.executor.replace(C))
+
+        self.lua_rocks_install()
+        self.copy2sandbox_github()
 
         self.doneSet("build")
+
+
+    def lua_rock_install(self,name,reset=False):
+
+        if self.doneCheck("lua_rock_install_%s"%name) and not reset:
+            return
+
+        C = "source /sandbox/env.sh;luarocks install $NAME OPENSSL_DIR=/sandbox/var/build/openssl CRYPTO_DIR=/sandbox/var/build/openssl"
+        C = C.replace("$NAME",name)
+        self.prefab.core.run(self.executor.replace(C))
+
+        self.doneSet("lua_rock_install_%s"%name)
+
+
+    def lua_rocks_install(self,reset=False):
+        """
+        js_shell 'j.tools.prefab.local.runtimes.lua.lua_rocks_install()'
+        :param install:
+        :return:
+        """
+
+        if self.prefab.core.isUbuntu:
+            # self.prefab.system.package.mdupdate()
+            self.prefab.system.package.install("geoip-database,libgeoip-dev")
+
+        C="""
+        luaossl
+        luasec 
+        lapis
+        moonscript
+        lapis-console
+        LuaFileSystem
+        LuaSocket 
+        lua-geoip 
+        lua-cjson
+        lua-term 
+        penlight 
+        lpeg
+        mediator_lua
+        # luajwt
+        # mooncrafts
+        inspect
+        lua-resty-jwt
+        lua-resty-redis-connector
+        lua-resty-openidc
+
+        LuaRestyRedis
+        lua-resty-qless
+        
+        lua-capnproto
+        lua-toml
+        
+        lua-resty-exec
+        
+        lua-resty-influx
+        lua-resty-repl
+
+
+        lua-resty-iputils
+
+        lsqlite3 
+        
+        bcrypt
+        md5
+        
+        date
+        uuid
+        lua-resty-cookie
+        lua-path
+        
+        #various encryption
+        luazen
+        """
+
+        for line in C.split("\n"):
+            line = line.strip()
+            if line == "":
+                continue
+            if line.startswith("#"):
+                continue
+            self.lua_rock_install(line)
+
+
+        C="""
+        export LUALIB=/sandbox/openresty/lualib
+        rsync -rav /sandbox/var/build/luarocks/lua_modules/lib/lua/5.1/ $LUALIB/
+        rsync -rav /sandbox/var/build/luarocks/lua_modules/share/lua/5.1/ $LUALIB/
+
+        """
+        self.prefab.core.execute_bash(self.executor.replace(C))
+
 
 
     # def build_crypto(self):
@@ -124,10 +165,6 @@ class PrefabLua(base):
         """
         C="""
         
-        export LUALIB=/sandbox/openresty/lualib
-        # rsync -rav /sandbox/openresty/luarocks/lib/lua/5.1/ $LUALIB/
-        # rsync -rav /sandbox/openresty/luarocks/share/lua/5.1/ $LUALIB/
-
         set -ex
         
         rm -rf /sandbox/openresty/luajit/lib/lua
@@ -145,18 +182,45 @@ class PrefabLua(base):
         
     
         """
-        C = self.replace(C)
+        C = self.executor.replace(C)
         print(C)
 
         self.prefab.core.execute_bash(C)
 
 
-    # def package(self, name, server=''):
-    #     if server:
-    #         server = '--server=' + server
-    #     self.prefab.core.run("luarocks install %s %s" % (server, name))
-    #
-    #
-    #
+    def copy2sandbox_github(self):
+        """
+        js_shell 'j.tools.prefab.local.runtimes.lua.copy2sandbox_github()'
+        :return:
+        """
+        assert self.executor.type=="local"
+        path="/sandbox/openresty/lualib"
+
+        if self.core.isUbuntu:
+            destbin="%s/base/openresty/lualib"%j.clients.git.getContentPathFromURLorPath("git@github.com:threefoldtech/sandbox_ubuntu.git")
+        elif self.core.isMac:
+            destbin="%s/base/openresty/lualib"%j.clients.git.getContentPathFromURLorPath("git@github.com:threefoldtech/sandbox_osx.git")
+        else:
+            raise RuntimeError("only ubuntu & osx support")
+
+        dest="%s/base/openresty/lualib"%j.clients.git.getContentPathFromURLorPath("git@github.com:threefoldtech/sandbox_base.git")
+
+        for item in j.sal.fs.listFilesInDir(path, recursive=True):
+            rdest = j.sal.fs.pathRemoveDirPart(item,path)
+            if j.sal.fs.getFileExtension(item)=="so":
+                d2=destbin
+            elif j.sal.fs.getFileExtension(item)=="lua":
+                d2=dest
+            else:
+                raise RuntimeError(item)
+            dir_dest_full=j.sal.fs.getDirName(j.sal.fs.joinPaths(d2,rdest))
+            j.sal.fs.createDir(dir_dest_full)
+            dest_full=j.sal.fs.joinPaths(d2,rdest)
+            print("copy: %s %s"%(item,dest_full))
+            j.sal.fs.copyFile(item,dest_full)
+
+
+
+        self.cleanup()
 
 

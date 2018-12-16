@@ -16,7 +16,7 @@ class PrefabZOS_ufs(app):
         self.prefab.system.package.install('build-essential')
 
         self.prefab.runtimes.golang.get("github.com/g8os/g8ufs")
-        self.prefab.core.file_copy("$GOPATHDIR/bin/g8ufs", "$BASEDIR/bin/")
+        self.prefab.core.file_copy("{DIR_BASE}/go/bin/g8ufs", "{DIR_BASE}/bin/")
 
         if install:
             self.install(start)

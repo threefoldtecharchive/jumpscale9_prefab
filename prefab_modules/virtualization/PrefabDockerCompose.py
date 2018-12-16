@@ -188,12 +188,12 @@ class Prefabdockerobj:
 #     CMD ["/usr/sbin/init"]
 #
 #     """
-#     self.prefab.core.run("rm -rf $TMPDIR/docker;mkdir $TMPDIR/docker")
-#     self.prefab.core.file_write("$TMPDIR/docker/Dockerfile", C)
+#     self.prefab.core.run("rm -rf {DIR_TEMP}/docker;mkdir {DIR_TEMP}/docker")
+#     self.prefab.core.file_write("{DIR_TEMP}/docker/Dockerfile", C)
 #
 #     C = """
 #     set -ex
-#     cd $TMPDIR/docker
+#     cd {DIR_TEMP}/docker
 #     docker build -t arch .
 #     """
 #     self.prefab.core.execute_bash(C)

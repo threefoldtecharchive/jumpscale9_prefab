@@ -7,9 +7,9 @@ class PrefabPython(base):
 
     def _init(self):
         self.logger_enable()
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/python3/")
-        self.CODEDIRL = self.core.replace("$BUILDDIR/code/python3/")
-        self.OPENSSLPATH = self.core.replace("$BUILDDIR/openssl")
+        self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/python3/")
+        self.CODEDIRL = self.core.replace("{DIR_VAR}/build/code/python3/")
+        self.OPENSSLPATH = self.core.replace("{DIR_VAR}/build/openssl")
         self.JUMPSCALE_BRANCH = "development_961"
 
     def reset(self):
@@ -48,7 +48,7 @@ class PrefabPython(base):
                 C = """
                 set -ex
                 cd $CODEDIRL
-                mkdir -p $BUILDDIRL
+                mkdir -p {DIR_VAR}/build/L
 
                 # export OPENSSLPATH=$(brew --prefix openssl)
                 
@@ -57,16 +57,16 @@ class PrefabPython(base):
                 # export CPPFLAGS=-I/opt/X11/include
                 # export CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib"                
 
-                ./configure --prefix=$BUILDDIRL  CPPFLAGS="-I$OPENSSLPATH/include" LDFLAGS="-L$OPENSSLPATH/lib"
+                ./configure --prefix={DIR_VAR}/build/L  CPPFLAGS="-I$OPENSSLPATH/include" LDFLAGS="-L$OPENSSLPATH/lib"
 
                 #if you do the optimizations then it will do all the tests
-                # ./configure --prefix=$BUILDDIRL --enable-optimizations
+                # ./configure --prefix={DIR_VAR}/build/L --enable-optimizations
                 
                 # make -j12
 
                 make -j12 EXTRATESTOPTS=--list-tests install
                 """
-                C = self.replace(C)
+                C = self.executor.replace(C)
             else:
                 # on ubuntu 1604 it was all working with default libs, no reason to do it ourselves
                 self.prefab.system.package.install('zlib1g-dev,libncurses5-dev,libbz2-dev,liblzma-dev,libsqlite3-dev,libreadline-dev,libssl-dev,libsnappy-dev')
@@ -80,14 +80,14 @@ class PrefabPython(base):
                 
                 # export OPENSSLPATH=$OPENSSLPATH
 
-                ./configure --prefix=$BUILDDIRL --enable-optimizations  #THIS WILL MAKE SURE ALL TESTS ARE DONE, WILL TAKE LONG TIME
+                ./configure --prefix={DIR_VAR}/build/L --enable-optimizations  #THIS WILL MAKE SURE ALL TESTS ARE DONE, WILL TAKE LONG TIME
 
                 make clean
                 # make -j4
                 make -j8 EXTRATESTOPTS=--list-tests install
                 # make install
                 """
-                C = self.replace(C)
+                C = self.executor.replace(C)
 
             self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, C)
 
@@ -122,7 +122,7 @@ class PrefabPython(base):
 
         export PBASE=`pwd`
 
-        export OPENSSLPATH=$(brew --prefix openssl)
+        # export OPENSSLPATH=$(brew --prefix openssl)
 
         export PATH=$PATH:$OPENSSLPATH/bin:/usr/local/bin:/usr/bin:/bin
 
@@ -137,7 +137,7 @@ class PrefabPython(base):
         export LDFLAGS="-L$LIBRARY_PATH/"
 
         """
-        C = self.replace(C)
+        C = self.executor.replace(C)
         self.prefab.core.file_write("%s/envbuild.sh" % self.BUILDDIRL, C)
 
         C = """
@@ -163,14 +163,14 @@ class PrefabPython(base):
 
         if not self.doneGet("pip3install") or reset:
             C = """
-            cd $BUILDDIRL
+            cd {DIR_VAR}/build/L
             . envbuild.sh
             set -e                        
             rm -rf get-pip.py
             curl https://bootstrap.pypa.io/get-pip.py > get-pip.py
-            $BUILDDIRL/bin/python3 get-pip.py
+            {DIR_VAR}/build/L/bin/python3 get-pip.py
             """
-            C = self.replace(C)
+            C = self.executor.replace(C)
             self.prefab.core.file_write("%s/pip3build.sh" % self.BUILDDIRL, C)
             self.prefab.core.run("cd %s;bash pip3build.sh" % self.BUILDDIRL)
         self.doneSet("pip3install")
@@ -178,115 +178,17 @@ class PrefabPython(base):
         if not self.core.isMac:
             self.prefab.system.package.ensure("libssl-dev")
             # for osx SHOULD NOT BE DONE BECAUSE WE SHOULD HAVE IT BUILD BEFORE AND ARE USING I FOR OSX
-            self.prefab.system.package.ensure("libcapnp-dev")
+            # self.prefab.system.package.ensure("libcapnp-dev")
+            pass
         else:
             self.prefab.system.package.ensure("capnp")
 
         self._pipAll(reset=reset)
 
-        msg = "\n\nto test do:\ncd $BUILDDIRL;source env.sh;python3"
-        msg = self.replace(msg)
+        msg = "\n\nto test do:\ncd {DIR_VAR}/build/L;source env.sh;python3"
+        msg = self.executor.replace(msg)
         self.logger.info(msg)
 
-    def pips_list(self,level=0):
-        """
-        level0 is only the most basic
-        1 in the middle
-        2 is all pips
-        """
-        C="""
-        asyncssh>=1.9.0
-        pystache
-        blosc>=1.5.1
-        Brotli>=0.6.0
-        certifi
-        click>=6.6
-        colored-traceback>=0.2.2
-        colorlog>=2.10.0
-        cryptocompare
-        cryptography>=2.2.0
-        cson>=0.7 *
-        Cython **
-        dnslib
-        dnspython>=1.15.0 **
-        docker>=3 **
-        ed25519>=1.4
-        etcd3>=0.7.0 **
-        fakeredis
-        Flask-Inputs>=0.2.0 **
-        Flask>=0.12.2 **
-        future>=0.15.0
-        gevent >= 1.2.2
-        gevent-websocket *
-        gipc
-        GitPython>=2.1.1
-        graphene>=2.0 *
-        grequests>=0.3.0
-        html2text **
-        httplib2>=0.9.2
-        influxdb>=4.1.0 **
-        ipcalc>=1.99.0
-        ipython<6.5.0>=6.0.0
-        itsdangerous>=0.24 *
-        Jinja2>=2.9.6
-        jsonschema>=2.5.1 *
-        libtmux>=0.7.1
-        msgpack-python>=0.4.8
-        netaddr>=0.7.19
-        netifaces>=0.10.6
-        netstr
-        npyscreen
-        ovh>=0.4.7 *
-        packet-python>=1.37 *
-        parallel_ssh>=1.4.0
-        paramiko>=2.2.3
-        path.py>=10.3.1
-        peewee>=2.9.2
-        Pillow>=4.1.1 *
-        psutil>=5.4.3
-        psycopg2>=2.7.1 *
-        pudb>=2017.1.2
-        pyblake2>=0.9.3
-        pycapnp>=0.5.12  
-        pycountry *
-        PyGithub>=1.34
-        pymongo>=3.4.0 **
-        pymux>=0.13
-        pynacl>=1.2.1
-        pyOpenSSL>=17.0.0
-        pypandoc>=1.3.3 **
-        pyserial>=3.0
-        pystache>=0.5.4 **
-        python-dateutil>=2.5.3
-        python-jose>=2.0.1 *
-        pytoml>=0.1.2
-        pyyaml
-        redis>=2.10.5
-        requests>=2.13.0
-        six>=1.10.0
-        #SQLAlchemy>=1.1.9 **
-        ssh2-python *
-        toml>=0.9.2
-        Unidecode>=0.04.19
-        uvloop>=0.8.0 *
-        watchdog>=0.8.3
-        zerotier>=1.1.2 *
-                
-        """
-        res=[]
-        for line in j.core.text.strip(C).split("\n"):
-            if level==0 and line.find("*")!=-1:
-                continue
-            elif level==1 and line.find("**")!=-1:
-                continue
-            pip=line.strip()
-            if pip.startswith("#"):
-                continue
-            pip=pip.replace("*","").replace("*","").strip()
-            if pip=="":
-                continue
-            res.append(pip)
-        return res
 
     def _pipAll(self, reset=False):
         """
@@ -302,11 +204,11 @@ class PrefabPython(base):
         #list comes from /sandbox/code/github/threefoldtech/jumpscale_core/install/InstallTools.py
 
 
-        self._pip(self.pips_list(3))
+        self._pip( j.core.installtools.UbuntuInstall.pips_list())
 
         if not self.core.isMac:
             self.prefab.zero_os.zos_stor_client.build(python_build=True)  # builds the zos_stor_client
-            self._pip("g8storclient")
+            self._pip(["g8storclient"])
 
         # self.sandbox(deps=False)
         self.doneSet("pipall")
@@ -318,8 +220,197 @@ class PrefabPython(base):
             item = "'%s'"%item
             # cannot use prefab functionality because would not be sandboxed
             if not self.doneGet("pip3_%s" % item) or reset:
-                C = "set -ex;cd $BUILDDIRL;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
-                self.prefab.core.run(self.replace(C), shell=True)
+                C = "set -ex;cd {DIR_VAR}/build/L;source envbuild.sh;pip3 install --trusted-host pypi.python.org %s" % item
+                self.prefab.core.run(self.executor.replace(C), shell=True)
                 self.doneSet("pip3_%s" % item)
+
+
+    @property
+    def PACKAGEDIR(self):
+        return j.dirs.BUILDDIR + "/sandbox/tfbot/"
+
+
+    def copy2sandbox_github(self, reset=False):
+        """
+
+        js_shell 'j.tools.prefab.local.runtimes.python.copy2sandbox_github(reset=False)'
+
+
+        builds python and returns the build dir
+
+        result in : j.dirs.BUILDDIR+"/sandbox/tfbot/
+
+        """
+        assert self.executor.type=="local"
+
+        path = self.build(reset=reset)
+
+
+        self.logger.info("sandbox:%s" % path)
+        j.tools.prefab.local.system.package.install("zip")
+        if j.core.platformtype.myplatform.isMac:
+            j.tools.prefab.local.system.package.install("redis")
+        else:
+            j.tools.prefab.local.system.package.install("redis-server")
+
+        if path == "":
+            path = self.BUILDDIR
+
+        if not j.sal.fs.exists("%s/bin/python3.6" % path):
+            j.shell()
+            raise RuntimeError(
+                "am not in compiled python dir, need to find %s/bin/python3.6" % path)
+
+        dest = self.PACKAGEDIR
+
+        j.sal.fs.remove(dest)
+        j.sal.fs.createDir(dest)
+
+        for item in ["bin", "root", "lib"]:
+            j.sal.fs.createDir("%s/%s" % (dest, item))
+
+        for item in ["pip3", "python3.6", "ipython","bpython","electrum","pudb3","zrobot"]:
+            src0 = "%s/bin/%s" % (path, item)
+            dest0 = "%s/bin/%s" % (dest, item)
+            if j.sal.fs.exists(src0):
+                j.sal.fs.copyFile(src0, dest0)
+
+        #for OSX
+        for item in ["libpython3.6m.a"]:
+            src0 = "%s/lib/%s" % (path, item)
+            dest0 = "%s/bin/%s" % (dest, item)
+            if j.sal.fs.exists(src0):
+                j.sal.fs.copyFile(src0, dest0)
+
+
+
+
+        #LINK THE PYTHON BINARIES
+        j.sal.fs.symlink("%s/bin/python3.6" % dest, "%s/bin/python" % dest, overwriteTarget=True)
+        j.sal.fs.symlink("%s/bin/python3.6" % dest, "%s/bin/python3" % dest, overwriteTarget=True)
+
+
+        #NOW DEAL WITH THE PYTHON LIBS
+
+        def dircheck(name):
+            for item in ["lib2to3", "idle", ".dist-info", "__pycache__", "site-packages"]:
+                if name.find(item) is not -1:
+                    return False
+            return True
+
+        def binarycheck(path):
+            """
+            checks if there is a .so in the directory (python libs), if so we need to copy to the binary location
+            """
+            if "parso" in path:
+                return True
+            if "jedi" in path:
+                return True
+
+            files = j.sal.fs.listFilesInDir(path, recursive=True, filter="*.so", followSymlinks=True)
+            files += j.sal.fs.listFilesInDir(path, recursive=True, filter="*.so.*", followSymlinks=True)
+            if len(files) > 0:
+                self.logger.debug("found binary files in:%s" % path)
+                return True
+            return False
+
+        # ignore files which are not relevant,
+
+        ignoredir = ['.egg-info', '.dist-info', "__pycache__", "audio", "tkinter", "audio", "test",
+                     "electrum_"]
+        ignorefiles = ['.egg-info', ".pyc"]
+
+        todo = ["%s/lib/python3.6/site-packages" % path,"%s/lib/python3.6" % path]
+        for src in todo:
+            for ddir in j.sal.fs.listDirsInDir(src, recursive=False, dirNameOnly=True, findDirectorySymlinks=True, followSymlinks=True):
+                if dircheck(ddir):
+                    src0 = src+"/%s" % ddir
+                    if binarycheck(src0):
+                        dest0 = "%s/lib/pythonbin/%s" % (dest, ddir)
+                    else:
+                        dest0 = "%s/lib/python/%s" % (dest, ddir)
+                    self.logger.debug("copy lib:%s ->%s" % (src0, dest0))
+                    j.sal.fs.copyDirTree(src0, dest0, keepsymlinks=False, deletefirst=True, overwriteFiles=True, ignoredir=ignoredir, ignorefiles=ignorefiles, recursive=True, rsyncdelete=True, createdir=True)
+
+
+            for item in j.sal.fs.listFilesInDir(src, recursive=False, exclude=ignorefiles, followSymlinks=True):
+                fname = j.sal.fs.getBaseName(item)
+                dest0 = ""
+                if fname.endswith(".so") or ".so." in fname:
+                    dest0 = "%s/lib/pythonbin/%s" % (dest, fname)
+                if fname.endswith(".py"):
+                    dest0 = "%s/lib/python/%s" % (dest, fname)
+                self.logger.debug("copy %s %s" % (item, dest0))
+                if dest0 is not "":
+                    j.sal.fs.copyFile(item, dest0)
+
+        self.env_write(dest)
+
+
+        remove = ["codecs_jp", "codecs_hk", "codecs_cn", "codecs_kr", "testcapi", "tkinter", "audio"]
+        # remove some stuff we don't need
+        for item in j.sal.fs.listFilesInDir("%s/lib" % dest, recursive=True):
+            if item.endswith(".c") or item.endswith(".h") or item.endswith(".pyc"):
+                j.sal.fs.remove(item)
+                pass
+            for x in remove:
+                if item.find(x) is not -1:
+                    j.sal.fs.remove(item)
+                    pass
+
+        C="""
+        mv $PACKAGEDIR/lib/python/_sysconfigdata_m_linux_x86_64-linux-gnu.py $PACKAGEDIR/lib/pythonbin/_sysconfigdata_m_linux_x86_64-linux-gnu.py
+        rm -rf $PACKAGEDIR/lib/python/config-3.6m-x86_64-linux-gnu
+        
+        """
+        args={}
+        args["$PACKAGEDIR"]=self.PACKAGEDIR
+        C = j.core.tools.text_strip(C,args=args)
+        j.sal.process.executeBashScript(C)
+
+        def copy2git():
+
+            #copy to sandbox & upload
+            ignoredir = ['.egg-info', '.dist-info', "__pycache__", "audio", "tkinter", "audio", "test",".git","linux-gnu"]
+            ignorefiles = ['.egg-info', ".pyc","_64-linux-gnu.py"]
+
+            path = j.clients.git.getContentPathFromURLorPath("git@github.com:threefoldtech/sandbox_base.git")
+            src0 = "%s/lib/python"%self.PACKAGEDIR
+            dest0 = "%s/base/lib/python"%path
+            j.sal.fs.createDir(dest0)
+            j.sal.fs.copyDirTree(src0, dest0, keepsymlinks=False, deletefirst=False, overwriteFiles=True,
+                             ignoredir=ignoredir, ignorefiles=ignorefiles, recursive=True, rsyncdelete=True)
+            j.shell()
+
+            if j.core.platformtype.myplatform.isUbuntu:
+                url = "git@github.com:threefoldtech/sandbox_ubuntu.git"
+                path = j.clients.git.getContentPathFromURLorPath(url)
+                src0 = "%s/lib/pythonbin"%self.PACKAGEDIR
+                dest0 = "%s/base/lib/pythonbin"%path
+                j.sal.fs.createDir(dest0)
+                j.sal.fs.copyDirTree(src0, dest0, keepsymlinks=False, deletefirst=False, overwriteFiles=True,
+                                 ignoredir=ignoredir, ignorefiles=ignorefiles, recursive=True, rsyncdelete=True)
+
+            if j.core.platformtype.myplatform.isMac:
+                url = "git@github.com:threefoldtech/sandbox_osx.git"
+                j.shell()
+
+
+
+
+        copy2git()
+
+
+    def _zip(self, dest="", python_lib_zip=False):
+        assert self.executor.type=="local"
+        if dest == "":
+            dest = j.dirs.BUILDDIR + "/sandbox/python3/"
+        cmd = "cd %s;rm -f ../js_sandbox.tar.gz;tar -czf ../js_sandbox.tar.gz .;" % dest
+        j.sal.process.execute(cmd)
+        if python_lib_zip:
+            cmd = "cd %s;rm -f ../tfbot/lib/python.zip;cd ../tfbot/lib/python;zip -r ../python.zip .;" % dest
+            j.sal.process.execute(cmd)
+            cmd = "cd %s;rm -rf ../tfbot/lib/python" % dest
+            j.sal.process.execute(cmd)
 
 

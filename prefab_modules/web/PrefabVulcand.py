@@ -14,28 +14,28 @@ class PrefabVulcand(app):
         source /bd_build/buildconfig
         set -x
 
-        export goDir=$TMPDIR/vulcandgoDir
+        export goDir={DIR_TEMP}/vulcandgoDir
 
-        if [ ! -d $GOPATHDIR ]; then
-            mkdir -p $GOPATHDIR
+        if [ ! -d {DIR_BASE}/go ]; then
+            mkdir -p {DIR_BASE}/go
         fi
 
         go get -d github.com/vulcand/vulcand
 
-        cd $GOPATHDIR/src/github.com/vulcand/vulcand
+        cd {DIR_BASE}/go/src/github.com/vulcand/vulcand
         CGO_ENABLED=0 go build -a -ldflags '-s' -installsuffix nocgo .
         GOOS=linux go build -a -tags netgo -installsuffix cgo -ldflags '-w' -o ./vulcand .
         GOOS=linux go build -a -tags netgo -installsuffix cgo -ldflags '-w' -o ./vctl/vctl ./vctl
         GOOS=linux go build -a -tags netgo -installsuffix cgo -ldflags '-w' -o ./vbundle/vbundle ./vbundle
 
         mkdir -p /build/vulcand
-        cp $GOPATHDIR/src/github.com/vulcand/vulcand/vulcand $BASEDIR/bin/
-        cp $GOPATHDIR/src/github.com/vulcand/vulcand/vctl/vctl $BASEDIR/bin/
-        cp $GOPATHDIR/src/github.com/vulcand/vulcand/vbundle/vbundle $BASEDIR/bin/
+        cp {DIR_BASE}/go/src/github.com/vulcand/vulcand/vulcand {DIR_BASE}/bin/
+        cp {DIR_BASE}/go/src/github.com/vulcand/vulcand/vctl/vctl {DIR_BASE}/bin/
+        cp {DIR_BASE}/go/src/github.com/vulcand/vulcand/vbundle/vbundle {DIR_BASE}/bin/
 
-        rm -rf $GOPATHDIR
+        rm -rf {DIR_BASE}/go
 
         '''
         C = self.prefab.bash.replaceEnvironInText(C)
         self.prefab.core.run(C, profile=True)
-        self.prefab.bash.addPath("$BASEDIR/bin")
+        self.prefab.bash.addPath("{DIR_BASE}/bin")

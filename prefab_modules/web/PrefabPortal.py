@@ -10,7 +10,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabPortal(base):
 
     def _init(self):
-        self.portal_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["JSAPPSDIR"], "portals/")
+        self.portal_dir = "{DIR_BASE}/apps/portals/"
 
     def configure(
             self,
@@ -86,10 +86,10 @@ class PrefabPortal(base):
             return
 
         self.prefab.db.mongodb.install(start=start)
-        self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
+        self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("{DIR_BIN}"))
         self.prefab.bash.profileDefault.save()
 
-        portal_config_path = '%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/config.toml' % self.prefab.core.dir_paths["CODEDIR"]
+        portal_config_path = '%s/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/config.toml' % self.replace("{DIR_CODE}")
         portal_config_data = self.prefab.core.file_read(portal_config_path)
         portal_config_data = portal_config_data.format(name=name, port=port, ip=ip)
         portal_config = pytoml.loads(portal_config_data)
@@ -154,7 +154,7 @@ class PrefabPortal(base):
         cmd = """
             cd {CODEDIR}/github/threefoldtech/jumpscale_portal_classic
             pip3 install -e . -U
-            """.format(CODEDIR=self.prefab.core.dir_paths["CODEDIR"])
+            """.format(CODEDIR=self.replace("{DIR_CODE}"))
         self.prefab.core.execute_bash(cmd)
         self.doneSet("installdeps"+name)
 
@@ -171,7 +171,7 @@ class PrefabPortal(base):
             self.portal_dir += '/'
         self.prefab.core.dir_ensure(self.portal_dir)
 
-        CODE_DIR = self.prefab.core.dir_paths["CODEDIR"]
+        CODE_DIR = self.replace("{DIR_CODE}")
         self.prefab.core.file_link("%s/github/threefoldtech/jumpscale_portal_classic/jslib" % CODE_DIR,
                                     '%s/jslib' % self.portal_dir)
         self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, 'portalbase'))
@@ -207,7 +207,7 @@ class PrefabPortal(base):
         for space in to_link:
             space_name = j.sal.fs.getBaseName(space)
             if space_name not in ['home', 'TestWebsite', 'TestSpace']:
-                self.prefab.core.file_link(source=space, destination='$JSAPPSDIR/portals/'+name+'/base/%s' % space_name)
+                self.prefab.core.file_link(source=space, destination='{DIR_BASE}/apps/portals/'+name+'/base/%s' % space_name)
 
     def addSpace(self, spacepath, name='main'):
         spacename = j.sal.fs.getBaseName(spacepath)

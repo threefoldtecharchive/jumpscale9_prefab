@@ -46,9 +46,6 @@ class PrefabCore(base):
         path = "".join([("\\" + _) if _ in SHELL_ESCAPE else _ for _ in path])
         return path
 
-    @property
-    def dir_paths(self):
-        return self.executor.dir_paths
 
     # =============================================================================
     #
@@ -60,87 +57,9 @@ class PrefabCore(base):
         """
         @format py3, bash
         """
-        text = self.replace(text)
+        text = self.executor.replace(text)
+        return j.core.text.print(text,lexer=lexer)
 
-        formatter = pygments.formatters.Terminal256Formatter(
-            style=pygments.styles.get_style_by_name("vim"))
-
-        lexer = pygments.lexers.get_lexer_by_name(lexer)  # , stripall=True)
-        colored = pygments.highlight(text, lexer, formatter)
-        sys.stdout.write(colored)
-
-    def replace(self, text, args={}):
-        """
-        replace following args (when jumpscale installed it will take the args from there)
-
-        uses http://mustache.github.io/ syntax
-        {{varname}}
-
-
-        dirs:
-        - CODEDIR
-        - HOSTCFGDIR
-        - LOGDIR
-        - BUILDDIR
-        - BINDIR
-        - TEMPLATEDIR
-        - LIBDIR
-        - DATADIR
-        - BASEDIR
-        - HOMEDIR
-        - BASEDIRJS
-        - VARDIR
-        - HOSTDIR
-        - JSAPPSDIR
-        - CFGDIR
-        - TMPDIR
-        
-
-        args are additional arguments in dict form
-
-        """
-        text = j.core.text.strip(text)
-        # for backwards compatibility
-        if "$" in text:
-            for key, var in self.dir_paths.items():
-                text = text.replace("$%s" % key, var)
-                text = text.replace("$%s" % key.lower(), var)
-            text = text.replace("$hostname", self.hostname)
-            text = text.replace("$HOSTNAME", self.hostname)
-
-        args2 = self.getArgsDict()
-        args2.update(args)
-        text = pystache.render(text, args2)
-        return text
-
-    def getArgsDict(self):
-        """
-        get all arguments in a dict, keys are in uppercase
-
-        dirs:
-        - CODEDIR
-        - HOSTCFGDIR
-        - LOGDIR
-        - BUILDDIR
-        - BINDIR
-        - TEMPLATEDIR
-        - LIBDIR
-        - DATADIR
-        - BASEDIR
-        - HOMEDIR
-        - BASEDIRJS
-        - VARDIR
-        - HOSTDIR
-        - JSAPPSDIR
-        - CFGDIR
-        - TMPDIR
-
-        """
-        args = {}
-        for key, var in self.dir_paths.items():
-            args[key.upper()] = var
-        args["HOSTNAME"] = self.hostname
-        return args
 
     def system_uuid_alias_add(self):
         """Adds system UUID alias to /etc/hosts.
@@ -193,8 +112,8 @@ class PrefabCore(base):
         @param deletefirst: bool (Set to True if you want to erase destination first, be carefull, this can erase directories)
         @param overwriteFiles: if True will overwrite files, otherwise will not overwrite when destination exists
         """
-        source = self.replace(source)
-        dest = self.replace(dest)
+        source = self.executor.replace(source)
+        dest = self.executor.replace(dest)
 
         # if ssh:
         excl = ""
@@ -303,6 +222,7 @@ class PrefabCore(base):
         """Backups the file at the given location in the same directory, appending
         the given suffix. If `once` is True, then the backup will be skipped if
         there is already a backup file."""
+        location = self.executor.replace(location)
         backup_location = location + suffix
         if once and self.file_exists(backup_location):
             return False
@@ -313,11 +233,12 @@ class PrefabCore(base):
             ))[1]
 
     def file_get_tmp_path(self, basepath=""):
+        basepath = self.executor.replace(basepath)
         if basepath == "":
-            x = "$TMPDIR/%s" % j.data.idgenerator.generateXCharID(10)
+            x = "{DIR_TEMP}/%s" % j.data.idgenerator.generateXCharID(10)
         else:
-            x = "$TMPDIR/%s" % basepath
-        x = self.replace(x)
+            x = "{DIR_TEMP}/%s" % basepath
+        x = self.executor.replace(x)
         return x
 
     def file_download(
@@ -344,6 +265,8 @@ class PrefabCore(base):
         @param removeTopDir : if True and there is only 1 dir in the destination then will move files away from the one dir to parent (often in tgz the top dir is not relevant)
         """
 
+        to = self.executor.replace(to)
+
         # DO NOT CHANGE minsizekb<40, is to protect us against file not found, if
         # there is a specific need then change the argument only for that 1
         # usecase
@@ -354,9 +277,9 @@ class PrefabCore(base):
                 self.dir_remove(destination)
 
         if to == "" or expand:
-            to = self.joinpaths("$TMPDIR", j.sal.fs.getBaseName(url))
+            to = self.joinpaths("{DIR_TEMP}", j.sal.fs.getBaseName(url))
 
-        to = self.replace(to)
+        to = self.executor.replace(to)
 
         if deletedest:
             self.dir_remove(to)
@@ -412,7 +335,7 @@ class PrefabCore(base):
 
     def file_expand(self, path, destination="", removeTopDir=False):
         self.logger.info("file_expand:%s" % path)
-        path = self.replace(path)
+        path = self.executor.replace(path)
         base = j.sal.fs.getBaseName(path)
         if base.endswith(".tgz"):
             base = base[:-4]
@@ -431,9 +354,9 @@ class PrefabCore(base):
         else:
             raise RuntimeError("Cannot file expand, not supported")
         if destination == "":
-            destination = self.joinpaths("$TMPDIR", base)
-        path = self.replace(path)
-        destination = self.replace(destination)
+            destination = self.joinpaths("{DIR_TEMP}", base)
+        path = self.executor.replace(path)
+        destination = self.executor.replace(destination)
         self.dir_ensure(destination)
         if path.endswith(".tar.gz") or path.endswith(".tgz"):
             cmd = "tar -C %s -xzf %s" % (destination, path)
@@ -470,14 +393,15 @@ class PrefabCore(base):
         return destination
 
     def touch(self, path):
-        path = self.replace(path)
+        path = self.executor.replace(path)
         self.file_write(path, "")
 
     def file_read(self, location, default=None):
+        location = self.executor.replace(location)
         import base64
         """Reads the *remote* file at the given location, if default is not `None`,
         default will be returned if the file does not exist."""
-        location = self.replace(location)
+        location = self.executor.replace(location)
         if default is None:
             assert self.file_exists(location), "prefab.file_read: file does not exists {0}".format(location)
         elif not self.file_exists(location):
@@ -487,13 +411,14 @@ class PrefabCore(base):
 
     def _check_is_ok(self, cmd, location, replace=True):
         if replace:
-            location = self.replace(location)
+            location = self.executor.replace(location)
         cmd += ' %s' % location
         rc, out, err = self.run(
             cmd, showout=False, die=False, replaceArgs=False)
         return rc == 0
 
     def file_exists(self, location):
+        location = self.executor.replace(location)
         """Tests if there is a *remote* file at the given location."""
         return self._check_is_ok('test -e', location)
 
@@ -501,21 +426,25 @@ class PrefabCore(base):
         """
         check if dir or file or exists
         """
+        location = self.executor.replace(location)
         return self._check_is_ok('test -e', location, replace=replace)
 
     def file_is_file(self, location):
+        location = self.executor.replace(location)
         return self._check_is_ok('test -f', location)
 
     def file_is_dir(self, location):
+        location = self.executor.replace(location)
         return self._check_is_ok('test -d', location)
 
     def file_is_link(self, location):
+        location = self.executor.replace(location)
         return self._check_is_ok('test -L', location)
 
     def file_attribs(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
         location."""
-        location = self.replace(location)
+        location = self.executor.replace(location)
         return self.dir_attribs(location, mode, owner, group, False)
 
     def file_attribs_get(self, location):
@@ -523,7 +452,7 @@ class PrefabCore(base):
         Return mode, owner, and group if remote path exists, 'None'
         otherwise.
         """
-        location = self.replace(location)
+        location = self.executor.replace(location)
         location = location.replace("//", "/")
         if self.file_exists(location):
             if self.isMac:
@@ -541,6 +470,7 @@ class PrefabCore(base):
         """
         return in kb
         """
+        path = self.executor.replace(path)
         if  self.executor.type =="local":
             return j.sal.fs.fileSize(path)
         # print("du -Lck %s" % path)
@@ -650,7 +580,8 @@ class PrefabCore(base):
         @param source is on local (where we run the prefab)
         @param dest is on remote host (on the ssh node)
 
-        will replace $VARDIR, $CODEDIR, ... in source using j.dirs.replace_txt_dir_vars (is for local prefab)
+        will replace {DIR_VAR}, $CODEDIR, ... in source using
+        j.dirs.replace_txt_dir_vars (is for local prefab)
         will also replace in dest but then using prefab.core.replace(dest) (so for prefab host)
 
         @param dest, if empty then will be same as source very usefull when using e.g. $CODEDIR
@@ -661,7 +592,7 @@ class PrefabCore(base):
         if dest == "":
             dest = source
         source = j.dirs.replace_txt_dir_vars(source)
-        dest = self.replace(dest)
+        dest = self.executor.replace(dest)
         self.logger.info("upload local:%s to remote:%s" % (source, dest))
         # if self.prefab.id == 'localhost':
         #     j.do.copyTree(source, dest, keepsymlinks=True)
@@ -673,7 +604,7 @@ class PrefabCore(base):
         """
         @param source is on remote host (on the ssh node)
         @param dest is on local (where we run the prefab)
-        will replace $VARDIR, $CODEDIR, ...
+        will replace {DIR_VAR}, $CODEDIR, ...
         - in source but then using prefab.core.replace(dest) (so for prefab host)
         - in dest using j.dirs.replace_txt_dir_vars (is for local prefab)
 
@@ -684,7 +615,7 @@ class PrefabCore(base):
         if dest == "":
             dest = source
         dest = j.dirs.replace_txt_dir_vars(dest)
-        source = self.replace(source)
+        source = self.executor.replace(source)
         self.logger.info("download remote:%s to local:%s" % (source, dest))
         # if self.prefab.id == 'localhost':
         #     j.do.copyTree(source, dest, keepsymlinks=True)
@@ -697,20 +628,20 @@ class PrefabCore(base):
         """
         @param append if append then will add to file
         """
-        path = self.replace(location)
+        path = self.executor.replace(location)
 
         if strip:
             content = j.core.text.strip(content)
 
         if replaceInContent:
-            content = self.replace(content)
+            content = self.executor.replace(content)
         self.executor.file_write(
             path=path, content=content, mode=mode, owner=owner, group=group, append=append, sudo=sudo)
 
     def file_ensure(self, location, mode=None, owner=None, group=None):
         """Updates the mode/owner/group for the remote file at the given
         location."""
-        location = self.replace(location)
+        location = self.executor.replace(location)
         if self.file_exists(location):
             self.file_attribs(location, mode=mode, owner=owner, group=group)
         else:
@@ -744,6 +675,7 @@ class PrefabCore(base):
 
     def file_remove_prefix(self, location, prefix, strip=True):
         # look for each line which starts with prefix & remove
+        location = self.executor.replace(location)
         content = self.file_read(location)
         out = ""
         for l in content.split("\n"):
@@ -770,7 +702,7 @@ class PrefabCore(base):
 
         > if file_update("/etc/myfile.cfg", lambda _: text_ensure_line(_, line)): self.run("service restart")
         """
-        location = self.replace(location)
+        location = self.executor.replace(location)
         assert self.file_exists(location), "File does not exists: " + location
         old_content = self.file_read(location)
         new_content = updater(old_content)
@@ -785,7 +717,7 @@ class PrefabCore(base):
 
     # def check_exist(self, location, content):
     #     """check if the file in location contain the content"""
-    #     location = self.replace(location)
+    #     location = self.executor.replace(location)
     #     content2 = content.encode('utf-8')
     #     content_base64 = base64.b64encode(content2).decode()
     #     rc, _, _ = self.run('grep -F "$(echo "%s" | openssl base64 -A -d)" %s' % (content_base64, location), die=False)
@@ -794,7 +726,7 @@ class PrefabCore(base):
     def file_append(self, location, content, mode=None, owner=None, group=None, check_exist=False):
         """Appends the given content to the remote file at the given
         location, optionally updating its mode / owner / group."""
-        location = self.replace(location)
+        location = self.executor.replace(location)
         content2 = content.encode('utf-8')
         content_base64 = base64.b64encode(content2).decode()
         if check_exist:
@@ -808,14 +740,14 @@ class PrefabCore(base):
         self.file_attribs(location, mode=mode, owner=owner, group=group)
 
     def file_unlink(self, path):
-        path = self.replace(path)
+        path = self.executor.replace(path)
         self.run("rm -f %s" % (self.shell_safe(path)), showout=False)
 
     def file_link(self, source, destination, symbolic=True, mode=None, owner=None, group=None):
         """Creates a (symbolic) link between source and destination on the remote host,
         optionally setting its mode / owner / group."""
-        source = self.replace(source)
-        destination = self.replace(destination)
+        source = self.executor.replace(source)
+        destination = self.executor.replace(destination)
         if self.file_exists(destination) and (not self.file_is_link(destination)):
             raise Exception(
                 "Destination already exists and is not a link: %s" % (destination))
@@ -833,8 +765,8 @@ class PrefabCore(base):
         self.file_attribs(destination, mode, owner, group)
 
     def file_copy(self, source, dest, recursive=False, overwrite=True):
-        source = self.replace(source)
-        dest = self.replace(dest)
+        source = self.executor.replace(source)
+        dest = self.executor.replace(dest)
         cmd = "cp -v "
         if recursive:
             cmd += "-r "
@@ -861,7 +793,7 @@ class PrefabCore(base):
 
     def file_base64(self, location):
         """Returns the base64 - encoded content of the file at the given location."""
-        location = self.replace(location)
+        location = self.executor.replace(location)
         cmd = "cat {0} | base64".format(self.shell_safe((location)))
         rc, out, err = self.run(cmd, debug=False, checkok=False, showout=False, profile=False)
         return out
@@ -871,7 +803,7 @@ class PrefabCore(base):
         # NOTE: In some cases, self.sudo can output errors in here -- but the errors will
         # appear before the result, so we simply split and get the last line to
         # be on the safe side.
-        location = self.replace(location)
+        location = self.executor.replace(location)
         if self.file_exists(location):
             return self.run(
                 "cat {0} | python -c 'import sys,hashlib;sys.stdout.write(hashlib.sha256(sys.stdin.read()).hexdigest())'".format(
@@ -893,7 +825,7 @@ class PrefabCore(base):
         # appear before the result, so we simply split and get the last line to
         # be on the safe side.
         # if prefab_env[OPTION_HASH] == "python":
-        location = self.replace(location)
+        location = self.executor.replace(location)
         if self.file_exists(location):
             cmd = "md5sum {0} | cut -f 1 -d ' '".format(
                 self.shell_safe((location)))
@@ -950,12 +882,12 @@ class PrefabCore(base):
             else:
                 path += sep + b
 
-        return self.replace(path)
+        return self.executor.replace(path)
 
     def dir_attribs(self, location, mode=None, owner=None, group=None, recursive=False, showout=False):
         """Updates the mode / owner / group for the given remote directory."""
 
-        location = self.replace(location)
+        location = self.executor.replace(location)
         if showout:
             # self.logger.info("set dir attributes:%s"%location)
             self.logger.debug('set dir attributes:%s"%location')
@@ -977,7 +909,7 @@ class PrefabCore(base):
 
     def dir_remove(self, location, recursive=True):
         """ Removes a directory """
-        location = self.replace(location)
+        location = self.executor.replace(location)
         # self.logger.info("dir remove:%s" % location)
         self.logger.debug("dir remove:%s" % location)
         flag = ''
@@ -993,7 +925,7 @@ class PrefabCore(base):
         If we are not updating the owner / group then this can be done as a single
         ssh call, so use that method, otherwise set owner / group after creation."""
 
-        location = self.replace(location)
+        location = self.executor.replace(location)
         if not self.dir_exists(location):
             self.run('mkdir %s %s' %
                      (recursive and "-p" or "", location), showout=False, sudo=True)
@@ -1034,7 +966,7 @@ class PrefabCore(base):
 
         @param extendinfo: this will return [[$path, $sizeinkb, $epochmod]]
         """
-        path = self.replace(path)
+        path = self.executor.replace(path)
         cmd = "cd %s;find ." % path
         if recursive is False:
             cmd += " -maxdepth 1"
@@ -1095,11 +1027,11 @@ class PrefabCore(base):
 
     def sudo(self, cmd, die=True, showout=True):
         """
-        Keep this for backward compatibality
+        Keep this for backward compatibility
         """
         return self.run(cmd=cmd, die=die, showout=showout, sudo=True)
 
-    def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replaceArgs=True,
+    def run(self, cmd, die=True, debug=None, checkok=False, showout=True, profile=True, replace=True,
             shell=False, env=None, timeout=600, sudo=False, raw=False):
         """
         @param profile, execute the bash profile first
@@ -1109,8 +1041,8 @@ class PrefabCore(base):
             raise RuntimeError("cmd cannot be empty")
         if not env:
             env = {}
-        if replaceArgs:
-            cmd = self.replace(cmd)
+        if replace:
+            cmd = self.executor.replace(cmd)
         self.executor.curpath = self._cd
         # self.logger.info("CMD:'%s'"%cmd)
         if debug:
@@ -1152,7 +1084,7 @@ class PrefabCore(base):
 
     def cd(self, path):
         """cd to the given path"""
-        path = self.replace(path)
+        path = self.executor.replace(path)
         self._cd = path
 
     def pwd(self):
@@ -1166,7 +1098,7 @@ class PrefabCore(base):
         """
 
         if replace:
-            content = self.replace(content)
+            content = self.executor.replace(content)
         content = j.core.text.strip(content)
 
         self.logger.info("RUN SCRIPT:\n%s" % content)
@@ -1186,8 +1118,8 @@ class PrefabCore(base):
             ext = "lua"
 
         rnr = j.data.idgenerator.generateRandomInt(0, 10000)
-        path = "$TMPDIR/%s.%s" % (rnr, ext)
-        path = self.replace(path)
+        path = "{DIR_TEMP}/%s.%s" % (rnr, ext)
+        path = self.executor.replace(path)
 
         if self.isMac:
             self.file_write(location=path, content=content,
@@ -1205,8 +1137,8 @@ class PrefabCore(base):
         if self.sudomode:
             cmd = self.executor.sudo_cmd(cmd)
 
-        cmd = "cd $TMPDIR; %s" % (cmd, )
-        cmd = self.replace(cmd)
+        cmd = "cd {DIR_TEMP}; %s" % (cmd, )
+        cmd = self.executor.replace(cmd)
         if profile:
             ppath = self.executor.dir_paths["HOMEDIR"] + "/.bash_profile"
             # next will check if profile path exists, if not will put it
@@ -1271,7 +1203,7 @@ class PrefabCore(base):
         """
         execute a jumpscript(script as content) in a remote tmux command, the stdout will be returned
         """
-        script = self.replace(script)
+        script = self.executor.replace(script)
         script = j.core.text.strip(script)
 
         if script.find("from Jumpscale import j") == -1:
@@ -1288,7 +1220,7 @@ class PrefabCore(base):
 
     def command_check(self, command):
         """Tests if the given command is available on the system."""
-        command = self.replace(command)
+        command = self.executor.replace(command)
         rc, out, err = self.run("which '%s'" % command,
                                 die=False, showout=False, profile=True)
         return rc == 0
@@ -1297,14 +1229,14 @@ class PrefabCore(base):
         """
         return location of cmd
         """
-        command = self.replace(command)
+        command = self.executor.replace(command)
         return self.prefab.bash.cmdGetPath(command)
 
     def command_ensure(self, command, package=None):
         """Ensures that the given command is present, if not installs the
         package with the given name, which is the same as the command by
         default."""
-        command = self.replace(command)
+        command = self.executor.replace(command)
         if package is None:
             package = command
         if not self.command_check(command):

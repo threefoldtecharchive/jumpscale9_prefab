@@ -46,7 +46,7 @@ class PrefabVolumeDriver(app):
         self.prefab.system.package.install(apt_deps, allow_unauthenticated=True)
 
     def _build(self, version='6.0.0'):
-        workspace = self.replace("$TMPDIR/volumedriver-workspace")
+        workspace = self.executor.replace("{DIR_TEMP}/volumedriver-workspace")
         self.prefab.core.dir_ensure(workspace)
 
         str_repl = {
@@ -76,4 +76,4 @@ class PrefabVolumeDriver(app):
         """ % str_repl
 
         self.prefab.core.run(build_script)
-        self.prefab.core.file_copy('$TMPDIR/volumedriver-workspace/volumedriver/build/bin/*', '$BINDIR')
+        self.prefab.core.file_copy('{DIR_TEMP}/volumedriver-workspace/volumedriver/build/bin/*', '{DIR_BIN}')

@@ -159,7 +159,7 @@ MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n2
             }
         }
         """
-        caddy_cfg = self.replace(caddy_cfg, {
+        caddy_cfg = self.executor.replace(caddy_cfg, {
             "client_path": self.client_path,
             "client_port": client_port,
             "iyo_client_id": iyo_client_id,

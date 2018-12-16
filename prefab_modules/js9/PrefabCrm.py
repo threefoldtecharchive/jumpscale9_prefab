@@ -8,7 +8,7 @@ class PrefabCrm(app):
 
     def _init(self):
         self.git_url = "https://github.com/incubaid/crm"
-        self.crm_dir = self.replace("$CODEDIR/github/incubaid/crm")
+        self.crm_dir = self.executor.replace("$CODEDIR/github/incubaid/crm")
 
     def build(self):
         """
@@ -80,7 +80,7 @@ class PrefabCrm(app):
         """
 
         # Configure Caddy
-        log_dir = self.replace("{{LOGDIR}}/caddy/log")
+        log_dir = self.executor.replace("{{LOGDIR}}/caddy/log")
 
         if caddy_port == 443:
             listen = domain
@@ -122,7 +122,7 @@ class PrefabCrm(app):
             }}
             """.format(CLIENT_ID=client_id, CLIENT_SECRET=client_secret, SCHEME=scheme, DOMAIN=domain, LISTEN=listen)
         self.prefab.core.dir_ensure(log_dir)
-        self.prefab.core.file_write(self.replace("$CFGDIR/caddy.cfg"), caddy_cfg)
+        self.prefab.core.file_write(self.executor.replace("$CFGDIR/caddy.cfg"), caddy_cfg)
 
         # Configure Database
         if not self.prefab.db.postgresql.isStarted():

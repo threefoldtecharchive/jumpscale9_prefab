@@ -8,14 +8,14 @@ class PrefabCaddy(app):
     NAME = "caddy"
 
     def _init(self):
-        self.BUILDDIR_ = self.replace("$BUILDDIR/caddy")
+        self.BUILDDIR_ = self.executor.replace("{DIR_VAR}/build/caddy")
 
     def reset(self):
         self.stop()
         app.reset(self)
         self._init()
         self.prefab.core.dir_remove(self.BUILDDIR_)
-        self.prefab.core.dir_remove("$BINDIR/caddy")
+        self.prefab.core.dir_remove("{DIR_BIN}/caddy")
 
     def build(self, reset=False, plugins=None):
         """
@@ -43,7 +43,7 @@ class PrefabCaddy(app):
         self.prefab.core.run(cmd)
         self.doneSet('build')
 
-    def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/caddy.cfg"):
+    def install(self, plugins=None, reset=False, configpath="{DIR_CFG}/caddy.cfg"):
         """
         will build if required & then install binary on right location
         """
@@ -52,11 +52,11 @@ class PrefabCaddy(app):
         if self.doneCheck('install', reset):
             return
 
-        self.prefab.core.file_copy('/opt/go_proj/bin/caddy', '$BINDIR/caddy')
-        self.prefab.bash.profileDefault.addPath(self.prefab.core.dir_paths['BINDIR'])
+        self.prefab.core.file_copy('/opt/go_proj/bin/caddy', '{DIR_BIN}/caddy')
+        self.prefab.bash.profileDefault.addPath('{DIR_BIN}')
         self.prefab.bash.profileDefault.save()
 
-        configpath = self.replace(configpath)
+        configpath = self.executor.replace(configpath)
 
         if not self.prefab.core.exists(configpath):
             # default configuration, can overwrite
@@ -76,8 +76,8 @@ class PrefabCaddy(app):
 
         self.doneSet('install')
 
-    def reload(self, configpath="{{CFGDIR}}/caddy.cfg"):
-        configpath = self.replace(configpath)
+    def reload(self, configpath="{DIR_CFG}/caddy.cfg"):
+        configpath = self.executor.replace(configpath)
         for item in self.prefab.system.process.info_get():
             if item["process"] == "caddy":
                 pid = item["pid"]
@@ -85,29 +85,29 @@ class PrefabCaddy(app):
                 return True
         return False
 
-    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{CFGDIR}}/caddy.cfg",
+    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{DIR_CFG}/caddy.cfg",
                   logdir="{{LOGDIR}}/caddy/log", email='replaceme', port=8000):
         """
         @param caddyconfigfile
             template args available DATADIR, LOGDIR, WWWROOTDIR, PORT, TMPDIR, EMAIL ... (using mustasche)
         """
-        vhosts_dir = self.replace("{{CFGDIR}}/vhosts")
+        vhosts_dir = self.executor.replace("{DIR_CFG}/vhosts")
         self.prefab.core.dir_ensure(vhosts_dir)
         C = """
         #tcpport:{{PORT}}
         import {{VHOSTS_DIR}}/*
         """
 
-        configpath = self.replace(configpath)
+        configpath = self.executor.replace(configpath)
         args = {
             "PORT": str(port),
             "VHOSTS_DIR": vhosts_dir
         }
-        C = self.replace(C, args)
+        C = self.executor.replace(C, args)
         self.prefab.core.file_write(configpath, C)
 
-    def getTCPPort(self, configpath="{{CFGDIR}}/caddy.cfg"):
-        configpath = self.replace(configpath)
+    def getTCPPort(self, configpath="{DIR_CFG}/caddy.cfg"):
+        configpath = self.executor.replace(configpath)
         C = self.prefab.core.file_read(configpath)
         for line in C.split("\n"):
             if "#tcpport:" in line:
@@ -115,12 +115,12 @@ class PrefabCaddy(app):
         raise RuntimeError(
             "Can not find tcpport arg in config file, needs to be '#tcpport:'")
 
-    def start(self, configpath="{{CFGDIR}}/caddy.cfg", agree=True, expect="done."):
+    def start(self, configpath="{DIR_CFG}/caddy.cfg", agree=True, expect="done."):
         """
         @expect is to see if we can find this string in output of caddy starting
         """
 
-        configpath = self.replace(configpath)
+        configpath = self.executor.replace(configpath)
 
         if not self.prefab.core.exists(configpath):
             raise RuntimeError(
@@ -138,7 +138,7 @@ class PrefabCaddy(app):
         if self.prefab.platformtype.isMac:
             cmd = "caddy"
         else:
-            cmd = self.replace("$BINDIR/caddy")
+            cmd = self.executor.replace("{DIR_BIN}/caddy")
 
         if agree:
             agree = " -agree"
@@ -150,9 +150,9 @@ class PrefabCaddy(app):
     def stop(self):
         self.prefab.system.processmanager.get().stop("caddy")
 
-    def add_website(self, name, cfg, configpath="{{CFGDIR}}/caddy.cfg"):
+    def add_website(self, name, cfg, configpath="{DIR_CFG}/caddy.cfg"):
         file_contents = self.prefab.core.file_read(configpath)
-        vhosts_dir = self.replace("{{CFGDIR}}/vhosts")
+        vhosts_dir = self.executor.replace("{DIR_CFG}/vhosts")
         if vhosts_dir not in file_contents:
             file_contents = "import {}/*\n".format(vhosts_dir) + file_contents
         self.prefab.core.file_write(configpath, file_contents)

@@ -10,16 +10,16 @@ class PrefabCelery(base):
         self.prefab.runtimes.pip.install('flower')
         j.clients.redis.core_get()
 
-    def start(self, cmd, path="$JSAPPSDIR/celery/tasks.py", broker='redis://localhost:6379', appname='celery'):
+    def start(self, cmd, path="{DIR_BASE}/apps/celery/tasks.py", broker='redis://localhost:6379', appname='celery'):
         """
         :param cmd: contains the arg and its parameters, for example `worker --loglevel=info`
-        :param path: path of the module defining the celery app, default is $JSAPPSDIR/celery/tasks.py
+        :param path: path of the module defining the celery app, default is {DIR_BASE}/apps/celery/tasks.py
         :param broker: specify the celery broker, default redis
         :param appname: name of celery app
         """
         parent = j.sal.fs.getParent(path)
         module = j.sal.fs.getBaseName(path).split('.py')[0]
-        if parent == '$JSAPPSDIR/celery' and not self.prefab.core.exists('$JSAPPSDIR/celery/tasks.py'):
+        if parent == '{DIR_BASE}/apps/celery' and not self.prefab.core.exists('{DIR_BASE}/apps/celery/tasks.py'):
             content = """
             from celery import Celery
             app = Celery('{name}', broker='{back}', backend='{back}')

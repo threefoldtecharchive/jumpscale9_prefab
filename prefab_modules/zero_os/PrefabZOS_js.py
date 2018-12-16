@@ -54,7 +54,7 @@ class PrefabZOS_js(base):
             wget https://stor.jumpscale.org/storx/static/js8 -O /usr/local/bin/js8
             chmod +x /usr/local/bin/js8
             cd /
-            mkdir -p $BASEDIR
+            mkdir -p {DIR_BASE}
             """
         self.prefab.core.execute_bash(C)
 

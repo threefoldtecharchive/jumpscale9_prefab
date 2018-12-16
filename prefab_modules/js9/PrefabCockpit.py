@@ -20,8 +20,8 @@ class PrefabCockpit(base):
         # add link from portal to API
         content = self.prefab.core.file_read('$CODEDIR/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/AYS/.space/nav.wiki')
         content = content.replace('AYS API:http://localhost:5000', "AYS API:http://{ip}:5000".format(ip=ip))
-        self.prefab.core.dir_ensure('$JSAPPSDIR/portals/main/base/AYS/.space/')
-        self.prefab.core.file_write('$JSAPPSDIR/portals/main/base/AYS/.space/nav.wiki', content=content)
+        self.prefab.core.dir_ensure('{DIR_BASE}/apps/portals/main/base/AYS/.space/')
+        self.prefab.core.file_write('{DIR_BASE}/apps/portals/main/base/AYS/.space/nav.wiki', content=content)
 
         self.prefab.apps.portal.stop()
         self.prefab.apps.portal.configure(
@@ -33,7 +33,7 @@ class PrefabCockpit(base):
             ip)
 
         # Configure AYS
-        # Install ays will just link apidocs, index.html, main.py from $CODEDIR into $JSAPPSDIR
+        # Install ays will just link apidocs, index.html, main.py from $CODEDIR into {DIR_BASE}/apps/
         self.prefab.apps.atyourservice.install()
         self.prefab.apps.atyourservice.stop()
         self.prefab.apps.atyourservice.configure(
@@ -45,7 +45,7 @@ class PrefabCockpit(base):
             ip)
 
         # configure base URI for api-console
-        raml_path = "$JSAPPSDIR/atyourservice/JumpscaleAYS/ays/server/apidocs/api.raml"
+        raml_path = "{DIR_BASE}/apps/atyourservice/JumpscaleAYS/ays/server/apidocs/api.raml"
         raml = self.prefab.core.file_read(raml_path)
         raml = raml.replace('baseUri: https://localhost:5000', "baseUri: http://{ip}:5000".format(ip=ip))
         self.prefab.core.file_write(raml_path, raml)

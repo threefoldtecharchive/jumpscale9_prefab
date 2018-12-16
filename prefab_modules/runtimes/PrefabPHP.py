@@ -12,8 +12,8 @@ compileconfig['with_libzip'] = True
 compileconfig['with_zlib'] = True
 compileconfig['with_openssl'] = True
 compileconfig['enable_fpm'] = True
-compileconfig['prefix'] = "$JSAPPSDIR/php"
-compileconfig['exec_prefix'] = "$JSAPPSDIR/php"
+compileconfig['prefix'] = "{DIR_BASE}/apps/php"
+compileconfig['exec_prefix'] = "{DIR_BASE}/apps/php"
 compileconfig['with_mysqli'] = True
 compileconfig['with_pdo_mysql'] = True
 compileconfig['with_mysql_sock'] = "/var/run/mysqld/mysqld.sock"
@@ -28,7 +28,7 @@ class PrefabPHP(app):
         pkgs = "libxml2-dev libpng-dev libcurl4-openssl-dev libzip-dev zlibc zlib1g zlib1g-dev libmysqld-dev libmysqlclient-dev re2c bison bzip2 build-essential libaprutil1-dev libapr1-dev openssl pkg-config libssl-dev libsslcommon2-dev file"
         list(map(self.prefab.system.package.ensure, pkgs.split(sep=" ")))
 
-        compileconfig['with_apxs2'] = self.prefab.core.replace("$JSAPPSDIR/apache2/bin/apxs")
+        compileconfig['with_apxs2'] = self.prefab.core.replace("{DIR_BASE}/apps/apache2/bin/apxs")
         buildconfig = deepcopy(compileconfig)
         buildconfig.update(config)  # should be defaultconfig.update(config) instead of overriding the explicit ones.
 
@@ -46,27 +46,27 @@ class PrefabPHP(app):
                 args_string += " --{k}={v}".format(k=k, v=v)
         C = """
         set -x
-        rm -f $TMPDIR/php-7.0.17.tar.bz*
-        cd $TMPDIR && [ ! -f $TMPDIR/php-7.0.17.tar.bz2 ] && wget http://be2.php.net/distributions/php-7.0.17.tar.bz2
-        cd $TMPDIR && tar xvjf $TMPDIR/php-7.0.17.tar.bz2
-        mv $TMPDIR/php-7.0.17/ $TMPDIR/php
+        rm -f {DIR_TEMP}/php-7.0.17.tar.bz*
+        cd {DIR_TEMP} && [ ! -f {DIR_TEMP}/php-7.0.17.tar.bz2 ] && wget http://be2.php.net/distributions/php-7.0.17.tar.bz2
+        cd {DIR_TEMP} && tar xvjf {DIR_TEMP}/php-7.0.17.tar.bz2
+        mv {DIR_TEMP}/php-7.0.17/ {DIR_TEMP}/php
 
         """
 
-        C = self.replace(C)
+        C = self.executor.replace(C)
         self.prefab.core.run(C)
 
-        C = """cd $TMPDIR/php && ./configure {args_string}""".format(args_string=args_string)
+        C = """cd {DIR_TEMP}/php && ./configure {args_string}""".format(args_string=args_string)
         self.prefab.core.run(C, die=False)
 
-        C = """cd $TMPDIR/php && make"""
+        C = """cd {DIR_TEMP}/php && make"""
         self.prefab.core.run(C, die=False)
 
         # check if we need an php accelerator: https://en.wikipedia.org/wiki/List_of_PHP_accelerators
 
     def install(self, start=False):
         fpmdefaultconf = """\
-        include=$JSAPPSDIR/php/etc/php-fpm.d/*.conf
+        include={DIR_BASE}/apps/php/etc/php-fpm.d/*.conf
         """
         fpmwwwconf = """\
         ;nobody Start a new pool named 'www'.
@@ -91,31 +91,31 @@ class PrefabPHP(app):
         fpmwwwconf = textwrap.dedent(fpmwwwconf)
         # make sure to save that configuration file ending with .conf under php/etc/php-fpm.d/www.conf
         C = """
-        cd $TMPDIR/php && make install
+        cd {DIR_TEMP}/php && make install
         """
 
-        C = self.replace(C)
+        C = self.executor.replace(C)
         self.prefab.core.run(C)
-        fpmdefaultconf = self.replace(fpmdefaultconf)
-        fpmwwwconf = self.replace(fpmwwwconf)
-        self.prefab.core.file_write("$JSAPPSDIR/php/etc/php-fpm.conf.default", content=fpmdefaultconf)
-        self.prefab.core.file_write("$JSAPPSDIR/php/etc/php-fpm.d/www.conf", content=fpmwwwconf)
-        self.prefab.bash.profileJS.addPath(self.replace('$JSAPPSDIR/php/bin'))
+        fpmdefaultconf = self.executor.replace(fpmdefaultconf)
+        fpmwwwconf = self.executor.replace(fpmwwwconf)
+        self.prefab.core.file_write("{DIR_BASE}/apps/php/etc/php-fpm.conf.default", content=fpmdefaultconf)
+        self.prefab.core.file_write("{DIR_BASE}/apps/php/etc/php-fpm.d/www.conf", content=fpmwwwconf)
+        self.prefab.bash.profileJS.addPath(self.executor.replace('{DIR_BASE}/apps/php/bin'))
         self.prefab.bash.profileJS.save()
 
         # FOR APACHE
-        self.prefab.core.dir_ensure('$JSAPPSDIR/php/lib/')
-        self.prefab.core.file_copy("$TMPDIR/php/php.ini-development", "$JSAPPSDIR/php/lib/php.ini")
+        self.prefab.core.dir_ensure('{DIR_BASE}/apps/php/lib/')
+        self.prefab.core.file_copy("{DIR_TEMP}/php/php.ini-development", "{DIR_BASE}/apps/php/lib/php.ini")
         if start:
             self.start()
 
     def start(self):
-        phpfpmbinpath = '$JSAPPSDIR/php/sbin'
+        phpfpmbinpath = '{DIR_BASE}/apps/php/sbin'
         # COPY BINARIES
-        self.prefab.core.run("cp $JSAPPSDIR/php/sbin/* $BINDIR")
+        self.prefab.core.run("cp {DIR_BASE}/apps/php/sbin/* {DIR_BIN}")
 
-        phpfpmcmd = "$JSAPPSDIR/php/sbin/php-fpm -F -y $JSAPPSDIR/php/etc/php-fpm.conf.default"  # foreground
-        phpfpmcmd = self.replace(phpfpmcmd)
+        phpfpmcmd = "{DIR_BASE}/apps/php/sbin/php-fpm -F -y {DIR_BASE}/apps/php/etc/php-fpm.conf.default"  # foreground
+        phpfpmcmd = self.executor.replace(phpfpmcmd)
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name="php-fpm", cmd=phpfpmcmd, path=phpfpmbinpath)
 

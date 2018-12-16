@@ -14,10 +14,10 @@ class PrefabGogs(app):
         self._gogspath = str()
         self._gopath = str()
         self._appini = str()
-        self.BUILDDIR = self.replace("$BUILDDIR/caddy")
-        self.GOGSPATH = self.replace("$GOPATH/src/github.com/gogits/gogs")
+        self.BUILDDIR = self.executor.replace("{DIR_VAR}/build/caddy")
+        self.GOGSPATH = self.executor.replace("$GOPATH/src/github.com/gogits/gogs")
         self.CODEDIR = self.GOGSPATH
-        self.INIPATH = self.replace("$GOGSPATH/custom/conf/app.ini")
+        self.INIPATH = self.executor.replace("$GOGSPATH/custom/conf/app.ini")
 
     @property
     def GOPATH(self):
@@ -32,9 +32,9 @@ class PrefabGogs(app):
         self.prefab.runtimes.golang.install()
         self.prefab.runtimes.golang.glide()
 
-        self.GOGSPATH = self.replace("{}/src/github.com/gogits/gogs".format(self.GOPATH))
+        self.GOGSPATH = self.executor.replace("{}/src/github.com/gogits/gogs".format(self.GOPATH))
         self.CODEDIR = self.GOGSPATH
-        self.INIPATH = self.replace("$GOGSPATH/custom/conf/app.ini")
+        self.INIPATH = self.executor.replace("$GOGSPATH/custom/conf/app.ini")
 
         self.prefab.bash.envSet(
             'GOGITSDIR', '%s/src/github.com/gogits' % self.GOGSPATH)

@@ -75,7 +75,7 @@ class PrefabTmux(base):
             envstr += "export %s=%s\n" % (name, value)
 
         if replaceArgs:
-            cmd = self.replace(cmd)
+            cmd = self.executor.replace(cmd)
 
         # Escape the double quote character in cmd
         cmd = cmd.replace('"', r'\"')
@@ -412,7 +412,7 @@ class PrefabTmux(base):
         if xonsh:
             C += "set -g default-command \"xonsh\"\n\n"
 
-        self.prefab.core.file_write("$HOMEDIR/.tmux.conf", C)
+        self.prefab.core.file_write("{DIR_HOME}/.tmux.conf", C)
 
         if restartTmux:
             self.prefab.core.run("killall tmux", die=False, profile=True)

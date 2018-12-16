@@ -27,13 +27,13 @@ class PrefabRedis(app):
             self.prefab.system.package.mdupdate()
             self.prefab.system.package.install("build-essential")
 
-            self.prefab.core.dir_remove("$TMPDIR/build/redis")
+            self.prefab.core.dir_remove("{DIR_TEMP}/build/redis")
 
             C = """
             #!/bin/bash
             set -ex
-            mkdir -p $TMPDIR/build/redis
-            cd $TMPDIR/build/redis
+            mkdir -p {DIR_TEMP}/build/redis
+            cd {DIR_TEMP}/build/redis
             wget http://download.redis.io/redis-stable.tar.gz
             tar xzf redis-stable.tar.gz
             cd redis-stable
@@ -43,19 +43,19 @@ class PrefabRedis(app):
             rm -f /usr/local/bin/redis-cli
             """
             C = self.prefab.core.replace(C)
-            C = self.replace(C)
+            C = self.executor.replace(C)
             self.prefab.core.run(C)
 
             # move action
             C = """
             set -ex
-            mkdir -p $BINDIR
-            cp -f $TMPDIR/build/redis/redis-stable/src/redis-server $BINDIR
-            cp -f $TMPDIR/build/redis/redis-stable/src/redis-cli $BINDIR
-            rm -rf $BASEDIR/apps/redis
+            mkdir -p {DIR_BIN}
+            cp -f {DIR_TEMP}/build/redis/redis-stable/src/redis-server {DIR_BIN}
+            cp -f {DIR_TEMP}/build/redis/redis-stable/src/redis-cli {DIR_BIN}
+            rm -rf {DIR_BASE}/apps/redis
             """
             C = self.prefab.core.replace(C)
-            C = self.replace(C)
+            C = self.executor.replace(C)
             self.prefab.core.run(C)
         else:
             raise j.exceptions.NotImplemented(message="only ubuntu supported for building redis")
@@ -88,20 +88,20 @@ class PrefabRedis(app):
                                 password=password,
                                 unixsocket=unixsocket)
         # return if redis is already running
-        if self.is_running(ip_address=ip, port=port, path='$BINDIR', password=password, unixsocket=unixsocket):
+        if self.is_running(ip_address=ip, port=port, path='{DIR_BIN}', password=password, unixsocket=unixsocket):
             self.logger.info('Redis is already running!')
             return
 
         _, c_path = self._get_paths(name)
 
-        cmd = "$BINDIR/redis-server %s" % c_path
-        cmd = self.replace(cmd)
+        cmd = "{DIR_BIN}/redis-server %s" % c_path
+        cmd = self.executor.replace(cmd)
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name="redis_%s" % name, cmd=cmd,
-                  env={}, path='$BINDIR', autostart=True)
+                  env={}, path='{DIR_BIN}', autostart=True)
 
         # Checking if redis is started correctly with port specified
-        if not self.is_running(ip_address=ip, port=port, path='$BINDIR', unixsocket=unixsocket, password=password):
+        if not self.is_running(ip_address=ip, port=port, path='{DIR_BIN}', unixsocket=unixsocket, password=password):
             raise j.exceptions.RuntimeError(
                 'Redis is failed to start correctly')
 
@@ -109,7 +109,7 @@ class PrefabRedis(app):
         pm = self.prefab.system.processmanager.get()
         pm.stop(name="redis_%s" % name)
 
-    def is_running(self, ip_address='localhost', port=6379, path='$BINDIR', password=None, unixsocket=None):
+    def is_running(self, ip_address='localhost', port=6379, path='{DIR_BIN}', password=None, unixsocket=None):
         if ip_address != '' and port != 0:
             ping_cmd = '%s/redis-cli -h %s -p %s ' % (path, ip_address, port)
         elif unixsocket is not None:
@@ -117,7 +117,7 @@ class PrefabRedis(app):
         else:
             raise j.exceptions.RuntimeError("can't connect to redis")
 
-        ping_cmd = self.replace(ping_cmd)
+        ping_cmd = self.executor.replace(ping_cmd)
         if password is not None and password.strip():
             ping_cmd += ' -a %s ' % password
         ping_cmd += ' ping'
@@ -1208,10 +1208,10 @@ class PrefabRedis(app):
         config = config.replace("$maxram", str(max_ram))
         config = config.replace("$port", str(port))
         config = config.replace(
-            "$VARDIR", self.prefab.core.dir_paths["VARDIR"])
+            "{DIR_VAR}", self.prefab.core.dir_paths["VARDIR"])
 
         base_dir = self.prefab.core.replace(
-            '$VARDIR/data/redis/redis_%s' % name)
+            '{DIR_VAR}/data/redis/redis_%s' % name)
         self.prefab.core.dir_ensure(base_dir)
         config = config.replace("$dir", base_dir)
 

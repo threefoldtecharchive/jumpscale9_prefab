@@ -6,8 +6,8 @@ base = j.tools.prefab._getBaseClass()
 class PrefabLibffi(base):
 
     def _init(self):
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/libffi")
-        self.CODEDIRL = self.core.replace("$BUILDDIR/code/libffi")
+        self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/libffi")
+        self.CODEDIRL = self.core.replace("{DIR_VAR}/build/code/libffi")
 
     def reset(self):
         base.reset(self)
@@ -34,14 +34,14 @@ class PrefabLibffi(base):
         if not self.doneGet("compile") or reset:
             C = """
             set -ex
-            mkdir -p $BUILDDIRL
+            mkdir -p {DIR_VAR}/build/L
             cd $CODEDIRL
             ./autogen.sh
-            ./configure  --prefix=$BUILDDIRL --disable-docs
+            ./configure  --prefix={DIR_VAR}/build/L --disable-docs
             make
             make install
             """
-            self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.replace(C))
+            self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.executor.replace(C))
             self.logger.info("compile libffi")
             self.logger.debug(C)                
             self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)            

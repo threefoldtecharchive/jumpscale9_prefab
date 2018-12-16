@@ -6,11 +6,11 @@ base = j.tools.prefab._getBaseClass()
 class PrefabZerotier(base):
 
     def _init(self):
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/zerotier/")
+        self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/zerotier/")
         if "LEDE" in self.prefab.platformtype.osname:
             self.CLI = 'zerotier-cli'
         else:
-            self.CLI = j.sal.fs.joinPaths(self.prefab.core.dir_paths['BINDIR'], 'zerotier-cli')
+            self.CLI = j.sal.fs.joinPaths('{DIR_BIN}', 'zerotier-cli')
 
 
     def reset(self):
@@ -49,7 +49,7 @@ class PrefabZerotier(base):
         self.prefab.core.run(cmd)
         if self.prefab.core.isMac:
             cmd = "cd {code} && make install-mac-tap".format(code=codedir, build=self.BUILDDIRL)
-            bindir = self.prefab.core.dir_paths['BINDIR']
+            bindir = '{DIR_BIN}'
             self.prefab.core.dir_ensure(bindir)
             for item in ['zerotier-cli', 'zerotier-idtool', 'zerotier-one']:
                 self.prefab.core.file_copy('{code}/{item}'.format(code=codedir, item=item), bindir+'/')
@@ -67,7 +67,7 @@ class PrefabZerotier(base):
             self.build(install=False)
         if "LEDE" in self.prefab.platformtype.osname:
             return
-        bindir = self.prefab.core.dir_paths['BINDIR']
+        bindir = '{DIR_BIN}'
         self.prefab.core.dir_ensure(bindir)
 
         if self.prefab.core.isMac:
@@ -77,7 +77,7 @@ class PrefabZerotier(base):
             self.prefab.core.file_copy(item, bindir + '/')
 
     def start(self):
-        self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
+        self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("{DIR_BIN}"))
         self.prefab.bash.profileDefault.save()
         pm = self.prefab.system.processmanager.get()
         pm.ensure('zerotier-one', cmd='zerotier-one')
@@ -232,4 +232,3 @@ class PrefabZerotier(base):
         if config_path:
             switches += "-D%s " % config_path
         return switches
-        

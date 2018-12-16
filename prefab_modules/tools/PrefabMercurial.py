@@ -13,14 +13,14 @@ class PrefabMercurial(base):
         self.prefab.system.package.install("python2.7-dev")
         self.prefab.core.file_download(
             'https://www.mercurial-scm.org/release/mercurial-4.1.tar.gz',
-            '$TMPDIR/mercurial-4.1.tar.gz')
+            '{DIR_TEMP}/mercurial-4.1.tar.gz')
 
-        self.prefab.core.run('cd $TMPDIR; tar -xf mercurial-4.1.tar.gz')
-        self.prefab.core.run('cd $TMPDIR/mercurial-4.1; python setup.py build')
+        self.prefab.core.run('cd {DIR_TEMP}; tar -xf mercurial-4.1.tar.gz')
+        self.prefab.core.run('cd {DIR_TEMP}/mercurial-4.1; python setup.py build')
         # TODO: if BINDIR doesn't end /bin theis won't work
-        self.prefab.core.run('cd $TMPDIR/mercurial-4.1; python setup.py install --force')
-        # self.prefab.core.run('cd $TMPDIR/mercurial-4.1; python setup.py install --home="$BINDIR/.." --prefix="" --install-lib="$JSLIBEXTDIR" --force')
-        self.prefab.core.run("sed -i '1s/python/python2/' $BINDIR/hg")
+        self.prefab.core.run('cd {DIR_TEMP}/mercurial-4.1; python setup.py install --force')
+        # self.prefab.core.run('cd {DIR_TEMP}/mercurial-4.1; python setup.py install --home="{DIR_BIN}/.." --prefix="" --install-lib="$JSLIBEXTDIR" --force')
+        self.prefab.core.run("sed -i '1s/python/python2/' {DIR_BIN}/hg")
 
     def pullRepo(self, url, dest=None,
                  ignorelocalchanges=True, reset=False, branch=None, timeout=1200):
@@ -33,7 +33,7 @@ class PrefabMercurial(base):
         if dest is None:
             dest = "$CODEDIR/mercurial/%s" % name
 
-        dest = self.replace(dest)
+        dest = self.executor.replace(dest)
 
         if reset:
             self.prefab.core.run("rm -rf %s" % dest)

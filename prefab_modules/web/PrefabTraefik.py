@@ -8,16 +8,16 @@ class PrefabTraefik(app):
     NAME = "traefik"
 
     def _init(self):
-        self.BUILDDIR_ = self.replace("$BUILDDIR/traefik")
+        self.BUILDDIR_ = self.executor.replace("{DIR_VAR}/build/traefik")
 
     def reset(self):
         self.stop()
         app.reset(self)
         self._init()
         self.prefab.core.dir_remove(self.BUILDDIR_)
-        self.prefab.core.dir_remove("$BINDIR/traefik")
+        self.prefab.core.dir_remove("{DIR_BIN}/traefik")
 
-    def install(self, plugins=None, reset=False, configpath="{{CFGDIR}}/traefik.cfg"):
+    def install(self, plugins=None, reset=False, configpath="{DIR_CFG}/traefik.cfg"):
         """
         will build if required & then install binary on right location
         """
@@ -27,10 +27,10 @@ class PrefabTraefik(app):
         if self.doneGet('install') and reset is False and self.isInstalled():
             return
 
-        self.prefab.bash.profileDefault.addPath(self.prefab.core.dir_paths['BINDIR'])
+        self.prefab.bash.profileDefault.addPath('{DIR_BIN}')
         self.prefab.bash.profileDefault.save()
 
-        configpath = self.replace(configpath)
+        configpath = self.executor.replace(configpath)
 
         if not self.prefab.core.exists(configpath):
             # default configuration, can overwrite
@@ -46,8 +46,8 @@ class PrefabTraefik(app):
 
         self.doneSet('install')
 
-    def reload(self, configpath="{{CFGDIR}}/caddy.cfg"):
-        configpath = self.replace(configpath)
+    def reload(self, configpath="{DIR_CFG}/caddy.cfg"):
+        configpath = self.executor.replace(configpath)
         for item in self.prefab.system.process.info_get():
             if item["process"] == "caddy":
                 pid = item["pid"]
@@ -55,7 +55,7 @@ class PrefabTraefik(app):
                 return True
         return False
 
-    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{{CFGDIR}}/caddy.cfg",
+    def configure(self, ssl=False, wwwrootdir="{{DATADIR}}/www/", configpath="{DIR_CFG}/caddy.cfg",
                   logdir="{{LOGDIR}}/caddy/log", email='info@threefold.tech', port=8000):
         """
         @param caddyconfigfile
@@ -73,24 +73,24 @@ class PrefabTraefik(app):
         root {{WWWROOTDIR}}
         """
 
-        configpath = self.replace(configpath)
+        configpath = self.executor.replace(configpath)
 
         args = {}
-        args["WWWROOTDIR"] = self.replace(wwwrootdir).rstrip("/")
-        args["LOGDIR"] = self.replace(logdir).rstrip("/")
+        args["WWWROOTDIR"] = self.executor.replace(wwwrootdir).rstrip("/")
+        args["LOGDIR"] = self.executor.replace(logdir).rstrip("/")
         args["PORT"] = str(port)
         args["EMAIL"] = email
         args["CONFIGPATH"] = configpath
 
-        C = self.replace(C, args)
+        C = self.executor.replace(C, args)
 
         self.prefab.core.dir_ensure(args["LOGDIR"])
         self.prefab.core.dir_ensure(args["WWWROOTDIR"])
 
         self.prefab.core.file_write(configpath, C)
 
-    def getTCPPort(self, configpath="{{CFGDIR}}/caddy.cfg"):
-        configpath = self.replace(configpath)
+    def getTCPPort(self, configpath="{DIR_CFG}/caddy.cfg"):
+        configpath = self.executor.replace(configpath)
         C = self.prefab.core.file_read(configpath)
         for line in C.split("\n"):
             if "#tcpport:" in line:
@@ -98,12 +98,12 @@ class PrefabTraefik(app):
         raise RuntimeError(
             "Can not find tcpport arg in config file, needs to be '#tcpport:'")
 
-    def start(self, configpath="{{CFGDIR}}/caddy.cfg", agree=True, expect="done."):
+    def start(self, configpath="{DIR_CFG}/caddy.cfg", agree=True, expect="done."):
         """
         @expect is to see if we can find this string in output of caddy starting
         """
 
-        configpath = self.replace(configpath)
+        configpath = self.executor.replace(configpath)
 
         if not j.sal.fs.exists(configpath, followlinks=True):
             raise RuntimeError(

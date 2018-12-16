@@ -629,7 +629,7 @@ class StorSpace(object):
         Compress and upload the directory to the storagespace
         """
         """
-        - rsync over ssh the source to $tmpdir/prefabstor/$plistname.   (from remote machine to local one)
+        - rsync over ssh the source to {DIR_TEMP}/prefabstor/$plistname.   (from remote machine to local one)
         - create a plist like we do for aydostor or G8stor
         - do a self.exists ... to find which files are not on remote yet
         - create tar with all files which do not exist
@@ -708,13 +708,13 @@ class StorSpace(object):
         mds.flist_upload(flistfile, '%s.flist' % flistname)
 
         # cleaning: removing tar file, flist dir, ...
-        j.sal.fs.removeDirTree(flistpath)
+        j.sal.fs.remove(flistpath)
         j.sal.fs.remove(tmptar)
 
         # cleaning temp directory (if asked and not the local one)
         if target != source:
             if removetmpdir:
-                j.sal.fs.removeDirTree(target)
+                j.sal.fs.remove(target)
 
     def download(self, flistname, destination="/mnt/", removetmpdir=True, cacheStorspace=None, metadataStorspace=None):
         """
@@ -723,9 +723,9 @@ class StorSpace(object):
         - create a bash or python file which has commands to get required files & put in tar on remote
         - download tar
         - if cacheStorspace!=None: upload each file to restore not in cache yet to cache
-        - restore the files to $tmpdir/prefabstor/$plistname  (all files, from cache & from remote, as efficient as possible)
+        - restore the files to {DIR_TEMP}/prefabstor/$plistname  (all files, from cache & from remote, as efficient as possible)
             - decompress each file
-        - rsync over ssh $tmpdir/prefabstor/$plistname  to the prefab we are working on
+        - rsync over ssh {DIR_TEMP}/prefabstor/$plistname  to the prefab we are working on
         - remove tmpdir if removetmpdir=True
         """
         # FIXME:

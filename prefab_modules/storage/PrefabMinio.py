@@ -8,7 +8,7 @@ class PrefabMinio(app):
     NAME = "minio"
 
     def _init(self):
-        self.BUILDDIR = self.replace("$TMPDIR/minio")
+        self.BUILDDIR = self.executor.replace("{DIR_TEMP}/minio")
 
     def build(self, reset=False, install=False):
         """
@@ -35,7 +35,7 @@ class PrefabMinio(app):
         """
         if self.doneCheck("install", reset):
             return
-        self.prefab.core.run("cp $TMPDIR/minio $BINDIR/")
+        self.prefab.core.run("cp {DIR_TEMP}/minio {DIR_BIN}/")
         self.doneSet('install')
 
         if start:

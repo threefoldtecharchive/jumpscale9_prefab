@@ -36,7 +36,7 @@ class PrefabEthereum(app):
         go get github.com/ethereum/go-ethereum
         cd {geth_path}
         make geth
-        cp build/bin/geth $BINDIR
+        cp build/bin/geth {DIR_BIN}
         """.format(geth_path=geth_path)
         self.prefab.core.run(cmd)
 

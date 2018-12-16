@@ -11,7 +11,7 @@ class PrefabTIDB(app):
     NAME = 'tidb-server'
 
     def _init(self):
-        self.BUILDDIR = self.replace("$BUILDDIR/tidb/")
+        self.BUILDDIR = self.executor.replace("{DIR_VAR}/build/tidb/")
 
     def build(self, install=True, reset=False):
         if self.doneCheck("build", reset):
@@ -31,7 +31,7 @@ class PrefabTIDB(app):
         """
         if self.doneCheck("install", reset):
             return
-        self.prefab.core.run("cp $BUILDDIR/tidb/bin/* $BINDIR/")
+        self.prefab.core.run("cp {DIR_VAR}/build/tidb/bin/* {DIR_BIN}/")
         self.doneSet('install')
 
         if start:

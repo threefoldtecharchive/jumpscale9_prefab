@@ -11,14 +11,14 @@ class PrefabBootMediaInstaller(base):
 
     def _downloadImage(self, url, redownload=False):
         base = url.split("/")[-1]
-        downloadpath = "$TMPDIR/%s" % base
-        self.prefab.core.dir_ensure("$TMPDIR")
+        downloadpath = "{DIR_TEMP}/%s" % base
+        self.prefab.core.dir_ensure("{DIR_TEMP}")
 
         if redownload:
             self.prefab.core.file_unlink(downloadpath)
 
         if not self.prefab.core.file_exists(downloadpath):
-            self.prefab.core.run("cd $TMPDIR;curl -L %s -O" % url)
+            self.prefab.core.run("cd {DIR_TEMP};curl -L %s -O" % url)
 
         return base
 
@@ -41,7 +41,7 @@ class PrefabBootMediaInstaller(base):
 
     def _install(self, base):
         # We use bsdtar to support pi2 arm images.
-        self.prefab.core.run("cd $TMPDIR && bsdtar -vxpf %s -C /mnt/root" % base)
+        self.prefab.core.run("cd {DIR_TEMP} && bsdtar -vxpf %s -C /mnt/root" % base)
         self.prefab.core.run("sync")
         self.prefab.core.run("echo 'PermitRootLogin=yes'>>'/mnt/root/etc/ssh/sshd_config'")
 
@@ -118,7 +118,7 @@ class PrefabBootMediaInstaller(base):
         else:
             raise j.exceptions.Input("platform not supported yet")
 
-        path = "$TMPDIR/%s" % name
+        path = "{DIR_TEMP}/%s" % name
         cmd = 'dd if=%s of=/dev/%s bs=4000' % (path, deviceid)
         self.prefab.core.sudo(cmd)
 

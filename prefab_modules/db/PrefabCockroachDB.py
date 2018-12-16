@@ -18,17 +18,17 @@ class PrefabCockroachDB(app):
         self.prefab.core.dir_ensure(appbase)
 
         url = 'https://binaries.cockroachdb.com/cockroach-latest.linux-amd64.tgz'
-        dest = "$TMPDIR/cockroach-latest.linux-amd64"
+        dest = "{DIR_TEMP}/cockroach-latest.linux-amd64"
 
         self.logger.info('Downloading CockroachDB.')
         self.prefab.core.file_download(
-            url, to="$TMPDIR", overwrite=False, expand=True)
+            url, to="{DIR_TEMP}", overwrite=False, expand=True)
         tarpaths = self.prefab.core.find(
-            "$TMPDIR", recursive=False, pattern="*cockroach*.tgz", type='f')
+            "{DIR_TEMP}", recursive=False, pattern="*cockroach*.tgz", type='f')
         if len(tarpaths) == 0:
-            raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (url, self.replace("$TMPDIR")))
+            raise j.exceptions.Input(message="could not download:%s, did not find in %s" % (url, self.executor.replace("{DIR_TEMP}")))
         tarpath = tarpaths[0]
-        self.prefab.core.file_expand(tarpath, "$TMPDIR")
+        self.prefab.core.file_expand(tarpath, "{DIR_TEMP}")
 
         for file in self.prefab.core.find(dest, type='f'):
             self.prefab.core.file_copy(file, appbase)
@@ -42,14 +42,14 @@ class PrefabCockroachDB(app):
     def start(self, host="localhost", insecure=True, background=False, reset=False, port=26257, http_port=8581):
         if self.isStarted() and not reset:
             return
-        cmd = "$BINDIR/cockroach start --host=%s" % host
+        cmd = "{DIR_BIN}/cockroach start --host=%s" % host
         if insecure:
             cmd = "%s --insecure" % (cmd)
         if background:
             cmd = "%s --background" % (cmd)
         cmd = "%s --port=%s --http-port=%s" % (cmd, port, http_port)
 
-        # cmd = "$BINDIR/cockroach start --insecure --host=localhost --background"
+        # cmd = "{DIR_BIN}/cockroach start --insecure --host=localhost --background"
         self.prefab.system.process.kill("cockroach")
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name="cockroach", cmd=cmd, env={}, path="", autostart=True)

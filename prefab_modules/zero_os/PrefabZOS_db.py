@@ -34,7 +34,7 @@ class PrefabZOS_db(app):
         if not source:
             raise j.exceptions.RuntimeError("Please provide source-code path")
 
-        self.prefab.core.file_copy("%s/bin/*" % source, "$BASEDIR/bin/")
+        self.prefab.core.file_copy("%s/bin/*" % source, "{DIR_BASE}/bin/")
 
         if start:
             self.start()
@@ -44,7 +44,7 @@ class PrefabZOS_db(app):
             raise ValueError("mode %s is not supported" % mode)
 
         pm = self.prefab.system.processmanager.get()
-        cmdline = "$BINDIR/zdb --listen %s --port %s --index %s --data %s --mode %s" % (host, port, index, data, mode)
+        cmdline = "{DIR_BIN}/zdb --listen %s --port %s --index %s --data %s --mode %s" % (host, port, index, data, mode)
         if adminsecret is not "":
             cmdline += " --admin %s" % adminsecret
 

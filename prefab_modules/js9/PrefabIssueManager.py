@@ -13,7 +13,7 @@ class PrefabIssueManager(base):
     def install(self):
         j.clients.git.pullGitRepo(url='git@github.com:Jumpscale/issue_manager.git')
         self.prefab.core.run('cd %s/libs && pip3 install -e .' % self.code_dir)
-        self.prefab.core.file_link(source='%s/apps/IssueManager/' % self.code_dir, destination='$JSAPPSDIR/portals/main/base/IssueManager')
+        self.prefab.core.file_link(source='%s/apps/IssueManager/' % self.code_dir, destination='{DIR_BASE}/apps/portals/main/base/IssueManager')
 
     def start(self, passwd=None):
         self.prefab.web.portal.start(passwd)

@@ -11,7 +11,7 @@ class PrefabSmartmontools(base):
 
     NAME = "smartmontools"
 
-    _DOWNLOAD_URL = "http://builds.smartmontools.org/r4592/smartmontools-6.6-0-20171104-r4592.linux-x86_64-static.tar.gz"
+    _DOWNLOAD_URL = "http:/builds.smartmontools.org/r4592/smartmontools-6.6-0-20171104-r4592.linux-x86_64-static.tar.gz"
     _VERSION = "6.6"
     _REL_INSTALL_LOCATION = j.sal.fs.joinPaths("usr", "local", "sbin")
 

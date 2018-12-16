@@ -38,7 +38,7 @@ class PrefabTFChain(app):
         tfchaindpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchaind')
         tfchaincpath = self.prefab.core.joinpaths(self.prefab.runtimes.golang.GOPATH, 'bin', 'tfchainc')
 
-        self.prefab.core.file_copy(tfchaindpath, "$BINDIR/")
-        self.prefab.core.file_copy(tfchaincpath, "$BINDIR/")
+        self.prefab.core.file_copy(tfchaindpath, "{DIR_BIN}/")
+        self.prefab.core.file_copy(tfchaincpath, "{DIR_BIN}/")
 
         self.doneSet('install')

@@ -34,7 +34,7 @@ class PrefabWordpress(app):
         #4- nstall wp-cli
         url = "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
         cli_path = "/usr/local/bin/wp"
-        cli_path = self.replace(cli_path)
+        cli_path = self.executor.replace(cli_path)
         self.prefab.core.file_download(url=url, to=cli_path, overwrite=True, retry=3, timeout=0, removeTopDir=False)
 
         self.prefab.executor.execute('chmod +x %s' % cli_path)

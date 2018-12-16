@@ -34,7 +34,7 @@ class PrefabProxyClassic(base):
             #admin-address privoxy-admin@example.com
             #confdir /usr/local/etc/privoxy
             confdir /etc/privoxy
-            #logdir $VARDIR/privoxy
+            #logdir {DIR_VAR}/privoxy
             logfile logfile
 
             actionsfile match-all.action # Actions that are applied to all sites and maybe overruled later on.

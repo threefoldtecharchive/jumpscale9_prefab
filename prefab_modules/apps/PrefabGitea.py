@@ -24,10 +24,10 @@ class PrefabGitea(app):
         """
 
         # set needed paths
-        self.GITEAPATH = self.replace('{}/src/code.gitea.io/gitea'.format(self.GOPATH))
-        self.CUSTOM_PATH = self.replace('%s/custom' % self.GITEAPATH)
+        self.GITEAPATH = self.executor.replace('{}/src/code.gitea.io/gitea'.format(self.GOPATH))
+        self.CUSTOM_PATH = self.executor.replace('%s/custom' % self.GITEAPATH)
         self.CODEDIR = self.GITEAPATH
-        self.INIPATH = self.replace('%s/conf/app.ini' % self.CUSTOM_PATH)
+        self.INIPATH = self.executor.replace('%s/conf/app.ini' % self.CUSTOM_PATH)
         if self.doneCheck('build', reset):
             return
 

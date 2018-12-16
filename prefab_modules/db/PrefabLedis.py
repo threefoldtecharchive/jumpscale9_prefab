@@ -25,16 +25,16 @@ class PrefabLedis(app):
             """
             self.prefab.runtimes.golang.install()
             self.prefab.tools.git.pullRepo("https://github.com/siddontang/ledisdb",
-                                           dest="$GOPATHDIR/src/github.com/siddontang/ledisdb")
+                                           dest="{DIR_BASE}/go/src/github.com/siddontang/ledisdb")
 
             # set the backend in the server config
-            ledisdir = self.replace(
-                "$GOPATHDIR/src/github.com/siddontang/ledisdb")
+            ledisdir = self.executor.replace(
+                "{DIR_BASE}/go/src/github.com/siddontang/ledisdb")
 
             configcontent = self.prefab.core.file_read(
                 os.path.join(ledisdir, "config", "config.toml"))
-            ledisdir = self.replace(
-                "$GOPATHDIR/src/github.com/siddontang/ledisdb")
+            ledisdir = self.executor.replace(
+                "{DIR_BASE}/go/src/github.com/siddontang/ledisdb")
 
             if backend == "rocksdb":
                 self._preparerocksdb()
@@ -58,7 +58,7 @@ class PrefabLedis(app):
     def _prepareleveldb(self):
         # execute the build script in tools/build_leveldb.sh
         # it will install snappy/leveldb in /usr/local{snappy/leveldb} directories
-        ledisdir = self.replace("$GOPATHDIR/src/github.com/siddontang/ledisdb")
+        ledisdir = self.executor.replace("{DIR_BASE}/go/src/github.com/siddontang/ledisdb")
         # leveldb_build file : ledisdir/tools/build_leveldb.sh
         rc, out, err = self.prefab.core.run(
             "bash {ledisdir}/tools/build_leveldb.sh".format(ledisdir=ledisdir))
@@ -71,14 +71,14 @@ class PrefabLedis(app):
         if self.doneCheck("install", reset):
             return
 
-        ledisdir = self.replace("$GOPATHDIR/src/github.com/siddontang/ledisdb")
+        ledisdir = self.executor.replace("{DIR_BASE}/go/src/github.com/siddontang/ledisdb")
 
         #rc, out, err = self.prefab.core.run("cd {ledisdir} && source dev.sh && make install".format(ledisdir=ledisdir), profile=True)
         self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg")
         self.prefab.core.file_copy(
             "/tmp/ledisconfig.toml", dest="$TEMPLATEDIR/cfg/ledisconfig.toml")
         self.prefab.core.file_copy(
-            "{ledisdir}/bin/*".format(ledisdir=ledisdir), dest="$BINDIR")
+            "{ledisdir}/bin/*".format(ledisdir=ledisdir), dest="{DIR_BIN}")
         self.prefab.core.file_copy(
             "{ledisdir}/dev.sh".format(ledisdir=ledisdir), dest="$TEMPLATEDIR/ledisdev.sh")
 
@@ -88,6 +88,6 @@ class PrefabLedis(app):
             self.start()
 
     def start(self):
-        cmd = "source $TEMPLATEDIR/ledisdev.sh && $BINDIR/ledis-server -config $TEMPLATEDIR/cfg/ledisconfig.toml"
+        cmd = "source $TEMPLATEDIR/ledisdev.sh && {DIR_BIN}/ledis-server -config $TEMPLATEDIR/cfg/ledisconfig.toml"
         pm = self.prefab.system.processmanager.get("tmux")
         pm.ensure(name='ledis', cmd=cmd)

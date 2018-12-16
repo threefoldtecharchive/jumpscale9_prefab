@@ -7,7 +7,7 @@ class PrefabCmake(app):
     NAME = 'cmake'
 
     def _init(self):
-        self.src_dir = "$TMPDIR/cmake"
+        self.src_dir = "{DIR_TEMP}/cmake"
 
     def build(self):
         self.prefab.core.dir_ensure(self.src_dir)

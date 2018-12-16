@@ -35,7 +35,7 @@ class PrefabRipple(app):
             return
 
         cmds = """
-        cp /opt/ripple/bin/rippled $BINDIR/
+        cp /opt/ripple/bin/rippled {DIR_BIN}/
         """
         self.prefab.core.run(cmds)
 

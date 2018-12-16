@@ -10,7 +10,7 @@ class PrefabAydoStor(app):
 
     NAME = 'stor'
 
-    def build(self, addr='0.0.0.0:8090', backend="$VARDIR/aydostor", start=True, install=True, reset=False):
+    def build(self, addr='0.0.0.0:8090', backend="{DIR_VAR}/aydostor", start=True, install=True, reset=False):
         """
         Build and Install aydostore
         @input addr, address and port on which the service need to listen. e.g. : 0.0.0.0:8090
@@ -29,20 +29,20 @@ class PrefabAydoStor(app):
         if install:
             self.install(addr, backend, start)
 
-    def install(self, addr='0.0.0.0:8090', backend="$VARDIR/aydostor", start=True):
+    def install(self, addr='0.0.0.0:8090', backend="{DIR_VAR}/aydostor", start=True):
         """
         download, install, move files to appropriate places, and create relavent configs
         """
-        self.prefab.core.dir_ensure('$BINDIR')
+        self.prefab.core.dir_ensure('{DIR_BIN}')
         self.prefab.core.file_copy(self.prefab.core.joinpaths(
-            self.prefab.core.dir_paths['GODIR'], 'bin', 'stor'), '$BINDIR', overwrite=True)
-        self.prefab.bash.addPath("$BASEDIR/bin")
+            self.prefab.core.dir_paths['GODIR'], 'bin', 'stor'), '{DIR_BIN}', overwrite=True)
+        self.prefab.bash.addPath("{DIR_BASE}/bin")
 
         pm = self.prefab.system.processmanager.get()
         pm.stop("stor")  # will also kill
 
-        self.prefab.core.dir_ensure("$JSCFGDIR/stor")
-        backend = self.replace(backend)
+        self.prefab.core.dir_ensure("{DIR_BASE}/cfg/stor")
+        backend = self.executor.replace(backend)
         self.prefab.core.dir_ensure(backend)
         config = {
             'listen_addr': addr,
@@ -67,8 +67,8 @@ class PrefabAydoStor(app):
                 raise RuntimeError(
                     "port %d is occupied, cannot start stor" % port)
 
-        self.prefab.core.dir_ensure("$JSCFGDIR/stor/", recursive=True)
-        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/stor/config.toml", "$JSCFGDIR/stor/")
+        self.prefab.core.dir_ensure("{DIR_BASE}/cfg/stor/", recursive=True)
+        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/stor/config.toml", "{DIR_BASE}/cfg/stor/")
         cmd = self.prefab.bash.cmdGetPath("stor")
         pm = self.prefab.system.processmanager.get()
-        pm.ensure("stor", '%s --config $JSCFGDIR/stor/config.toml' % cmd)
+        pm.ensure("stor", '%s --config {DIR_BASE}/cfg/stor/config.toml' % cmd)

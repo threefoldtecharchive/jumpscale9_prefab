@@ -68,15 +68,15 @@ class PrefabSSH(base):
         else:
             try:
                 # out=self.prefab.core.run("nmap -p 22 %s | grep for"%range,showout=False)
-                _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX $TMPDIR/nmap" %
+                _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX {DIR_TEMP}/nmap" %
                                                  (range))
             except Exception as e:
                 if str(e).find("command not found") != -1:
                     self.prefab.system.package.install("nmap")
                     # out=self.prefab.core.run("nmap -p 22 %s | grep for"%range)
-                    _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX $TMPDIR/nmap" %
+                    _, out, _ = self.prefab.core.run("nmap %s -p %s --open -oX {DIR_TEMP}/nmap" %
                                                      (range))
-            out = self.prefab.core.file_read("$TMPDIR/nmap")
+            out = self.prefab.core.file_read("{DIR_TEMP}/nmap")
             import xml.etree.ElementTree as ET
             root = ET.fromstring(out)
             for child in root:

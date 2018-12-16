@@ -8,7 +8,7 @@ class PrefabRestic(app):
     NAME = 'restic'
 
     def _init(self):
-        self.BUILDDIR = self.core.replace("$BUILDDIR/restic")
+        self.BUILDDIR = self.core.replace("{DIR_VAR}/build/restic")
         self.DOWNLOAD_DEST = '{}/linux_amd64.bz2'.format(self.BUILDDIR)
         self.FILE_NAME = '{}/linux_amd64'.format(self.BUILDDIR)
 
@@ -67,9 +67,9 @@ class PrefabRestic(app):
             return
 
         if source:
-            self.prefab.core.file_copy(self.FILE_NAME, '$BINDIR/restic' )
+            self.prefab.core.file_copy(self.FILE_NAME, '{DIR_BIN}/restic' )
         else:
-            self.prefab.core.file_copy(self.CODEDIR + '/restic', '$BINDIR')
+            self.prefab.core.file_copy(self.CODEDIR + '/restic', '{DIR_BIN}')
 
         self.doneSet("install")
 
@@ -95,7 +95,7 @@ class ResticRepository:
             self.initRepository()
 
     def _exists(self):
-        rc, _, _ = self._run('$BINDIR/restic snapshots > /dev/null', die=False)
+        rc, _, _ = self._run('{DIR_BIN}/restic snapshots > /dev/null', die=False)
         if rc > 0:
             return False
         return True
@@ -115,7 +115,7 @@ class ResticRepository:
         """
         initialize the repository at self.path location
         """
-        cmd = '$BINDIR/restic init'
+        cmd = '{DIR_BIN}/restic init'
         self._run(cmd)
 
     def snapshot(self, path, tag=None):
@@ -123,7 +123,7 @@ class ResticRepository:
         @param path: directory/file to snapshot
         @param tag: tag to add to the snapshot
         """
-        cmd = '$BINDIR/restic backup {} '.format(path)
+        cmd = '{DIR_BIN}/restic backup {} '.format(path)
         if tag:
             cmd += " --tag {}".format(tag)
         self._run(cmd)
@@ -133,7 +133,7 @@ class ResticRepository:
         @param snapshot_id: id of the snapshot to restore
         @param dest: path where to restore the snapshot to
         """
-        cmd = '$BINDIR/restic restore --target {dest} {id} '.format(dest=dest, id=snapshot_id)
+        cmd = '{DIR_BIN}/restic restore --target {dest} {id} '.format(dest=dest, id=snapshot_id)
         self._run(cmd)
 
     def list_snapshots(self):
@@ -146,7 +146,7 @@ class ResticRepository:
           'tags': 'backup1'
         }
         """
-        cmd = '$BINDIR/restic snapshots'
+        cmd = '{DIR_BIN}/restic snapshots'
         _, out, _ = self._run(cmd, showout=False)
 
         snapshots = []
@@ -172,7 +172,7 @@ class ResticRepository:
         """
         @return: True if integrity is ok else False
         """
-        cmd = '$BINDIR/restic check'
+        cmd = '{DIR_BIN}/restic check'
         rc, _, _ = self._run(cmd)
         if rc != 0:
             return False

@@ -24,13 +24,13 @@ class PrefabCapnp(app):
             self.prefab.system.package.install('g++')
 
         url="https://capnproto.org/capnproto-c++-0.6.1.tar.gz"
-        dest = self.replace("$BUILDDIR/capnproto")
+        dest = self.executor.replace("{DIR_VAR}/build/capnproto")
         self.prefab.core.createDir(dest)
         self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
                     expand=True, minsizekb=900, removeTopDir=True, deletedest=True)
 
         script = """
-        cd $BUILDDIR/capnproto
+        cd {DIR_VAR}/build/capnproto
         ./configure
         make -j6 check
         make install

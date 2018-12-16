@@ -22,8 +22,8 @@ class PrefabJSAgent(app):
         if reset is False and self.isInstalled():
             return
 
-        self.prefab.core.dir_ensure('$JSAPPSDIR')
-        self.prefab.core.file_link('$CODEDIR/github/threefoldtech/jumpscale_core/apps/jsagent', '$JSAPPSDIR/jsagent')
+        self.prefab.core.dir_ensure('{DIR_BASE}/apps/')
+        self.prefab.core.file_link('$CODEDIR/github/threefoldtech/jumpscale_core/apps/jsagent', '{DIR_BASE}/apps/jsagent')
         if start is True:
             self.start(gid, ctrl_addr, ctrl_port, ctrl_passwd)
 
@@ -40,4 +40,4 @@ class PrefabJSAgent(app):
         if ctrl_passwd is not None and ctrl_passwd != '':
             cmd += ' --controller-password %s' % ctrl_passwd
         pm = self.prefab.system.processmanager.get()
-        pm.ensure(name="jsagent", cmd=cmd, path='$JSAPPSDIR/jsagent')
+        pm.ensure(name="jsagent", cmd=cmd, path='{DIR_BASE}/apps/jsagent')

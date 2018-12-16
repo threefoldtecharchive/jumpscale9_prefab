@@ -25,7 +25,7 @@ Description=etcd
 Documentation=https://github.com/coreos
 
 [Service]
-ExecStart=$BINDIR/etcd \\
+ExecStart={DIR_BIN}/etcd \\
   --name {name} \\
   --cert-file=$CFGDIR/etcd/pki/etcd.crt \\
   --key-file=$CFGDIR/etcd/pki/etcd.key \\
@@ -178,7 +178,7 @@ class PrefabKubernetes(app):
         # build
         self.doneSet("install_base")
 
-    def install_kube_client(self, reset=False, location='$BINDIR/kubectl'):
+    def install_kube_client(self, reset=False, location='{DIR_BIN}/kubectl'):
         """
         Installs kubectl. Supported platformers are: macOS and Linux.
         @param reset,, bool will default to false, if ture  will rebuild even if the code has been run before.
@@ -203,9 +203,9 @@ class PrefabKubernetes(app):
 
         @param nodes,, list(prefab) list of master node prefab connections
         """
-        self.prefab.core.dir_remove('$TMPDIR/k8s')
+        self.prefab.core.dir_remove('{DIR_TEMP}/k8s')
         self.prefab.core.dir_ensure(
-            '$TMPDIR/k8s/crt $TMPDIR/k8s/key $TMPDIR/k8s/csr')
+            '{DIR_TEMP}/k8s/crt {DIR_TEMP}/k8s/key {DIR_TEMP}/k8s/csr')
         # get node ips from prefab
         nodes_ip = [node.executor.sshclient.addr for node in nodes]
 
@@ -216,24 +216,24 @@ class PrefabKubernetes(app):
         ssl_config = OPENSSL.format(alt_names_etcd=alt_names_etcd)
 
         # generate certigicates and sign them for use by etcd
-        self.prefab.core.file_write('$TMPDIR/k8s/openssl.cnf', ssl_config)
+        self.prefab.core.file_write('{DIR_TEMP}/k8s/openssl.cnf', ssl_config)
         cmd = """
-        openssl genrsa -out $TMPDIR/k8s/key/etcd-ca.key 4096
-        openssl req -x509 -new -sha256 -nodes -key $TMPDIR/k8s/key/etcd-ca.key -days 3650 -out $TMPDIR/k8s/crt/etcd-ca.crt -subj '/CN=etcd-ca' -extensions v3_ca -config $TMPDIR/k8s/openssl.cnf
-        openssl genrsa -out $TMPDIR/k8s/key/etcd.key 4096
-        openssl req -new -sha256 -key $TMPDIR/k8s/key/etcd.key -subj '/CN=etcd' -out $TMPDIR/k8s/csr/etcd.csr
-        openssl x509 -req -in $TMPDIR/k8s/csr/etcd.csr -sha256 -CA $TMPDIR/k8s/crt/etcd-ca.crt -CAkey $TMPDIR/k8s/key/etcd-ca.key -CAcreateserial -out $TMPDIR/k8s/crt/etcd.crt -days 365 -extensions v3_req_etcd -extfile $TMPDIR/k8s/openssl.cnf
-        openssl genrsa -out $TMPDIR/k8s/key/etcd-peer.key 4096
-        openssl req -new -sha256 -key $TMPDIR/k8s/key/etcd-peer.key -subj '/CN=etcd-peer' -out $TMPDIR/k8s/csr/etcd-peer.csr
-        openssl x509 -req -in $TMPDIR/k8s/csr/etcd-peer.csr -sha256 -CA $TMPDIR/k8s/crt/etcd-ca.crt -CAkey $TMPDIR/k8s/key/etcd-ca.key -CAcreateserial -out $TMPDIR/k8s/crt/etcd-peer.crt -days 365 -extensions v3_req_etcd -extfile $TMPDIR/k8s/openssl.cnf
+        openssl genrsa -out {DIR_TEMP}/k8s/key/etcd-ca.key 4096
+        openssl req -x509 -new -sha256 -nodes -key {DIR_TEMP}/k8s/key/etcd-ca.key -days 3650 -out {DIR_TEMP}/k8s/crt/etcd-ca.crt -subj '/CN=etcd-ca' -extensions v3_ca -config {DIR_TEMP}/k8s/openssl.cnf
+        openssl genrsa -out {DIR_TEMP}/k8s/key/etcd.key 4096
+        openssl req -new -sha256 -key {DIR_TEMP}/k8s/key/etcd.key -subj '/CN=etcd' -out {DIR_TEMP}/k8s/csr/etcd.csr
+        openssl x509 -req -in {DIR_TEMP}/k8s/csr/etcd.csr -sha256 -CA {DIR_TEMP}/k8s/crt/etcd-ca.crt -CAkey {DIR_TEMP}/k8s/key/etcd-ca.key -CAcreateserial -out {DIR_TEMP}/k8s/crt/etcd.crt -days 365 -extensions v3_req_etcd -extfile {DIR_TEMP}/k8s/openssl.cnf
+        openssl genrsa -out {DIR_TEMP}/k8s/key/etcd-peer.key 4096
+        openssl req -new -sha256 -key {DIR_TEMP}/k8s/key/etcd-peer.key -subj '/CN=etcd-peer' -out {DIR_TEMP}/k8s/csr/etcd-peer.csr
+        openssl x509 -req -in {DIR_TEMP}/k8s/csr/etcd-peer.csr -sha256 -CA {DIR_TEMP}/k8s/crt/etcd-ca.crt -CAkey {DIR_TEMP}/k8s/key/etcd-ca.key -CAcreateserial -out {DIR_TEMP}/k8s/crt/etcd-peer.crt -days 365 -extensions v3_req_etcd -extfile {DIR_TEMP}/k8s/openssl.cnf
         """
         self.prefab.core.run(cmd, showout=False)
         if save:
-            self.prefab.core.file_copy('$TMPDIR/k8s', '$HOMEDIR/')
+            self.prefab.core.file_copy('{DIR_TEMP}/k8s', '{DIR_HOME}/')
 
     def copy_etcd_certs(self, controller_node):
         """
-        Copies the etcd certiftes from $TMPDIR/k8s/ to the controller node to the current node. This assumes certs
+        Copies the etcd certiftes from {DIR_TEMP}/k8s/ to the controller node to the current node. This assumes certs
         are created in the specified location.
 
         @param controller_node ,, object(prefab) prefab connection to the controller node which deploys the cluster should have ssh access to all nodes.
@@ -258,8 +258,8 @@ class PrefabKubernetes(app):
             raise RuntimeError('failed to decrypt key')
 
         cmd = """
-        scp -P {port} -i {key} $TMPDIR/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
-        scp -P {port} -i {key} $TMPDIR/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        scp -P {port} -i {key} {DIR_TEMP}/k8s/crt/etcd* {node_ip}:{cfg_dir}/etcd/pki/
+        scp -P {port} -i {key} {DIR_TEMP}/k8s/key/etcd* {node_ip}:{cfg_dir}/etcd/pki/
         """.format(
             node_ip=self.prefab.executor.sshclient.addr,
             cfg_dir=self.prefab.executor.dir_paths['CFGDIR'],
@@ -278,18 +278,18 @@ class PrefabKubernetes(app):
         """
         etcd_ver = version if version.startswith('v') else 'v%s' % version
         cmd = """
-        cd $TMPDIR/etcd_{etcd_ver}
+        cd {DIR_TEMP}/etcd_{etcd_ver}
         curl -L {google_url}/{etcd_ver}/etcd-{etcd_ver}-linux-amd64.tar.gz -o etcd-{etcd_ver}-linux-amd64.tar.gz
         tar xzvf etcd-{etcd_ver}-linux-amd64.tar.gz -C .
         """.format(google_url='https://storage.googleapis.com/etcd', etcd_ver=etcd_ver,
                    github_url='https://github.com/coreos/etcd/releases/download')
-        self.prefab.core.dir_ensure('$TMPDIR/etcd_{etcd_ver}'.format(etcd_ver=etcd_ver))
+        self.prefab.core.dir_ensure('{DIR_TEMP}/etcd_{etcd_ver}'.format(etcd_ver=etcd_ver))
         self.prefab.core.run(cmd, showout=False)
-        self.prefab.core.dir_ensure('$BINDIR')
-        self.prefab.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcd'.format(etcd_ver=etcd_ver),
-                                   '$BINDIR/etcd')
-        self.prefab.core.file_copy('$TMPDIR/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcdctl'.format(etcd_ver=etcd_ver),
-                                   '$BINDIR/etcdctl')
+        self.prefab.core.dir_ensure('{DIR_BIN}')
+        self.prefab.core.file_copy('{DIR_TEMP}/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcd'.format(etcd_ver=etcd_ver),
+                                   '{DIR_BIN}/etcd')
+        self.prefab.core.file_copy('{DIR_TEMP}/etcd_{etcd_ver}/etcd-{etcd_ver}-linux-amd64/etcdctl'.format(etcd_ver=etcd_ver),
+                                   '{DIR_BIN}/etcdctl')
         self.prefab.core.dir_remove("$CFGDIR/etcd/pki")
         self.prefab.core.dir_remove("/var/lib/etcd")
         self.prefab.core.dir_ensure('$CFGDIR/etcd/pki /var/lib/etcd')
@@ -383,8 +383,8 @@ class PrefabKubernetes(app):
 
 
         # move the config to be able to use kubectl directly
-        init_node.core.dir_ensure('$HOMEDIR/.kube')
-        init_node.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
+        init_node.core.dir_ensure('{DIR_HOME}/.kube')
+        init_node.core.file_copy('/etc/kubernetes/admin.conf', '{DIR_HOME}/.kube/config')
         if flannel:
             init_node.core.run(
                 'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.0/Documentation/kube-flannel.yml',
@@ -457,7 +457,7 @@ class PrefabKubernetes(app):
                 "name": "system:nodes"
             }]
         }
-        init_node.core.file_write('$TMPDIR/system_node_config.yaml', j.data.serializers.yaml.dumps(system_node_config))
+        init_node.core.file_write('{DIR_TEMP}/system_node_config.yaml', j.data.serializers.yaml.dumps(system_node_config))
 
         if unsafe:
             # if unsafe  comppletly remove role master from the cluster
@@ -467,7 +467,7 @@ class PrefabKubernetes(app):
             )
         else:
             # write patch file used later on to register the nodes as masters
-            init_node.core.file_write('$TMPDIR/master.yaml', j.data.serializers.yaml.dumps(node_json))
+            init_node.core.file_write('{DIR_TEMP}/master.yaml', j.data.serializers.yaml.dumps(node_json))
 
         for index, master in enumerate(nodes[1:]):
             # send certs from init node to the rest of the master nodes
@@ -481,8 +481,8 @@ class PrefabKubernetes(app):
             pm.reload()
             pm.restart('kubelet')
             master.virtualization.kubernetes.wait_on_apiserver()
-            master.core.dir_ensure('$HOMEDIR/.kube')
-            master.core.file_copy('/etc/kubernetes/admin.conf', '$HOMEDIR/.kube/config')
+            master.core.dir_ensure('{DIR_HOME}/.kube')
+            master.core.file_copy('/etc/kubernetes/admin.conf', '{DIR_HOME}/.kube/config')
 
             # giving time for the nodes to be registered
             for i in range(30):
@@ -496,12 +496,12 @@ class PrefabKubernetes(app):
 
             if not unsafe:
                 # else setting the nodes as master
-                register_cmd = """kubectl patch node %s -p "$(cat $TMPDIR/master.yaml)"
+                register_cmd = """kubectl patch node %s -p "$(cat {DIR_TEMP}/master.yaml)"
                 """ % (master.core.hostname)
                 init_node.core.execute_bash(register_cmd)
 
         # bind node users to system:node role
-        patch_user_command = 'kubectl patch clusterrolebinding system:node -p "$(cat $TMPDIR/system_node_config.yaml)"'
+        patch_user_command = 'kubectl patch clusterrolebinding system:node -p "$(cat {DIR_TEMP}/system_node_config.yaml)"'
         init_node.core.execute_bash(patch_user_command)
         config = init_node.core.file_read('/etc/kubernetes/admin.conf')
 

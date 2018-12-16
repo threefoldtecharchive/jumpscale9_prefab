@@ -6,7 +6,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabRsync(base):
 
     def _init(self):
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/rsync/")
+        self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/rsync/")
         self.VERSION = 'rsync-3.1.2'
 
     def reset(self):
@@ -36,13 +36,13 @@ class PrefabRsync(base):
 
         C = """
         set -xe
-        cd $BUILDDIRL
+        cd {DIR_VAR}/build/L
         tar -xf $VERSION.tar.gz
         cd $VERSION
         ./configure
         make
         """
-        C = C.replace('$BUILDDIRL', self.BUILDDIRL)
+        C = C.replace('{DIR_VAR}/build/L', self.BUILDDIRL)
         C = C.replace('$VERSION', self.VERSION)
         self.prefab.core.run(C, profile=True)
 
@@ -54,13 +54,13 @@ class PrefabRsync(base):
         if build:
             if not self.doneGet("build"):
                 self.build(install=False)
-            self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("$BINDIR"))
+            self.prefab.bash.profileDefault.addPath(self.prefab.core.replace("{DIR_BIN}"))
             self.prefab.bash.profileDefault.save()
             self.prefab.core.file_copy(
                 "%s/%s/rsync" %
                 (self.BUILDDIRL,
                 self.VERSION),
-                self.prefab.core.dir_paths['BINDIR'])
+                '{DIR_BIN}')
         else:
             self.prefab.system.package.install("rsync")
 

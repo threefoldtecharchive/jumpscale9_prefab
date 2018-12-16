@@ -49,7 +49,7 @@ class PrefabVRouter(base):
         # will make sure jumpscale has been installed (&base)
         self.prefab.development.js8.install()
 
-        dest = self.replace('$CODEDIR/github/threefoldtech/jumpscale_smartproxy')
+        dest = self.executor.replace('$CODEDIR/github/threefoldtech/jumpscale_smartproxy')
         j.clients.git.pullGitRepo("git@github.com:despiegk/smartproxy.git", dest=dest)
 
         self.prefab.core.upload("$CODEDIR/github/threefoldtech/jumpscale_smartproxy")

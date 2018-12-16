@@ -17,7 +17,7 @@ class PrefabZOS_fs(app):
         self.prefab.system.package.install('build-essential')
 
         self.prefab.runtimes.golang.get("github.com/g8os/fs")
-        self.prefab.core.file_copy("$GOPATHDIR/bin/fs", "$BASEDIR/bin/")
+        self.prefab.core.file_copy("{DIR_BASE}/go/bin/fs", "{DIR_BASE}/bin/")
 
         if install:
             self.install(start)
@@ -48,15 +48,15 @@ class PrefabZOS_fs(app):
             passwd=""
         """
         self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg/fs")
-        self.prefab.core.file_copy("$GOPATHDIR/bin/fs", "$BASEDIR/bin")
-        self.prefab.core.file_write("$GOPATHDIR/src/github.com/g8os/fs/config/config.toml", content)
-        self.prefab.core.file_copy("$GOPATHDIR/src/github.com/g8os/fs/config/config.toml", "$TEMPLATEDIR/cfg/fs")
+        self.prefab.core.file_copy("{DIR_BASE}/go/bin/fs", "{DIR_BASE}/bin")
+        self.prefab.core.file_write("{DIR_BASE}/go/src/github.com/g8os/fs/config/config.toml", content)
+        self.prefab.core.file_copy("{DIR_BASE}/go/src/github.com/g8os/fs/config/config.toml", "$TEMPLATEDIR/cfg/fs")
         self.prefab.core.file_download(
             "https://stor.jumpscale.org/storx/static/js8_opt.flist", "$TEMPLATEDIR/cfg/fs/js8_opt.flist", minsizekb=0)
         if start:
             self.start()
 
     def start(self):
-        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/fs", "$JSCFGDIR", recursive=True)
+        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/fs", "{DIR_BASE}/cfg", recursive=True)
         pm = self.prefab.system.processmanager.get()
-        pm.ensure('fs', cmd="$BINDIR/fs -c $JSCFGDIR/fs/config.toml")
+        pm.ensure('fs', cmd="{DIR_BIN}/fs -c {DIR_BASE}/cfg/fs/config.toml")

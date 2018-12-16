@@ -31,7 +31,7 @@ class PrefabZOS_core(app):
 
         url = "github.com/g8os/agent"
         self.prefab.runtimes.golang.godep(url)
-        self.prefab.core.run("cd $GOPATHDIR/src/github.com/g8os/agent && go build -o superagent", profile=True)
+        self.prefab.core.run("cd {DIR_BASE}/go/src/github.com/g8os/agent && go build -o superagent", profile=True)
 
         if install:
             self.install(start, gid, nid)
@@ -40,9 +40,9 @@ class PrefabZOS_core(app):
         """
         download, install, move files to appropriate places, and create relavent configs
         """
-        sourcepath = "$GOPATHDIR/src/github.com/g8os/agent"
-        if not self.prefab.core.file_exists('$BINDIR/agent'):
-            self.prefab.core.file_move("%s/superagent" % sourcepath, "$BINDIR/agent")
+        sourcepath = "{DIR_BASE}/go/src/github.com/g8os/agent"
+        if not self.prefab.core.file_exists('{DIR_BIN}/agent'):
+            self.prefab.core.file_move("%s/superagent" % sourcepath, "{DIR_BIN}/agent")
 
         # copy extensions
         self.prefab.core.dir_remove("$TEMPLATEDIR/cfg/agent/extensions")
@@ -61,7 +61,7 @@ class PrefabZOS_core(app):
             ubuntu_config_dest = '$TEMPLATEDIR/cfg/agent/conf/'
             self.prefab.core.file_copy(ubuntu_config_src, ubuntu_config_dest, recursive=True)
         self.prefab.core.dir_ensure("$TEMPLATEDIR/cfg/agent/extensions/syncthing")
-        self.prefab.core.file_copy("$BINDIR/syncthing", "$TEMPLATEDIR/cfg/agent/extensions/syncthing/", recursive=True)
+        self.prefab.core.file_copy("{DIR_BIN}/syncthing", "$TEMPLATEDIR/cfg/agent/extensions/syncthing/", recursive=True)
 
         if start:
             self.start(nid, gid)
@@ -78,8 +78,8 @@ class PrefabZOS_core(app):
         if not gid:
             gid = 1
 
-        self.prefab.core.dir_ensure('$JSCFGDIR/agent/')
-        self.prefab.core.file_copy('$TEMPLATEDIR/cfg/agent', '$JSCFGDIR/', recursive=True)
+        self.prefab.core.dir_ensure('{DIR_BASE}/cfg/agent/')
+        self.prefab.core.file_copy('$TEMPLATEDIR/cfg/agent', '{DIR_BASE}/cfg/', recursive=True)
 
         # manipulate config file
         sourcepath = '$TEMPLATEDIR/cfg/agent'
@@ -107,7 +107,7 @@ class PrefabZOS_core(app):
         cfg["logging"]["db"]["address"] = self.prefab.core.joinpaths(cfgdir, "/agent/logs")
         C = j.data.serializers.toml.dumps(cfg)
 
-        self.prefab.core.file_write("$JSCFGDIR/agent/g8os.toml", C, replaceArgs=True)
+        self.prefab.core.file_write("{DIR_BASE}/cfg/agent/g8os.toml", C, replaceArgs=True)
 
         self.prefab.apps.mongodb.start()
         self.prefab.apps.redis.start()
@@ -115,7 +115,7 @@ class PrefabZOS_core(app):
         #@todo (*1*) need to implement to work on node
         env = {}
         env["TMPDIR"] = self.prefab.core.dir_paths["TMPDIR"]
-        cmd = "$BINDIR/agent -nid %s -gid %s -c $JSCFGDIR/core/g8os.toml" % (
+        cmd = "{DIR_BIN}/agent -nid %s -gid %s -c {DIR_BASE}/cfg/core/g8os.toml" % (
             nid, gid)
         pm = self.prefab.system.processmanager.get('tmux')
-        pm.ensure("agent", cmd=cmd, path="$JSCFGDIR/agent", env=env)
+        pm.ensure("agent", cmd=cmd, path="{DIR_BASE}/cfg/agent", env=env)

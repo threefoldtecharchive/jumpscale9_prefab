@@ -21,10 +21,10 @@ class PrefabRust(app):
 
         # copy file to correct locations.
         self.prefab.core.run(
-            'cd /tmp/{version} && ./install.sh --prefix=$JSAPPSDIR/rust --destdir==$JSAPPSDIR/rust'.format(version=version))
+            'cd /tmp/{version} && ./install.sh --prefix={DIR_BASE}/apps/rust --destdir=={DIR_BASE}/apps/rust'.format(version=version))
 
         # was profileDefault
-        self.prefab.bash.profileJS.addPath(self.replace('$JSAPPSDIR/rust/bin'))
+        self.prefab.bash.profileJS.addPath(self.executor.replace('{DIR_BASE}/apps/rust/bin'))
         self.prefab.bash.profileJS.save()
 
         self.doneSet('install')

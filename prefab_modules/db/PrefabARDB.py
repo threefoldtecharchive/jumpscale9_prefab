@@ -11,14 +11,14 @@ class PrefabARDB(app):
         self._init()
 
     def _init(self):
-        self.BUILDDIRFDB = self.replace("$BUILDDIR/forestdb/")
-        self.CODEDIRFDB = self.replace("$CODEDIR/github/couchbase/forestdb")
-        self.CODEDIRARDB = self.replace("$CODEDIR/github/yinqiwen/ardb")
-        self.BUILDDIRARDB = self.replace("$BUILDDIR/ardb/")
+        self.BUILDDIRFDB = self.executor.replace("{DIR_VAR}/build/forestdb/")
+        self.CODEDIRFDB = self.executor.replace("$CODEDIR/github/couchbase/forestdb")
+        self.CODEDIRARDB = self.executor.replace("$CODEDIR/github/yinqiwen/ardb")
+        self.BUILDDIRARDB = self.executor.replace("{DIR_VAR}/build/ardb/")
 
     def build(self, destpath="", reset=False):
         """
-        @param destpath, if '' then will be $TMPDIR/build/openssl
+        @param destpath, if '' then will be {DIR_TEMP}/build/openssl
         """
         if self.doneCheck("build", reset):
             return
@@ -57,13 +57,13 @@ class PrefabARDB(app):
             cd build
             cmake ../
             make all
-            rm -rf $BUILDDIRFDB/
-            mkdir -p $BUILDDIRFDB
-            cp forestdb_dump* $BUILDDIRFDB/
-            cp forestdb_hexamine* $BUILDDIRFDB/
-            cp libforestdb* $BUILDDIRFDB/
+            rm -rf {DIR_VAR}/build/FDB/
+            mkdir -p {DIR_VAR}/build/FDB
+            cp forestdb_dump* {DIR_VAR}/build/FDB/
+            cp forestdb_hexamine* {DIR_VAR}/build/FDB/
+            cp libforestdb* {DIR_VAR}/build/FDB/
             """
-        self.prefab.core.run(self.replace(C))
+        self.prefab.core.run(self.executor.replace(C))
         self.doneSet("buildforestdb")
 
     def build(self, reset=False, storageEngine="forestdb"):
@@ -105,15 +105,15 @@ class PrefabARDB(app):
         C = """
             set -ex
             cd $CODEDIRARDB
-            # cp $BUILDDIRFDB/libforestdb* .
+            # cp {DIR_VAR}/build/FDB/libforestdb* .
             storage_engine=$storageEngine make
-            rm -rf $BUILDDIRARDB/
-            mkdir -p $BUILDDIRARDB
-            cp src/ardb-server $BUILDDIRARDB/
-            cp ardb.conf $BUILDDIRARDB/
+            rm -rf {DIR_VAR}/build/ARDB/
+            mkdir -p {DIR_VAR}/build/ARDB
+            cp src/ardb-server {DIR_VAR}/build/ARDB/
+            cp ardb.conf {DIR_VAR}/build/ARDB/
             """
         C = C.replace("$storageEngine", storageEngine)
-        self.prefab.core.execute_bash(self.replace(C))
+        self.prefab.core.execute_bash(self.executor.replace(C))
 
         self.doneSet("buildardb")
 
@@ -124,21 +124,21 @@ class PrefabARDB(app):
         if self.doneCheck("install-%s" % name, reset):
             return
         self.buildARDB()
-        self.prefab.core.dir_ensure("$BINDIR")
+        self.prefab.core.dir_ensure("{DIR_BIN}")
         self.prefab.core.dir_ensure("$CFGDIR")
-        if not self.prefab.core.file_exists('$BINDIR/ardb-server'):
-            self.core.file_copy("$BUILDDIR/ardb/ardb-server",
-                                "$BINDIR/ardb-server")
+        if not self.prefab.core.file_exists('{DIR_BIN}/ardb-server'):
+            self.core.file_copy("{DIR_VAR}/build/ardb/ardb-server",
+                                "{DIR_BIN}/ardb-server")
 
-        self.prefab.bash.profileDefault.addPath('$BINDIR')
+        self.prefab.bash.profileDefault.addPath('{DIR_BIN}')
 
         if datadir is None or datadir == '':
-            datadir = self.replace("$VARDIR/data/ardb/{}".format(name))
+            datadir = self.executor.replace("{DIR_VAR}/data/ardb/{}".format(name))
         self.core.dir_ensure(datadir)
 
         # config = config.replace("redis-compatible-mode     no", "redis-compatible-mode     yes")
         # config = config.replace("redis-compatible-version  2.8.0", "redis-compatible-version  3.5.2")
-        config = self.core.file_read("$BUILDDIR/ardb/ardb.conf")
+        config = self.core.file_read("{DIR_VAR}/build/ardb/ardb.conf")
         config = config.replace("${ARDB_HOME}", datadir)
         config = config.replace(
             "0.0.0.0:16379", '{host}:{port}'.format(host=host, port=port))
@@ -156,7 +156,7 @@ class PrefabARDB(app):
             return
 
         cfg_path = "$CFGDIR/ardb/{}/ardb.conf".format(name)
-        cmd = "$BINDIR/ardb-server {}".format(cfg_path)
+        cmd = "{DIR_BIN}/ardb-server {}".format(cfg_path)
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name="ardb-server-{}".format(name), cmd=cmd, env={}, path="")
         # self.test(port=port)

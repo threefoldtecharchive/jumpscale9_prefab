@@ -21,22 +21,22 @@ class PrefabArakoon(base):
             cmd = 'cd %s && make' % (dest)
             self.prefab.core.run(cmd, profile=True)
 
-            self.prefab.core.file_copy('%s/arakoon.native' % dest, "$BINDIR/arakoon", overwrite=True)
+            self.prefab.core.file_copy('%s/arakoon.native' % dest, "{DIR_BIN}/arakoon", overwrite=True)
 
-        self.prefab.core.dir_ensure('$VARDIR/data/arakoon')
+        self.prefab.core.dir_ensure('{DIR_VAR}/data/arakoon')
 
     def _install_ocaml(self):
         self.logger.info("download opam installer")
         ocaml_url = 'https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh'
-        self.prefab.core.file_download(ocaml_url, to='$TMPDIR/opam_installer.sh')
+        self.prefab.core.file_download(ocaml_url, to='{DIR_TEMP}/opam_installer.sh')
         self.logger.info("install opam")
-        self.prefab.core.run('chmod +x $TMPDIR/opam_installer.sh')
+        self.prefab.core.run('chmod +x {DIR_TEMP}/opam_installer.sh')
         ocaml_version = '4.02.3'
-        cmd = 'yes | $TMPDIR/opam_installer.sh $BINDIR %s' % ocaml_version
+        cmd = 'yes | {DIR_TEMP}/opam_installer.sh {DIR_BIN} %s' % ocaml_version
         self.prefab.core.run(cmd, profile=True)
 
         self.logger.info("initialize opam")
-        opam_root = self.replace('$TMPDIR/OPAM')
+        opam_root = self.executor.replace('{DIR_TEMP}/OPAM')
         self.prefab.core.dir_ensure(opam_root)
         cmd = 'opam init --root=%s --comp %s -a --dot-profile %s' % (
             opam_root, ocaml_version, self.prefab.bash.profilePath)
@@ -114,8 +114,8 @@ class PrefabArakoon(base):
 
     def start(self):
         which = self.prefab.core.command_location("arakoon")
-        self.prefab.core.dir_ensure('$VARDIR/data/arakoon')
-        cmd = "%s --config $JSCFGDIR/arakoon/arakoon.ini" % which
+        self.prefab.core.dir_ensure('{DIR_VAR}/data/arakoon')
+        cmd = "%s --config {DIR_BASE}/cfg/arakoon/arakoon.ini" % which
         self.prefab.system.process.kill("arakoon")
         pm = self.prefab.system.processmanager.get()
         pm.ensure("arakoon", cmd=cmd, env={}, path="")
@@ -145,8 +145,8 @@ class ArakoonCluster(object):
         self.plugins = []
         self.nodes = []
 
-    def add_node(self, ip, home='$VARDIR/data/arakoon', client_port=7080, messaging_port=10000, log_level='info'):
-        home = self.replace(home)
+    def add_node(self, ip, home='{DIR_VAR}/data/arakoon', client_port=7080, messaging_port=10000, log_level='info'):
+        home = self.executor.replace(home)
         node = ArakoonNode(ip=ip, home=home, client_port=client_port,
                            messaging_port=messaging_port, log_level=log_level)
         node.id = 'node_%d' % len(self.nodes)

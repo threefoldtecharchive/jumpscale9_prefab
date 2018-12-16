@@ -7,7 +7,7 @@ class PrefabZOS_stor_client(base):
     
     def _init(self):
         self.logger_enable()
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/buildg8client/")
+        self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/buildg8client/")
         self.CODEDIRL = self.BUILDDIRL
 
 
@@ -27,14 +27,14 @@ class PrefabZOS_stor_client(base):
         if python_build:
             C= """
             set -ex
-            cd $BUILDDIRL
+            cd {DIR_VAR}/build/L
             cd ../python3/
             . envbuild.sh
-            cd $BUILDDIRL
+            cd {DIR_VAR}/build/L
             make -C src
             cd python/
             python3 setup.py build
-            cd $BUILDDIRL
+            cd {DIR_VAR}/build/L
 
             """
             if self.core.isMac:
@@ -42,7 +42,7 @@ class PrefabZOS_stor_client(base):
                 C = C + "cp python/build/$libpath ../python3/lib/python3.6/lib-dynload/"
                 C = C.replace("$libpath",libpath)
 
-            C=self.replace(C)
+            C=self.executor.replace(C)
             self.core.file_write("%s/build.sh"%self.BUILDDIRL,C)
             self.prefab.core.run("bash %s/build.sh"%self.BUILDDIRL)
         else:
@@ -50,9 +50,9 @@ class PrefabZOS_stor_client(base):
             BUILDENV = """
             set -ex
             cd $CODEDIRL
-            mkdir -p $BUILDDIRL
+            mkdir -p {DIR_VAR}/build/L
             """
-            BUILDENV=self.replace(BUILDENV)
+            BUILDENV=self.executor.replace(BUILDENV)
 
             if self.core.isMac:
                 self.prefab.system.installbase.development(python=False)
@@ -72,7 +72,7 @@ class PrefabZOS_stor_client(base):
                 echo $LDFLAGS
 
                 """  
-                BUILDENV += self.replace(C)
+                BUILDENV += self.executor.replace(C)
             else:         
                 self.prefab.system.package.ensure('build-essential libz-dev libssl-dev python3-dev libsnappy-dev')
                 self.prefab.lib.cmake.install()

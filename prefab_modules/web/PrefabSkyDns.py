@@ -16,8 +16,8 @@ class PrefabSkyDns(app):
         """
         download , install, move files to appropriate places, and create relavent configs
         """
-        self.prefab.core.file_copy(self.prefab.core.joinpaths('$GOPATHDIR', 'bin', 'skydns'), '$BINDIR')
-        self.prefab.bash.addPath(self.replace("$BINDIR"))
+        self.prefab.core.file_copy(self.prefab.core.joinpaths('{DIR_BASE}/go', 'bin', 'skydns'), '{DIR_BIN}')
+        self.prefab.bash.addPath(self.executor.replace("{DIR_BIN}"))
 
         if start:
             self.start()

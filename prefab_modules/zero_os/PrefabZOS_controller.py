@@ -34,7 +34,7 @@ class PrefabZOS_controller(app):
         self.prefab.runtimes.golang.godep(url)
 
         # Do the actual building
-        self.prefab.core.run("cd $GOPATHDIR/src/github.com/g8os/controller && go build .", profile=True)
+        self.prefab.core.run("cd {DIR_BASE}/go/src/github.com/g8os/controller && go build .", profile=True)
 
         if install:
             self.install(start, listen_addr)
@@ -43,10 +43,10 @@ class PrefabZOS_controller(app):
         """
         download, install, move files to appropriate places, and create relavent configs
         """
-        sourcepath = "$GOPATHDIR/src/github.com/g8os/controller"
+        sourcepath = "{DIR_BASE}/go/src/github.com/g8os/controller"
         # move binary
-        if not self.prefab.core.file_exists('$BINDIR/controller'):
-            self.prefab.core.file_move("%s/controller" % sourcepath, "$BINDIR/controller")
+        if not self.prefab.core.file_exists('{DIR_BIN}/controller'):
+            self.prefab.core.file_move("%s/controller" % sourcepath, "{DIR_BIN}/controller")
 
         # file copy
         self.prefab.core.dir_remove("$TEMPLATEDIR/cfg/controller/extensions")
@@ -74,11 +74,11 @@ class PrefabZOS_controller(app):
         import hashlib
         from xml.etree import ElementTree
 
-        self.prefab.core.dir_ensure("$JSCFGDIR/controller/")
-        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/controller", "$JSCFGDIR/", recursive=True, overwrite=True)
+        self.prefab.core.dir_ensure("{DIR_BASE}/cfg/controller/")
+        self.prefab.core.file_copy("$TEMPLATEDIR/cfg/controller", "{DIR_BASE}/cfg/", recursive=True, overwrite=True)
 
         # edit config
-        C = self.prefab.core.file_read('$JSCFGDIR/controller/agentcontroller.toml')
+        C = self.prefab.core.file_read('{DIR_BASE}/cfg/controller/agentcontroller.toml')
         cfg = j.data.serializers.toml.loads(C)
 
         listen = cfg['listen']
@@ -97,7 +97,7 @@ class PrefabZOS_controller(app):
             cfgDir, "/controller/jumpscripts")
         C = j.data.serializers.toml.dumps(cfg)
 
-        self.prefab.core.file_write('$JSCFGDIR/controller/agentcontroller.toml', C, replaceArgs=True)
+        self.prefab.core.file_write('{DIR_BASE}/cfg/controller/agentcontroller.toml', C, replaceArgs=True)
 
         # expose syncthing and get api key
         sync_cfg = ElementTree.fromstring(self.prefab.core.file_read("$TEMPLATEDIR/cfg/syncthing/config.xml"))
@@ -107,7 +107,7 @@ class PrefabZOS_controller(app):
         sync_cfg.find("./gui/address").text = '127.0.0.1:18384'
 
         jumpscripts_id = "jumpscripts-%s" % hashlib.md5(sync_id.encode()).hexdigest()
-        jumpscripts_path = self.replace("$JSCFGDIR/controller/jumpscripts")
+        jumpscripts_path = self.executor.replace("{DIR_BASE}/cfg/controller/jumpscripts")
 
         # find folder element
         configured = False
@@ -138,13 +138,13 @@ class PrefabZOS_controller(app):
         dump = ElementTree.tostring(sync_cfg, 'unicode')
         j.logger.info("SYNCTHING CONFIG", level=10)
         j.logger.info(dump, level=10)
-        self.prefab.core.file_write("$JSCFGDIR/syncthing/config.xml", dump)
+        self.prefab.core.file_write("{DIR_BASE}/cfg/syncthing/config.xml", dump)
 
         # start
         pm = self.prefab.apps.syncthing.restart()
 
         env = {}
         env["TMPDIR"] = self.prefab.core.dir_paths["TMPDIR"]
-        cmd = "$BINDIR/controller -c $JSCFGDIR/controller/agentcontroller.toml"
+        cmd = "{DIR_BIN}/controller -c {DIR_BASE}/cfg/controller/agentcontroller.toml"
         pm = self.prefab.system.processmanager.get("tmux")
-        pm.ensure("controller", cmd=cmd, path="$JSCFGDIR/controller/", env=env)
+        pm.ensure("controller", cmd=cmd, path="{DIR_BASE}/cfg/controller/", env=env)

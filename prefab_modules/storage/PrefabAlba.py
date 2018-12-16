@@ -30,7 +30,7 @@ class PrefabAlba(base):
         self.prefab.system.package.install(apt_deps, allow_unauthenticated=True)
 
         # OPAM
-        self.opam_root = self.replace('$TMPDIR/OPAM')
+        self.opam_root = self.executor.replace('{DIR_TEMP}/OPAM')
 
         # profile fix
         if not self.prefab.core.file_exists('/root/.profile_js'):
@@ -42,9 +42,9 @@ class PrefabAlba(base):
 
         # self.prefab.core.run('wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh')
         self.prefab.core.file_download(
-            'https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh', to='$TMPDIR/opam_installer.sh', minsizekb=0)
-        self.prefab.core.run('sed -i "/read -p/d" $TMPDIR/opam_installer.sh')  # remove any confirmation
-        self.prefab.core.run('bash $TMPDIR/opam_installer.sh $BINDIR %s' %
+            'https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh', to='{DIR_TEMP}/opam_installer.sh', minsizekb=0)
+        self.prefab.core.run('sed -i "/read -p/d" {DIR_TEMP}/opam_installer.sh')  # remove any confirmation
+        self.prefab.core.run('bash {DIR_TEMP}/opam_installer.sh {DIR_BIN} %s' %
                               self.ocaml_version, profile=True, shell=True)
 
         cmd = 'opam init --root=%s --comp %s -a --dot-profile %s' % (
@@ -58,7 +58,7 @@ class PrefabAlba(base):
         self.prefab.core.run("opam repo --root=%s -k local add janestreet %s || exit 0" %
                               (self.opam_root, janestreet), profile=True)
 
-        cmd = "opam config env --root=%s --dot-profile %s > $TMPDIR/opam.env" % (
+        cmd = "opam config env --root=%s --dot-profile %s > {DIR_TEMP}/opam.env" % (
             self.opam_root, self.prefab.bash.profilePath)
         self.prefab.core.run(cmd, die=False, profile=True, shell=True)
 
@@ -69,15 +69,15 @@ class PrefabAlba(base):
         """
 
         self.prefab.core.run(
-            'source $TMPDIR/opam.env && opam update && opam install -y %s' % opam_deps, profile=True)
+            'source {DIR_TEMP}/opam.env && opam update && opam install -y %s' % opam_deps, profile=True)
 
     def _install_deps_intel_storage(self):
         url = 'https://01.org/sites/default/files/downloads/intelr-storage-acceleration-library-open-source-version/isa-l-2.14.0.tar.gz'
-        self.prefab.core.file_download(url, to='$TMPDIR/isa-l-2.14.0.tar.gz')
+        self.prefab.core.file_download(url, to='{DIR_TEMP}/isa-l-2.14.0.tar.gz')
 
-        self.prefab.core.run('cd $TMPDIR && tar xfzv isa-l-2.14.0.tar.gz')
-        self.prefab.core.run('cd $TMPDIR/isa-l-2.14.0 && ./autogen.sh && ./configure')
-        self.prefab.core.run('cd $TMPDIR/isa-l-2.14.0 && make && make install')
+        self.prefab.core.run('cd {DIR_TEMP} && tar xfzv isa-l-2.14.0.tar.gz')
+        self.prefab.core.run('cd {DIR_TEMP}/isa-l-2.14.0 && ./autogen.sh && ./configure')
+        self.prefab.core.run('cd {DIR_TEMP}/isa-l-2.14.0 && make && make install')
 
         """
         RUN wget https://01.org/sites/default/files/downloads/intelr-storage-acceleration-library-open-source-version/isa-l-2.14.0.tar.gz
@@ -105,20 +105,20 @@ class PrefabAlba(base):
     def _install_deps_arakoon(self):
         aradest = self.prefab.tools.git.pullRepo(
             'https://github.com/openvstorage/arakoon.git', branch="1.9", depth=None, ssh=False)
-        pfx = 'cd %s && source $TMPDIR/opam.env' % aradest
+        pfx = 'cd %s && source {DIR_TEMP}/opam.env' % aradest
 
         self.prefab.core.run('%s && git pull && git checkout %s' % (pfx, self.arakoon_version), shell=True)
         self.prefab.core.run('%s && make' % pfx, shell=True)
 
-        if self.prefab.core.file_exists('$TMPDIR/OPAM/4.03.0/lib/arakoon_client/META'):
-            self.prefab.core.file_unlink('$TMPDIR/OPAM/4.03.0/lib/arakoon_client/META')
+        if self.prefab.core.file_exists('{DIR_TEMP}/OPAM/4.03.0/lib/arakoon_client/META'):
+            self.prefab.core.file_unlink('{DIR_TEMP}/OPAM/4.03.0/lib/arakoon_client/META')
 
         prefix = '%s/%s' % (self.opam_root, self.ocaml_version)
         libdir = 'ocamlfind printconf destdir'
         cmd = '%s && export PREFIX=%s && export OCAML_LIBDIR=$(%s) && make install' % (pfx, prefix, libdir)
 
         self.prefab.core.run(cmd, profile=True)
-        self.prefab.core.file_copy(j.sal.fs.joinPaths(aradest, 'arakoon.native'), "$BINDIR/arakoon")
+        self.prefab.core.file_copy(j.sal.fs.joinPaths(aradest, 'arakoon.native'), "{DIR_BIN}/arakoon")
 
         """
         RUN git clone https://github.com/openvstorage/arakoon.git
@@ -135,7 +135,7 @@ class PrefabAlba(base):
         #
         # cleaning
         #
-        if self.prefab.core.file_exists('$TMPDIR/OPAM/%s/lib/rocks/META' % self.ocaml_version):
+        if self.prefab.core.file_exists('{DIR_TEMP}/OPAM/%s/lib/rocks/META' % self.ocaml_version):
             self.logger.info('rocksdb already found')
             return
 
@@ -151,7 +151,7 @@ class PrefabAlba(base):
         commit = '26c45963f1f305825785592efb41b50192a07491'
         orodest = self.prefab.tools.git.pullRepo('https://github.com/domsj/orocksdb.git', depth=None, ssh=False)
 
-        pfx = 'cd %s && source $TMPDIR/opam.env' % orodest
+        pfx = 'cd %s && source {DIR_TEMP}/opam.env' % orodest
         self.prefab.core.run('%s && git pull && git checkout %s' % (pfx, commit))
 
         self.prefab.core.run('%s && ./install_rocksdb.sh && make build install' % pfx)
@@ -185,7 +185,7 @@ class PrefabAlba(base):
         #
         # cleaning
         #
-        if self.prefab.core.file_exists('$TMPDIR/OPAM/%s/lib/ordma/META' % self.ocaml_version):
+        if self.prefab.core.file_exists('{DIR_TEMP}/OPAM/%s/lib/ordma/META' % self.ocaml_version):
             self.logger.info('ordma already found')
             return
 
@@ -198,7 +198,7 @@ class PrefabAlba(base):
 
         self.prefab.core.run('cd %s && git pull && git fetch --tags && git checkout %s' % (ordmadest, commit))
 
-        pfx = 'cd %s && source $TMPDIR/opam.env' % ordmadest
+        pfx = 'cd %s && source {DIR_TEMP}/opam.env' % ordmadest
         self.prefab.core.run('%s && eval `${opam_env}` && make install' % pfx)
 
         """
@@ -234,11 +234,11 @@ class PrefabAlba(base):
 
     def _install_deps_etcd(self):
         url = 'https://github.com/coreos/etcd/releases/download/v2.2.4/etcd-v2.2.4-linux-amd64.tar.gz'
-        self.prefab.core.file_download(url, to='$TMPDIR/etcd-v2.2.4-linux-amd64.tar.gz')
+        self.prefab.core.file_download(url, to='{DIR_TEMP}/etcd-v2.2.4-linux-amd64.tar.gz')
 
-        self.prefab.core.run('cd $TMPDIR && tar xfzv etcd-v2.2.4-linux-amd64.tar.gz')
-        self.prefab.core.run('cp $TMPDIR/etcd-v2.2.4-linux-amd64/etcd /usr/bin')
-        self.prefab.core.run('cp $TMPDIR/etcd-v2.2.4-linux-amd64/etcdctl /usr/bin')
+        self.prefab.core.run('cd {DIR_TEMP} && tar xfzv etcd-v2.2.4-linux-amd64.tar.gz')
+        self.prefab.core.run('cp {DIR_TEMP}/etcd-v2.2.4-linux-amd64/etcd /usr/bin')
+        self.prefab.core.run('cp {DIR_TEMP}/etcd-v2.2.4-linux-amd64/etcdctl /usr/bin')
 
         """
         RUN curl -L  https://github.com/coreos/etcd/releases/download/v2.2.4/etcd-v2.2.4-linux-amd64.tar.gz -o etcd-v2.2.4-linux-amd64.tar.gz
@@ -265,8 +265,8 @@ class PrefabAlba(base):
 
         self.prefab.core.run('cd %s && git checkout %s' % (repo, self.alba_version))
 
-        self.prefab.core.run('source $TMPDIR/opam.env && cd %s; make' % repo, profile=True)
-        self.prefab.core.file_copy('%s/ocaml/alba.native' % repo, '$BINDIR/alba')
-        self.prefab.core.file_copy('%s/ocaml/albamgr_plugin.cmxs' % repo, '$BINDIR/albamgr_plugin.cmxs')
-        self.prefab.core.file_copy('%s/ocaml/nsm_host_plugin.cmxs' % repo, '$BINDIR/nsm_host_plugin.cmxs')
-        self.prefab.core.file_copy('%s/ocaml/disk_failure_tests.native' % repo, '$BINDIR/disk_failure_tests.native')
+        self.prefab.core.run('source {DIR_TEMP}/opam.env && cd %s; make' % repo, profile=True)
+        self.prefab.core.file_copy('%s/ocaml/alba.native' % repo, '{DIR_BIN}/alba')
+        self.prefab.core.file_copy('%s/ocaml/albamgr_plugin.cmxs' % repo, '{DIR_BIN}/albamgr_plugin.cmxs')
+        self.prefab.core.file_copy('%s/ocaml/nsm_host_plugin.cmxs' % repo, '{DIR_BIN}/nsm_host_plugin.cmxs')
+        self.prefab.core.file_copy('%s/ocaml/disk_failure_tests.native' % repo, '{DIR_BIN}/disk_failure_tests.native')

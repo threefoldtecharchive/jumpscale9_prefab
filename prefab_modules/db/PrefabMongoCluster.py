@@ -61,7 +61,7 @@ class MongoInstance(Startable):
         self.replica = replica
         self.configdb = configdb
         if dbdir is None:
-            dbdir = "$VARDIR/data/db"
+            dbdir = "{DIR_VAR}/data/db"
         if public_port is None:
             public_port = private_port
         self.dbdir = dbdir
@@ -91,7 +91,7 @@ class MongoInstance(Startable):
             args += " --replSet %s" % (self.replica)
         if self.configdb:
             args += " --configdb %s" % (self.configdb)
-        return '$BINDIR/' + cmd + args
+        return '{DIR_BIN}/' + cmd + args
 
     @Startable.ensure_installed
     def _start(self):
@@ -105,7 +105,7 @@ class MongoInstance(Startable):
     def execute(self, cmd):
         for i in range(5):
             rc, out, err = self.prefab.core.run(
-                "LC_ALL=C $BINDIR/mongo --port %s --eval '%s'" %
+                "LC_ALL=C {DIR_BIN}/mongo --port %s --eval '%s'" %
                 (self.private_port, cmd.replace(
                     "\\", "\\\\").replace(
                     "'", "\\'")), die=False)

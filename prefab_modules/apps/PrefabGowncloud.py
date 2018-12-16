@@ -20,7 +20,7 @@ class PrefabGowncloud(app):
         # self.prefab.core.run('mkdir -p {dest}'.format(dest=dest))
         self.prefab.tools.git.pullRepo("https://github.com/gowncloud/gowncloud.git", dest=dest, ssh=False)
         self.prefab.core.run('cd {dest} && go generate && go build'.format(dest=dest), profile=True)
-        self.prefab.core.file_copy("{dest}/gowncloud".format(dest=dest), "$BINDIR")
+        self.prefab.core.file_copy("{dest}/gowncloud".format(dest=dest), "{DIR_BIN}")
         self.doneSet('build')
 
 
@@ -43,7 +43,7 @@ class PrefabGowncloud(app):
             db_port='26257',
             sslmode='disable'):
         pm = self.prefab.system.processmanager.get()
-        pm.ensure("gowncloud", "$BINDIR/gowncloud -c {client_id} -s {client_secret} --db {db_driver}://{db_user}@{db_url}:{db_port}?sslmode={sslmode}".format(
+        pm.ensure("gowncloud", "{DIR_BIN}/gowncloud -c {client_id} -s {client_secret} --db {db_driver}://{db_user}@{db_url}:{db_port}?sslmode={sslmode}".format(
             client_id=client_id,
             client_secret=client_secret,
             db_driver=db_driver,

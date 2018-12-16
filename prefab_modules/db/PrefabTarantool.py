@@ -27,7 +27,7 @@ class PrefabTarantool(app):
 
             C = """
             set -ex
-            pushd $TMPDIR
+            pushd {DIR_TEMP}
             git clone http://luajit.org/git/luajit-2.0.git
             cd luajit-2.0/
             git checkout v2.1
@@ -35,7 +35,7 @@ class PrefabTarantool(app):
             ln -sf /usr/local/bin/luajit-2.1.0-beta3 /usr/local/bin/luajit
             popd
 
-            pushd $TMPDIR
+            pushd {DIR_TEMP}
             git clone --recursive https://github.com/Sulverus/tdb
             cd tdb
             make
@@ -165,13 +165,13 @@ class PrefabTarantool(app):
         LUA = LUA.replace('$passwd', passwd)
         LUA = LUA.replace('$port', str(port))
 
-        luapath = prefab.core.replace('$TMPDIR/tarantool.lua')
+        luapath = prefab.core.replace('{DIR_TEMP}/tarantool.lua')
 
         self.logger.info('write lua startup to:%s' % luapath)
 
         prefab.core.file_write(luapath, LUA)
 
-        cmd = 'cd $TMPDIR;rm -rf tarantool;mkdir tarantool;cd tarantool;tarantool %s' % luapath
+        cmd = 'cd {DIR_TEMP};rm -rf tarantool;mkdir tarantool;cd tarantool;tarantool %s' % luapath
         pm = self.prefab.system.processmanager.get()
         pm.ensure(name='tarantool', cmd=cmd, env={}, path='')
 

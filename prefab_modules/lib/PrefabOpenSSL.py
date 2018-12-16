@@ -36,8 +36,8 @@ sudo mv -f /usr/bin/openssl_ /usr/bin/openssl
 class PrefabOpenSSL(base):
 
     def _init(self):
-        self.BUILDDIRL = self.core.replace("$BUILDDIR/openssl")
-        self.CODEDIRL = self.core.replace("$BUILDDIR/code/openssl")
+        self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/openssl")
+        self.CODEDIRL = self.core.replace("{DIR_VAR}/build/code/openssl")
 
     def reset(self):
         base.reset(self)
@@ -58,14 +58,14 @@ class PrefabOpenSSL(base):
         if not self.doneGet("compile") or reset:
             C = """
             set -ex
-            mkdir -p $BUILDDIRL
+            mkdir -p {DIR_VAR}/build/L
             cd $CODEDIRL
             # ./config
-            ./Configure $target shared enable-ec_nistp_64_gcc_128 no-ssl2 no-ssl3 no-comp --openssldir=$BUILDDIRL --prefix=$BUILDDIRL
+            ./Configure $target shared enable-ec_nistp_64_gcc_128 no-ssl2 no-ssl3 no-comp --openssldir={DIR_VAR}/build/L --prefix={DIR_VAR}/build/L
             make depend
             make install
-            rm -rf $BUILDDIRL/share
-            rm -rf $BUILDDIRL/private
+            rm -rf {DIR_VAR}/build/L/share
+            rm -rf {DIR_VAR}/build/L/private
             echo "**BUILD DONE**"
             """
             if self.prefab.core.isMac:
@@ -73,7 +73,7 @@ class PrefabOpenSSL(base):
             else:
                 C = C.replace("$target", "linux-generic64")
 
-            self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.replace(C))
+            self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.executor.replace(C))
             self.logger.info("compile openssl")
             self.logger.debug(C)                
             self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)

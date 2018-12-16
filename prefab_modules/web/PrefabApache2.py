@@ -16,7 +16,7 @@ class PrefabApache2(app):
         httpdir = "/optvar/build/httpd"
 
         if reset and self.prefab.core.dir_exists(httpdir):
-            self.prefab.core.dir_remove("$JSAPPSDIR/apache2")
+            self.prefab.core.dir_remove("{DIR_BASE}/apps/apache2")
 
         self.prefab.core.dir_ensure("/optvar/build")
 
@@ -30,13 +30,13 @@ class PrefabApache2(app):
         # EXTRACT SROURCE CODE
         self.prefab.core.run(
             "cd /optvar/build && tar xjf {dest} && cp -r /optvar/build/httpd-2.4.29 /optvar/build/httpd".format(**locals()))
-        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/bin")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/lib")
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/apache2/bin")
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/apache2/lib")
 
         buildscript = """
 
-        cd {httpdir} &&  ./configure --prefix=$JSAPPSDIR/apache2 --bindir=$JSAPPSDIR/apache2/bin --sbindir=$JSAPPSDIR/apache2/bin \
-              --libdir=$JSAPPSDIR/apache2/lib \
+        cd {httpdir} &&  ./configure --prefix={DIR_BASE}/apps/apache2 --bindir={DIR_BASE}/apps/apache2/bin --sbindir={DIR_BASE}/apps/apache2/bin \
+              --libdir={DIR_BASE}/apps/apache2/lib \
               --enable-mpms-shared=all \
               --enable-modules=all \
               --enable-mods-shared=all \
@@ -48,7 +48,8 @@ class PrefabApache2(app):
               --enable-proxy-http --enable-proxy-ftp \
               --enable-dbd --enable-imagemap --enable-ident --enable-cern-meta \
               --enable-xml2enc && make && make test\
-        """.format(httpdir=httpdir)
+        """
+        buildscript=self.replace(buildscript,args={"httpdir":httpdir})
 
         self.prefab.core.run(buildscript)
 
@@ -60,10 +61,10 @@ class PrefabApache2(app):
         self.prefab.core.run(installscript)
 
         # COPY APACHE BINARIES to /opt/jumpscale/bin
-        self.prefab.core.file_copy("$JSAPPSDIR/apache2/bin/*", '$BINDIR/')
+        self.prefab.core.file_copy("{DIR_BASE}/apps/apache2/bin/*", '{DIR_BIN}/')
 
     def configure(self):
-        conffile = self.prefab.core.file_read("$JSAPPSDIR/apache2/conf/httpd.conf")
+        conffile = self.prefab.core.file_read("{DIR_BASE}/apps/apache2/conf/httpd.conf")
         # SANE CONFIGURATIONS
         lines = """
         #LoadModule negotiation_module
@@ -101,10 +102,10 @@ class PrefabApache2(app):
 
         # MAKE VHOSTS DIRECTORY
         self.prefab.core.dir_ensure("%s/apache2/sites-enabled/" % j.dirs.CFGDIR)
-        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-available")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/apache2/sites-enabled")
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/apache2/sites-available")
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/apache2/sites-enabled")
         #self.logger.info("Config to be written = ", conffile)
-        self.prefab.core.file_write("$JSAPPSDIR/apache2/conf/httpd.conf", conffile)
+        self.prefab.core.file_write("{DIR_BASE}/apps/apache2/conf/httpd.conf", conffile)
 
     def start(self):
         """start Apache."""

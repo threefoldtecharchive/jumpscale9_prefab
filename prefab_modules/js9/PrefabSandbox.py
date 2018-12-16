@@ -15,7 +15,7 @@ class PrefabSandbox(base):
         self.prefab.development.js8.install()
         self.prefab.system.package.mdupdate()
 
-        self.prefab.core.file_copy('/usr/local/bin/jspython', '$BINDIR')
+        self.prefab.core.file_copy('/usr/local/bin/jspython', '{DIR_BIN}')
 
         sandbox_script = """
         prefab = j.tools.prefab.local
@@ -62,7 +62,7 @@ class PrefabSandbox(base):
         self.prefab.core.execute_jumpscript(dedupe_script)
 
         copy_script = """
-        j.sal.fs.removeDirTree("$out/$name/jumpscale/")
+        j.sal.fs.remove("$out/$name/jumpscale/")
         j.sal.fs.copyDirTree("/opt/jumpscale/","$out/$name/jumpscale",deletefirst=True,ignoredir=['.egg-info', '.dist-info','__pycache__'],ignorefiles=['.egg-info',"*.pyc"])
         j.sal.fs.removeIrrelevantFiles("$out")
         """
@@ -75,12 +75,12 @@ class PrefabSandbox(base):
         self.prefab.core.run("apt-get clean")
         self.prefab.core.dir_remove("/var/tmp/*")
         self.prefab.core.dir_remove("/etc/dpkg/dpkg.cfg.d/02apt-speedup")
-        self.prefab.core.dir_remove("$TMPDIR")
-        self.prefab.core.dir_ensure("$TMPDIR")
+        self.prefab.core.dir_remove("{DIR_TEMP}")
+        self.prefab.core.dir_ensure("{DIR_TEMP}")
 
-        self.prefab.core.dir_remove("$GOPATHDIR/src/*")
-        self.prefab.core.dir_remove("$TMPDIR/*")
-        self.prefab.core.dir_remove("$VARDIR/data/*")
+        self.prefab.core.dir_remove("{DIR_BASE}/go/src/*")
+        self.prefab.core.dir_remove("{DIR_TEMP}/*")
+        self.prefab.core.dir_remove("{DIR_VAR}/data/*")
         self.prefab.core.dir_remove('/opt/code/github/domsj', True)
         self.prefab.core.dir_remove('/opt/code/github/openvstorage', True)
 

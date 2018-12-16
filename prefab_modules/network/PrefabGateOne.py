@@ -34,7 +34,7 @@ cd /opt/code/github/liftoff/GateOne
 apt-get install build-essential python3-dev python3-setuptools python3-pip -y
 pip3 install tornado==4.5.3
 python3 setup.py install
-cp /usr/local/bin/gateone $BINDIR/gateone
+cp /usr/local/bin/gateone {DIR_BIN}/gateone
 ln -s /usr/bin/python3 /usr/bin/python
 """
         self.prefab.core.run(cmd)

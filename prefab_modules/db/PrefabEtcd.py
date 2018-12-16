@@ -28,20 +28,20 @@ class PrefabEtcd(app):
 
         go get -x -d -u github.com/coreos/etcd
 
-        cd $GOPATHDIR/src/$REPO_PATH
+        cd {DIR_BASE}/go/src/$REPO_PATH
 
         # first checkout master to prevent error if already in detached mode
         git checkout master
 
         go get -d .
 
-        CGO_ENABLED=0 go build $GO_BUILD_FLAGS -installsuffix cgo -ldflags "-s -X ${REPO_PATH}/cmd/vendor/${REPO_PATH}/version.GitSHA=${GIT_SHA}" -o $BINDIR/etcd ${REPO_PATH}/cmd/etcd
-        CGO_ENABLED=0 go build $GO_BUILD_FLAGS -installsuffix cgo -ldflags "-s" -o $BINDIR/etcdctl ${REPO_PATH}/cmd/etcdctl
+        CGO_ENABLED=0 go build $GO_BUILD_FLAGS -installsuffix cgo -ldflags "-s -X ${REPO_PATH}/cmd/vendor/${REPO_PATH}/version.GitSHA=${GIT_SHA}" -o {DIR_BIN}/etcd ${REPO_PATH}/cmd/etcd
+        CGO_ENABLED=0 go build $GO_BUILD_FLAGS -installsuffix cgo -ldflags "-s" -o {DIR_BIN}/etcdctl ${REPO_PATH}/cmd/etcdctl
         """
 
         script = self.prefab.bash.replaceEnvironInText(_script)
         self.prefab.core.run(script, profile=True)
-        self.prefab.bash.addPath("$BASEDIR/bin")
+        self.prefab.bash.addPath("{DIR_BASE}/bin")
 
         self.doneSet("build")
 
@@ -102,7 +102,7 @@ class PrefabEtcd(app):
         if host and peers:
             cmd = self._etcd_cluster_cmd(host, peers)
         else:
-            cmd = '$BINDIR/etcd'
+            cmd = '{DIR_BIN}/etcd'
         pm = self.prefab.system.processmanager.get()
         pm.ensure("etcd", cmd)
 
@@ -124,7 +124,7 @@ class PrefabEtcd(app):
         cluster = cluster.rstrip(",")
 
         host = host.lstrip("http://").lstrip('https://')
-        cmd = """$BINDIR/etcd -name infra{i} -initial-advertise-peer-urls http://{host}:2380 \
+        cmd = """{DIR_BIN}/etcd -name infra{i} -initial-advertise-peer-urls http://{host}:2380 \
       -listen-peer-urls http://{host}:2380 \
       -listen-client-urls http://{host}:2379,http://127.0.0.1:2379,http://{host}:4001,http://127.0.0.1:4001 \
       -advertise-client-urls http://{host}:2379,http://{host}:4001 \
@@ -132,4 +132,4 @@ class PrefabEtcd(app):
       -initial-cluster {cluster} \
       -initial-cluster-state new \
     """.format(host=host, cluster=cluster, i=number)
-        return self.replace(cmd)
+        return self.executor.replace(cmd)

@@ -8,7 +8,7 @@ class PrefabBrotli(app):
     NAME = 'brotli'
 
     def _init(self):
-        self.src_dir = "$TMPDIR/brotli"
+        self.src_dir = "{DIR_TEMP}/brotli"
 
     def build(self, reset=False):
         if reset is False and (self.isInstalled() or self.doneGet('build')):
@@ -25,7 +25,7 @@ class PrefabBrotli(app):
         make
         make test
         """.format(self.src_dir)
-        cmd = self.replace(cmd)
+        cmd = self.executor.replace(cmd)
         self.prefab.core.run(cmd)
         self.doneSet('build')
 

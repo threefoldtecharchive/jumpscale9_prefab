@@ -12,9 +12,9 @@ def test(geodns_install=False, dnsresolver_install=True, port=3333, tmux=True):
     if dnsresolver_install:
         prefab.core.run('pip install dnspython')
         # prefab.core.file_download("http://www.dnspython.org/kits3/1.12.0/dnspython3-1.12.0.tar.gz",
-        #                            to="$TMPDIR", overwrite=False, expand=True)
-        # tarpath = prefab.core.find("$TMPDIR", recursive=True, pattern="*dns*.gz", type='f')[0]
-        # extracted = prefab.core.file_expand(tarpath, "$TMPDIR")
+        #                            to="{DIR_TEMP}", overwrite=False, expand=True)
+        # tarpath = prefab.core.find("{DIR_TEMP}", recursive=True, pattern="*dns*.gz", type='f')[0]
+        # extracted = prefab.core.file_expand(tarpath, "{DIR_TEMP}")
         # prefab.core.run("cd %s && python setup.py" % extracted)
 
     if geodns_install:

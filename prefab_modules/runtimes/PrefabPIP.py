@@ -19,7 +19,7 @@ class PrefabPIP(base):
         if self.doneCheck("ensure", reset):
             return
 
-        tmpdir = self.replace("$TMPDIR")
+        tmpdir = self.executor.replace("{DIR_TEMP}")
         cmd1 = """
             #important remove olf pkg_resources, will conflict with new pip
             rm -rf /usr/lib/python3/dist-packages/pkg_resources

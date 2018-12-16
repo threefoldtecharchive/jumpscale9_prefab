@@ -25,8 +25,8 @@ class PrefabMicroEditor(app):
             raise RuntimeError("not implemented for other platforms")
 
         dest = self.prefab.network.tools.download(
-            url=url, to='$TMPDIR/micro/', overwrite=False, retry=3, expand=True, removeTopDir=True)
-        self.core.file_move("$TMPDIR/micro/micro",
+            url=url, to='{DIR_TEMP}/micro/', overwrite=False, retry=3, expand=True, removeTopDir=True)
+        self.core.file_move("{DIR_TEMP}/micro/micro",
                             "/usr/local/bin/micro", recursive=False)
 
         self.doneSet('install')

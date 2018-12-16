@@ -13,7 +13,7 @@ class PrefabOdoo(app):
         self.prefab.system.package.install(['python2.7', 'python2.7-dev'])
         self.prefab.core.file_download(pip_url, overwrite=False)
         cmd = """
-        python2.7 $TMPDIR/get-pip.py
+        python2.7 {DIR_TEMP}/get-pip.py
         """
         self.prefab.core.execute_bash(cmd, profile=True)
 
@@ -28,10 +28,10 @@ class PrefabOdoo(app):
         self.prefab.runtimes.nodejs.install()
         self.prefab.core.run("npm install -g less less-plugin-clean-css -y", profile=True)
         odoo_git_url = "https://github.com/odoo/odoo.git"
-        odoo_dir = '$TMPDIR/odoo'
+        odoo_dir = '{DIR_TEMP}/odoo'
         self.prefab.tools.git.pullRepo(odoo_git_url, dest=odoo_dir, branch='10.0', depth=1, ssh=False)
         cmd = """
-        export PATH=$PATH:$BINDIR/postgres/
+        export PATH=$PATH:{DIR_BIN}/postgres/
         cd {} && pip2 install -r requirements.txt
         """.format(odoo_dir)
         self.prefab.core.run(cmd, profile=True)
@@ -44,13 +44,13 @@ class PrefabOdoo(app):
         if not self.prefab.db.postgresql.isStarted():
             self.prefab.db.postgresql.start()
         self.prefab.core.run('adduser --system --quiet --shell /bin/bash --group --gecos "Odoo administrator" odoo')
-        self.prefab.core.run('sudo -u postgres $BINDIR/createuser -s odoo')
+        self.prefab.core.run('sudo -u postgres {DIR_BIN}/createuser -s odoo')
         self.prefab.core.dir_ensure("$JSLIBEXTDIR")
 
         c = """
-        cp $TMPDIR/odoo/odoo-bin $BINDIR/odoo-bin
-        cp -r $TMPDIR/odoo/odoo $JSLIBEXTDIR
-        cp -r $TMPDIR/odoo/addons $JSLIBEXTDIR/odoo-addons
+        cp {DIR_TEMP}/odoo/odoo-bin {DIR_BIN}/odoo-bin
+        cp -r {DIR_TEMP}/odoo/odoo $JSLIBEXTDIR
+        cp -r {DIR_TEMP}/odoo/addons $JSLIBEXTDIR/odoo-addons
         """
         self.prefab.core.run(c, profile=True)
         self.doneSet('install')
@@ -59,7 +59,7 @@ class PrefabOdoo(app):
         if not self.prefab.db.postgresql.isStarted():
             self.prefab.db.postgresql.start()
         cmd = """
-             cd $BINDIR
+             cd {DIR_BIN}
              sudo -H -u odoo \
              PATH=$PATH \
              PYTHONPATH=$JSLIBEXTDIR:$PYTHONPATH \

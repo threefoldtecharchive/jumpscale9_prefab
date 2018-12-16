@@ -11,72 +11,8 @@ class PrefabOpenResty(app):
     NAME = 'openresty'
 
     def _init(self):
-        self.BUILDDIR = self.replace("$BUILDDIR")
+        self.BUILDDIR = self.executor.replace("{DIR_VAR}/build/")
 
-
-    def install(self, start=True):
-        """
-        Moving build files to build directory and copying config files
-        """
-
-        """
-        # Install through ubuntu
-        # self.prefab.system.package.mdupdate()
-        # self.prefab.system.package.ensure('openresty')
-        # link openresty to binDir and use it from there
-
-        # self.prefab.core.dir_ensure("$JSAPPSDIR/openresty/")
-        # self.prefab.core.dir_ensure("$JSAPPSDIR/openresty/bin")
-        # self.prefab.core.dir_ensure("$JSAPPSDIR/openresty/etc")
-        self.prefab.core.dir_ensure("$JSCFGDIR")
-        self.prefab.core.dir_ensure("$TMPDIR")
-        # self.prefab.core.dir_ensure("/optvar/tmp")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/openresty/")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/openresty/bin")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/openresty/etc")
-        self.prefab.core.dir_ensure("$JSCFGDIR/openresty/etc")
-
-        self.prefab.core.file_copy('/usr/sbin/openresty', '$JSAPPSDIR/openresty/bin/openresty', overwrite=True)
-        self.prefab.core.dir_ensure('/var/log/openresty')
-        self.prefab.core.file_copy('/etc/openresty/*', '$JSAPPSDIR/openresty/etc/', recursive=True)  # default conf
-        self.prefab.core.file_copy('/etc/openresty/*', '$JSCFGDIR/openresty/etc/', recursive=True)  # variable conf
-        """
-
-        # Install openresty
-
-        C = """
-        #!/bin/bash
-        set -ex
-
-        cd $TMPDIR/build/openresty/openresty-1.11.3
-        make install
-        """
-
-        C = self.prefab.core.replace(C)
-        C = self.replace(C)
-        self.prefab.core.run(C)
-
-        # Writing config files
-        self.prefab.core.dir_ensure("$BUILDDIR/openresty/conf/conf.d/")
-        self.prefab.core.dir_ensure("$BUILDDIR/openresty/conf/sites-enabled/")
-
-        basicopenrestyconf = self.get_basic_openresty_conf()
-        basicopenrestyconf = self.replace(textwrap.dedent(basicopenrestyconf))
-
-        defaultenabledsitesconf = self.get_basic_openresty_site()
-        defaultenabledsitesconf = self.replace(textwrap.dedent(defaultenabledsitesconf))
-
-        self.prefab.core.file_write("$BUILDDIR/openresty/conf/openresty.conf", content=basicopenrestyconf)
-        self.prefab.core.file_write("$BUILDDIR/openresty/conf/sites-enabled/default", content=defaultenabledsitesconf)
-
-        fst_cgi_conf = self.prefab.core.file_read("$BUILDDIR/openresty/conf/fastcgi.conf")
-        fst_cgi_conf = fst_cgi_conf.replace("include fastcgi.conf;",
-                                            self.replace("include $BUILDDIR/openresty/conf/fastcgi.conf;"))
-        self.prefab.core.file_write("$BUILDDIR/openresty/conf/fastcgi.conf", content=fst_cgi_conf)
-
-        #self.prefab.core.file_link(source="$JSCFGDIR/openresty", destination="$JSAPPSDIR/openresty")
-        if start:
-            self.start()
 
     def build(self, reset=False):
         """
@@ -93,36 +29,16 @@ class PrefabOpenResty(app):
             self.prefab.system.package.mdupdate()
             self.prefab.system.package.install("build-essential libpcre3-dev libssl-dev")
 
-            self.prefab.core.dir_remove("$TMPDIR/build/openresty")
-            self.prefab.core.dir_ensure("$TMPDIR/build/openresty")
-
-            C = """
-            #!/bin/bash
-            set -ex
-
-            cd $TMPDIR/build/openresty
-            wget http://openresty.org/download/openresty-1.11.3.tar.gz
-            tar xzf openresty-1.11.3.tar.gz
-
-            cd openresty-1.11.3
-            ./configure --prefix=$BUILDDIR/openresty/ --with-http_ssl_module --with-ipv6
-            make
-            """
-            C = self.prefab.core.replace(C)
-            C = self.replace(C)
-            self.prefab.core.run(C)
-
-        else:
-            #build with system openssl, no need to include custom build
-            # j.tools.prefab.local.lib.openssl.build()
-
+            # self.prefab.core.dir_remove("{DIR_TEMP}/build/openresty")
+            # self.prefab.core.dir_ensure("{DIR_TEMP}/build/openresty")
             url="https://openresty.org/download/openresty-1.13.6.2.tar.gz"
-            dest = self.replace("$BUILDDIR/openresty")
+            dest = self.executor.replace("{DIR_VAR}/build/openresty")
             self.prefab.core.createDir(dest)
             self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
                         expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
-            C="""
-            cd $BUILDDIR/openresty
+
+            C = """
+            cd {DIR_VAR}/build/openresty
             mkdir -p /sandbox/var/pid
             mkdir -p /sandbox/var/log
             ./configure \
@@ -138,20 +54,102 @@ class PrefabOpenResty(app):
                 -j8
             make -j8
             make install
-            rm -rf $BUILDDIR/openresty
+            rm -rf {DIR_VAR}/build/openresty
             
             ln -s /sandbox/openresty/luajit/bin/luajit /sandbox/bin/lua
             
             """
             C = self.prefab.core.replace(C)
-            C = self.replace(C)
+            C = self.executor.replace(C)
+            self.prefab.core.run(C)
+
+        else:
+            #build with system openssl, no need to include custom build
+            # j.tools.prefab.local.lib.openssl.build()
+
+            url="https://openresty.org/download/openresty-1.13.6.2.tar.gz"
+            dest = self.executor.replace("{DIR_VAR}/build/openresty")
+            self.prefab.core.createDir(dest)
+            self.prefab.core.file_download(url, to=dest, overwrite=False, retry=3,
+                        expand=True, minsizekb=1000, removeTopDir=True, deletedest=True)
+            C="""
+            cd {DIR_VAR}/build/openresty
+            mkdir -p /sandbox/var/pid
+            mkdir -p /sandbox/var/log
+            ./configure \
+                --with-cc-opt="-I/usr/local/opt/openssl/include/ -I/usr/local/opt/pcre/include/" \
+                --with-ld-opt="-L/usr/local/opt/openssl/lib/ -L/usr/local/opt/pcre/lib/" \
+                --prefix="/sandbox/openresty" \
+                --sbin-path="/sandbox/bin/openresty" \
+                --modules-path="/sandbox/lib" \
+                --pid-path="/sandbox/var/pid/openresty.pid" \
+                --error-log-path="/sandbox/var/log/openresty.log" \
+                --lock-path="/sandbox/var/nginx.lock" \
+                --conf-path="/sandbox/cfg/openresty.cfg" \
+                -j8
+            make -j8
+            make install
+            rm -rf {DIR_VAR}/build/openresty
+            
+            ln -s /sandbox/openresty/luajit/bin/luajit /sandbox/bin/lua
+            
+            """
+            C = self.prefab.core.replace(C)
+            C = self.executor.replace(C)
             self.prefab.core.run(C)
 
         self.doneSet("build")
 
+        self.copy2sandbox_github()
 
 
+    def copy2sandbox_github(self):
+        """
+        js_shell 'j.tools.prefab.local.web.openresty.copy2sandbox_github()'
+        :return:
+        """
+        assert self.executor.type=="local"
 
-    def test(self):
-        # host a file test can be reached
-        raise NotImplementedError
+        if self.core.isUbuntu:
+            CODE_SB_BIN=j.clients.git.getContentPathFromURLorPath("git@github.com:threefoldtech/sandbox_ubuntu.git")
+        elif self.core.isMac:
+            CODE_SB_BIN=j.clients.git.getContentPathFromURLorPath("git@github.com:threefoldtech/sandbox_osx.git")
+        else:
+            raise RuntimeError("only ubuntu & osx support")
+
+        CODE_SB_BASE = j.clients.git.getContentPathFromURLorPath("git@github.com:threefoldtech/sandbox_base.git")
+
+        C="""
+        set -ex
+
+        cp $SRCBINDIR/resty* $CODE_SB_BASE/base/bin/
+        rm -f $CODE_SB_BIN/base/bin/resty*
+                
+        cp $SRCBINDIR/openresty $CODE_SB_BASE/base/bin/
+        rm -f $CODE_SB_BIN/base/bin/openresty        
+
+        cp {DIR_BIN}/*.lua $CODE_SB_BASE/base/bin/
+        rm -f $CODE_SB_BIN/base/bin/*.lua    
+
+        cp {DIR_BIN}/lapis $CODE_SB_BASE/base/bin/
+        rm -f $CODE_SB_BIN/base/bin/lapis  
+
+        cp {DIR_BIN}/lua $CODE_SB_BIN/base/bin/
+        rm -f $CODE_SB_BASE/base/bin/lua  
+
+        cp {DIR_BIN}/moon* $CODE_SB_BASE/base/bin/
+        rm -f $CODE_SB_BIN/base/bin/moon*
+        
+        cp {DIR_BIN}/openresty $CODE_SB_BIN/base/bin/
+        rm -f $CODE_SB_BASE/base/bin/openresty
+          
+
+
+        """
+        args={}
+        args["CODE_SB_BIN"]=CODE_SB_BIN
+        args["CODE_SB_BASE"]=CODE_SB_BASE
+        args["SRCBINDIR"]="%s/openresty/bin"%j.core.installtools.MyEnv.config["DIR_BASE"]
+        args["BINDIR"]="%s/bin"%j.core.installtools.MyEnv.config["DIR_BASE"]
+        j.core.tools.run(C, args=args)
+        # self.cleanup()

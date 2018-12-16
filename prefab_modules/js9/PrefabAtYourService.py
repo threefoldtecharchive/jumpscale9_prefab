@@ -7,10 +7,10 @@ base = j.tools.prefab._getBaseClass()
 class PrefabAtYourService(base):
     def _init(self):
         self.base_dir = j.sal.fs.joinPaths(
-            self.prefab.core.dir_paths["JSAPPSDIR"],
+            self.replace("{DIR_BASE}/apps"),
             "atyourservice"
         )
-        self.repo_dir = j.sal.fs.joinPaths(self.prefab.core.dir_paths["CODEDIR"], 'github/threefoldtech/jumpscale_ays9/')
+        self.repo_dir = j.sal.fs.joinPaths(self.replace("{DIR_CODE}"), 'github/threefoldtech/jumpscale_ays9/')
 
     def configure(self, production=False, organization='', restart=True, host='127.0.0.1', port=5000):
         jwt_key = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAES5X8XrfKdx9gYayFITc89wad4usrk0n27MjiGYvqalizeSWTHEpnd7oea9IQ8T5oJjMVH5cc0H5tFSKilFFeh//wngxIyny66+Vq5t5B0V0Ehy01+2ceEon2Y0XDkIKv"
@@ -52,7 +52,7 @@ class PrefabAtYourService(base):
         }
         console_url = ays_console_url or ays_url
         self.prefab.web.portal.add_configuration(config)
-        nav_path = '$JSAPPSDIR/portals/{portal}/base/AYS/.space/nav.wiki'.format(portal=portal_name)
+        nav_path = '{DIR_BASE}/apps/portals/{portal}/base/AYS/.space/nav.wiki'.format(portal=portal_name)
         nav = self.prefab.core.file_read(nav_path)
         nav = re.sub(r'AYS API:.*', r'AYS API:{}/apidocs/index.html?raml=api.raml'.format(console_url), nav)
         self.prefab.core.file_write(nav_path, nav)
@@ -69,7 +69,7 @@ class PrefabAtYourService(base):
             url {string} -- desired ays console api binding (default: {"http://localhost:5000"})
         """
 
-        raml_path = "$JSAPPSDIR/atyourservice/JumpscaleAYS/ays/server/apidocs/api.raml"
+        raml_path = "{DIR_BASE}/apps/atyourservice/JumpscaleAYS/ays/server/apidocs/api.raml"
         raml = self.prefab.core.file_read(raml_path)
 
         raml = re.sub(
@@ -94,7 +94,7 @@ class PrefabAtYourService(base):
         self.get_code(branch=branch)
         if install_portal:
             self.prefab.web.portal.install(branch=branch)
-        if self.core.file_exists('{}/portals'.format(self.prefab.core.dir_paths["JSAPPSDIR"])):
+        if self.core.file_exists('{}/portals'.format(self.replace("{DIR_BASE}/apps"))):
             self.prefab.web.portal.addSpace('{}apps/AYS'.format(self.repo_dir))
             self.prefab.web.portal.addActor('{}apps/ays__tools'.format(self.repo_dir))
 

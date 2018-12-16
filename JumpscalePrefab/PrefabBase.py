@@ -8,9 +8,8 @@ class PrefabBase(JSBASE):
         JSBASE.__init__(self)
         self._classname = ""
         self.executor = executor
-        self.state = executor.state
-        self.config = self.state.config
         self.prefab = prefab
+        # self.core = self.prefab.core
         self._initenvDone = False
         self._logger = None
         self.env = self.executor.env
@@ -30,37 +29,33 @@ class PrefabBase(JSBASE):
         pass #NEEDS TO REMAIN EMPTY BECAUSE IS USED AT HIGHER LEVEL LAYER
 
 
-    def replace(self, txt, args={}):
-        txt = j.core.text.strip(txt)
-        for item in self.__dict__.keys():
-            if item == item.upper():
-                txt = txt.replace("$%s" % item, self.__dict__[item])
-        txt = self.core.replace(txt, args=args)
-        return txt
-
+    def replace(self, txt, args=None):
+        if args is None:
+            args={}
+        return self.executor.replace(txt,args=args)
 
 
     def reset(self):
-        self.executor.state.stateSet(self.classname, {})
         self.doneReset()
         self._init()
 
     @property
     def done(self):
-        return self.state.stateGet(self.classname,{},True)
+        j.shell()
+        w
+
 
     def doneReset(self):
         """
         resets the remembered items which are done
         """
-        self.state.stateSet(self.classname,{},save=True)
+        self.executor.state_deleteall()
 
 
     def doneSet(self, key):
         if self.executor.readonly:
             self.logger.debug("info: Canot do doneset:%s because readonly" % key)
             return False
-        done = self.done
         # bring to list of keys
         if key.find(",") != -1:
             key = [item.strip() for item in key.split(",")]
@@ -71,45 +66,45 @@ class PrefabBase(JSBASE):
         for item in key:
             if item.strip() == "":
                 continue
-            done[item] = True
-        self.state.stateSet(self.classname,done,save=True)
+            self.executor.state_set(item)
+
         return True
 
     def doneDelete(self, key):
         if self.executor.readonly:
             self.logger.debug("info: Canot do doneDelete:%s because readonly" % key)
             return False
-        done = self.done
-        if key in done:
-            del (done[key])
-        self.state.stateSet(self.classname,done,save=True)
-        return True
+        if key.find(",") != -1:
+            key = [item.strip() for item in key.split(",")]
+        elif key.find("\n") != -1:
+            key = [item.strip() for item in key.split("\n")]
+        elif not j.data.types.list.check(key):
+            key = [key]
+        for item in key:
+            if item.strip() == "":
+                continue
+            self.executor.state_delete(item)
 
     def doneGet(self, key):
         if self.executor.readonly:
             return False
-        if key in self.done:
-            self.logger.debug("donecheck:%s:%s" % (key, self.done[key]))
-            return self.done[key]
-        else:
-            self.logger.debug("donecheck, not set:%s:False" % (key))
-            return False
+        return self.executor.state_exists(key)
 
-    def doneCheck(self, cat, reset=False):
-        """
-        specify category to test against
-        if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
-
-        will call doneGet and take reset into account
-
-        reset can be 1, "1", True, ...
-
-        if done will return : True
-        """
-        reset = j.data.serializers.fixType(reset, False)
-        if reset is False and self.doneGet(cat):
-            return True
-        return False
+    # def doneCheck(self, cat, reset=False):
+    #     """
+    #     specify category to test against
+    #     if $CLASS.NAME specified then will call the isInstalled method which checks if command is installed
+    #
+    #     will call doneGet and take reset into account
+    #
+    #     reset can be 1, "1", True, ...
+    #
+    #     if done will return : True
+    #     """
+    #     reset = j.data.serializers.fixType(reset, False)
+    #     if reset is False and self.doneGet(cat):
+    #         return True
+    #     return False
 
     @property
     def classname(self):

@@ -14,7 +14,7 @@ class PrefabGrafana(app):
 
         if self.prefab.core.isUbuntu:
             C = """
-            cd $TMPDIR
+            cd {DIR_TEMP}
             wget https://grafanarel.s3.amazonaws.com/builds/grafana_3.1.1-1470047149_amd64.deb
             sudo apt-get install -y adduser libfontconfig
             sudo dpkg -i grafana_3.1.1-1470047149_amd64.deb
@@ -25,29 +25,29 @@ class PrefabGrafana(app):
             raise RuntimeError("platform not supported")
 
     def install(self, start=False, influx_addr='127.0.0.1', influx_port=8086, port=3000):
-        self.prefab.core.dir_ensure('$BINDIR')
-        self.prefab.core.file_copy("/usr/sbin/grafana*", dest="$BINDIR")
+        self.prefab.core.dir_ensure('{DIR_BIN}')
+        self.prefab.core.file_copy("/usr/sbin/grafana*", dest="{DIR_BIN}")
 
-        self.prefab.core.dir_ensure("$JSAPPSDIR/grafana")
-        self.prefab.core.file_copy("/usr/share/grafana/", "$JSAPPSDIR/", recursive=True)
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/grafana")
+        self.prefab.core.file_copy("/usr/share/grafana/", "{DIR_BASE}/apps/", recursive=True)
 
         if self.prefab.core.file_exists("/usr/share/grafana/conf/defaults.ini"):
             cfg = self.prefab.core.file_read("/usr/share/grafana/conf/defaults.ini")
         else:
-            cfg = self.prefab.core.file_read('$TMPDIR/cfg/grafana/conf/defaults.ini')
-        self.prefab.core.file_write('$JSCFGDIR/grafana/grafana.ini', cfg)
+            cfg = self.prefab.core.file_read('{DIR_TEMP}/cfg/grafana/conf/defaults.ini')
+        self.prefab.core.file_write('{DIR_BASE}/cfg/grafana/grafana.ini', cfg)
 
         if start:
             self.start(influx_addr, influx_port, port)
 
     def start(self, influx_addr='127.0.0.1', influx_port=8086, port=3000):
 
-        cmd = "$BINDIR/grafana-server --config=$JSCFGDIR/grafana/grafana.ini\n"
-        cmd = self.replace(cmd)
+        cmd = "{DIR_BIN}/grafana-server --config={DIR_BASE}/cfg/grafana/grafana.ini\n"
+        cmd = self.executor.replace(cmd)
         self.prefab.core.file_write("/opt/jumpscale/bin/start_grafana.sh", cmd, 777, replaceArgs=True)
         self.prefab.system.process.kill("grafana-server")
         pm = self.prefab.system.processmanager.get()
-        pm.ensure("grafana-server", cmd=cmd, env={}, path='$JSAPPSDIR/grafana')
+        pm.ensure("grafana-server", cmd=cmd, env={}, path='{DIR_BASE}/apps/grafana')
         grafanaclient = j.clients.grafana.get(
             url='http://%s:%d' % (self.prefab.core.executor.addr, port), username='admin', password='admin')
         data = {

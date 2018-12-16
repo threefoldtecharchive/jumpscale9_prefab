@@ -11,7 +11,7 @@ class PrefabNGINX(app):
     NAME = 'nginx'
 
     def _init(self):
-        self.BUILDDIR = self.replace("$BUILDDIR")
+        self.BUILDDIR = self.executor.replace("{DIR_VAR}/build/")
 
     def get_basic_nginx_conf(self):
         return """\
@@ -40,7 +40,7 @@ class PrefabNGINX(app):
         	# server_names_hash_bucket_size 64;
         	# server_name_in_redirect off;
 
-        	include $BUILDDIR/nginx/conf/mime.types;
+        	include {DIR_VAR}/build/nginx/conf/mime.types;
         	default_type application/octet-stream;
 
         	##
@@ -54,8 +54,8 @@ class PrefabNGINX(app):
         	# Logging Settings
         	##
 
-        	access_log $BUILDDIR/nginx/logs/access.log;
-        	error_log $BUILDDIR/nginx/logs/error.log;
+        	access_log {DIR_VAR}/build/nginx/logs/access.log;
+        	error_log {DIR_VAR}/build/nginx/logs/error.log;
 
         	##
         	# Gzip Settings
@@ -68,8 +68,8 @@ class PrefabNGINX(app):
         	# Virtual Host Configs
         	##
 
-        	include $BUILDDIR/nginx/conf/conf.d/*;
-        	include $BUILDDIR/nginx/conf/sites-enabled/*;
+        	include {DIR_VAR}/build/nginx/conf/conf.d/*;
+        	include {DIR_VAR}/build/nginx/conf/sites-enabled/*;
         }
         """
 
@@ -93,7 +93,7 @@ class PrefabNGINX(app):
             }
 
             # location ~ \.php$ {
-                # include $BUILDDIR/nginx/conf/snippets/fastcgi-php.conf;
+                # include {DIR_VAR}/build/nginx/conf/snippets/fastcgi-php.conf;
 
                 # With php7.0-cgi alone:
                 # fastcgi_pass 127.0.0.1:9000;
@@ -114,21 +114,21 @@ class PrefabNGINX(app):
         # self.prefab.system.package.ensure('nginx')
         # link nginx to binDir and use it from there
 
-        # self.prefab.core.dir_ensure("$JSAPPSDIR/nginx/")
-        # self.prefab.core.dir_ensure("$JSAPPSDIR/nginx/bin")
-        # self.prefab.core.dir_ensure("$JSAPPSDIR/nginx/etc")
-        self.prefab.core.dir_ensure("$JSCFGDIR")
-        self.prefab.core.dir_ensure("$TMPDIR")
+        # self.prefab.core.dir_ensure("{DIR_BASE}/apps/nginx/")
+        # self.prefab.core.dir_ensure("{DIR_BASE}/apps/nginx/bin")
+        # self.prefab.core.dir_ensure("{DIR_BASE}/apps/nginx/etc")
+        self.prefab.core.dir_ensure("{DIR_BASE}/cfg")
+        self.prefab.core.dir_ensure("{DIR_TEMP}")
         # self.prefab.core.dir_ensure("/optvar/tmp")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/nginx/")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/nginx/bin")
-        self.prefab.core.dir_ensure("$JSAPPSDIR/nginx/etc")
-        self.prefab.core.dir_ensure("$JSCFGDIR/nginx/etc")
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/nginx/")
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/nginx/bin")
+        self.prefab.core.dir_ensure("{DIR_BASE}/apps/nginx/etc")
+        self.prefab.core.dir_ensure("{DIR_BASE}/cfg/nginx/etc")
 
-        self.prefab.core.file_copy('/usr/sbin/nginx', '$JSAPPSDIR/nginx/bin/nginx', overwrite=True)
+        self.prefab.core.file_copy('/usr/sbin/nginx', '{DIR_BASE}/apps/nginx/bin/nginx', overwrite=True)
         self.prefab.core.dir_ensure('/var/log/nginx')
-        self.prefab.core.file_copy('/etc/nginx/*', '$JSAPPSDIR/nginx/etc/', recursive=True)  # default conf
-        self.prefab.core.file_copy('/etc/nginx/*', '$JSCFGDIR/nginx/etc/', recursive=True)  # variable conf
+        self.prefab.core.file_copy('/etc/nginx/*', '{DIR_BASE}/apps/nginx/etc/', recursive=True)  # default conf
+        self.prefab.core.file_copy('/etc/nginx/*', '{DIR_BASE}/cfg/nginx/etc/', recursive=True)  # variable conf
         """
 
         # Install nginx
@@ -137,33 +137,33 @@ class PrefabNGINX(app):
         #!/bin/bash
         set -ex
 
-        cd $TMPDIR/build/nginx/nginx-1.11.3
+        cd {DIR_TEMP}/build/nginx/nginx-1.11.3
         make install
         """
 
         C = self.prefab.core.replace(C)
-        C = self.replace(C)
+        C = self.executor.replace(C)
         self.prefab.core.run(C)
 
         # Writing config files
-        self.prefab.core.dir_ensure("$BUILDDIR/nginx/conf/conf.d/")
-        self.prefab.core.dir_ensure("$BUILDDIR/nginx/conf/sites-enabled/")
+        self.prefab.core.dir_ensure("{DIR_VAR}/build/nginx/conf/conf.d/")
+        self.prefab.core.dir_ensure("{DIR_VAR}/build/nginx/conf/sites-enabled/")
 
         basicnginxconf = self.get_basic_nginx_conf()
-        basicnginxconf = self.replace(textwrap.dedent(basicnginxconf))
+        basicnginxconf = self.executor.replace(textwrap.dedent(basicnginxconf))
 
         defaultenabledsitesconf = self.get_basic_nginx_site()
-        defaultenabledsitesconf = self.replace(textwrap.dedent(defaultenabledsitesconf))
+        defaultenabledsitesconf = self.executor.replace(textwrap.dedent(defaultenabledsitesconf))
 
-        self.prefab.core.file_write("$BUILDDIR/nginx/conf/nginx.conf", content=basicnginxconf)
-        self.prefab.core.file_write("$BUILDDIR/nginx/conf/sites-enabled/default", content=defaultenabledsitesconf)
+        self.prefab.core.file_write("{DIR_VAR}/build/nginx/conf/nginx.conf", content=basicnginxconf)
+        self.prefab.core.file_write("{DIR_VAR}/build/nginx/conf/sites-enabled/default", content=defaultenabledsitesconf)
 
-        fst_cgi_conf = self.prefab.core.file_read("$BUILDDIR/nginx/conf/fastcgi.conf")
+        fst_cgi_conf = self.prefab.core.file_read("{DIR_VAR}/build/nginx/conf/fastcgi.conf")
         fst_cgi_conf = fst_cgi_conf.replace("include fastcgi.conf;",
-                                            self.replace("include $BUILDDIR/nginx/conf/fastcgi.conf;"))
-        self.prefab.core.file_write("$BUILDDIR/nginx/conf/fastcgi.conf", content=fst_cgi_conf)
+                                            self.executor.replace("include {DIR_VAR}/build/nginx/conf/fastcgi.conf;"))
+        self.prefab.core.file_write("{DIR_VAR}/build/nginx/conf/fastcgi.conf", content=fst_cgi_conf)
 
-        #self.prefab.core.file_link(source="$JSCFGDIR/nginx", destination="$JSAPPSDIR/nginx")
+        #self.prefab.core.file_link(source="{DIR_BASE}/cfg/nginx", destination="{DIR_BASE}/apps/nginx")
         if start:
             self.start()
 
@@ -174,23 +174,23 @@ class PrefabNGINX(app):
             self.prefab.system.package.mdupdate()
             self.prefab.system.package.install("build-essential libpcre3-dev libssl-dev")
 
-            self.prefab.core.dir_remove("$TMPDIR/build/nginx")
-            self.prefab.core.dir_ensure("$TMPDIR/build/nginx")
+            self.prefab.core.dir_remove("{DIR_TEMP}/build/nginx")
+            self.prefab.core.dir_ensure("{DIR_TEMP}/build/nginx")
 
             C = """
             #!/bin/bash
             set -ex
 
-            cd $TMPDIR/build/nginx
+            cd {DIR_TEMP}/build/nginx
             wget http://nginx.org/download/nginx-1.11.3.tar.gz
             tar xzf nginx-1.11.3.tar.gz
 
             cd nginx-1.11.3
-            ./configure --prefix=$BUILDDIR/nginx/ --with-http_ssl_module --with-ipv6
+            ./configure --prefix={DIR_VAR}/build/nginx/ --with-http_ssl_module --with-ipv6
             make
             """
             C = self.prefab.core.replace(C)
-            C = self.replace(C)
+            C = self.executor.replace(C)
             self.prefab.core.run(C)
 
         else:
@@ -200,21 +200,21 @@ class PrefabNGINX(app):
             self.install()
 
     def start(self, name="nginx", nodaemon=True, nginxconfpath=None):
-        nginxbinpath = '$BUILDDIR/nginx/sbin'
+        nginxbinpath = '{DIR_VAR}/build/nginx/sbin'
         # COPY BINARIES TO BINDIR
-        self.prefab.core.dir_ensure('$BINDIR')
-        self.prefab.core.run("cp $BUILDDIR/nginx/sbin/* $BINDIR/")
+        self.prefab.core.dir_ensure('{DIR_BIN}')
+        self.prefab.core.run("cp {DIR_VAR}/build/nginx/sbin/* {DIR_BIN}/")
 
         if nginxconfpath is None:
-            nginxconfpath = '$BUILDDIR/nginx/conf/nginx.conf'
+            nginxconfpath = '{DIR_VAR}/build/nginx/conf/nginx.conf'
 
-        nginxconfpath = self.replace(nginxconfpath)
+        nginxconfpath = self.executor.replace(nginxconfpath)
         nginxconfpath = os.path.normpath(nginxconfpath)
 
         if self.prefab.core.file_exists(nginxconfpath):
             # foreground
             nginxcmd = "%s/nginx -c %s -g 'daemon off;'" % (nginxbinpath, nginxconfpath)
-            nginxcmd = self.replace(nginxcmd)
+            nginxcmd = self.executor.replace(nginxcmd)
 
             self.logger.info("cmd: %s" % nginxcmd)
             pm = self.prefab.system.processmanager.get()

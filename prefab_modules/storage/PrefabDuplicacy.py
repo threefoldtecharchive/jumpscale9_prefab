@@ -17,7 +17,7 @@ class PrefabDuplicacy(app):
             return
 
         dup_url = "https://github.com/gilbertchen/duplicacy/releases/download/v2.0.10/duplicacy_linux_x64_2.0.10"
-        self.prefab.core.file_download(dup_url, overwrite=True, to="$TMPDIR/duplicacy")
+        self.prefab.core.file_download(dup_url, overwrite=True, to="{DIR_TEMP}/duplicacy")
         self.doneSet('build')
 
         if install:
@@ -31,7 +31,7 @@ class PrefabDuplicacy(app):
         """
         if self.doneCheck("install", reset):
             return
-        self.prefab.core.run("cp $TMPDIR/duplicacy $BINDIR/")
+        self.prefab.core.run("cp {DIR_TEMP}/duplicacy {DIR_BIN}/")
         self.doneSet('install')
 
         if start:
