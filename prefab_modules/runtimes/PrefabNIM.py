@@ -9,7 +9,7 @@ class PrefabNIM(base):
     """
 
     def _init(self):
-        self.logger_enable()
+        self._logger_enable()
         self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/nimlang/")
         self.CODEDIRL = self.core.replace("{DIR_VAR}/build/code/nimlang/")
 

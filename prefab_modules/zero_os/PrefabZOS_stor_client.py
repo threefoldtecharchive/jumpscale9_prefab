@@ -6,7 +6,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabZOS_stor_client(base):
     
     def _init(self):
-        self.logger_enable()
+        self._logger_enable()
         self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/buildg8client/")
         self.CODEDIRL = self.BUILDDIRL
 

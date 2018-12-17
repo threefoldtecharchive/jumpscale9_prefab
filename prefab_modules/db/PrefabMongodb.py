@@ -34,7 +34,7 @@ class PrefabMongodb(app):
             raise j.exceptions.RuntimeError("unsupported platform")
 
         if url:
-            self.logger.info('Downloading mongodb.')
+            self._logger.info('Downloading mongodb.')
             self.prefab.core.file_download(
                 url, to="{DIR_TEMP}", overwrite=False, expand=True)
             tarpaths = self.prefab.core.find(

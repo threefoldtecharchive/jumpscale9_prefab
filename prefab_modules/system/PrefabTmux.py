@@ -19,7 +19,7 @@ class PrefabTmux(base):
             self.prefab.system.package.install("tmux")
         # else:
         #     from IPython import embed
-        #     self.logger.info("DEBUG NOW sdsd")
+        #     self._logger.info("DEBUG NOW sdsd")
         #     embed()
         #     raise RuntimeError("stop debug here")
         #     raise j.exceptions.RuntimeError(message="only support ubuntu")
@@ -133,7 +133,7 @@ class PrefabTmux(base):
                 # this removes the initial cmd
 
                 if '**START**' not in out:
-                    self.logger.info("reread from tmux, cmd did not start yet")
+                    self._logger.info("reread from tmux, cmd did not start yet")
                     time.sleep(0.1)
                     continue
 

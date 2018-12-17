@@ -42,13 +42,13 @@ class PrefabSandbox(base):
         j.tools.sandboxer.sandboxLibs("%s/lib" % base, recursive=True)
         j.tools.sandboxer.sandboxLibs("%s/bin" % base, recursive=True)
         """
-        self.logger.info("start sandboxing")
+        self._logger.info("start sandboxing")
         self.prefab.core.execute_jumpscript(sandbox_script)
 
         name = "js8"
 
         if reset:
-            self.logger.info("remove previous build info")
+            self._logger.info("remove previous build info")
             self.core.dir_remove("%s/%s" % (destination, name))
 
         self.core.dir_remove("%s/%s/" % (destination, name))
@@ -58,7 +58,7 @@ class PrefabSandbox(base):
         """
         dedupe_script = dedupe_script.replace("$name", name)
         dedupe_script = dedupe_script.replace("$out", destination)
-        self.logger.info("start dedupe")
+        self._logger.info("start dedupe")
         self.prefab.core.execute_jumpscript(dedupe_script)
 
         copy_script = """
@@ -68,7 +68,7 @@ class PrefabSandbox(base):
         """
         copy_script = copy_script.replace("$name", name)
         copy_script = copy_script.replace("$out", destination)
-        self.logger.info("start copy sandbox")
+        self._logger.info("start copy sandbox")
         self.prefab.core.execute_jumpscript(copy_script)
 
     def cleanup(self, aggressive=False):

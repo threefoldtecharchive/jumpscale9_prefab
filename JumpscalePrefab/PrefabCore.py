@@ -161,7 +161,7 @@ class PrefabCore(base):
         self.run(cmd, showout=False)
         return
         # else:
-        #     self.logger.info('Copy directory tree from %s to %s' %
+        #     self._logger.info('Copy directory tree from %s to %s' %
         #                      (source, dest))
         #     if ((source is None) or (dest is None)):
         #         raise TypeError(
@@ -308,7 +308,7 @@ class PrefabCore(base):
                     url, to, user, minsp, retry, timeout)
                 if self.file_exists(to):
                     cmd += " -C -"
-                self.logger.info(cmd)
+                self._logger.info(cmd)
                 self.file_unlink("%s.downloadok" % to)
                 rc, out, err = self.run(cmd, die=False, timeout=timeout)
                 if rc == 33:  # resume is not support try again withouth resume
@@ -334,7 +334,7 @@ class PrefabCore(base):
         return to
 
     def file_expand(self, path, destination="", removeTopDir=False):
-        self.logger.info("file_expand:%s" % path)
+        self._logger.info("file_expand:%s" % path)
         path = self.executor.replace(path)
         base = j.sal.fs.getBaseName(path)
         if base.endswith(".tgz"):
@@ -541,15 +541,15 @@ class PrefabCore(base):
                         return fqn
             raise j.exceptions.RuntimeError(
                 "fqn was never set, please use prefab.setIDs()")
-        return self.cache.get("fqn", get)
+        return self._cache.get("fqn", get)
 
     @fqn.setter
     def fqn(self, val):
-        self.cache.set("fqn", val)
+        self._cache.set("fqn", val)
         self.name  # will do the splitting
         self.ns.hostfile_set_multiple([["127.0.1.1", self.fqn], ["127.0.1.1", self.name], [
                                       "127.0.1.1", self.name + "." + self.grid]], remove=["127.0.1.1"])
-        self.cache.reset()
+        self._cache.reset()
 
     def setIDs(self, name, grid, domain="aydo.com"):
         self.fqn = "%s.%s.%s" % (name, grid, domain)
@@ -563,7 +563,7 @@ class PrefabCore(base):
             else:
                 hostfile = "/etc/hosts"
             return self.file_read(hostfile)
-        return self.cache.get("hostfile", get)
+        return self._cache.get("hostfile", get)
 
     @hostfile.setter
     def hostfile(self, val):
@@ -573,7 +573,7 @@ class PrefabCore(base):
         else:
             hostfile = "/etc/hosts"
             self.file_write(hostfile, val)
-        self.cache.reset()
+        self._cache.reset()
 
     def upload(self, source, dest=""):
         """
@@ -593,12 +593,12 @@ class PrefabCore(base):
             dest = source
         source = j.dirs.replace_txt_dir_vars(source)
         dest = self.executor.replace(dest)
-        self.logger.info("upload local:%s to remote:%s" % (source, dest))
+        self._logger.info("upload local:%s to remote:%s" % (source, dest))
         # if self.prefab.id == 'localhost':
         #     j.do.copyTree(source, dest, keepsymlinks=True)
         #     return
         self.executor.upload(source, dest)
-        self.cache.reset()
+        self._cache.reset()
 
     def download(self, source, dest=""):
         """
@@ -616,7 +616,7 @@ class PrefabCore(base):
             dest = source
         dest = j.dirs.replace_txt_dir_vars(dest)
         source = self.executor.replace(source)
-        self.logger.info("download remote:%s to local:%s" % (source, dest))
+        self._logger.info("download remote:%s to local:%s" % (source, dest))
         # if self.prefab.id == 'localhost':
         #     j.do.copyTree(source, dest, keepsymlinks=True)
         #     return
@@ -889,8 +889,8 @@ class PrefabCore(base):
 
         location = self.executor.replace(location)
         if showout:
-            # self.logger.info("set dir attributes:%s"%location)
-            self.logger.debug('set dir attributes:%s"%location')
+            # self._logger.info("set dir attributes:%s"%location)
+            self._logger.debug('set dir attributes:%s"%location')
         recursive = recursive and "-R " or ""
         if mode:
             self.run('chmod %s %s %s' %
@@ -904,14 +904,14 @@ class PrefabCore(base):
 
     def dir_exists(self, location):
         """Tells if there is a remote directory at the given location."""
-        # self.logger.info("dir exists:%s"%location)
+        # self._logger.info("dir exists:%s"%location)
         return self.executor.exists(location)
 
     def dir_remove(self, location, recursive=True):
         """ Removes a directory """
         location = self.executor.replace(location)
-        # self.logger.info("dir remove:%s" % location)
-        self.logger.debug("dir remove:%s" % location)
+        # self._logger.info("dir remove:%s" % location)
+        self._logger.debug("dir remove:%s" % location)
         flag = ''
         if recursive:
             flag = 'r'
@@ -991,8 +991,8 @@ class PrefabCore(base):
 
         out = self.run(cmd, showout=False)[1]
 
-        # self.logger.info(cmd)
-        self.logger.debug(cmd)
+        # self._logger.info(cmd)
+        self._logger.debug(cmd)
 
         paths = []
         for item in out.split("\n"):
@@ -1036,7 +1036,7 @@ class PrefabCore(base):
         """
         @param profile, execute the bash profile first
         """
-        # self.logger.info(cmd)
+        # self._logger.info(cmd)
         if cmd.strip() == "":
             raise RuntimeError("cmd cannot be empty")
         if not env:
@@ -1044,7 +1044,7 @@ class PrefabCore(base):
         if replace:
             cmd = self.executor.replace(cmd)
         self.executor.curpath = self._cd
-        # self.logger.info("CMD:'%s'"%cmd)
+        # self._logger.info("CMD:'%s'"%cmd)
         if debug:
             debugremember = copy.copy(debug)
             self.executor.debug = debug
@@ -1058,14 +1058,14 @@ class PrefabCore(base):
                 ppath, ppath, ppath, cmd)
 
             if showout:
-                self.logger.info("RUN:%s" % cmd0)
+                self._logger.info("RUN:%s" % cmd0)
             else:
-                self.logger.debug("RUN:%s" % cmd0)
+                self._logger.debug("RUN:%s" % cmd0)
             shell = True
 
         sudo = self.sudomode or sudo
 
-        self.logger.debug(cmd)
+        self._logger.debug(cmd)
         if not raw:
             rc, out, err = self.executor.execute(
                 cmd, checkok=checkok, die=die, showout=showout, env=env, timeout=timeout, sudo=sudo)
@@ -1101,7 +1101,7 @@ class PrefabCore(base):
             content = self.executor.replace(content)
         content = j.core.text.strip(content)
 
-        self.logger.info("RUN SCRIPT:\n%s" % content)
+        self._logger.info("RUN SCRIPT:\n%s" % content)
 
         if content[-1] != "\n":
             content += "\n"
@@ -1148,7 +1148,7 @@ class PrefabCore(base):
         if tmux:
             rc, out = self.prefab.system.tmux.executeInScreen("cmd", "cmd", cmd, wait=True, die=False)
             if showout:
-                self.logger.info(out)
+                self._logger.info(out)
         else:
             cmd = cmd + " 2>&1 || echo **ERROR**"
             rc, out, err = self.executor.executeRaw(cmd, showout=showout, die=False)
@@ -1160,7 +1160,7 @@ class PrefabCore(base):
             elif lastline.find("**OK**") != -1:
                 rc = 0
             else:
-                self.logger.info(out)
+                self._logger.info(out)
                 rc = 998
             out = out.replace("**OK**", "")
             out = out.replace("**ERROR**", "")
@@ -1251,7 +1251,7 @@ class PrefabCore(base):
     #         if self.isMac:
     #             return "none"
     #         return self.file_read("/proc/1/cgroup", "none")
-    #     return self.cache.get("cgroup", get)
+    #     return self._cache.get("cgroup", get)
 
     # @property
     # def uname(self):

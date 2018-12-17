@@ -24,10 +24,10 @@ class PrefabSmartmontools(base):
         Ensures smartctl is installed
         """
         if self.isInstalled():
-            self.logger.info("smartctl version %s is present" % self._VERSION)
+            self._logger.info("smartctl version %s is present" % self._VERSION)
             return
             
-        self.logger.info("installing smartctl...")
+        self._logger.info("installing smartctl...")
 
         tmp_location = self.prefab.core.file_download(self._DOWNLOAD_URL, expand=True)
 
@@ -48,15 +48,15 @@ class PrefabSmartmontools(base):
         cmd = "smartctl --version"
         rc, out, err = self.prefab.core.run(cmd, die=False)
         if rc != 0:
-            self.logger.warning("'smartctl --version' failed, assuming it's not installed: %s", err)
+            self._logger.warning("'smartctl --version' failed, assuming it's not installed: %s", err)
             return False
 
         # version number should be the second word of the first line
         version = out.split()[1]
-        self.logger.debug("smartctl version '%s' found" % version)
+        self._logger.debug("smartctl version '%s' found" % version)
 
         if version != self._VERSION:
-            self.logger.warning("smartctl found but was version: %s\nNeed version %s to be installed" % (version, self._VERSION))
+            self._logger.warning("smartctl found but was version: %s\nNeed version %s to be installed" % (version, self._VERSION))
             return False
         
         return True

@@ -216,7 +216,7 @@ class PrefabNGINX(app):
             nginxcmd = "%s/nginx -c %s -g 'daemon off;'" % (nginxbinpath, nginxconfpath)
             nginxcmd = self.executor.replace(nginxcmd)
 
-            self.logger.info("cmd: %s" % nginxcmd)
+            self._logger.info("cmd: %s" % nginxcmd)
             pm = self.prefab.system.processmanager.get()
             pm.ensure(name=name, cmd=nginxcmd, path=nginxbinpath)
 

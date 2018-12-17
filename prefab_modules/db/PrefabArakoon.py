@@ -26,16 +26,16 @@ class PrefabArakoon(base):
         self.prefab.core.dir_ensure('{DIR_VAR}/data/arakoon')
 
     def _install_ocaml(self):
-        self.logger.info("download opam installer")
+        self._logger.info("download opam installer")
         ocaml_url = 'https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh'
         self.prefab.core.file_download(ocaml_url, to='{DIR_TEMP}/opam_installer.sh')
-        self.logger.info("install opam")
+        self._logger.info("install opam")
         self.prefab.core.run('chmod +x {DIR_TEMP}/opam_installer.sh')
         ocaml_version = '4.02.3'
         cmd = 'yes | {DIR_TEMP}/opam_installer.sh {DIR_BIN} %s' % ocaml_version
         self.prefab.core.run(cmd, profile=True)
 
-        self.logger.info("initialize opam")
+        self._logger.info("initialize opam")
         opam_root = self.executor.replace('{DIR_TEMP}/OPAM')
         self.prefab.core.dir_ensure(opam_root)
         cmd = 'opam init --root=%s --comp %s -a --dot-profile %s' % (
@@ -71,7 +71,7 @@ class PrefabArakoon(base):
             'ocplib-endian'
         )
 
-        self.logger.info("start installation of ocaml pacakges")
+        self._logger.info("start installation of ocaml pacakges")
         cmd = 'opam update && opam install -y {}'.format(' '.join(opam_deps))
         self.prefab.core.run(cmd, profile=True)
         # For some reason redis failed when added to the others but success on its own
@@ -188,4 +188,4 @@ if __name__ == '__main__':
     node1 = cluster.add_node('127.0.0.1')
     node2 = cluster.add_node('172.20.0.55')
     cfg = cluster.get_config()
-    self.logger.info(cfg)
+    self._logger.info(cfg)

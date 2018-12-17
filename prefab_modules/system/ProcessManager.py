@@ -46,7 +46,7 @@ class PrefabSystemd(ProcessManagerBase):
         for line in out.split("\n"):
             res = re.search(p, line)
             if res is not None:
-                # self.logger.info(line)
+                # self._logger.info(line)
                 d = res.groupdict()
                 if d["name"].startswith(prefix):
                     result.append(d["name"])
@@ -76,11 +76,11 @@ class PrefabSystemd(ProcessManagerBase):
             self.stop(name)
 
             for item in self.prefab.core.find("/etc/systemd", True, "*%s.service" % name):
-                self.logger.info("remove:%s" % item)
+                self._logger.info("remove:%s" % item)
                 self.prefab.core.file_unlink(item)
 
             for item in self.prefab.core.find("/etc/init.d", True, "*%s" % name):
-                self.logger.info("remove:%s" % item)
+                self._logger.info("remove:%s" % item)
                 self.prefab.core.file_unlink(item)
 
             self.prefab.core.run("systemctl daemon-reload")
@@ -219,7 +219,7 @@ class PrefabRunit(ProcessManagerBase):
         while not self.prefab.core.dir_exists("/etc/service/%s/supervise" % name):
             remain = remain - 1
             if remain == 0:
-                self.logger.warn(
+                self._logger.warn(
                     '/etc/service/%s/supervise: still not exists, check if runsvdir is running, start may fail.' % name)
                 break
 
@@ -329,7 +329,7 @@ class PrefabTmuxec(ProcessManagerBase):
             self.prefab.core.run("kill -9 %s" % pid)
             self.prefab.system.tmux.killWindow("main", name)
         self.prefab.system.process.kill(name, signal=9, exact=False)
-        self.logger.info("...ok")
+        self._logger.info("...ok")
 
     def remove(self, name):
         """removes service """

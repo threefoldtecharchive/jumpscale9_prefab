@@ -32,7 +32,7 @@ class PrefabLoader(JSBASE):
         if moduleList is None:
             moduleList = self.moduleList
 
-        self.logger.debug("find prefab modules in %s" % path)
+        self._logger.debug("find prefab modules in %s" % path)
 
         for cat in j.sal.fs.listDirsInDir(path, recursive=False, dirNameOnly=True, findDirectorySymlinks=True, followSymlinks=True):
             catpath = j.sal.fs.joinPaths(path, cat)

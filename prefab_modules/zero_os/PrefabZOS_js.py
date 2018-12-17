@@ -83,7 +83,7 @@ class PrefabZOS_js(base):
                 self.prefab.bash.include('/opt/jumpscale/env.sh')
                 break
 
-        self.logger.info(
+        self._logger.info(
             "* re-login into your shell to have access to js, because otherwise the env arguments are not set properly.")
 
     def base(self):

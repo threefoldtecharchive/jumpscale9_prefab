@@ -136,7 +136,7 @@ class PrefabAlba(base):
         # cleaning
         #
         if self.prefab.core.file_exists('{DIR_TEMP}/OPAM/%s/lib/rocks/META' % self.ocaml_version):
-            self.logger.info('rocksdb already found')
+            self._logger.info('rocksdb already found')
             return
 
         if self.prefab.core.file_exists('/usr/local/lib/librocksdb.so'):
@@ -186,7 +186,7 @@ class PrefabAlba(base):
         # cleaning
         #
         if self.prefab.core.file_exists('{DIR_TEMP}/OPAM/%s/lib/ordma/META' % self.ocaml_version):
-            self.logger.info('ordma already found')
+            self._logger.info('ordma already found')
             return
 
         #

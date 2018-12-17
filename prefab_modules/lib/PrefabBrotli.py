@@ -31,7 +31,7 @@ class PrefabBrotli(app):
 
     def install(self, reset=False):
         if reset is False and self.isInstalled():
-            self.logger.info("Brotli already installed")
+            self._logger.info("Brotli already installed")
             return
         if not self.doneGet('build'):
             self.build()

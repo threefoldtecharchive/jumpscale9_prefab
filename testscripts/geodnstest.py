@@ -25,8 +25,8 @@ def test(geodns_install=False, dnsresolver_install=True, port=3333, tmux=True):
     # and is exposed for debugging purposes)
     domain_manager = j.clients.domainmanager.get(prefab)
     domain = domain_manager.ensure_domain("gig.com", serial=3, ttl=600)
-    self.logger.info(domain._a_records)
-    self.logger.info(domain._cname_records)
+    self._logger.info(domain._a_records)
+    self._logger.info(domain._cname_records)
 
     # add an A record
     domain.add_a_record("123.45.123.1", "www")
@@ -38,9 +38,9 @@ def test(geodns_install=False, dnsresolver_install=True, port=3333, tmux=True):
     answer1 = my_resolver.query('www.gig.com')
     time.sleep(5)
     if 1 == answer1.rrset[0].rdtype and "123.45.123.1" == answer1.rrset[0].to_text():
-        self.logger.info("add A record Test SUCCESS")
+        self._logger.info("add A record Test SUCCESS")
     else:
-        self.logger.info("failure")
+        self._logger.info("failure")
 
     # add cname record
     domain.add_cname_record("www", "grid")
@@ -49,21 +49,21 @@ def test(geodns_install=False, dnsresolver_install=True, port=3333, tmux=True):
     answer2 = my_resolver.query("grid.gig.com", rdtype="cname")
     time.sleep(5)
     if 5 == answer2.rrset[0].rdtype and "www.gig.com." == answer2.rrset[0].to_text():
-        self.logger.info("add CNAME record Test SUCCESS")
+        self._logger.info("add CNAME record Test SUCCESS")
     else:
-        self.logger.info("failure")
-    self.logger.info(str(type(answer1)) + str(type(answer2)))
+        self._logger.info("failure")
+    self._logger.info(str(type(answer1)) + str(type(answer2)))
 
     # get A record
     a_records = domain.get_a_record()
 
     if a_records == {"www": [["123.45.123.1", 100]]}:
-        self.logger.info("get A record Test SUCCESS")
+        self._logger.info("get A record Test SUCCESS")
 
     # get cname record
     cname_records = domain.get_cname_record()
     if cname_records == {"grid": "www"}:
-        self.logger.info("get cname cname_records")
+        self._logger.info("get cname cname_records")
 
     # delete A record
     domain.del_a_record("www", full=True)
@@ -72,7 +72,7 @@ def test(geodns_install=False, dnsresolver_install=True, port=3333, tmux=True):
     try:
         answer1 = my_resolver.query('www.gig.com')
     except Exception as e:
-        self.logger.info(str(e))
+        self._logger.info(str(e))
 
     # delete cname record
     domain.del_cname_record("grid")
@@ -81,7 +81,7 @@ def test(geodns_install=False, dnsresolver_install=True, port=3333, tmux=True):
     try:
         answer1 = my_resolver.query('grid.gig.com')
     except Exception as e:
-        self.logger.info(str(e))
+        self._logger.info(str(e))
 
 
 if __name__ == "__main__":

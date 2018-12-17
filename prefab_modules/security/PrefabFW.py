@@ -76,14 +76,14 @@ class PrefabFW(base):
         f.write(C)
 
         #now applying
-        self.logger.info("applied ruleset")
+        self._logger.info("applied ruleset")
         rc=os.system("nft -f /etc/nftables.conf")
         time.sleep(1)
 
         rc2=os.system("ping -c 1 $pinghost")
 
         if rc2!=0:
-            self.logger.info("could not apply, restore")
+            self._logger.info("could not apply, restore")
             #could not ping need to restore
             os.system("cp /tmp/firelwallruleset_old /etc/nftables.conf")
             rc=os.system("nft -f /etc/nftables.conf")

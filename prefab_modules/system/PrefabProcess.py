@@ -45,7 +45,7 @@ class PrefabProcess(base):
             for line in out.split("\n"):
                 res = re.search(p, line)
                 if res is not None:
-                    # self.logger.info(line)
+                    # self._logger.info(line)
                     d = res.groupdict()
                     d["process"] = d["process"].lower()
                     if d["state"] == "LISTEN":
@@ -57,7 +57,7 @@ class PrefabProcess(base):
             for line in out.split("\n"):
                 res = re.search(p, line)
                 if res is not None:
-                    # self.logger.info(line)
+                    # self._logger.info(line)
                     d = res.groupdict()
                     d["process"] = d["process"].lower()
                     if d["state"] == "LISTEN":

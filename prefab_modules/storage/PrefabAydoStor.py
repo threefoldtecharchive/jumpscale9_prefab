@@ -17,7 +17,7 @@ class PrefabAydoStor(app):
         @input backend, directory where to save the data push to the store
         """
         if self.isInstalled() and not reset:
-            self.logger.info('Aydostor is already installed, pass reinstall=True parameter to reinstall')
+            self._logger.info('Aydostor is already installed, pass reinstall=True parameter to reinstall')
             return
 
         self.prefab.system.package.mdupdate()

@@ -42,13 +42,13 @@ class PrefabLibffi(base):
             make install
             """
             self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, self.executor.replace(C))
-            self.logger.info("compile libffi")
-            self.logger.debug(C)                
+            self._logger.info("compile libffi")
+            self._logger.debug(C)
             self.prefab.core.run("sh %s/mycompile_all.sh" % self.CODEDIRL)            
             self.doneSet("compile")
-            self.logger.info("BUILD DONE")
+            self._logger.info("BUILD DONE")
         else:
-            self.logger.info("NO NEED TO BUILD")
+            self._logger.info("NO NEED TO BUILD")
 
-        self.logger.info("BUILD COMPLETED OK")
+        self._logger.info("BUILD COMPLETED OK")
         self.doneSet("build")

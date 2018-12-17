@@ -19,7 +19,7 @@ class PrefabRedis(app):
 
         """Building and installing redis"""
         if reset is False and self.isInstalled():
-            self.logger.info(
+            self._logger.info(
                 'Redis is already installed, pass reset=True to reinstall.')
             return
 
@@ -89,7 +89,7 @@ class PrefabRedis(app):
                                 unixsocket=unixsocket)
         # return if redis is already running
         if self.is_running(ip_address=ip, port=port, path='{DIR_BIN}', password=password, unixsocket=unixsocket):
-            self.logger.info('Redis is already running!')
+            self._logger.info('Redis is already running!')
             return
 
         _, c_path = self._get_paths(name)

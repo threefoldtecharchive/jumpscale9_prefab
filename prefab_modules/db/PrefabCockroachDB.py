@@ -20,7 +20,7 @@ class PrefabCockroachDB(app):
         url = 'https://binaries.cockroachdb.com/cockroach-latest.linux-amd64.tgz'
         dest = "{DIR_TEMP}/cockroach-latest.linux-amd64"
 
-        self.logger.info('Downloading CockroachDB.')
+        self._logger.info('Downloading CockroachDB.')
         self.prefab.core.file_download(
             url, to="{DIR_TEMP}", overwrite=False, expand=True)
         tarpaths = self.prefab.core.find(

@@ -173,10 +173,10 @@ class PrefabProxyClassic(base):
 
         self.start()
 
-        self.logger.info("http://config.privoxy.org/")
-        self.logger.info("http://config.privoxy.org/show-status")
-        self.logger.info("http://config.privoxy.org/show-request")
-        self.logger.info("http://config.privoxy.org/show-url-info")
+        self._logger.info("http://config.privoxy.org/")
+        self._logger.info("http://config.privoxy.org/show-status")
+        self._logger.info("http://config.privoxy.org/show-request")
+        self._logger.info("http://config.privoxy.org/show-url-info")
 
     def start(self):
 
@@ -339,10 +339,10 @@ class PrefabProxyClassic(base):
 
         _, cmd, _ = self.prefab.core.run("which polipo")
 
-        self.logger.info("INSTALL OK")
-        self.logger.info("to see status: point webbrowser to")
-        self.logger.info("http://%s:%s/polipo/status?" % (self.prefab.core.executor.addr, port))
-        self.logger.info(
+        self._logger.info("INSTALL OK")
+        self._logger.info("to see status: point webbrowser to")
+        self._logger.info("http://%s:%s/polipo/status?" % (self.prefab.core.executor.addr, port))
+        self._logger.info(
             "configure your webproxy client to use %s on tcp port %s" %
             (self.prefab.core.executor.addr, port))
 

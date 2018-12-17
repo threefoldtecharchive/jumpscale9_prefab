@@ -42,7 +42,7 @@ class PrefabJumpscaleCore(app):
 
         assert self.core.run("js_shell 'j.tools.console.echo(\"1\")'")[1]=='1'
 
-        self.logger.info("jumpscale_install")
+        self._logger.info("jumpscale_install")
 
         self.doneSet("install")
 

@@ -82,7 +82,7 @@ class PrefabAtYourService(base):
     def get_code(self, branch):
         if not branch:
             branch = self.prefab.bash.env.get('JUMPSCALEBRANCH', 'master')
-        self.logger.info("Get ays code on branch:'%s'" % branch)
+        self._logger.info("Get ays code on branch:'%s'" % branch)
         self.prefab.tools.git.pullRepo("https://github.com/Jumpscale/ays9.git", branch=branch)
 
     def load_ays_space(self, install_portal=False, branch="master"):
@@ -142,13 +142,13 @@ class PrefabAtYourService(base):
         """
         # check if the install was called before
         if not self.prefab.core.exists(j.sal.fs.joinPaths(self.base_dir, 'main.py')):
-            self.logger.warning('AYS is not installed. Installing it...')
+            self._logger.warning('AYS is not installed. Installing it...')
             self.install()
 
         try:
             j.core.state.configGet('ays')
         except j.exceptions.Input:
-            self.logger.warning('AYS has not been configured. Will start with default host:127.0.0.1 and port:5000')
+            self._logger.warning('AYS has not been configured. Will start with default host:127.0.0.1 and port:5000')
 
         cfg = self.executor.state.configGet('ays', {'host': '127.0.0.1', 'port': 5000}, set=True)
         cmd = 'cd {base_dir}; python3 main.py -h {host} -p {port} --log {log}'.format(base_dir=self.base_dir,

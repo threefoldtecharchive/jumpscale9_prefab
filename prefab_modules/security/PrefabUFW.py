@@ -19,7 +19,7 @@ class PrefabUFW(base):
             if not self.prefab.core.isMac:
                 if self.prefab.bash.cmdGetPath("nft", die=False) is not False:
                     self._ufw_enabled = False
-                    self.logger.info("cannot use ufw, nft installed")
+                    self._logger.info("cannot use ufw, nft installed")
                 if self.prefab.bash.cmdGetPath("ufw", die=False) is False:
                     self.prefab.system.package.install("ufw")
                     self.prefab.bash.cmdGetPath("ufw")
@@ -98,9 +98,9 @@ class PrefabUFW(base):
             return                 
         a = self.ufw_rules_allow
         b = self.ufw_rules_deny
-        self.logger.info("ALLOW")
-        self.logger.info(a)
-        self.logger.info("DENY")
-        self.logger.info(b)
+        self._logger.info("ALLOW")
+        self._logger.info(a)
+        self._logger.info("DENY")
+        self._logger.info(b)
 
-        # self.logger.info(self.prefab.core.run("iptables -t nat -nvL"))
+        # self._logger.info(self.prefab.core.run("iptables -t nat -nvL"))

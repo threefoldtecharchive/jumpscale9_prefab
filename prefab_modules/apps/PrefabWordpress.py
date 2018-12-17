@@ -180,9 +180,9 @@ class PrefabWordpress(app):
         
         rc, _, _ = self.prefab.core.run('tar -czvf {} {}'.format(backup_tar_name, backup_path))
         if rc == 0:
-            self.logger.info('Backup done successfuly')
+            self._logger.info('Backup done successfuly')
         else:
-            self.logger.info('an error happened while compressing your backup')
+            self._logger.info('an error happened while compressing your backup')
         
         # clean up
         self.prefab.core.dir_remove(backup_path)

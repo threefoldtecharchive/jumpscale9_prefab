@@ -98,7 +98,7 @@ class PrefabARDB(app):
         url = "https://github.com/yinqiwen/ardb.git"
         cpath = self.prefab.tools.git.pullRepo(
             url, tag="v0.9.3", reset=reset, ssh=False)
-        self.logger.info(cpath)
+        self._logger.info(cpath)
 
         assert cpath.rstrip("/") == self.CODEDIRARDB.rstrip("/")
 

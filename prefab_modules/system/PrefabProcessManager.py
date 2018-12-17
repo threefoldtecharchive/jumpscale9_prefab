@@ -18,12 +18,12 @@ class PrefabProcessManager(base):
 
     def systemdOK(self):
         res =  self.prefab.core.command_check("systemctl")
-        self.logger.info("systemd:%s" % res)
+        self._logger.info("systemd:%s" % res)
         return res
 
     def svOK(self):
         res = self.prefab.core.command_check("sv")
-        self.logger.info("systemd:%s" % res)
+        self._logger.info("systemd:%s" % res)
         return res
 
     def get_prefered(self):

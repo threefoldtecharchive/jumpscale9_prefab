@@ -21,7 +21,7 @@ class PrefabUser(base):
 
     def passwd(self, name, passwd, encrypted_passwd=False):
         """Sets the given user password."""
-        self.logger.info("set user:%s passwd for %s" % (name, self))
+        self._logger.info("set user:%s passwd for %s" % (name, self))
         name = name.strip()
         passwd = passwd.strip()
 

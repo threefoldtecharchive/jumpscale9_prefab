@@ -40,7 +40,7 @@ class PrefabMercurial(base):
 
         pdir = j.sal.fs.getParent(dest)
 
-        self.logger.info("mercurial pull %s" % (url))
+        self._logger.info("mercurial pull %s" % (url))
 
         if self.prefab.core.dir_exists(dest):
             cmd = "set -ex; cd %s;hg pull %s" % (dest, url)

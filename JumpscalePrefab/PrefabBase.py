@@ -54,7 +54,7 @@ class PrefabBase(JSBASE):
 
     def doneSet(self, key):
         if self.executor.readonly:
-            self.logger.debug("info: Canot do doneset:%s because readonly" % key)
+            self._logger.debug("info: Canot do doneset:%s because readonly" % key)
             return False
         # bring to list of keys
         if key.find(",") != -1:
@@ -72,7 +72,7 @@ class PrefabBase(JSBASE):
 
     def doneDelete(self, key):
         if self.executor.readonly:
-            self.logger.debug("info: Canot do doneDelete:%s because readonly" % key)
+            self._logger.debug("info: Canot do doneDelete:%s because readonly" % key)
             return False
         if key.find(",") != -1:
             key = [item.strip() for item in key.split(",")]
@@ -188,5 +188,5 @@ class PrefabBaseLoader(JSBASE):
             # attach the class to this class
             do = "self.%s=Prefab%s(self.executor,self.prefab)" % (
                 className.lower(), className)
-            # self.logger.info(do)
+            # self._logger.info(do)
             exec(do)

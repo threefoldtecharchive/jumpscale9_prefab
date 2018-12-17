@@ -17,7 +17,7 @@ class PrefabCapacity(base):
         :return: url of the flist
         :rtype: str
         """
-        self.logger.info("create capacity_registation flist")
+        self._logger.info("create capacity_registation flist")
         path = j.sal.fs.joinPaths(j.sal.fs.getParent(__file__), 'capacity', 'flist')
         tarfile = '/tmp/capacity_registation.tar.gz'
         self.prefab.core.run('tar czf {} -C {} .'.format(tarfile, path))
@@ -33,7 +33,7 @@ class PrefabCapacity(base):
         return flist
 
     def zbundle_build(self):
-        self.logger.info("create zbundle_capacity flist")
+        self._logger.info("create zbundle_capacity flist")
         capacity_flist = self._capacity_start()
         to_merge = [
             'gig-bootable/ubuntu:16.04.flist',
@@ -42,7 +42,7 @@ class PrefabCapacity(base):
             capacity_flist,
         ]
 
-        self.logger.info("merging \n%s together..." % ',\n'.join(to_merge))
+        self._logger.info("merging \n%s together..." % ',\n'.join(to_merge))
 
         hub = _get_hub_client()
         hub.authenticate()

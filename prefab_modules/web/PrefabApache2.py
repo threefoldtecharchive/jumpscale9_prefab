@@ -104,7 +104,7 @@ class PrefabApache2(app):
         self.prefab.core.dir_ensure("%s/apache2/sites-enabled/" % j.dirs.CFGDIR)
         self.prefab.core.dir_ensure("{DIR_BASE}/apps/apache2/sites-available")
         self.prefab.core.dir_ensure("{DIR_BASE}/apps/apache2/sites-enabled")
-        #self.logger.info("Config to be written = ", conffile)
+        #self._logger.info("Config to be written = ", conffile)
         self.prefab.core.file_write("{DIR_BASE}/apps/apache2/conf/httpd.conf", conffile)
 
     def start(self):

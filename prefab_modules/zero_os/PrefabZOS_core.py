@@ -111,7 +111,7 @@ class PrefabZOS_core(app):
 
         self.prefab.apps.mongodb.start()
         self.prefab.apps.redis.start()
-        self.logger.info("connection test ok to agentcontroller")
+        self._logger.info("connection test ok to agentcontroller")
         #@todo (*1*) need to implement to work on node
         env = {}
         env["TMPDIR"] = self.prefab.core.dir_paths["TMPDIR"]

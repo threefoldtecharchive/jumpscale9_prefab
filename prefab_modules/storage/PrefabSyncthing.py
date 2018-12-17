@@ -97,7 +97,7 @@ class PrefabSyncthing(app):
         for item in r:
             if item.tag == "gui":
                 for item2 in item:
-                    self.logger.info(item2.tag)
+                    self._logger.info(item2.tag)
                     if item2.tag == "apikey":
                         return item2.text
 
@@ -107,7 +107,7 @@ class PrefabSyncthing(app):
 
     def getApiClient(self):
         from IPython import embed
-        self.logger.info("DEBUG NOW u8")
+        self._logger.info("DEBUG NOW u8")
         embed()
         raise RuntimeError("stop debug here")
         import syncthing

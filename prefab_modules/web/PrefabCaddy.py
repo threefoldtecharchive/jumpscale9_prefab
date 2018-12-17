@@ -130,7 +130,7 @@ class PrefabCaddy(app):
 
         # TODO: *1 reload does not work yet
         # if self.reload(configpath=configpath) == True:
-        #     self.logger.info("caddy already started, will reload")
+        #     self._logger.info("caddy already started, will reload")
         #     return
 
         self.stop()  # will also kill

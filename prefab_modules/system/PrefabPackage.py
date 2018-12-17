@@ -62,7 +62,7 @@ class PrefabPackage(base):
         """
         if self.doneCheck("mdupdate", reset):
             return
-        self.logger.info("packages mdupdate")
+        self._logger.info("packages mdupdate")
         if self.prefab.core.isUbuntu:
             self.prefab.core.run("apt-get update")
         elif self.prefab.core.isAlpine:
@@ -82,7 +82,7 @@ class PrefabPackage(base):
         if self.doneCheck("upgrade", reset):
             return
         self.mdupdate()
-        self.logger.info("packages upgrade")
+        self._logger.info("packages upgrade")
         if self.prefab.core.isUbuntu:
             if distupgrade:
                 raise NotImplementedError()
@@ -125,12 +125,12 @@ class PrefabPackage(base):
 
             key = "install_%s" % package
             if self.doneCheck(key, reset):
-                self.logger.info("package:%s already installed"%package)
+                self._logger.info("package:%s already installed"%package)
                 continue
             todo.append(package)
             print("+ install: %s" % package)
 
-            self.logger.info("prepare to install:%s" % package)
+            self._logger.info("prepare to install:%s" % package)
 
             if self.prefab.core.isUbuntu:
                 cmd += "%s install %s\n" % (CMD_APT_GET, package)

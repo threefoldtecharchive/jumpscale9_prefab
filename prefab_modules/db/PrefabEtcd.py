@@ -76,7 +76,7 @@ class PrefabEtcd(app):
         if not self.isInstalled():
             self.install()
 
-        self.logger.info("building flist")
+        self._logger.info("building flist")
         build_dir = j.sal.fs.getTmpDirPath()
         tarfile = '/tmp/etcd-3.3.4.tar.gz'
         bin_dir = j.sal.fs.joinPaths(build_dir, 'bin')
@@ -91,9 +91,9 @@ class PrefabEtcd(app):
                 raise j.exceptions.Input("hub instance %s does not exists, can't upload to the hub" % hub_instance)
             hub = j.clients.zerohub.get(hub_instance)
             hub.authentificate()
-            self.logger.info("uploading flist to the hub")
+            self._logger.info("uploading flist to the hub")
             hub.upload(tarfile)
-            self.logger.info("uploaded at https://hub.gig.tech/%s/etcd-3.3.4.flist", hub.config.data['username'])
+            self._logger.info("uploaded at https://hub.gig.tech/%s/etcd-3.3.4.flist", hub.config.data['username'])
 
         return tarfile
 

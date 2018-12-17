@@ -68,7 +68,7 @@ class PrefabElectrum(app):
             electrum_dir = self.prefab.core.joinpaths(j.dirs.DATADIR, 'electrum')
         process_name = j.sal.process.getProcessByPort(rpcport)
         if process_name and 'electrum' in process_name:
-            self.logger.info("Electrum daemon is already running")
+            self._logger.info("Electrum daemon is already running")
             return
         elif process_name:
             raise RuntimeError("Port {} already in use by process {}".format(rpcport, process_name))

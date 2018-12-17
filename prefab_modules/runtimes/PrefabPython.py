@@ -6,7 +6,7 @@ base = j.tools.prefab._getBaseClass()
 class PrefabPython(base):
 
     def _init(self):
-        self.logger_enable()
+        self._logger_enable()
         self.BUILDDIRL = self.core.replace("{DIR_VAR}/build/python3/")
         self.CODEDIRL = self.core.replace("{DIR_VAR}/build/code/python3/")
         self.OPENSSLPATH = self.core.replace("{DIR_VAR}/build/openssl")
@@ -91,8 +91,8 @@ class PrefabPython(base):
 
             self.prefab.core.file_write("%s/mycompile_all.sh" % self.CODEDIRL, C)
 
-            self.logger.info("compile python3")
-            self.logger.debug(C)
+            self._logger.info("compile python3")
+            self._logger.debug(C)
             self.prefab.core.run("bash %s/mycompile_all.sh" % self.CODEDIRL, sudo=True)  # makes it easy to test & make changes where required
 
             #test openssl is working
@@ -187,7 +187,7 @@ class PrefabPython(base):
 
         msg = "\n\nto test do:\ncd {DIR_VAR}/build/L;source env.sh;python3"
         msg = self.executor.replace(msg)
-        self.logger.info(msg)
+        self._logger.info(msg)
 
 
     def _pipAll(self, reset=False):
@@ -246,7 +246,7 @@ class PrefabPython(base):
         path = self.build(reset=reset)
 
 
-        self.logger.info("sandbox:%s" % path)
+        self._logger.info("sandbox:%s" % path)
         j.tools.prefab.local.system.package.install("zip")
         if j.core.platformtype.myplatform.isMac:
             j.tools.prefab.local.system.package.install("redis")
@@ -310,7 +310,7 @@ class PrefabPython(base):
             files = j.sal.fs.listFilesInDir(path, recursive=True, filter="*.so", followSymlinks=True)
             files += j.sal.fs.listFilesInDir(path, recursive=True, filter="*.so.*", followSymlinks=True)
             if len(files) > 0:
-                self.logger.debug("found binary files in:%s" % path)
+                self._logger.debug("found binary files in:%s" % path)
                 return True
             return False
 
@@ -329,7 +329,7 @@ class PrefabPython(base):
                         dest0 = "%s/lib/pythonbin/%s" % (dest, ddir)
                     else:
                         dest0 = "%s/lib/python/%s" % (dest, ddir)
-                    self.logger.debug("copy lib:%s ->%s" % (src0, dest0))
+                    self._logger.debug("copy lib:%s ->%s" % (src0, dest0))
                     j.sal.fs.copyDirTree(src0, dest0, keepsymlinks=False, deletefirst=True, overwriteFiles=True, ignoredir=ignoredir, ignorefiles=ignorefiles, recursive=True, rsyncdelete=True, createdir=True)
 
 
@@ -340,7 +340,7 @@ class PrefabPython(base):
                     dest0 = "%s/lib/pythonbin/%s" % (dest, fname)
                 if fname.endswith(".py"):
                     dest0 = "%s/lib/python/%s" % (dest, fname)
-                self.logger.debug("copy %s %s" % (item, dest0))
+                self._logger.debug("copy %s %s" % (item, dest0))
                 if dest0 is not "":
                     j.sal.fs.copyFile(item, dest0)
 

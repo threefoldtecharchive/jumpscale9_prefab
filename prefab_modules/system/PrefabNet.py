@@ -163,7 +163,7 @@ class PrefabNet(base):
 
         res = []
         for nic in getNetworkInfo():
-            # self.logger.info(nic["name"])
+            # self._logger.info(nic["name"])
             if nic["name"] == device:
                 return nic
             res.append(nic)
@@ -293,10 +293,10 @@ class PrefabNet(base):
         f.write(C)
 
         # now applying
-        self.logger.info("restart network")
+        self._logger.info("restart network")
         rc=os.system("/etc/init.d/networking restart")
         rc=os.system("/etc/init.d/networking restart")
-        self.logger.info("restart network done")
+        self._logger.info("restart network done")
 
         rc=os.system("ping -c 1 $pinghost")
         rc2=0
@@ -305,10 +305,10 @@ class PrefabNet(base):
             # could not ping need to restore
             os.system("cp /etc/network/interfaces_old /etc/network/interfaces")
 
-            self.logger.info("restart network to recover")
+            self._logger.info("restart network to recover")
             rc2=os.system("/etc/init.d/networking restart")
             rc2=os.system("/etc/init.d/networking restart")
-            self.logger.info("restart done to recover")
+            self._logger.info("restart done to recover")
 
         if rc>0 or rc2>0:
             raise RuntimeError("Could not set interface file, something went wrong, previous situation restored.")
@@ -317,7 +317,6 @@ class PrefabNet(base):
         pscript = pscript.replace("$ifacefile", ifacefile)
         pscript = pscript.replace("$pinghost", pinghost)
 
-        self.logger.info(pscript)
+        self._logger.info(pscript)
 
         self.prefab.core.execute_bash(content=pscript, die=True, interpreter="python3", tmux=True)
-        

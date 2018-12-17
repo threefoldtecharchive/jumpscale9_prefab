@@ -76,7 +76,7 @@ class PrefabPortal(base):
         Portal install will only install the portal and libs. No spaces but the system ones will be add by default.
         To add spaces and actors, please use addSpace and addactor
         """
-        self.logger.info("Install prefab portal on branch:'%s'" % branch)
+        self._logger.info("Install prefab portal on branch:'%s'" % branch)
         self.prefab.core.dir_ensure(j.sal.fs.joinPaths(self.portal_dir, name))
         self.prefab.bash.locale_check()
         if not reset and self.doneGet("install-"+name):
@@ -159,7 +159,7 @@ class PrefabPortal(base):
         self.doneSet("installdeps"+name)
 
     def getcode(self, branch='master'):
-        self.logger.info("Get portal code on branch:'%s'" % branch)
+        self._logger.info("Get portal code on branch:'%s'" % branch)
         if branch == "":
             branch = os.environ.get('JUMPSCALEBRANCH')
         self.prefab.tools.git.pullRepo(

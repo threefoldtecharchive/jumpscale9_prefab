@@ -42,7 +42,7 @@ class PrefabSSHReflector(base):
         path = "/home/sshreflector/.ssh/reflector"
         ftp = self.prefab.core.executor.sshclient.sftp
         if j.sal.fs.exists(lpath) and j.sal.fs.exists(lpath + ".pub"):
-            self.logger.info("UPLOAD EXISTING SSH KEYS")
+            self._logger.info("UPLOAD EXISTING SSH KEYS")
             ftp.put(lpath, path)
             ftp.put(lpath + ".pub", path + ".pub")
         else:
@@ -110,7 +110,7 @@ class PrefabSSHReflector(base):
             lpath = os.environ["HOME"] + "/.ssh/reflector"
 
             if reset or not j.sal.fs.exists(lpath) or not j.sal.fs.exists(lpath_pub):
-                self.logger.info("DOWNLOAD SSH KEYS")
+                self._logger.info("DOWNLOAD SSH KEYS")
                 # get private key from reflector
                 ftp = remoteprefab.core.executor.sshclient.sftp
                 path = "/home/sshreflector/.ssh/reflector"
@@ -145,7 +145,7 @@ class PrefabSSHReflector(base):
             self.prefab.system.ns.hostfile_set(rname, addr)
 
             if remoteprefab.core.file_exists("/home/sshreflector/reflectorclients") is False:
-                self.logger.info("reflectorclientsfile does not exist")
+                self._logger.info("reflectorclientsfile does not exist")
                 remoteprefab.core.file_write("/home/sshreflector/reflectorclients", "%s:%s\n" %
                                              (self.prefab.platformtype.hostname, 9800))
                 newport = 9800
@@ -175,11 +175,11 @@ class PrefabSSHReflector(base):
 
             reflport = "9222"
 
-            self.logger.info("check ssh connection to reflector")
+            self._logger.info("check ssh connection to reflector")
             self.prefab.core.run(
                 "ssh -i /root/.ssh/reflector -o StrictHostKeyChecking=no sshreflector@%s -p %s 'ls /'" %
                 (rname, reflport))
-            self.logger.info("OK")
+            self._logger.info("OK")
 
             _, cpath, _ = self.prefab.core.run("which autossh")
             cmd = "%s -M 0 -N -o ExitOnForwardFailure=yes -o \"ServerAliveInterval 60\" -o \"ServerAliveCountMax 3\" -R %s:localhost:22 sshreflector@%s -p %s -i /root/.ssh/reflector" % (
@@ -188,7 +188,7 @@ class PrefabSSHReflector(base):
             pm = self.prefab.system.processmanager.get()
             pm.ensure("autossh_%s" % rname_short, cmd, descr='')
 
-            self.logger.info("On %s:%s remote SSH port:%s" % (remoteprefab.core.executor.addr, port, newport))
+            self._logger.info("On %s:%s remote SSH port:%s" % (remoteprefab.core.executor.addr, port, newport))
 
     def createconnection(self, remoteids):
         """
@@ -232,9 +232,9 @@ class PrefabSSHReflector(base):
                 port, port, addr, keypath)
             self.prefab.core.run(cmd)
 
-        self.logger.info("\n\n\n")
-        self.logger.info("Reflector:%s" % addr)
-        self.logger.info(out)
+        self._logger.info("\n\n\n")
+        self._logger.info("Reflector:%s" % addr)
+        self._logger.info(out)
 
     def __str__(self):
         return "prefab.reflector:%s:%s" % (getattr(self.executor, 'addr', 'local'),
