@@ -47,7 +47,7 @@ class PrefabRootClassFactory(JSBASE):
             return self._generate_pubkey()
 
         key = j.clients.ssh.sshkey_path_get(keyname)
-        return j.sal.fs.fileGetContents(key + '.pub')
+        return j.sal.fs.readFile(key + '.pub')
 
     def _get_ssh_executor(self, addr, port, login, passphrase, passwd):
         if not passwd and passphrase is not None:

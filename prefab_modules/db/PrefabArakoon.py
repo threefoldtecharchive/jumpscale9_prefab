@@ -177,7 +177,7 @@ class ArakoonCluster(object):
             f.addParam(node.id, 'log_level', node.log_level)
 
         f.write()
-        content = j.sal.fs.fileGetContents(tmp)
+        content = j.sal.fs.readFile(tmp)
         j.sal.fs.remove(tmp)
         return content
 

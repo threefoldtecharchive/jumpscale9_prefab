@@ -59,7 +59,7 @@ class PrefabSSHReflector(base):
             j.sal.fs.chmod(lpath + ".pub", 0o600)
 
         # authorize remote server to accept now copied private key
-        self.prefab.system.ssh.authorize("sshreflector", j.sal.fs.fileGetContents(lpath + ".pub"))
+        self.prefab.system.ssh.authorize("sshreflector", j.sal.fs.readFile(lpath + ".pub"))
 
         self.prefab.core.run("chmod 0644 /home/sshreflector/.ssh/*")
         self.prefab.core.run("chown -R sshreflector:sshreflector /home/sshreflector/.ssh/")

@@ -37,7 +37,7 @@ class PrefabSSH(base):
         for item in self.test_login(passwd, port, range, onlyplatform=onlyplatform):
             keypath = j.sal.fs.joinPaths(self.prefab.bash.env["HOME"], ".ssh", keyname + ".pub")
             if j.sal.fs.exists(keypath):
-                key = j.sal.fs.fileGetContents(keypath)
+                key = j.sal.fs.readFile(keypath)
                 executor = j.tools.executor.getSSHBased(item, port, login, passwd, checkok=True)
                 executor.prefab.system.ssh.authorize(user="root", key=key)
                 if changepasswdto != "":
