@@ -2,7 +2,7 @@
 from Jumpscale import j
 import time
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 CMD_APT_GET = "DEBIAN_FRONTEND=noninteractive apt-get -q --yes -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' --allow-downgrades "
 

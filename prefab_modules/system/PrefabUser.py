@@ -14,7 +14,7 @@ def shell_safe(path):
     return path
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabUser(base):

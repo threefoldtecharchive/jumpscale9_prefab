@@ -3,7 +3,7 @@ from Jumpscale import j
 import netaddr
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabSSH(base):

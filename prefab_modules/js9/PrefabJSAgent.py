@@ -1,6 +1,6 @@
 from Jumpscale import j
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 # TODO: is this still correct, maybe our docker approach better, need to check
 

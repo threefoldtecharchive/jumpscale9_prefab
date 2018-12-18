@@ -2,7 +2,7 @@ from Jumpscale import j
 import os
 import textwrap
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 class PrefabDuplicacy(app):
     NAME = "duplicacy"

@@ -3,7 +3,7 @@ Module to install 0-robot
 """
 from Jumpscale import j
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabZOS_robot(app):

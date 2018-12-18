@@ -1,6 +1,6 @@
 from Jumpscale import j
 import json
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabZerotier(base):

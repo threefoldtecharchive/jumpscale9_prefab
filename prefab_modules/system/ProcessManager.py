@@ -3,7 +3,7 @@ import time
 import re
 
 # not using prefab.system.tmux.executeInScreen
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class ProcessManagerBase(base):

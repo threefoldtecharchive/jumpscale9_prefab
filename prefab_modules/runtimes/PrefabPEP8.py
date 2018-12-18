@@ -1,7 +1,7 @@
 from os import path
 from Jumpscale import j
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabPEP8(base):

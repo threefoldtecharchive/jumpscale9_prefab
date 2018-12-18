@@ -1,6 +1,6 @@
 from Jumpscale import j
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 # TODO: *4 unfinished but ok for now
 

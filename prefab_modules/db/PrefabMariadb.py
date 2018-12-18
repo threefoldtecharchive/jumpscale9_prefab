@@ -2,7 +2,7 @@ from Jumpscale import j
 import time
 
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabMariadb(app):

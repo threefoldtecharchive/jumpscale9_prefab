@@ -2,7 +2,7 @@ from Jumpscale import j
 from time import sleep
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabAlba(base):

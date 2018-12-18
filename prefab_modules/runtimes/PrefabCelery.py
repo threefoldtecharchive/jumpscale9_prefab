@@ -1,6 +1,6 @@
 from Jumpscale import j
 
-base = j.tools.prefab._getBaseAppClass()
+base = j.tools.prefab._BaseAppClass
 
 
 class PrefabCelery(base):

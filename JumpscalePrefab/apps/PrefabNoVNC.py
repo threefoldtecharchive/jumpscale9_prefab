@@ -1,7 +1,7 @@
 from Jumpscale import j
 import os
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabNoVNC(app):

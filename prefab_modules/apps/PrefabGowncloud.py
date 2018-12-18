@@ -1,7 +1,7 @@
 from Jumpscale import j
 import textwrap
 import re
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabGowncloud(app):

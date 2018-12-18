@@ -248,7 +248,7 @@ class MongoConfigSvr(Startable):
     __str__ = __repr__
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabMongoCluster(base):

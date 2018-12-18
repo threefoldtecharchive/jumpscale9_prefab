@@ -1,7 +1,7 @@
 import os.path
 from Jumpscale import j
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 _NBDSERVER_CONFIG_FILE = "{DIR_BASE}/config/nbdserver/config.yaml"
 _DEFAULT_LOCAL_CONFIG_FILE = "./config.yaml"

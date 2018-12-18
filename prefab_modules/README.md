@@ -6,7 +6,7 @@
 
 ```python
 from Jumpscale import j
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 class PrefabModule(base):
   #rest of the code

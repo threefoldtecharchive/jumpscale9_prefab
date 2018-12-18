@@ -3,7 +3,7 @@ import time
 
 from Jumpscale import j
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 ZEROTIER_FIREWALL_ZONE_REGEX = re.compile(r"^firewall\.@zone\[(\d+)\]\.name='zerotier'$")
 FORWARDING_FIREWALL_REGEX = re.compile(r"^firewall\.@forwarding\[(\d+)\].*?('\w+')?$")

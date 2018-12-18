@@ -6,7 +6,7 @@ import time
 import socket
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabVRouter(base):

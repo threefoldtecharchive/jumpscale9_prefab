@@ -31,7 +31,7 @@ from Jumpscale import j
 
 from .PrefabCoreTools import *
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabCore(base):

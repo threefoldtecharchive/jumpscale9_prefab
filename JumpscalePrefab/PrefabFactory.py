@@ -23,10 +23,12 @@ class PrefabRootClassFactory(JSBASE):
             self._local = self.get(j.tools.executorLocal)
         return self._local
 
-    def _getBaseClass(self):
+    @property
+    def _BaseClass(self):
         return PrefabBase
 
-    def _getBaseAppClass(self):
+    @property
+    def _BaseAppClass(self):
         return PrefabApp
 
     def reset(self, prefab):

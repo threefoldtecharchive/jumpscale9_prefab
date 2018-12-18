@@ -2,7 +2,7 @@ import urllib3
 from Jumpscale import j
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabGit(base):

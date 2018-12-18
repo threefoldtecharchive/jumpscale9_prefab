@@ -2,7 +2,7 @@
 from Jumpscale import j
 import time
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabInstallBase(base):

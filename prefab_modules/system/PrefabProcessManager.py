@@ -2,19 +2,13 @@
 from ProcessManager import PrefabRunit, PrefabTmuxec, PrefabSystemd
 from Jumpscale import j
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 class PrefabProcessManager(base):
 
     def _init(self):
         self.pms = {}
-        self._logger = None
 
-    @property
-    def logger(self):
-        if self._logger is None:
-            self._logger = j.logger.get("processManagerfactory")
-        return self._logger
 
     def systemdOK(self):
         res =  self.prefab.core.command_check("systemctl")

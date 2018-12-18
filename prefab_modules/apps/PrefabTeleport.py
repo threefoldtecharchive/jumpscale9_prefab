@@ -1,7 +1,7 @@
 from Jumpscale import j
 import time
 import uuid
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabTeleport(app):

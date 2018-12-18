@@ -4,7 +4,7 @@ import os
 import pytoml
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabPortal(base):

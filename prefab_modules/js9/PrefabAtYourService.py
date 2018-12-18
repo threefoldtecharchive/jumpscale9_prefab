@@ -1,7 +1,7 @@
 from Jumpscale import j
 import re
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabAtYourService(base):

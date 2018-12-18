@@ -5,13 +5,15 @@ JSBASE = j.application.JSBaseClass
 class PrefabBase(JSBASE):
 
     def __init__(self, executor, prefab):
-        JSBASE.__init__(self)
+        JSBASE.__init__(self,init=False)
         self._classname = ""
         self.executor = executor
         self.prefab = prefab
-        # self.core = self.prefab.core
+        if "core" in prefab.__dict__:
+            self.core = self.prefab.core
+        else:
+            print("NO CORE IN PREFAB")
         self._initenvDone = False
-        self._logger = None
         self.env = self.executor.env
 
         if self.classname != 'PrefabCore':
@@ -19,11 +21,6 @@ class PrefabBase(JSBASE):
 
         self._init()
 
-    @property
-    def logger(self):
-        if self._logger is None:
-            self._logger = j.logger.get(self.classname)
-        return self._logger
 
     def _init(self):
         pass #NEEDS TO REMAIN EMPTY BECAUSE IS USED AT HIGHER LEVEL LAYER

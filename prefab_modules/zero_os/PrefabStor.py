@@ -223,7 +223,7 @@ self._logger.info(targ)
         """ % (root, j.data.serializers.json.dumps(keys), target)
 
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabStor(base):

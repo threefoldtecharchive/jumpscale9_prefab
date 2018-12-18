@@ -1,7 +1,7 @@
 from Jumpscale import j
 from time import sleep
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabTIDB(app):

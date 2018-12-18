@@ -1,6 +1,6 @@
 from Jumpscale import j
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 from JumpscaleLib.sal.dnsmasq.Dnsmasq import DNSMasq
 

@@ -3,7 +3,7 @@ import time
 from Jumpscale import j
 import Jumpscale
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabFileSystem(base):

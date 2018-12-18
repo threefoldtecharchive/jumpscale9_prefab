@@ -4,7 +4,7 @@ from kvm.Machines import Machines
 from kvm.Disks import Disks
 from kvm.StoragePools import StoragePools
 
-base = j.tools.prefab._getBaseClass()
+base = j.tools.prefab._BaseClass
 
 
 class PrefabKVM(base):

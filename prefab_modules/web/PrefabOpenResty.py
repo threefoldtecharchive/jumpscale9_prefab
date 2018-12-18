@@ -4,7 +4,7 @@ import textwrap
 from time import sleep
 
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabOpenResty(app):

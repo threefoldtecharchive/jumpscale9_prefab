@@ -2,7 +2,7 @@ from Jumpscale import j
 
 # TODO: needs to be checked how this needs to be used, maybe no longer relevant in line to the building we do now
 
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 
 class PrefabZOS_core(app):

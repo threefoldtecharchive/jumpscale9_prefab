@@ -1,7 +1,7 @@
 from Jumpscale import j
 import textwrap
 from copy import deepcopy
-app = j.tools.prefab._getBaseAppClass()
+app = j.tools.prefab._BaseAppClass
 
 compileconfig = {}
 compileconfig['enable_mbstring'] = True

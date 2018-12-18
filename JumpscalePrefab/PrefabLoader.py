@@ -13,6 +13,7 @@ class PrefabLoader(JSBASE):
     def __init__(self):
         self.moduleList = {}
         JSBASE.__init__(self)
+        self._logger_enable()
 
     def load(self, executor, prefab, moduleList=None):
         """
@@ -59,6 +60,7 @@ class PrefabLoader(JSBASE):
                     continue
 
                 exec("from %s import %s" % (basename, basename))
+                # self._logger.debug("import:%s"%basename)
                 prefabObject = eval("%s(executor,prefab)" % basename)
 
                 basenameLower = basename.replace("Prefab", "")
