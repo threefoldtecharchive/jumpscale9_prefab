@@ -18,7 +18,7 @@ class PrefabCockpit(base):
         # install portal
         self.prefab.apps.portal.install(start=False, branch=branch, reset=reset)
         # add link from portal to API
-        content = self.prefab.core.file_read('$CODEDIR/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/AYS/.space/nav.wiki')
+        content = self.prefab.core.file_read('{DIR_CODE}/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/AYS/.space/nav.wiki')
         content = content.replace('AYS API:http://localhost:5000', "AYS API:http://{ip}:5000".format(ip=ip))
         self.prefab.core.dir_ensure('{DIR_BASE}/apps/portals/main/base/AYS/.space/')
         self.prefab.core.file_write('{DIR_BASE}/apps/portals/main/base/AYS/.space/nav.wiki', content=content)
@@ -33,7 +33,7 @@ class PrefabCockpit(base):
             ip)
 
         # Configure AYS
-        # Install ays will just link apidocs, index.html, main.py from $CODEDIR into {DIR_BASE}/apps/
+        # Install ays will just link apidocs, index.html, main.py from {DIR_CODE} into {DIR_BASE}/apps/
         self.prefab.apps.atyourservice.install()
         self.prefab.apps.atyourservice.stop()
         self.prefab.apps.atyourservice.configure(

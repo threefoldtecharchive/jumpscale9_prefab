@@ -31,7 +31,7 @@ class PrefabMercurial(base):
         name = j.sal.fs.getBaseName(url)
 
         if dest is None:
-            dest = "$CODEDIR/mercurial/%s" % name
+            dest = "{DIR_CODE}/mercurial/%s" % name
 
         dest = self.executor.replace(dest)
 

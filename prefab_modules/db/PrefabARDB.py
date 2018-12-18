@@ -12,8 +12,8 @@ class PrefabARDB(app):
 
     def _init(self):
         self.BUILDDIRFDB = self.executor.replace("{DIR_VAR}/build/forestdb/")
-        self.CODEDIRFDB = self.executor.replace("$CODEDIR/github/couchbase/forestdb")
-        self.CODEDIRARDB = self.executor.replace("$CODEDIR/github/yinqiwen/ardb")
+        self.CODEDIRFDB = self.executor.replace("{DIR_CODE}/github/couchbase/forestdb")
+        self.CODEDIRARDB = self.executor.replace("{DIR_CODE}/github/yinqiwen/ardb")
         self.BUILDDIRARDB = self.executor.replace("{DIR_VAR}/build/ardb/")
 
     def build(self, destpath="", reset=False):
@@ -52,7 +52,7 @@ class PrefabARDB(app):
 
         C = """
             set -ex
-            cd $CODEDIRFDB
+            cd {DIR_CODE}FDB
             mkdir build
             cd build
             cmake ../
@@ -104,7 +104,7 @@ class PrefabARDB(app):
 
         C = """
             set -ex
-            cd $CODEDIRARDB
+            cd {DIR_CODE}ARDB
             # cp {DIR_VAR}/build/FDB/libforestdb* .
             storage_engine=$storageEngine make
             rm -rf {DIR_VAR}/build/ARDB/

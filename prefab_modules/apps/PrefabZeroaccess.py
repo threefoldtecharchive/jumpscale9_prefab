@@ -7,7 +7,7 @@ class PrefabZeroaccess(app):
     NAME = "zeroaccess"
 
     def _init(self):
-        self.zeroaccess_dir = self.executor.replace("$CODEDIR/github/0-complexity/0-access")
+        self.zeroaccess_dir = self.executor.replace("{DIR_CODE}/github/0-complexity/0-access")
         self.git_url = "https://github.com/0-complexity/0-access.git"
 
     def build(self, reset=False):

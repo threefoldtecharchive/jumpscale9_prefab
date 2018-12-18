@@ -199,7 +199,7 @@ class PrefabPortal(base):
                                     "%s/jslib/old/elfinder" % self.portal_dir, recursive=True)
         # link spaces
         spaces = j.tools.prefab.local.core.find(
-            '$CODEDIR/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/',
+            '{DIR_CODE}/github/threefoldtech/jumpscale_portal_classic/apps/portalbase/',
             recursive=True,
             pattern='*.space',
             type='d')

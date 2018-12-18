@@ -49,7 +49,7 @@ class PrefabZOS_stor_client(base):
             
             BUILDENV = """
             set -ex
-            cd $CODEDIRL
+            cd {DIR_CODE}L
             mkdir -p {DIR_VAR}/build/L
             """
             BUILDENV=self.executor.replace(BUILDENV)

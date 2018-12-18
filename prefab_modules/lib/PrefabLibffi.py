@@ -35,7 +35,7 @@ class PrefabLibffi(base):
             C = """
             set -ex
             mkdir -p {DIR_VAR}/build/L
-            cd $CODEDIRL
+            cd {DIR_CODE}L
             ./autogen.sh
             ./configure  --prefix={DIR_VAR}/build/L --disable-docs
             make

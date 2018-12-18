@@ -47,7 +47,7 @@ class PrefabPython(base):
 
                 C = """
                 set -ex
-                cd $CODEDIRL
+                cd {DIR_CODE}L
                 mkdir -p {DIR_VAR}/build/L
 
                 # export OPENSSLPATH=$(brew --prefix openssl)
@@ -76,7 +76,7 @@ class PrefabPython(base):
                 apt install wget gcc make -y
 
                 set -ex
-                cd $CODEDIRL
+                cd {DIR_CODE}L
                 
                 # export OPENSSLPATH=$OPENSSLPATH
 

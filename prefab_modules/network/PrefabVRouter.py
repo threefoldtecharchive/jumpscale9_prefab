@@ -49,13 +49,13 @@ class PrefabVRouter(base):
         # will make sure jumpscale has been installed (&base)
         self.prefab.development.js8.install()
 
-        dest = self.executor.replace('$CODEDIR/github/threefoldtech/jumpscale_smartproxy')
+        dest = self.executor.replace('{DIR_CODE}/github/threefoldtech/jumpscale_smartproxy')
         j.clients.git.pullGitRepo("git@github.com:despiegk/smartproxy.git", dest=dest)
 
-        self.prefab.core.upload("$CODEDIR/github/threefoldtech/jumpscale_smartproxy")
+        self.prefab.core.upload("{DIR_CODE}/github/threefoldtech/jumpscale_smartproxy")
         C = """
         rm -rf /opt/dnsmasq-alt
-        ln -s $CODEDIR/github/threefoldtech/jumpscale_smartproxy /opt/dnsmasq-alt
+        ln -s {DIR_CODE}/github/threefoldtech/jumpscale_smartproxy /opt/dnsmasq-alt
         """
         self.prefab.core.execute_bash(C)
 
@@ -255,7 +255,7 @@ class PrefabVRouter(base):
         self.prefab.system.tmux.executeInScreen('ovsrouter', 'ap', cmd)
 
     def firewall(self):
-        path = "$CODEDIR/github/threefoldtech/jumpscale_smartproxy/nftables.conf"
+        path = "{DIR_CODE}/github/threefoldtech/jumpscale_smartproxy/nftables.conf"
         # needs to be from local file
         C = j.sal.fs.readFile(j.dirs.replace_txt_dir_vars(path))
         C = C.replace("$waniface", self.defgwInterface)

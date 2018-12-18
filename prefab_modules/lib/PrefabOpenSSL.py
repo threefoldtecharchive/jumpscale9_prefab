@@ -59,7 +59,7 @@ class PrefabOpenSSL(base):
             C = """
             set -ex
             mkdir -p {DIR_VAR}/build/L
-            cd $CODEDIRL
+            cd {DIR_CODE}L
             # ./config
             ./Configure $target shared enable-ec_nistp_64_gcc_128 no-ssl2 no-ssl3 no-comp --openssldir={DIR_VAR}/build/L --prefix={DIR_VAR}/build/L
             make depend

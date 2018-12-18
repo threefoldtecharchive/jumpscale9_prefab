@@ -32,7 +32,7 @@ class PrefabNIM(base):
                                        expand=True, minsizekb=400, removeTopDir=True, deletedest=True)
 
         C="""
-        cd $CODEDIRL
+        cd {DIR_CODE}L
         export LDFLAGS="-L/usr/local/opt/openssl/lib"
         export CPPFLAGS="-I/usr/local/opt/openssl/include"
         export DYLD_LIBRARY_PATH=/usr/local/opt/openssl/lib

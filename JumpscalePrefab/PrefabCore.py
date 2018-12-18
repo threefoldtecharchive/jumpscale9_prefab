@@ -580,11 +580,11 @@ class PrefabCore(base):
         @param source is on local (where we run the prefab)
         @param dest is on remote host (on the ssh node)
 
-        will replace {DIR_VAR}, $CODEDIR, ... in source using
+        will replace {DIR_VAR}, {DIR_CODE}, ... in source using
         j.dirs.replace_txt_dir_vars (is for local prefab)
         will also replace in dest but then using prefab.core.replace(dest) (so for prefab host)
 
-        @param dest, if empty then will be same as source very usefull when using e.g. $CODEDIR
+        @param dest, if empty then will be same as source very usefull when using e.g. {DIR_CODE}
 
         upload happens using rsync
 
@@ -604,11 +604,11 @@ class PrefabCore(base):
         """
         @param source is on remote host (on the ssh node)
         @param dest is on local (where we run the prefab)
-        will replace {DIR_VAR}, $CODEDIR, ...
+        will replace {DIR_VAR}, {DIR_CODE}, ...
         - in source but then using prefab.core.replace(dest) (so for prefab host)
         - in dest using j.dirs.replace_txt_dir_vars (is for local prefab)
 
-        @param dest, if empty then will be same as source very usefull when using e.g. $CODEDIR
+        @param dest, if empty then will be same as source very usefull when using e.g. {DIR_CODE}
 
         """
         raise RuntimeError("use self.prefab.network.tools.download")

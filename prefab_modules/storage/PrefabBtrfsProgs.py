@@ -10,7 +10,7 @@ class PrefabBtrfsProgs(PrefabApp):
     def _init(self):
         # if the module builds something, define BUILDDIR and CODEDIR folders.
         self.BUILDDIR = self.core.replace("{DIR_VAR}/build/btrfs-progs/")
-        self.CODEDIR = self.core.replace("$CODEDIR")
+        self.CODEDIR = self.core.replace("{DIR_CODE}")
 
         self._host = "https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs"
         self._file = "btrfs-progs-v4.8.tar.xz"
@@ -40,11 +40,11 @@ class PrefabBtrfsProgs(PrefabApp):
         """
         self.prefab.system.package.install(deps)
         self._run("cd {DIR_TEMP}; wget -c %s/%s" % (self._host, self._file))
-        self._run("cd {DIR_TEMP}; tar -xf %s -C $CODEDIR" % self._file)
-        self._run("cd $CODEDIR/btrfs-progs-v4.8; ./autogen.sh")
-        self._run("cd $CODEDIR/btrfs-progs-v4.8; ./configure --prefix={DIR_VAR}/build/ --disable-documentation")
-        self._run("cd $CODEDIR/btrfs-progs-v4.8; make")
-        self._run("cd $CODEDIR/btrfs-progs-v4.8; make install")
+        self._run("cd {DIR_TEMP}; tar -xf %s -C {DIR_CODE}" % self._file)
+        self._run("cd {DIR_CODE}/btrfs-progs-v4.8; ./autogen.sh")
+        self._run("cd {DIR_CODE}/btrfs-progs-v4.8; ./configure --prefix={DIR_VAR}/build/ --disable-documentation")
+        self._run("cd {DIR_CODE}/btrfs-progs-v4.8; make")
+        self._run("cd {DIR_CODE}/btrfs-progs-v4.8; make install")
 
         self.doneSet('build')
 

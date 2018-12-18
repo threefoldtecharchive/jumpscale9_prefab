@@ -8,7 +8,7 @@ class PrefabCrm(app):
 
     def _init(self):
         self.git_url = "https://github.com/incubaid/crm"
-        self.crm_dir = self.executor.replace("$CODEDIR/github/incubaid/crm")
+        self.crm_dir = self.executor.replace("{DIR_CODE}/github/incubaid/crm")
 
     def build(self):
         """
