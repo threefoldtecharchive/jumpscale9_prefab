@@ -57,3 +57,6 @@ prefab.core.run('hostname')
 
 # Modules
 Please visit [Modules](docs/README.md) page to overview the available modules and also learn [How to add new modules](modules/README.md)
+
+# Repository Owners:
+- https://github.com/rkhamis, telegram: @rThursday
